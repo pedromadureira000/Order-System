@@ -1,0 +1,37 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django = "*"
+python-decouple = "*"
+dj-database-url = "*"
+psycopg2-binary = "*"
+django-s3-folder-storage = "*"
+collectfast = "*"
+sentry-sdk = "*"
+ipython = "*"
+django-extensions = "*"
+django-anymail = "*"
+gunicorn = "*"
+django-cpf-cnpj = "*"
+pillow = "*"
+django-axes = "*"
+python-barcode = "*"
+pdfkit = "*"
+jinja2 = "*"
+djangorestframework = "*"
+# django-debug-toolbar = "*"
+# django-ordered-model = "*"
+
+[dev-packages]
+# pytest = "*"
+# pytest-mock = "*"
+# pytest-django = "*"
+# model-bakery = "*"
+# pytest-cov = "*"
+neovim = "*"
+
+[requires]
+python_version = "3.9"
