@@ -88,6 +88,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     company = models.ForeignKey('Company', blank=True, on_delete=models.PROTECT, null=True, verbose_name="Empresa")
     is_admin_agent = models.BooleanField(default=False)
     all_api_permissions = models.BooleanField(default=False)
+    modules = [{"title": "reports", "icon":"mdi-clipboard-list-outline", "to": "/reports"}]
+#  [{"title": "reports", "icon":"mdi-clipboard-list-outline", "to": "/reports"}]
 
     is_staff = models.BooleanField(
         _('staff status'),

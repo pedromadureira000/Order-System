@@ -42,7 +42,8 @@
     data: () => ({
       email: '',
       password: '',
-			message: ''
+			message: '',
+      submitStatus: null
     }),
 
     computed: {
@@ -73,7 +74,7 @@
 						method: 'post',
 						url: '/api/user/login',
 						data: { email: this.email, password: this.password },
-						headers: { 'X-CSRFToken': this.$store.state.csrftoken }
+						headers: { 'X-CSRFToken': this.$store.state.user.csrftoken }
 						/* headers: { 'X-CSRFToken': this.$cookies.get('csrftoken') } */
 					})
 						.then((response) => {
@@ -94,9 +95,9 @@
 			}
 		},
 		beforeCreated() {
-			/* check if user existe, if true, redirect to / */
+			/* check if the user exists, if true, redirect to / */
 			if (this.$store.state.user.user){		
-				this.$store.dispatch("getCsrf")	
+        this.$router.push("/")
 			}
 		},
 		created() {

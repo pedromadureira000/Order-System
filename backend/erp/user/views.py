@@ -21,26 +21,37 @@ class GetCSRFToken(APIView):
 
 
 
-@method_decorator(csrf_protect, name='dispatch')
+#  @method_decorator(csrf_protect, name='dispatch')
+#  class SignupView(APIView):
+    #  permission_classes = (permissions.AllowAny,)
+
+    #  def post(self, request, format=None):
+        #  email = request.data.get('email')
+        #  password = request.data.get('password')
+        #  if not email:
+            #  return Response({'error': "'email' field is missing."})
+        #  if not password:
+            #  return Response({'error': "'password' field is missing."})
+        #  if User.objects.filter(email=email).exists():
+            #  return Response({'error': 'That email was already been registered.'})
+        #  else:
+            #  user = User.objects.create_user(email=email, password=password)
+            #  user.save()
+            #  return Response({"success": "user created successfully"})
+
+
+#  @method_decorator(csrf_protect, name='dispatch')
 class SignupView(APIView):
     permission_classes = (permissions.AllowAny,)
 
-    def post(self, request, format=None):
-        email = request.data.get('email')
-        password = request.data.get('password')
-        if not email:
-            return Response({'error': "'email' field is missing."})
-        if not password:
-            return Response({'error': "'password' field is missing."})
-        if User.objects.filter(email=email).exists():
-            return Response({'error': 'That email was already been registered.'})
-        else:
-            user = User.objects.create_user(email=email, password=password)
-            user.save()
-            return Response({"success": "user created successfully"})
+    def post(self, request):
+        data = request.data
+        serializer =  RegistrationSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
 
 
-@method_decorator(csrf_protect, name='dispatch')
 class LoginView(APIView):
     permission_classes = (permissions.AllowAny,)
 
@@ -69,7 +80,7 @@ class LoginView(APIView):
 # if user is already logged with sessionAuthentication, the views will be CSRF protected. You just need to use the CSRF
 # decorator if you use 'permission.AllowAny'
 
-@method_decorator(csrf_protect, name='dispatch')
+#  @method_decorator(csrf_protect, name='dispatch')
 class LogoutView(APIView):
     def post(self, request, format=None):
         try:
@@ -92,6 +103,32 @@ class LogoutView(APIView):
         #  return Response({"success": "User deleted successfully."})
 
 
+
+class ProfileInfoView(APIView):
+    def put(self, request):
+        user = request.user
+        serializer = UserSerializer(user, data=request.data, partial=True) # (partial=True)we dont want to update every field
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        print(serializer.data)
+        return Response(serializer.data)
+
+
+class ProfilePasswordView(APIView):
+    def put(self, request):
+        user = request.user
+        data = request.data
+        user.set_password(data['password'])
+        user.save()
+        return Response(UserSerializer(user).data)
+
+
+#  @method_decorator(csrf_protect, name='dispatch')
+#  class ProfileInfoView(APIView):
+    #  def post(self, request):
+        #  return Response({"oi":"oi"})
+
+
 class CheckAuthenticatedView(APIView):
     def get(self, request, format=None):
         try:
@@ -100,14 +137,3 @@ class CheckAuthenticatedView(APIView):
         except:
             return Response({'status': 'error', 'description': 'Something went wrong when checking authentication status.'}, 
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    #  def get(self, request, format=None):
-        #  try:
-            #  if request.user.is_authenticated:
-                #  return Response({'status': 'isAuthenticated', 'first_name': request.user.first_name, 
-                #  'last_name': request.user.last_name , 'email': request.user.email })
-            #  else:
-                #  return Response({'status': 'isNotAuthenticated'})
-        #  except:
-            #  return Response({'status': 'error', 'description': 'Something went wrong when checking authentication status.'})
-
