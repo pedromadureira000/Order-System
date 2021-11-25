@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="ma-3">
-      <h3>Account Information</h3>
+      <h3>Update Account Information</h3>
       <form @submit.prevent="infoSubmit">
         <div class="mb-3">
           <v-text-field
@@ -40,8 +40,19 @@
       </form>
 
       <h3 class="mt-4">Change Password</h3>
+      <p class="caption">After change your password you will be logged out.</p>
 
       <form @submit.prevent="passwordSubmit">
+        <div class="mb-3">
+          <v-text-field
+            type="password"
+            label="Current password"
+            v-model="current_password"
+            :error-messages="currentPassErrors"
+            required
+            @blur="$v.current_password.$touch()"
+          />
+        </div>
         <div class="mb-3">
           <v-text-field
             type="password"
@@ -96,6 +107,7 @@ export default {
       first_name: this.$store.state.user.user.first_name,
       last_name: this.$store.state.user.user.last_name,
       email: this.$store.state.user.user.email,
+      current_password: "",
       password: "",
       password_confirm: "",
       submitProfileStatus: null,
@@ -111,6 +123,11 @@ export default {
       required,
       maxLength: maxLength(10),
     },
+    current_password: {
+      required,
+      minLength: minLength(6),
+      maxLength: maxLength(20),
+    },
     password: {
       required,
       minLength: minLength(6),
@@ -120,42 +137,8 @@ export default {
       password_confirm: sameAs("password"),
     },
     profileGroup: ["first_name", "last_name"],
-    passwordUpdateGroup: ["password", "password_confirm"],
+    passwordUpdateGroup: ["current_password","password", "password_confirm"],
   },
-
-  /* methods: { */
-    /* async infoSubmit() { */
-      /* this.$v.profileGroup.$touch(); */
-      /* if (this.$v.profileGroup.$invalid) { */
-        /* this.submitProfileStatus = "ERROR"; */
-      /* } else { */
-        /* this.submitProfileStatus = "PENDING"; */
-        /* const { data } = await axios.put("/api/user/profile", { */
-          /* first_name: this.first_name, */
-          /* last_name: this.last_name, */
-        /* }); */
-        /* await this.$store.dispatch("setUser", data); */
-
-        /* setTimeout(() => { */
-          /* this.submitProfileStatus = "OK"; */
-        /* }, 500); */
-      /* } */
-    /* }, */
-    /* async passwordSubmit() { */
-      /* this.$v.passwordUpdateGroup.$touch(); */
-      /* if (this.$v.passwordUpdateGroup.$invalid) { */
-        /* this.submitPasswordStatus = "ERROR"; */
-      /* } else { */
-        /* this.submitPasswordStatus = "PENDING"; */
-        /* await axios.put("/api/user/profilepassword", { */
-          /* password: this.password, */
-        /* }); */
-        /* setTimeout(() => { */
-          /* this.submitPasswordStatus = "OK"; */
-        /* }, 500); */
-      /* } */
-    /* }, */
-  /* }, */
 
   methods: {
     infoSubmit() {
@@ -175,7 +158,6 @@ export default {
             }).catch(()=> {
               this.submitProfileStatus = "SERVER ERROR"
               })
-
       }
     },
     passwordSubmit() {
@@ -185,15 +167,18 @@ export default {
       } else {
         this.submitPasswordStatus = "PENDING";
         axios.put("/api/user/profilepassword", {
+          current_password: this.current_password,
           password: this.password,
           }).then(() => {
+
+            this.submitPasswordStatus = "OK";
             setTimeout(() => {
-              this.submitPasswordStatus = "OK";
+              this.$router.push('/login')
             }, 500);
             }).catch(()=> {
               this.submitPasswordStatus = "SERVER ERROR"
               })
-      }
+        }
     },
   },
   computed: {
@@ -209,6 +194,14 @@ export default {
       if (!this.$v.last_name.$dirty) return errors;
       !this.$v.last_name.required && errors.push("Last name is required.");
       !this.$v.last_name.maxLength && errors.push("This field must have up to 10 characters.");
+      return errors;
+    },
+    currentPassErrors() {
+      const errors = [];
+      if (!this.$v.current_password.$dirty) return errors;
+      !this.$v.current_password.required && errors.push("Password is required.");
+      !this.$v.current_password.maxLength && errors.push("This field must have up to 20 characters.");
+      !this.$v.current_password.minLength && errors.push("This field must have at least 6 characters.");
       return errors;
     },
     passwordErrors() {

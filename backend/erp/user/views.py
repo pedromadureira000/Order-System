@@ -118,9 +118,17 @@ class ProfilePasswordView(APIView):
     def put(self, request):
         user = request.user
         data = request.data
-        user.set_password(data['password'])
-        user.save()
-        return Response(UserSerializer(user).data)
+        if not data.get('password'):
+            return Response({"status": "Password field not sent."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not data.get('current_password'):
+            return Response({"status": "Current Password field not sent."},status=status.HTTP_400_BAD_REQUEST)
+
+        if user.check_password(data.get('current_password')):
+            user.set_password(data['password'])
+            user.save()
+            return Response(UserSerializer(user).data)
+        return Response({"status": "passwords don't match"},status=status.HTTP_400_BAD_REQUEST)
 
 
 #  @method_decorator(csrf_protect, name='dispatch')
@@ -137,3 +145,11 @@ class CheckAuthenticatedView(APIView):
         except:
             return Response({'status': 'error', 'description': 'Something went wrong when checking authentication status.'}, 
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class PasswordResetView(APIView):
+    permission_classes = (permissions.AllowAny,)
+
+    def get(self, request, format=None):
+        return Response({"status": "email has been sent."})
+ #  passowordReset

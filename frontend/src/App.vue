@@ -82,7 +82,6 @@ export default Vue.extend({
       axios({
         method: "post",
         url: "/api/user/logout",
-        headers: { "X-CSRFToken": this.$store.state.user.csrftoken },
       })
         .then(() => {
           this.$store.commit("deleteUser");

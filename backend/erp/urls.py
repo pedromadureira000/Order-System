@@ -25,7 +25,6 @@ urlpatterns = [
     #  path('pedidos/', include('erp.orders.urls')),
 
     # REST URLS
-
     path('api/orders/', include('erp.orders.urls')),
     path('api/user/', include('erp.user.urls')),
     path('api/documents/', include('erp.documents.urls')),

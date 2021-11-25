@@ -1,4 +1,5 @@
 from django.urls import path
+from django.urls.conf import include
 #  from rest_framework.authtoken.views import obtain_auth_token
 
 from erp.user.views import (
@@ -15,8 +16,8 @@ urlpatterns = [
     path('checkauth', CheckAuthenticatedView.as_view()),
     path('profile', ProfileInfoView.as_view()),
     path('profilepassword', ProfilePasswordView.as_view()),
-    #  path('users/password', ProfilePasswordAPIView.as_view()),
+    path('passwordreset/', include('djoser.urls')),
+    #  path('api/djoser/', include('djoser.urls.authtoken')),
     #  path('gettoken', obtain_auth_token, name='gettoken'),
     #  path('delete', DeleteAccountView.as_view(), name='deleteAccount'),
-    #  path('test', test_view, name='teste'),
 ]

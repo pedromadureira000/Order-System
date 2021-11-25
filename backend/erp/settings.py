@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'django_cpf_cnpj',
     'axes',
     'rest_framework',
+    'djoser',
     'rest_framework.authtoken',
 ]
 
@@ -114,14 +115,47 @@ REST_FRAMEWORK = {
 
 WSGI_APPLICATION = 'erp.wsgi.application'
 
-# SMTP
+DJOSER = {
+        "PASSWORD_RESET_CONFIRM_URL": "password/reset/confirm/{uid}/{token}",
+        "EMAIL": {
+            "password_reset": "erp.user.email.PasswordResetEmail"
+        },
+        "PERMISSIONS":{
+            'password_reset': ['rest_framework.permissions.AllowAny'],
+            'password_reset_confirm': ['rest_framework.permissions.AllowAny'],
+            'activation': ['rest_framework.permissions.IsAdminUser'],
+            'set_password': ['rest_framework.permissions.IsAdminUser'],
+            'username_reset': ['rest_framework.permissions.IsAdminUser'],
+            'username_reset_confirm': ['rest_framework.permissions.IsAdminUser'],
+            'set_username': ['rest_framework.permissions.IsAdminUser'],
+            'user_create': ['rest_framework.permissions.IsAdminUser'],
+            'user_delete': ['rest_framework.permissions.IsAdminUser'],
+            'user': ['rest_framework.permissions.IsAdminUser'],
+            'user_list': ['rest_framework.permissions.IsAdminUser'],
+            'token_create': ['rest_framework.permissions.IsAdminUser'],
+            'token_destroy': ['rest_framework.permissions.IsAdminUser'],
 
-EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
-SERVER_EMAIL = config('SERVER_EMAIL')
-ANYMAIL = {'MAILGUN_API_KEY': config('MAILGUN_API_KEY'),
-           'MAILGUN_SENDER_DOMAIN': config('MAILGUN_SENDER_DOMAIN'),
-           }
+        }
+    }
+
+
+# SMTP
+if DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    DEFAULT_FROM_EMAIL = "webmaster@localhost"
+    EMAIL_HOST = "localhost"
+    EMAIL_PORT = "1025"
+    EMAIL_HOST_USER = ""
+    EMAIL_HOST_PASSWORD = ""
+    EMAIL_USE_TLS = False
+
+else: 
+    EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
+    DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
+    SERVER_EMAIL = config('SERVER_EMAIL')
+    ANYMAIL = {'MAILGUN_API_KEY': config('MAILGUN_API_KEY'),
+               'MAILGUN_SENDER_DOMAIN': config('MAILGUN_SENDER_DOMAIN'),
+               }
 
 
 # Sentry
@@ -172,7 +206,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = 'pt-br'
+LANGUAGE_CODE = 'en'
 
 TIME_ZONE = 'America/Sao_Paulo'
 

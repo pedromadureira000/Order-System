@@ -24,6 +24,7 @@ jinja2 = "*"
 djangorestframework = "*"
 # django-debug-toolbar = "*"
 # django-ordered-model = "*"
+djoser = "*"
 
 [dev-packages]
 # pytest = "*"
