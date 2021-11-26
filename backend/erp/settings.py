@@ -44,6 +44,8 @@ LOGIN_URL = '/usuario/login/'
 # Auth User model
 AUTH_USER_MODEL = 'user.User'
 
+ROLEPERMISSIONS_MODULE = 'erp.user.roles'
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -65,6 +67,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'djoser',
     'rest_framework.authtoken',
+    'rolepermissions',
 ]
 
 MIDDLEWARE = [

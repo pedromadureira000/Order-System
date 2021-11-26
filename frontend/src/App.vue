@@ -96,18 +96,15 @@ export default Vue.extend({
     },
   },
   computed: {
-    user() {
-      return this.$store.state.user.user;
-    },
     menuItems() {
-      /* let user = this.$store.state.user.user; */
+      let user = this.$store.state.user.user;
       let menu = this.$store.state.menuItems;
-      if (this.user) {
+      if (user) {
         /* return MenuItems array with 'About' menuItems in the end. */
         return menu
           .slice(0, 1)
           //this error doesn't really exist
-          .concat(this.user.modules)
+          .concat(user.modules)
           .concat(menu.slice(1, 2));
       } else {
         return this.$store.state.menuItems;

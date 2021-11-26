@@ -8,7 +8,6 @@ from erp.user.views import (
 
 app_name = 'user'
 urlpatterns = [
-    #  path('', UserView.as_view()),
     path('signup', SignupView.as_view()),
     path('login', LoginView.as_view()),
     path('logout', LogoutView.as_view()),
