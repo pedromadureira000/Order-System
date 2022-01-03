@@ -1,0 +1,88 @@
+[
+  {
+    "name": "About",
+    "path": "/About",
+    "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/About.vue",
+    "chunkName": "pages/About",
+    "_name": "_4937e6c1"
+  },
+  {
+    "path": "/Admin",
+    "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/Admin.vue",
+    "chunkName": "pages/Admin",
+    "children": [
+      {
+        "name": "Admin",
+        "path": "",
+        "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/Admin/index.vue",
+        "chunkName": "pages/Admin/index",
+        "_name": "_1f982dc6"
+      },
+      {
+        "name": "Admin-user",
+        "path": "user",
+        "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/Admin/user/index.vue",
+        "chunkName": "pages/Admin/user/index",
+        "_name": "_ce5d016c"
+      }
+    ],
+    "_name": "_cb41d4fa"
+  },
+  {
+    "name": "Myaccount",
+    "path": "/Myaccount",
+    "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/Myaccount.vue",
+    "chunkName": "pages/Myaccount",
+    "_name": "_5e95fe35"
+  },
+  {
+    "path": "/Orders",
+    "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/Orders.vue",
+    "chunkName": "pages/Orders",
+    "children": [
+      {
+        "name": "Orders",
+        "path": "",
+        "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/Orders/index.vue",
+        "chunkName": "pages/Orders/index",
+        "_name": "_d8f1cdb8"
+      },
+      {
+        "name": "Orders-order",
+        "path": ":order",
+        "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/Orders/_order/index.vue",
+        "chunkName": "pages/Orders/_order/index",
+        "_name": "_df6542a0"
+      }
+    ],
+    "_name": "_8d7d413e"
+  },
+  {
+    "name": "PasswordReset",
+    "path": "/PasswordReset",
+    "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/PasswordReset.vue",
+    "chunkName": "pages/PasswordReset",
+    "_name": "_f45f11b0"
+  },
+  {
+    "name": "Reports",
+    "path": "/Reports",
+    "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/Reports.vue",
+    "chunkName": "pages/Reports",
+    "_name": "_6581561a"
+  },
+  {
+    "name": "password-reset-confirm-uid-token",
+    "path": "/password/reset/confirm/:uid?/:token",
+    "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/password/reset/confirm/_uid/_token/index.vue",
+    "chunkName": "pages/password/reset/confirm/_uid/_token/index",
+    "_name": "_8b86d558"
+  },
+  {
+    "name": "index",
+    "path": "/",
+    "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/index.vue",
+    "chunkName": "pages/index",
+    "_name": "_1d04bcb4"
+  }
+]

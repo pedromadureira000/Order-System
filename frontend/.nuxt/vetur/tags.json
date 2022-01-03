@@ -1,0 +1,17 @@
+{
+  "Footer": {
+    "description": "Auto imported from components/Footer.vue"
+  },
+  "Welcome": {
+    "description": "Auto imported from components/Welcome.vue"
+  },
+  "LoginDialog": {
+    "description": "Auto imported from components/login-dialog.vue"
+  },
+  "SessionErrorDialog": {
+    "description": "Auto imported from components/session-error-dialog.vue"
+  },
+  "AdminUserEditMenu": {
+    "description": "Auto imported from components/admin/user-edit-menu.vue"
+  }
+}
