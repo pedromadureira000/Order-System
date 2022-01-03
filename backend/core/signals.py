@@ -16,7 +16,8 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def assign_default_roles(sender, instance=None, created=False, **kwargs):
     if created:
-        assign_role(instance, 'reports')
+        #  assign_role(instance, 'reports')
+        pass
 
 # Signals that fires when a user logs in and logs out. And send 'user' as positional argument
 

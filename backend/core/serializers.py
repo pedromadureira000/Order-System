@@ -2,6 +2,7 @@ from django.utils.timezone import now
 from rest_framework import serializers
 from core.models import User
 from rolepermissions.roles import get_user_roles
+from rolepermissions.permissions import available_perm_status
 
 class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -25,12 +26,13 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     roles = serializers.SerializerMethodField() # will call get_<field_name> by default
+    permissions = serializers.SerializerMethodField() 
     email = serializers.EmailField(read_only=True)
 
     class Meta:
         ref_name = "User Serializer" # fixes name collision with djoser when fetching urls with swagger
         model = User
-        fields = ['first_name', 'last_name', 'email', 'roles']
+        fields = ['first_name', 'last_name', 'email', 'roles', 'permissions']
 
 
     def get_roles(self, user):
@@ -40,6 +42,15 @@ class UserSerializer(serializers.ModelSerializer):
             roles.append(role.get_name())
         return roles
 
+    def get_permissions(self, user):
+        permissions = available_perm_status(user)
+        permissions_list = []
+        #  if permissions['create_medical_record']:
+            #  print('user can create medical record')
+        for key, value in permissions.items():
+            if value == True:
+                permissions_list.append(key) 
+        return permissions_list 
 
 class UserLoginSerializer(serializers.Serializer):
     email = serializers.EmailField(write_only=True)

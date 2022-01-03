@@ -114,40 +114,44 @@ export default {
 			{ title: "Home", icon: "mdi-home", to: "/" },
 			{ title: "About", icon: "mdi-help-box", to: "/about" },
 		],
-		allUserModules: [
-			{"name": "admin", "title": "Admin", "icon":"mdi-account-tie", "to": "/admin"},
-			{"name": "admin_agent", "title": "Admin", "icon":"mdi-account-tie", "to": "/admin"},
-			{"name": "orders", "title": "Orders", "icon":"mdi-clipboard-check-multiple", "to": "/orders"},
-      {"name": "reports", "title": "Reports", "icon":"mdi-clipboard-list-outline", "to": "/reports"},
+		allMenuItems: [
+			{"role": "admin", "title": "Admin", "icon":"mdi-account-tie", "to": "/admin"},
+			{"role": "admin_agent", "title": "Admin", "icon":"mdi-account-tie", "to": "/admin"},
+			{"role": "orders", "title": "Orders", "icon":"mdi-clipboard-check-multiple", "to": "/orders"},
+      {"role": "reports", "title": "Reports", "icon":"mdi-clipboard-list-outline", "to": "/reports"},
 		],
-    allUserPermissions: {  
+    allUserPermissions: [  
       // Admin
-      "get_all_users": true,
-      "create_admin_agent": true,
-      "delete_admin_agent": true,
-      "update_admin_agent": true,
-      "get_all_admin_agents": true,
+      "get_all_users",
+      "create_admin_agent",
+      "delete_admin_agent",
+      "update_admin_agent",
+      "get_all_admin_agents",
       //AdminAgent
-      "create_agent": true,
-      "get_agents": true,
-      "update_agent": true,
-      "delete_agent": true,
+      "create_agent",
+      "get_agents",
+      "update_agent",
+      "delete_agent",
       // Agent
-      "create_client": true,
-      "get_clients": true,
-      "update_client": true,
-      "delete_client": true,
-      "create_item": true,
-      "get_items": true,
-      "update_item": true,
-      "delete_item": true,
-      "create_item_category": true,
-      "get_item_category": true,
-      "update_item_category": true,
-      "delete_item_category": true,
+      "create_client",
+      "get_clients",
+      "update_client",
+      "delete_client",
+      "create_item",
+      "get_items",
+      "update_item",
+      "delete_item",
+      "create_item_category",
+      "get_item_category",
+      "update_item_category",
+      "delete_item_category",
+      "create_price_table",
+      "get_price_tables",
+      "update_price_table",
+      "delete_price_table",
       // Client
-      "crud_order": true,
-    }
+      "crud_order",
+    ]
 	}),
 
   methods: {
@@ -167,10 +171,10 @@ export default {
 		currentMenuItems() {
 			let user = this.$store.state.auth.currentUser;
 			if (user) {
-				/* return defultMenuItems array concatenated with user modules with 'About' in the end. */
+				/* return defultMenuItems array concatenated with user Menuitems with 'About' in the end. */
 				return this.defaultMenuItems
 					.slice(0, 1)
-					.concat(this.allUserModules.filter(module => this.$store.state.auth.currentUser.modules.includes(module.name)))
+					.concat(this.allMenuItems.filter(MenuItem => this.$store.state.auth.currentUser.roles.includes(MenuItem.role)))
 					.concat(this.defaultMenuItems.slice(1, 2));
 			} else {
 				return this.defaultMenuItems;

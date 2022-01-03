@@ -8,7 +8,8 @@ class User {
 	first_name!: string;
 	last_name!: string;
 	email!: string;
-	modules!: string[];
+	roles!: string[];
+	permissions!: string[];
 }
 
 interface UserState {
