@@ -117,8 +117,9 @@ export default {
 		allMenuItems: [
 			{"role": "admin", "title": "Admin", "icon":"mdi-account-tie", "to": "/admin"},
 			{"role": "admin_agent", "title": "Admin", "icon":"mdi-account-tie", "to": "/admin"},
-			{"role": "orders", "title": "Orders", "icon":"mdi-clipboard-check-multiple", "to": "/orders"},
-      {"role": "reports", "title": "Reports", "icon":"mdi-clipboard-list-outline", "to": "/reports"},
+			{"role": "agent", "title": "Admin", "icon":"mdi-account-tie", "to": "/admin"},
+      {"role": "client", "title": "Orders", "icon":"mdi-clipboard-check-multiple", "to": "/client"},
+      /** {"role": "client", "title": "Reports", "icon":"mdi-clipboard-list-outline", "to": "/reports"}, */
 		],
     allUserPermissions: [  
       // Admin

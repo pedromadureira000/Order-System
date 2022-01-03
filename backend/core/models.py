@@ -25,6 +25,7 @@ class UserManager(BaseUserManager):
         
         if user.is_superuser:
             assign_role(user, 'admin')
+            assign_role(user, 'client')
 
         return user
 

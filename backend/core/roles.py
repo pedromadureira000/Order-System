@@ -30,8 +30,6 @@ class Admin(AbstractUserRole):
         "get_price_tables": True,
         "update_price_table": True,
         "delete_price_table": True,
-        # Client
-        "crud_order": True,
     }
 
 

@@ -27,7 +27,6 @@
 
 <script>
   export default {
-    middleware: ["authenticated", "admin"],
     data: () => ({ value: 'user' }),
   }
 </script>

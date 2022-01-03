@@ -6,12 +6,15 @@ import scrollBehavior from './router.scrollBehavior.js'
 
 const _4937e6c1 = () => interopDefault(import('../pages/About.vue' /* webpackChunkName: "pages/About" */))
 const _cb41d4fa = () => interopDefault(import('../pages/Admin.vue' /* webpackChunkName: "pages/Admin" */))
-const _1f982dc6 = () => interopDefault(import('../pages/Admin/index.vue' /* webpackChunkName: "pages/Admin/index" */))
+const _08779492 = () => interopDefault(import('../pages/Admin/item/index.vue' /* webpackChunkName: "pages/Admin/item/index" */))
+const _565bcda1 = () => interopDefault(import('../pages/Admin/item_category/index.vue' /* webpackChunkName: "pages/Admin/item_category/index" */))
+const _212b6fcf = () => interopDefault(import('../pages/Admin/price_table/index.vue' /* webpackChunkName: "pages/Admin/price_table/index" */))
 const _ce5d016c = () => interopDefault(import('../pages/Admin/user/index.vue' /* webpackChunkName: "pages/Admin/user/index" */))
+const _6653e572 = () => interopDefault(import('../pages/Client.vue' /* webpackChunkName: "pages/Client" */))
+const _55f3dafd = () => interopDefault(import('../pages/Client/Orders.vue' /* webpackChunkName: "pages/Client/Orders" */))
+const _3d7d6fc0 = () => interopDefault(import('../pages/Client/Orders/index.vue' /* webpackChunkName: "pages/Client/Orders/index" */))
+const _503cbed8 = () => interopDefault(import('../pages/Client/Orders/_order/index.vue' /* webpackChunkName: "pages/Client/Orders/_order/index" */))
 const _5e95fe35 = () => interopDefault(import('../pages/Myaccount.vue' /* webpackChunkName: "pages/Myaccount" */))
-const _8d7d413e = () => interopDefault(import('../pages/Orders.vue' /* webpackChunkName: "pages/Orders" */))
-const _d8f1cdb8 = () => interopDefault(import('../pages/Orders/index.vue' /* webpackChunkName: "pages/Orders/index" */))
-const _df6542a0 = () => interopDefault(import('../pages/Orders/_order/index.vue' /* webpackChunkName: "pages/Orders/_order/index" */))
 const _f45f11b0 = () => interopDefault(import('../pages/PasswordReset.vue' /* webpackChunkName: "pages/PasswordReset" */))
 const _6581561a = () => interopDefault(import('../pages/Reports.vue' /* webpackChunkName: "pages/Reports" */))
 const _8b86d558 = () => interopDefault(import('../pages/password/reset/confirm/_uid/_token/index.vue' /* webpackChunkName: "pages/password/reset/confirm/_uid/_token/index" */))
@@ -35,31 +38,45 @@ export const routerOptions = {
   }, {
     path: "/Admin",
     component: _cb41d4fa,
+    name: "Admin",
     children: [{
-      path: "",
-      component: _1f982dc6,
-      name: "Admin"
+      path: "item",
+      component: _08779492,
+      name: "Admin-item"
+    }, {
+      path: "item_category",
+      component: _565bcda1,
+      name: "Admin-item_category"
+    }, {
+      path: "price_table",
+      component: _212b6fcf,
+      name: "Admin-price_table"
     }, {
       path: "user",
       component: _ce5d016c,
       name: "Admin-user"
     }]
   }, {
+    path: "/Client",
+    component: _6653e572,
+    name: "Client",
+    children: [{
+      path: "Orders",
+      component: _55f3dafd,
+      children: [{
+        path: "",
+        component: _3d7d6fc0,
+        name: "Client-Orders"
+      }, {
+        path: ":order",
+        component: _503cbed8,
+        name: "Client-Orders-order"
+      }]
+    }]
+  }, {
     path: "/Myaccount",
     component: _5e95fe35,
     name: "Myaccount"
-  }, {
-    path: "/Orders",
-    component: _8d7d413e,
-    children: [{
-      path: "",
-      component: _d8f1cdb8,
-      name: "Orders"
-    }, {
-      path: ":order",
-      component: _df6542a0,
-      name: "Orders-order"
-    }]
   }, {
     path: "/PasswordReset",
     component: _f45f11b0,

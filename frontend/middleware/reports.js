@@ -2,7 +2,7 @@
 export default async (ctx) => {
 		//Checks if report module exist in user modules
 		console.log(ctx)
-		if (ctx.store.state.auth.currentUser.modules.includes('reports')){  
+		if (ctx.store.state.auth.currentUser.roles.includes('reports')){  
 			console.log('reports middleware passed')
 			return;
 		}else{
