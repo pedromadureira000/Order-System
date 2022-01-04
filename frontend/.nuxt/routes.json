@@ -7,74 +7,6 @@
     "_name": "_4937e6c1"
   },
   {
-    "name": "Admin",
-    "path": "/Admin",
-    "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/Admin.vue",
-    "chunkName": "pages/Admin",
-    "children": [
-      {
-        "name": "Admin-item",
-        "path": "item",
-        "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/Admin/item/index.vue",
-        "chunkName": "pages/Admin/item/index",
-        "_name": "_08779492"
-      },
-      {
-        "name": "Admin-item_category",
-        "path": "item_category",
-        "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/Admin/item_category/index.vue",
-        "chunkName": "pages/Admin/item_category/index",
-        "_name": "_565bcda1"
-      },
-      {
-        "name": "Admin-price_table",
-        "path": "price_table",
-        "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/Admin/price_table/index.vue",
-        "chunkName": "pages/Admin/price_table/index",
-        "_name": "_212b6fcf"
-      },
-      {
-        "name": "Admin-user",
-        "path": "user",
-        "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/Admin/user/index.vue",
-        "chunkName": "pages/Admin/user/index",
-        "_name": "_ce5d016c"
-      }
-    ],
-    "_name": "_cb41d4fa"
-  },
-  {
-    "name": "Client",
-    "path": "/Client",
-    "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/Client.vue",
-    "chunkName": "pages/Client",
-    "children": [
-      {
-        "path": "Orders",
-        "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/Client/Orders.vue",
-        "chunkName": "pages/Client/Orders",
-        "children": [
-          {
-            "name": "Client-Orders",
-            "path": "",
-            "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/Client/Orders/index.vue",
-            "chunkName": "pages/Client/Orders/index",
-            "_name": "_3d7d6fc0"
-          },
-          {
-            "name": "Client-Orders-order",
-            "path": ":order",
-            "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/Client/Orders/_order/index.vue",
-            "chunkName": "pages/Client/Orders/_order/index",
-            "_name": "_503cbed8"
-          }
-        ],
-        "_name": "_55f3dafd"
-      }
-    ],
-    "_name": "_6653e572"
-  },
-  {
     "name": "Myaccount",
     "path": "/Myaccount",
     "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/Myaccount.vue",
@@ -94,6 +26,64 @@
     "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/Reports.vue",
     "chunkName": "pages/Reports",
     "_name": "_6581561a"
+  },
+  {
+    "path": "/Admin/Item",
+    "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/Admin/Item.vue",
+    "chunkName": "pages/Admin/Item",
+    "children": [
+      {
+        "name": "Admin-Item",
+        "path": "",
+        "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/Admin/Item/index.vue",
+        "chunkName": "pages/Admin/Item/index",
+        "_name": "_66833e9c"
+      },
+      {
+        "name": "Admin-Item-item_category",
+        "path": "item_category",
+        "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/Admin/Item/item_category.vue",
+        "chunkName": "pages/Admin/Item/item_category",
+        "_name": "_48ccfc8a"
+      },
+      {
+        "name": "Admin-Item-price_table",
+        "path": "price_table",
+        "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/Admin/Item/price_table.vue",
+        "chunkName": "pages/Admin/Item/price_table",
+        "_name": "_08622438"
+      }
+    ],
+    "_name": "_3d9e2d22"
+  },
+  {
+    "name": "Admin-User",
+    "path": "/Admin/User",
+    "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/Admin/User/index.vue",
+    "chunkName": "pages/Admin/User/index",
+    "_name": "_5d184b6a"
+  },
+  {
+    "path": "/Client/Orders",
+    "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/Client/Orders.vue",
+    "chunkName": "pages/Client/Orders",
+    "children": [
+      {
+        "name": "Client-Orders",
+        "path": "",
+        "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/Client/Orders/index.vue",
+        "chunkName": "pages/Client/Orders/index",
+        "_name": "_3d7d6fc0"
+      },
+      {
+        "name": "Client-Orders-order",
+        "path": ":order",
+        "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/Client/Orders/_order/index.vue",
+        "chunkName": "pages/Client/Orders/_order/index",
+        "_name": "_503cbed8"
+      }
+    ],
+    "_name": "_55f3dafd"
   },
   {
     "name": "password-reset-confirm-uid-token",

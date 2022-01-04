@@ -5,18 +5,17 @@ import { interopDefault } from './utils'
 import scrollBehavior from './router.scrollBehavior.js'
 
 const _4937e6c1 = () => interopDefault(import('../pages/About.vue' /* webpackChunkName: "pages/About" */))
-const _cb41d4fa = () => interopDefault(import('../pages/Admin.vue' /* webpackChunkName: "pages/Admin" */))
-const _08779492 = () => interopDefault(import('../pages/Admin/item/index.vue' /* webpackChunkName: "pages/Admin/item/index" */))
-const _565bcda1 = () => interopDefault(import('../pages/Admin/item_category/index.vue' /* webpackChunkName: "pages/Admin/item_category/index" */))
-const _212b6fcf = () => interopDefault(import('../pages/Admin/price_table/index.vue' /* webpackChunkName: "pages/Admin/price_table/index" */))
-const _ce5d016c = () => interopDefault(import('../pages/Admin/user/index.vue' /* webpackChunkName: "pages/Admin/user/index" */))
-const _6653e572 = () => interopDefault(import('../pages/Client.vue' /* webpackChunkName: "pages/Client" */))
-const _55f3dafd = () => interopDefault(import('../pages/Client/Orders.vue' /* webpackChunkName: "pages/Client/Orders" */))
-const _3d7d6fc0 = () => interopDefault(import('../pages/Client/Orders/index.vue' /* webpackChunkName: "pages/Client/Orders/index" */))
-const _503cbed8 = () => interopDefault(import('../pages/Client/Orders/_order/index.vue' /* webpackChunkName: "pages/Client/Orders/_order/index" */))
 const _5e95fe35 = () => interopDefault(import('../pages/Myaccount.vue' /* webpackChunkName: "pages/Myaccount" */))
 const _f45f11b0 = () => interopDefault(import('../pages/PasswordReset.vue' /* webpackChunkName: "pages/PasswordReset" */))
 const _6581561a = () => interopDefault(import('../pages/Reports.vue' /* webpackChunkName: "pages/Reports" */))
+const _3d9e2d22 = () => interopDefault(import('../pages/Admin/Item.vue' /* webpackChunkName: "pages/Admin/Item" */))
+const _66833e9c = () => interopDefault(import('../pages/Admin/Item/index.vue' /* webpackChunkName: "pages/Admin/Item/index" */))
+const _48ccfc8a = () => interopDefault(import('../pages/Admin/Item/item_category.vue' /* webpackChunkName: "pages/Admin/Item/item_category" */))
+const _08622438 = () => interopDefault(import('../pages/Admin/Item/price_table.vue' /* webpackChunkName: "pages/Admin/Item/price_table" */))
+const _5d184b6a = () => interopDefault(import('../pages/Admin/User/index.vue' /* webpackChunkName: "pages/Admin/User/index" */))
+const _55f3dafd = () => interopDefault(import('../pages/Client/Orders.vue' /* webpackChunkName: "pages/Client/Orders" */))
+const _3d7d6fc0 = () => interopDefault(import('../pages/Client/Orders/index.vue' /* webpackChunkName: "pages/Client/Orders/index" */))
+const _503cbed8 = () => interopDefault(import('../pages/Client/Orders/_order/index.vue' /* webpackChunkName: "pages/Client/Orders/_order/index" */))
 const _8b86d558 = () => interopDefault(import('../pages/password/reset/confirm/_uid/_token/index.vue' /* webpackChunkName: "pages/password/reset/confirm/_uid/_token/index" */))
 const _1d04bcb4 = () => interopDefault(import('../pages/index.vue' /* webpackChunkName: "pages/index" */))
 
@@ -36,44 +35,6 @@ export const routerOptions = {
     component: _4937e6c1,
     name: "About"
   }, {
-    path: "/Admin",
-    component: _cb41d4fa,
-    name: "Admin",
-    children: [{
-      path: "item",
-      component: _08779492,
-      name: "Admin-item"
-    }, {
-      path: "item_category",
-      component: _565bcda1,
-      name: "Admin-item_category"
-    }, {
-      path: "price_table",
-      component: _212b6fcf,
-      name: "Admin-price_table"
-    }, {
-      path: "user",
-      component: _ce5d016c,
-      name: "Admin-user"
-    }]
-  }, {
-    path: "/Client",
-    component: _6653e572,
-    name: "Client",
-    children: [{
-      path: "Orders",
-      component: _55f3dafd,
-      children: [{
-        path: "",
-        component: _3d7d6fc0,
-        name: "Client-Orders"
-      }, {
-        path: ":order",
-        component: _503cbed8,
-        name: "Client-Orders-order"
-      }]
-    }]
-  }, {
     path: "/Myaccount",
     component: _5e95fe35,
     name: "Myaccount"
@@ -85,6 +46,38 @@ export const routerOptions = {
     path: "/Reports",
     component: _6581561a,
     name: "Reports"
+  }, {
+    path: "/Admin/Item",
+    component: _3d9e2d22,
+    children: [{
+      path: "",
+      component: _66833e9c,
+      name: "Admin-Item"
+    }, {
+      path: "item_category",
+      component: _48ccfc8a,
+      name: "Admin-Item-item_category"
+    }, {
+      path: "price_table",
+      component: _08622438,
+      name: "Admin-Item-price_table"
+    }]
+  }, {
+    path: "/Admin/User",
+    component: _5d184b6a,
+    name: "Admin-User"
+  }, {
+    path: "/Client/Orders",
+    component: _55f3dafd,
+    children: [{
+      path: "",
+      component: _3d7d6fc0,
+      name: "Client-Orders"
+    }, {
+      path: ":order",
+      component: _503cbed8,
+      name: "Client-Orders-order"
+    }]
   }, {
     path: "/password/reset/confirm/:uid?/:token",
     component: _8b86d558,

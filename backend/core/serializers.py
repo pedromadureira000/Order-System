@@ -32,7 +32,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         ref_name = "User Serializer" # fixes name collision with djoser when fetching urls with swagger
         model = User
-        fields = ['first_name', 'last_name', 'email', 'roles', 'permissions']
+        fields = ['first_name', 'last_name', 'email', 'cpf', 'company', 'roles', 'permissions']
 
 
     def get_roles(self, user):

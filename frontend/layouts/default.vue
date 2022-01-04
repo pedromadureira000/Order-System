@@ -98,6 +98,9 @@
 import footer from '~/components/Footer.vue';
 import loginDialog from '~/components/login-dialog.vue'
 import sessionErrorDialog from '~/components/session-error-dialog.vue'
+import {adminPermissions, agentPermissions, adminAgentPermissions, itemPermissions, categoryPermissions, priceTablePermissions, orderPermissions} from '~/helpers/permissions'
+let itemsMenuPermissions = itemPermissions.concat(categoryPermissions).concat(priceTablePermissions)
+let usersMenuPermissions = adminPermissions.concat(agentPermissions).concat(adminAgentPermissions)
 
 export default {
 	name: "default",
@@ -115,44 +118,10 @@ export default {
 			{ title: "About", icon: "mdi-help-box", to: "/about" },
 		],
 		allMenuItems: [
-			{"role": "admin", "title": "Admin", "icon":"mdi-account-tie", "to": "/admin"},
-			{"role": "admin_agent", "title": "Admin", "icon":"mdi-account-tie", "to": "/admin"},
-			{"role": "agent", "title": "Admin", "icon":"mdi-account-tie", "to": "/admin"},
-      {"role": "client", "title": "Orders", "icon":"mdi-clipboard-check-multiple", "to": "/client"},
-      /** {"role": "client", "title": "Reports", "icon":"mdi-clipboard-list-outline", "to": "/reports"}, */
+			{"permissions": usersMenuPermissions , "title": "Users", "icon":"mdi-account-group", "to": "/admin/user"},
+			{"permissions": itemsMenuPermissions, "title": "Items", "icon":"mdi-cart-variant", "to": "/admin/item"},
+      {"permissions": orderPermissions, "title": "Orders", "icon":"mdi-clipboard-check-multiple", "to": "/client/orders"},
 		],
-    allUserPermissions: [  
-      // Admin
-      "get_all_users",
-      "create_admin_agent",
-      "delete_admin_agent",
-      "update_admin_agent",
-      "get_all_admin_agents",
-      //AdminAgent
-      "create_agent",
-      "get_agents",
-      "update_agent",
-      "delete_agent",
-      // Agent
-      "create_client",
-      "get_clients",
-      "update_client",
-      "delete_client",
-      "create_item",
-      "get_items",
-      "update_item",
-      "delete_item",
-      "create_item_category",
-      "get_item_category",
-      "update_item_category",
-      "delete_item_category",
-      "create_price_table",
-      "get_price_tables",
-      "update_price_table",
-      "delete_price_table",
-      // Client
-      "crud_order",
-    ]
 	}),
 
   methods: {
@@ -172,10 +141,15 @@ export default {
 		currentMenuItems() {
 			let user = this.$store.state.auth.currentUser;
 			if (user) {
-				/* return defultMenuItems array concatenated with user Menuitems with 'About' in the end. */
 				return this.defaultMenuItems
 					.slice(0, 1)
-					.concat(this.allMenuItems.filter(MenuItem => this.$store.state.auth.currentUser.roles.includes(MenuItem.role)))
+          .concat(this.allMenuItems.filter(MenuItem => {
+            let addItem = false
+            MenuItem.permissions.forEach(permission => {
+              if (this.$store.state.auth.currentUser.permissions.includes(permission)){addItem = true; return;}
+            })
+            return addItem
+          }))
 					.concat(this.defaultMenuItems.slice(1, 2));
 			} else {
 				return this.defaultMenuItems;

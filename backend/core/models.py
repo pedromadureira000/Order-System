@@ -149,7 +149,7 @@ class Company(models.Model):
     client_code = models.CharField(blank=True, max_length=9, verbose_name="Código do cliente")
     vendor_code = models.CharField(blank=True, max_length=9, verbose_name="Código do vendedor")
     status = models.CharField(max_length=1, choices=status_choices)
-    type = models.CharField(max_length=1, choices=type_choices)
+    company_type = models.CharField(max_length=1, choices=type_choices)
 
     def __str__(self):
         return f'Empresa: {self.name}'
