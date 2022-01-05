@@ -5,11 +5,18 @@
       <v-card-text>
         <v-container fluid>
 					<v-text-field
-						v-model="email"
-						:error-messages="emailErrors"
-						label="E-mail"
+						v-model="username"
+						:error-messages="usernameErrors"
+						label="Username"
 						required
-						@blur="$v.email.$touch()"
+						@blur="$v.username.$touch()"
+					></v-text-field>
+					<v-text-field
+						v-model="company_code"
+						:error-messages="company_codeErrors"
+						label="Company"
+						required
+						@blur="$v.company_code.$touch()"
 					></v-text-field>
 					<v-text-field
 						v-model="password"
@@ -43,13 +50,14 @@
 
 <script>
 import { validationMixin } from "vuelidate";
-import { required, email } from "vuelidate/lib/validators";
+import { required, alphaNum, integer} from "vuelidate/lib/validators";
 
 export default {
   mixins: [validationMixin],
 
   validations: {
-    email: { required, email },
+    username: { required, alphaNum},
+    company_code: {required, integer},
     password: { required },
   },
 
@@ -57,7 +65,8 @@ export default {
     return {
       visible: false,
       loading: false,
-      email: '',
+      username: '',
+      company_code: null,
       password: '',
     }
   },
@@ -71,7 +80,7 @@ export default {
     },
     async login() {
       this.loading = true
-			await this.$store.dispatch('auth/login', {email: this.email, password: this.password} )
+			await this.$store.dispatch('auth/login', {username: this.username, company_code: this.company_code, password: this.password} )
 			if (this.$store.state.auth.currentUser){
 				this.visible = false
 			}      
@@ -80,17 +89,24 @@ export default {
   },
 
   computed: {
+    usernameErrors() {
+      const errors = [];
+      if (!this.$v.username.$dirty) return errors;
+      !this.$v.username.alphaNum && errors.push("Must have only alphanumeric characters.");
+      !this.$v.username.required && errors.push("Username is required");
+      return errors;
+    },
+    company_codeErrors() {
+      const errors = [];
+      if (!this.$v.company_code.$dirty) return errors;
+      !this.$v.company_code.integer && errors.push("Must be a integer");
+      !this.$v.company_code.required && errors.push("Company required");
+      return errors;
+    },
     passwordErrors() {
       const errors = [];
       if (!this.$v.password.$dirty) return errors;
       !this.$v.password.required && errors.push("Password is required.");
-      return errors;
-    },
-    emailErrors() {
-      const errors = [];
-      if (!this.$v.email.$dirty) return errors;
-      !this.$v.email.email && errors.push("Must be valid e-mail");
-      !this.$v.email.required && errors.push("E-mail is required");
       return errors;
     },
   },

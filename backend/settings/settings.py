@@ -41,7 +41,6 @@ AUTH_USER_MODEL = 'core.User'
 
 ROLEPERMISSIONS_MODULE = 'core.roles'
 
-CSRF_TRUSTED_ORIGINS = ['http://localhost:3000'] 
 
 # Application definition
 
@@ -141,6 +140,7 @@ DJOSER = {
 
 # SMTP
 if DEBUG:
+    CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', 'http://localhost:8000/'] 
     EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
     DEFAULT_FROM_EMAIL = "webmaster@localhost"
     EMAIL_HOST = "localhost"

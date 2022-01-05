@@ -2,7 +2,7 @@
   <div>
     <div class="ma-3">
       <h3>Update Account Information</h3>
-      <form @submit.prevent="infoSubmit">
+      <form @submit.prevent="updateUserProfile">
         <div class="mb-3">
           <v-text-field
             label="First Name"
@@ -22,7 +22,25 @@
           />
         </div>
         <div class="mb-3">
-          <v-text-field label="Email" type="email" v-model="email" disabled />
+          <v-text-field
+            label="Email"
+            v-model="email"
+            :error-messages="emailErrors"
+            required
+            @blur="$v.email.$touch()"
+          />
+        </div>
+        <!-- <div class="mb-3"> -->
+          <!-- <v-text-field label="Email" type="email" v-model="email" disabled /> -->
+        <!-- </div> -->
+        <div class="mb-3">
+          <v-text-field
+            label="CPF"
+            v-model="cpf"
+            :error-messages="cpfErrors"
+            required
+            @blur="$v.cpf.$touch()"
+          />
         </div>
         <v-btn color="primary" type="submit">Save</v-btn>
       </form>
@@ -73,6 +91,7 @@ import {
   sameAs,
   minLength,
   maxLength,
+  email
 } from "vuelidate/lib/validators";
 import { validationMixin } from "vuelidate";
 
@@ -85,6 +104,7 @@ export default {
 			first_name: this.$store.state.auth.currentUser.first_name,
 			last_name: this.$store.state.auth.currentUser.last_name,
 			email: this.$store.state.auth.currentUser.email,
+			cpf: this.$store.state.auth.currentUser.cpf,
       current_password: "",
       password: "",
       password_confirm: "",
@@ -100,6 +120,14 @@ export default {
       required,
       maxLength: maxLength(10),
     },
+    email: {
+      required,
+      email,
+    },
+    cpf: {  
+      required,
+      maxLength: maxLength(14),
+    },
     current_password: {
       required,
       minLength: minLength(6),
@@ -113,20 +141,24 @@ export default {
     password_confirm: {
       password_confirm: sameAs("password"),
     },
-    profileGroup: ["first_name", "last_name"],
+    profileGroup: ["first_name", "last_name", "email", "cpf"],
     passwordUpdateGroup: ["current_password","password", "password_confirm"],
   },
 
   methods: {
-    infoSubmit() {
+    updateUserProfile() {
 			if (
 				this.first_name === this.$store.state.auth.currentUser.first_name &&
-				this.last_name === this.$store.state.auth.currentUser.last_name
+				this.last_name === this.$store.state.auth.currentUser.last_name &&
+				this.email === this.$store.state.auth.currentUser.email &&
+				this.cpf === this.$store.state.auth.currentUser.cpf
 			){ this.$store.dispatch('setAlert', {message: "You must change some field to update profile.", alertType: 'warning'}, { root: true }) }
 			else {
-				this.$store.dispatch('auth/profileUpdate', {
+				this.$store.dispatch('auth/updateUserProfile', {
 					first_name: this.first_name,
 					last_name: this.last_name,
+          email: this.email,
+          cpf: this.cpf
 				})
 			}	
     },
@@ -147,6 +179,20 @@ export default {
       if (!this.$v.last_name.$dirty) return errors;
       !this.$v.last_name.required && errors.push("Last name is required.");
       !this.$v.last_name.maxLength && errors.push("This field must have up to 10 characters.");
+      return errors;
+    },
+    emailErrors() {
+      const errors = [];
+      if (!this.$v.email.$dirty) return errors;
+      !this.$v.email.email && errors.push("Must be valid e-mail");
+      !this.$v.email.required && errors.push("E-mail is required");
+      return errors;
+    },
+    cpfErrors() { 
+      const errors = [];
+      if (!this.$v.cpf.$dirty) return errors;
+      !this.$v.cpf.required && errors.push("CPF is required.");
+      !this.$v.cpf.maxLength && errors.push("This field must have up to 14 characters.");
       return errors;
     },
     currentPassErrors() {

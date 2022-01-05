@@ -13,7 +13,7 @@ export default {
 		return await axios({
 			method: "post",
 			url: "/api/user/login",
-			data: { email: payload.email, password: payload.password },
+			data: { username: payload.username, company_code: payload.company_code, password: payload.password },
 			headers: { "X-CSRFToken": payload.csrftoken },
 		})
 			.then((response) => {
@@ -28,13 +28,15 @@ export default {
 			})
 				.then(() => {})
 		},
-	async updateProfile(payload){
+	async updateUserProfile(payload){
 		return await axios({ 
 		method: "put",
-		url: "/api/user/profile",
+		url: "/api/user/update_user_profile",
 		data:{
 			first_name: payload.first_name,
 			last_name: payload.last_name,
+			email: payload.email,
+			cpf: payload.cpf,
 		}
 			}).then((request) => {
 					return request.data 
@@ -44,7 +46,7 @@ export default {
 	async updatePassword(payload){
 		return await axios({ 
 		method: "put",
-		url: "/api/user/profilepassword",
+		url: "/api/user/update_user_password",
 		data:{
 			current_password: payload.current_password,
 			password: payload.password,
@@ -78,9 +80,12 @@ export default {
 		method: "post",
 		url: "/api/user/createuser",
 		data:{
+      username: payload.username,
+      company_code: payload.company_code,
 			first_name: payload.first_name,
 			last_name: payload.last_name,
 			email: payload.email,
+			cpf: payload.cpf,
 			password: payload.password 
 		}
 			}).then((request) => {

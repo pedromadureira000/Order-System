@@ -1,10 +1,5 @@
-// interface module {
-  // title: string;
-  // icon: string;
-  // to: string;
-// }
-
 class User {
+	username!: string;
 	first_name!: string;
 	last_name!: string;
 	email!: string;
@@ -86,9 +81,9 @@ export const actions: ActionTree<UserState, RootState> = {
 		}
 	},
 
-	async profileUpdate({commit, dispatch}: {commit: Commit, dispatch: Dispatch,}, payload: any){
+	async updateUserProfile({commit, dispatch}: {commit: Commit, dispatch: Dispatch,}, payload: any){
 		try {
-		let data = await api.updateProfile(payload)
+		let data = await api.updateUserProfile(payload)
 		console.log(">>",data)
 		commit("SET_USER", data )
 		dispatch("setAlert", {message: "Your profile has been updated.", alertType: "success"}, { root: true })

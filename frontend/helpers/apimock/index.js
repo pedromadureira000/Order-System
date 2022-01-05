@@ -24,8 +24,9 @@ export default {
 	},
 
 	login(payload){ 
-		if (typeof payload.email === 'string' && typeof payload.password === 'string' && typeof payload.csrftoken === 'string'){
-		if (payload.email === "admin@admin.com"){
+		if (typeof payload.username === 'string' && typeof payload.company_code === 'number' && 
+        typeof payload.password === 'string' && typeof payload.csrftoken === 'string'){
+		if (payload.username === "admin" && payload.company_code === 'phsw'){
 			return mockasync(admin)
 		}else{
 			setCookie('sessionid', 'anothertoken', 1)
@@ -42,8 +43,10 @@ export default {
 		return mockasync("User logged out.")
 	},
 
-	updateProfile(payload){
-		if (typeof payload.first_name === 'string' && typeof payload.last_name === 'string'){
+	updateUserProfile(payload){ 
+    //TODO some fields should be optional
+		if (typeof payload.first_name === 'string' && typeof payload.last_name === 'string' 
+      && typeof payload.email === 'string' && payload.cpf === 'string'){
 			let updated_user = {...user, ...payload}
 			return mockasync(updated_user)	
 		}else {
@@ -80,13 +83,24 @@ export default {
 	},
 
 	createUser(payload){
+    //TODO some fields should be optional (use types!)
 		if (typeof payload.first_name === 'string' && typeof payload.last_name === 'string' &&
-				typeof payload.email === 'string' && typeof payload.password === 'string'  
-				)
-				{
-					delete payload.password	
-					return mockasync(payload)	
-				}
+        typeof payload.username === 'string' && typeof payload.company_code === 'number' &&
+        typeof payload.email === 'string' && typeof payload.password === 'string' && payload.cpf === 'string')
+        {	 
+          delete payload.password	
+          delete payload.company_code
+          payload['roles'] = []
+          payload['permissions'] = []
+          payload['company'] = {
+            "name": `Company: ${payload.company_code}`,
+            "cnpj": "30228893000166",
+            "company_code": payload.company_code,
+            "status": "A",
+            "company_type": "L"
+          }
+          return mockasync(payload)	
+        }
 		else {
 			mockasyncerror("createUser Error")
 		}

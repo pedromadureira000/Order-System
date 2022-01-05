@@ -4,6 +4,24 @@
     <form @submit.prevent="createUser">
       <div class="mb-3">
         <v-text-field
+          label="Username"
+          v-model="username"
+          :error-messages="usernameErrors"
+          required
+          @blur="$v.username.$touch()"
+        />
+      </div>
+      <div class="mb-3">
+        <v-text-field
+          label="Company code"
+          v-model="company_code"
+          :error-messages="companyCodeErrors"
+          required
+          @blur="$v.company_code.$touch()"
+        />
+      </div>
+      <div class="mb-3">
+        <v-text-field
           label="First Name"
           v-model="first_name"
           :error-messages="firstNameErrors"
@@ -28,6 +46,15 @@
           :error-messages="emailErrors"
           required
           @blur="$v.email.$touch()"
+        />
+      </div>
+      <div class="mb-3">
+        <v-text-field
+          label="CPF"
+          v-model="cpf"
+          :error-messages="cpfErrors"
+          required
+          @blur="$v.cpf.$touch()"
         />
       </div>
       <div class="mb-3">
@@ -91,6 +118,8 @@ import {
   minLength,
   maxLength,
   email,
+  alphaNum,
+  integer
 } from "vuelidate/lib/validators";
 import { validationMixin } from "vuelidate";
 
@@ -103,9 +132,12 @@ export default {
 
   data() {
     return {
+      username: null,
+      company_code: null,
       first_name: null,
       last_name: null,
       email: null,
+			cpf: null,
       password: null,
       password_confirm: null,
       loading: false,
@@ -119,6 +151,15 @@ export default {
   },
 
   validations: {
+    username: { 
+      required, 
+      alphaNum, 
+      maxLength: maxLength(12)
+    },
+    company_code: {
+      required, 
+      integer
+    },
     first_name: {
       required,
       maxLength: maxLength(10),
@@ -131,6 +172,10 @@ export default {
       required,
       email,
     },
+    cpf: {  
+      required,
+      maxLength: maxLength(14),
+    },
     password: {
       required,
       minLength: minLength(6),
@@ -140,9 +185,12 @@ export default {
       password_confirm: sameAs("password"),
     },
     userInfoGroup: [
+      "username",
+      "company_code",
       "first_name",
       "last_name",
       "email",
+      "cpf",
       "password",
       "password_confirm",
     ],
@@ -160,9 +208,12 @@ export default {
       } else {
         this.loading = true;
         let data = await this.$store.dispatch("auth/createUser", {
+          username: this.username, 
+          company_code: this.company_code,
           first_name: this.first_name,
           last_name: this.last_name,
           email: this.email,
+          cpf: this.cpf,
           password: this.password,
         });
         if (data) {
@@ -177,6 +228,21 @@ export default {
   },
 
   computed: {
+    usernameErrors() {
+      const errors = [];
+      if (!this.$v.username.$dirty) return errors;
+      !this.$v.username.alphaNum && errors.push("Must have only alphanumeric characters.");
+      !this.$v.username.required && errors.push("Username is required");
+      !this.$v.username.maxLength && errors.push("This field must have up to 12 characters.");
+      return errors;
+    },
+    companyCodeErrors() {
+      const errors = [];
+      if (!this.$v.company_code.$dirty) return errors;
+      !this.$v.company_code.integer && errors.push("Must be a integer");
+      !this.$v.company_code.required && errors.push("Company required");
+      return errors;
+    },
     firstNameErrors() {
       const errors = [];
       if (!this.$v.first_name.$dirty) return errors;
@@ -198,6 +264,13 @@ export default {
       if (!this.$v.email.$dirty) return errors;
       !this.$v.email.email && errors.push("Must be valid e-mail");
       !this.$v.email.required && errors.push("E-mail is required");
+      return errors;
+    },
+    cpfErrors() { 
+      const errors = [];
+      if (!this.$v.cpf.$dirty) return errors;
+      !this.$v.cpf.required && errors.push("CPF is required.");
+      !this.$v.cpf.maxLength && errors.push("This field must have up to 14 characters.");
       return errors;
     },
     passwordErrors() {

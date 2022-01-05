@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.views import APIView
-from core.serializers import RegistrationSerializer, UserSerializer, UserLoginSerializer, ProfilePasswordSerializer
+from core.serializers import UserSerializer, SwaggerLoginSerializer, SwaggerProfilePasswordSerializer
 #  from rest_framework.authtoken.models import Token
 from core.models import User
 from rolepermissions.checkers import has_permission, has_role
@@ -36,19 +36,24 @@ class GetCSRFToken(APIView):
 
 
 class CreateUserView(APIView):
-    @swagger_auto_schema(request_body=RegistrationSerializer) 
+    @swagger_auto_schema(request_body=UserSerializer) 
     @transaction.atomic  # if there is some error, it will be roolback all transaction
     def post(self, request):
         try:
             if has_permission(request.user, 'create_admin_agent'):
                 data = request.data
-                serializer =  RegistrationSerializer(data=data)
-                serializer.is_valid(raise_exception=True)
-                serializer.save()
-                return Response(serializer.data)
+                serializer =  UserSerializer(data=data)
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save()
+                    #  company_serialized = serializer.save()
+                    #  user_data = {**serializer.data, 'company': {**company_serialized.data}}
+                    #  return Response(user_data)
+                    return Response(serializer.data)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             return Response(status=status.HTTP_401_UNAUTHORIZED)
-        except Exception:
+        except Exception as error:
             transaction.rollback()
+            # what else??? TODO
 
 
 class LoginView(APIView):
@@ -62,19 +67,26 @@ class LoginView(APIView):
     #  )
     #  @swagger_auto_schema(request_body=UserLoginSerializer, manual_parameters=[csrftoken, sessionid]) 
 
-    @swagger_auto_schema(request_body=UserLoginSerializer) 
+    @swagger_auto_schema(request_body=SwaggerLoginSerializer) 
     def post(self, request, format=None):
         if request.user.is_authenticated:
             return Response({"status": "already_authenticated."})
-        email = request.data.get('email')
+        username = request.data.get('username')
+        company_code = request.data.get('company_code')
         password = request.data.get('password')
-        if not email:
-            return Response({'error': "'email' field is missing."})
+
+        if not username:
+            return Response({'error': "'username' field is missing."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not company_code:
+            return Response({'error': "'company_code' field is missing."}, status=status.HTTP_400_BAD_REQUEST)
 
         if not password:
-            return Response({'error': "'password' field is missing."})
+            return Response({'error': "'password' field is missing."}, status=status.HTTP_400_BAD_REQUEST)
 
-        user = authenticate(username=email, password=password, request=request)
+        user_code = username + "#" + company_code
+    
+        user = authenticate(username=user_code, password=password, request=request)
         if user is not None:
             login(request, user)
             # 'auth.login' will add user session in request, and in some way the sessionid cookie will be sent in the Response
@@ -147,19 +159,21 @@ class DeleteAccountView(APIView):
         #  return Response({"success": "User deleted successfully."})
 
 
-class ProfileInfoView(APIView):
+class updateUserProfile(APIView):
     @swagger_auto_schema(request_body=UserSerializer) 
     def put(self, request):
         user = request.user
         serializer = UserSerializer(user, data=request.data, partial=True) # (partial=True)we dont want to update every field
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
+        if serializer.is_valid(raise_exception=True):  # ????????????????
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response({"status": "Bad request."},status=status.HTTP_400_BAD_REQUEST)
 
 
-class ProfilePasswordView(APIView):
+class UpdateUserPassword(APIView):
     #  @swagger_auto_schema(request_body=openapi.Schema(title="Password", description='Description', type=openapi.TYPE_STRING))
-    @swagger_auto_schema(request_body=ProfilePasswordSerializer) 
+    @swagger_auto_schema(request_body=SwaggerProfilePasswordSerializer) 
     def put(self, request):
         user = request.user
         data = request.data
@@ -172,7 +186,6 @@ class ProfilePasswordView(APIView):
         if user.check_password(data.get('current_password')):
             user.set_password(data['password'])
             user.save()
-            #  return Response(UserSerializer(user).data)
             return Response({"status": "Password updated"})
         return Response({"status": "passwords don't match"},status=status.HTTP_400_BAD_REQUEST)
 
@@ -184,6 +197,7 @@ class CheckAuthenticatedView(APIView):
             data = UserSerializer(request.user).data
             return Response(data)
         except Exception as error:
+            print(error)
             return Response({'status': 'error', 'description': 'Something went wrong when checking authentication status.'}, 
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
