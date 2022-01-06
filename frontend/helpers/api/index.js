@@ -102,10 +102,10 @@ export default {
 				})
 	},
 
-	async deleteUserByAdmin(id){
+	async deleteUserByAdmin(payload){
 		return await axios({ 
 		method: "delete",
-		url: `/api/user/delete/${id}`,
+		url: `/api/user/delete/${payload.username}&${payload.company_code}`,
 			}).then((request) => {
 					return request.data 
 				})

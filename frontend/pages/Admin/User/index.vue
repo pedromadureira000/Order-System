@@ -87,27 +87,40 @@
     </form>
 
     <h3 class="mt-6">Edit User</h3>
-    <v-list dense>
-      <v-list-item v-for="user in users" :key="user.id">
-        <template v-slot:default>
-          <v-avatar size="45px" class="mr-9">
-            <img src="~assets/images/default_user.jpg" />
-          </v-avatar>
-          <v-list-item-content>
-            <v-list-item-title
-              >{{ user.first_name }} {{ user.last_name }}</v-list-item-title
-            >
-          </v-list-item-content>
-          <v-list-item-content>
-            <v-list-item-subtitle>{{ user.email }}</v-list-item-subtitle>
-          </v-list-item-content>
-          <v-list-item-action>
-            <user-edit-menu :user="user" @user-deleted="deleteUser(user)" />
-          </v-list-item-action>
-          <v-list-item-content> </v-list-item-content>
-        </template>
-      </v-list-item>
-    </v-list>
+    <!-- <v-list dense> -->
+      <!-- <v-list-item v-for="user in users" :key="user.id"> -->
+        <!-- <template v-slot:default> -->
+          <!-- <v-avatar size="45px" class="mr-9"> -->
+            <!-- <img src="~assets/images/default_user.jpg" /> -->
+          <!-- </v-avatar> -->
+          <!-- <v-list-item-content> -->
+            <!-- <v-list-item-subtitle>{{ user.username }}</v-list-item-subtitle> -->
+          <!-- </v-list-item-content> -->
+          <!-- <v-list-item-content> -->
+            <!-- <v-list-item-title>{{ user.first_name }} {{ user.last_name }}</v-list-item-title> -->
+          <!-- </v-list-item-content> -->
+          <!-- <v-list-item-content> -->
+            <!-- <v-list-item-subtitle>{{ user.email }}</v-list-item-subtitle> -->
+          <!-- </v-list-item-content> -->
+          <!-- <v-list-item-content> -->
+            <!-- <v-list-item-subtitle>{{ user.cpf }}</v-list-item-subtitle> -->
+          <!-- </v-list-item-content> -->
+          <!-- <v-list-item-content> -->
+            <!-- <v-list-item-subtitle>{{ user.email }}</v-list-item-subtitle> -->
+          <!-- </v-list-item-content> -->
+          <!-- <v-list-item-action> -->
+            <!-- <user-edit-menu :user="user" @user-deleted="deleteUser(user)" /> -->
+          <!-- </v-list-item-action> -->
+          <!-- <v-list-item-content> </v-list-item-content> -->
+        <!-- </template> -->
+      <!-- </v-list-item> -->
+    <!-- </v-list> -->
+    <v-data-table
+      :headers="headers"
+      :items="users"
+      :items-per-page="10"
+      class="elevation-1"
+    ></v-data-table>
   </div>
 </template>
 
@@ -142,12 +155,23 @@ export default {
       password_confirm: null,
       loading: false,
       users: [],
+      headers: [
+        { text: 'Username', value: 'username' },
+        { text: 'Complete name', value: 'complete_name' },
+        { text: 'Email', value: 'email' },
+        { text: 'CPF', value: 'cpf' },
+      ]
     };
   },
 
   async fetch() {
     let users = await this.$store.dispatch("auth/fetchUsersByAdmin");
-    this.users.push(...users);
+    for (const user_index in users){
+      let user = users[user_index]
+      this.users.push({username: user.username, complete_name: `${user.first_name} ${user.last_name}`, email: user.email, cpf: user.cpf})
+    }
+
+
   },
 
   validations: {
@@ -200,11 +224,7 @@ export default {
     async createUser() {
       this.$v.userInfoGroup.$touch();
       if (this.$v.userInfoGroup.$invalid) {
-        this.$store.dispatch(
-          "setAlert",
-          { message: "Please fill the form correctly.", alertType: "error" },
-          { root: true }
-        );
+        this.$store.dispatch("setAlert", { message: "Please fill the form correctly.", alertType: "error" }, { root: true })
       } else {
         this.loading = true;
         let data = await this.$store.dispatch("auth/createUser", {

@@ -23,7 +23,12 @@
             @keyup.enter="passwordResetConfirm"
           />
         </div>
-        <v-btn color="primary" type="submit">Save</v-btn>
+        <v-btn 
+          color="primary" 
+          type="submit"
+          :loading="loading"
+          :disabled="loading"
+        >Save</v-btn>
       </form>
   </div>
 </template>
@@ -49,11 +54,13 @@ export default {
     password_confirm: {
       password_confirm: sameAs("password"),
     },
+    password_group: ["password", "password_confirm"]
   },
   data() {
     return {
       password: "",
       password_confirm: "",
+      loading: false,
     };
   },
   computed: {
@@ -74,12 +81,20 @@ export default {
     },
   },
   methods: {
-    passwordResetConfirm() {
-			this.$store.dispatch('auth/passwordResetConfirm', {
-				new_password: this.password, 
-				token: this.$route.params.token, 
-				uid: this.$route.params.uid
-			})
+    async passwordResetConfirm() {
+      this.$v.password_group.$touch();
+      if (this.$v.password_group.$invalid) {
+        this.$store.dispatch("setAlert", { message: "Please fill the form correctly.", alertType: "error" }, { root: true })
+      } 
+      else {
+        this.loading = true
+        await this.$store.dispatch('auth/passwordResetConfirm', {
+          new_password: this.password, 
+          token: this.$route.params.token, 
+          uid: this.$route.params.uid
+        })
+        this.loading = false
+      }      
     }
   },
 };

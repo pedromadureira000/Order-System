@@ -15,7 +15,12 @@ class Command(BaseCommand):
                 first_name=faker.first_name(),
                 last_name=faker.last_name(),
                 email=faker.email(),
+                cpf=self.validated_data.get('cpf', '' ),
+                username=faker.username()   # validate? TODO
+                #  company=#????
+                #  user_code=faker.
                 password='',
             )
             user.set_password('1234')
             user.save()
+

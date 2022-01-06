@@ -116,6 +116,7 @@ export const actions: ActionTree<UserState, RootState> = {
 			dispatch("setAlert", {message: "Email has been sent", alertType: "success"}, { root: true })
 		}
 		catch(e){
+      console.log('error>>>>>>>>>>>>>>>>',e)
 			dispatch("setAlert", {message: "Something get wrong, the email was not been sent.", alertType: "error"}, { root: true })
 		}
 	},
@@ -162,9 +163,9 @@ export const actions: ActionTree<UserState, RootState> = {
 		return users
 	},
 
-	async deleteUserByAdmin({commit, dispatch}: {commit: Commit, dispatch: Dispatch,}, id: string){
+	async deleteUserByAdmin({commit, dispatch}: {commit: Commit, dispatch: Dispatch,}, payload: any){
 		try {
-			let data = await api.deleteUserByAdmin(id)
+			let data = await api.deleteUserByAdmin(payload)
 			console.log(">>>",data)
 			dispatch("setAlert", {message: "User deleted", alertType: "success"}, { root: true })
 			return "ok"

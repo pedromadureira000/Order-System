@@ -131,17 +131,18 @@ class GetAllUsers(APIView):
 
 class DeleteAccountView(APIView):
     @transaction.atomic  
-    def delete(self, request, email, format=None):
+    def delete(self, request, user_code, format=None):
         if has_permission(request.user, 'delete_admin_agent'):
             try: 
-              user = User.objects.get(email=email)
+                username_and_company_code = user_code.split("&")
+                user_code = username_and_company_code[0] + "#" + username_and_company_code[1]
+                user = User.objects.get(user_code=user_code)
 
-              if user.is_superuser or has_role(user, 'admin'):
-                return Response({'error': "You don't have permission to delete this user."},status=status.HTTP_401_UNAUTHORIZED)
+                if user.is_superuser or has_role(user, 'admin'):
+                    return Response({'error': "You don't have permission to delete this user."},status=status.HTTP_401_UNAUTHORIZED)
 
-              user.delete()
-              return Response({"success": "User deleted successfully."})
-
+                user.delete()
+                return Response({"success": "User deleted successfully."})
             except User.DoesNotExist:
               return Response(status=status.HTTP_404_NOT_FOUND) 
 

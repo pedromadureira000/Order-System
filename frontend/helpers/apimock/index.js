@@ -110,7 +110,7 @@ export default {
 		return mockasync(users)
 	},
 
-	deleteUserByAdmin(id){
+	deleteUserByAdmin(payload){
 		return mockasync('ok')	
 	}
 }

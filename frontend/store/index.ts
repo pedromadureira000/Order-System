@@ -3,6 +3,7 @@ export interface RootState {
     alertMessage: string;
     alertType: string;
     showAlert: boolean;
+    alertID: number
   },
 }
 
@@ -11,6 +12,7 @@ export const state = (): RootState => ({
     alertMessage: "",
     alertType: "info",
     showAlert: false,
+    alertID: 0
   },
 });
 
@@ -20,31 +22,43 @@ export const mutations: MutationTree<RootState> = {
     state.alert = {
       alertMessage: payload.message,
       alertType: payload.alertType,
-      showAlert: payload.showAlert,
+      showAlert: true,
+      alertID: Math.random()
     };
   },
+  removeAlert(state) {
+    state.alert = {
+      alertMessage: "",
+      alertType: "info",
+      showAlert: false,
+      alertID: state.alert.alertID
+    };
+  },
+  // removeOneFromAlertqueue(state){
+    // state.alert.alertqueue = state.alert.alertqueue - 1
+  // }
+
 };
 
 import { ActionTree, Commit } from "vuex";
 export const actions: ActionTree<RootState, RootState> = {
-  setAlert(
-    { commit }: { commit: Commit },
-    payload: {
-      alertMessage: string;
-      alertType: string;
-      showAlert?: boolean;
-      timeout?: number;
+  setAlert({ commit, state }: { commit: Commit, state: RootState }, 
+           payload: {alertMessage: string, alertType: string, timeout?: number}) {
+    // if showAlert is on. Close it and wait a few time to run the next.
+    let timeout = 0
+    if (state.alert.showAlert){
+      commit("removeAlert")
+      timeout = 300
     }
-  ) {
-    payload["showAlert"] = true;
-    payload["timeout"] = payload["timeout"] ? payload["timeout"] : 3600; // <<<<<<<<< Default value
-    commit("setAlert", payload);
     setTimeout(() => {
-      commit("setAlert", {
-        alertMessage: "",
-        alertType: "info",
-        showAlert: false,
-      });
-    }, payload.timeout);
+      payload["timeout"] = payload["timeout"] ? payload["timeout"] : 3600; // <<<<<<<<< Default value
+      commit("setAlert", payload);
+      let current_alert = state.alert.alertID
+      setTimeout(() => {
+        if (state.alert.alertID == current_alert) {
+          commit("removeAlert")
+        }
+      }, payload.timeout);
+    }, timeout);
   },
 };

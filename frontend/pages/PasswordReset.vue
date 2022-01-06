@@ -13,7 +13,13 @@
         required
         @blur="$v.email.$touch()"
       ></v-text-field>
-      <v-btn class="mr-4 mt-3" @click="passwordReset"> submit </v-btn>
+      <v-btn 
+        class="mr-4 mt-3" 
+        @click="passwordReset"
+        :loading="loading"
+        :disabled="loading"
+      > submit </v-btn>
+
     </form>
   </div>
 </template>
@@ -31,6 +37,7 @@ export default {
   data() {
     return {
       email: "",
+      loading: false,
     };
   },
   computed: {
@@ -43,11 +50,19 @@ export default {
     },
   },
   methods: {
-    passwordReset() {
-			this.$store.dispatch('auth/passwordReset', this.email)
+    async passwordReset() {
+      this.$v.email.$touch();
+      if (this.$v.email.$invalid) {
+        this.$store.dispatch("setAlert", { message: "Please fill the form correctly.", alertType: "error" }, { root: true })
+      } 
+      else {
+        this.loading = true
+			  await this.$store.dispatch('auth/passwordReset', this.email)
+        this.loading = false
+      }      
     }
-  },
-};
+  }
+}
 </script>
 
 <style></style>

@@ -42,7 +42,12 @@
             @blur="$v.cpf.$touch()"
           />
         </div>
-        <v-btn color="primary" type="submit">Save</v-btn>
+        <v-btn 
+          color="primary"
+          type="submit"
+          :loading="loading_profile"
+          :disabled="loading_profile"
+        >Save</v-btn>
       </form>
 
       <h3 class="mt-4">Change Password</h3>
@@ -79,7 +84,12 @@
             @blur="$v.password_confirm.$touch()"
           />
         </div>
-        <v-btn color="primary" type="submit">Save</v-btn>
+        <v-btn 
+          color="primary" 
+          type="submit"
+          :loading="loading_password"
+          :disabled="loading_password"
+        >Save</v-btn>
       </form>
     </div>
   </div>
@@ -108,6 +118,8 @@ export default {
       current_password: "",
       password: "",
       password_confirm: "",
+      loading_password: false,
+      loading_profile: false,
     };
   },
 
@@ -146,24 +158,38 @@ export default {
   },
 
   methods: {
-    updateUserProfile() {
-			if (
-				this.first_name === this.$store.state.auth.currentUser.first_name &&
-				this.last_name === this.$store.state.auth.currentUser.last_name &&
-				this.email === this.$store.state.auth.currentUser.email &&
-				this.cpf === this.$store.state.auth.currentUser.cpf
-			){ this.$store.dispatch('setAlert', {message: "You must change some field to update profile.", alertType: 'warning'}, { root: true }) }
-			else {
-				this.$store.dispatch('auth/updateUserProfile', {
-					first_name: this.first_name,
-					last_name: this.last_name,
-          email: this.email,
-          cpf: this.cpf
-				})
-			}	
+    async updateUserProfile() {
+      this.$v.profileGroup.$touch();
+      if (this.$v.profileGroup.$invalid) {
+        this.$store.dispatch("setAlert", { message: "Please fill the form correctly.", alertType: "error" }, { root: true })
+      } else {
+        if (
+          this.first_name === this.$store.state.auth.currentUser.first_name &&
+          this.last_name === this.$store.state.auth.currentUser.last_name &&
+          this.email === this.$store.state.auth.currentUser.email &&
+          this.cpf === this.$store.state.auth.currentUser.cpf
+        ){ this.$store.dispatch('setAlert', {message: "You must change some field to update profile.", alertType: 'warning'}, { root: true }) }
+        else {
+          this.loading_profile = true;
+          await this.$store.dispatch('auth/updateUserProfile', {
+            first_name: this.first_name,
+            last_name: this.last_name,
+            email: this.email,
+            cpf: this.cpf
+          })
+          this.loading_profile = false;
+        }	
+      }
     },
-    passwordSubmit() {
-			this.$store.dispatch('auth/updatePassword', {password: this.password, current_password: this.current_password})
+    async passwordSubmit() {
+      this.$v.passwordUpdateGroup.$touch();
+      if (this.$v.passwordUpdateGroup.$invalid) {
+        this.$store.dispatch("setAlert", { message: "Please fill the form correctly.", alertType: "error" }, { root: true })
+      } else {
+        this.loading_password = true;
+        await this.$store.dispatch('auth/updatePassword', {password: this.password, current_password: this.current_password})
+        this.loading_password = false;
+      }
     },
   },
   computed: {

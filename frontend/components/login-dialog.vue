@@ -59,6 +59,7 @@ export default {
     username: { required, alphaNum},
     company_code: {required, integer},
     password: { required },
+    login_group:["username", "company_code", "password"]
   },
 
   data () {
@@ -79,13 +80,18 @@ export default {
       this.visible = false
     },
     async login() {
-      this.loading = true
-			await this.$store.dispatch('auth/login', {username: this.username, company_code: this.company_code, password: this.password} )
-			if (this.$store.state.auth.currentUser){
-				this.visible = false
-			}      
-			this.loading = false
-    },
+      this.$v.login_group.$touch();
+      if (this.$v.login_group.$invalid) {
+        this.$store.dispatch("setAlert", { message: "Please fill the form correctly.", alertType: "error" }, { root: true })
+      } else {
+        this.loading = true
+        await this.$store.dispatch('auth/login', {username: this.username, company_code: this.company_code, password: this.password} )
+        if (this.$store.state.auth.currentUser){
+          this.visible = false
+        }      
+        this.loading = false
+      }
+    }
   },
 
   computed: {
