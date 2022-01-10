@@ -9,9 +9,6 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_cpf_cnpj.fields import CPFField, CNPJField
 from rolepermissions.roles import assign_role
-from django.contrib.auth.validators import UnicodeUsernameValidator
-#  from django.core.validators import MinLengthValidator 
-#  minlenghtvalidator = MinLengthValidator(limit_value=3)
 
 
 class UserManager(BaseUserManager):
@@ -94,13 +91,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     Email and password are required. Other fields are optional.
     """
 
-    username_validator = UnicodeUsernameValidator()
 
     username = models.CharField(
         _('username'),
         max_length=150,
         help_text=_('Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.'),
-        validators=[username_validator],
+        #  validators=[username_validator],               #TODO this is only for model_forms?
         #  error_messages={
             #  'unique': _("A user with that username already exists."),
         #  },
@@ -176,7 +172,7 @@ class Company(models.Model):
     cnpj = CNPJField(masked=True, blank=True, verbose_name="CNPJ")
     client_code = models.CharField(blank=True, max_length=9, verbose_name="Código do cliente")
     vendor_code = models.CharField(blank=True, max_length=9, verbose_name="Código do vendedor")
-    company_code = models.IntegerField(verbose_name="Código da empresa", unique=True)
+    company_code = models.CharField(verbose_name="Código da empresa", unique=True, max_length=9)
     status = models.CharField(max_length=1, choices=status_choices)
     company_type = models.CharField(max_length=1, choices=type_choices)
 

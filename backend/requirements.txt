@@ -8,3 +8,6 @@ apt get install xorg-server
 yay -S mailhog-bin
 mailhog (run mailhog)
 
+- Swagger
+
+After login is necessary to reload page to load csrftoken

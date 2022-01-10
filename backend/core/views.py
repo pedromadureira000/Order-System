@@ -43,7 +43,8 @@ class CreateUserView(APIView):
             if has_permission(request.user, 'create_admin_agent'):
                 data = request.data
                 serializer =  UserSerializer(data=data)
-                if serializer.is_valid(raise_exception=True):
+                #  if serializer.is_valid(raise_exception=True):
+                if serializer.is_valid():
                     serializer.save()
                     #  company_serialized = serializer.save()
                     #  user_data = {**serializer.data, 'company': {**company_serialized.data}}
@@ -58,54 +59,22 @@ class CreateUserView(APIView):
 
 class LoginView(APIView):
     permission_classes = (permissions.AllowAny,)
-
-    #  csrftoken = openapi.Parameter(
-        #  'email', in_=openapi.IN_HEADER, description='User email',type=openapi.TYPE_STRING    <<<< how to use custom header/query param
-    #  )
-    #  sessionid = openapi.Parameter(
-        #  'password', in_=openapi.IN_HEADER, description='User password',type=openapi.TYPE_STRING
-    #  )
-    #  @swagger_auto_schema(request_body=UserLoginSerializer, manual_parameters=[csrftoken, sessionid]) 
-
     @swagger_auto_schema(request_body=SwaggerLoginSerializer) 
     def post(self, request, format=None):
         if request.user.is_authenticated:
             return Response({"status": "already_authenticated."})
-        username = request.data.get('username')
-        company_code = request.data.get('company_code')
-        password = request.data.get('password')
-
-        if not username:
-            return Response({'error': "'username' field is missing."}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not company_code:
-            return Response({'error': "'company_code' field is missing."}, status=status.HTTP_400_BAD_REQUEST)
-
-        if not password:
-            return Response({'error': "'password' field is missing."}, status=status.HTTP_400_BAD_REQUEST)
-
-        user_code = username + "#" + company_code
-    
-        user = authenticate(username=user_code, password=password, request=request)
-        if user is not None:
-            login(request, user)
-            # 'auth.login' will add user session in request, and in some way the sessionid cookie will be sent in the Response
-            # I think that APIView is doing this automatically.
-
-            #  payload = {
-                #  'id': user.id,
-                #  "username": user.first_name
-            #  }
-
-            #  token = jwt.encode(payload, 'secret', algorithm='HS256').decode('utf-8')
-
-            #  response = Response()
-
-            #  response.set_cookie(key='jwt', value=token, httponly=True)
-            
-            return Response(UserSerializer(user).data)
+        serializer = SwaggerLoginSerializer(data=request.data)
+        if serializer.is_valid():
+            user_code = serializer.validated_data["username" ] + "#" + serializer.validated_data["company_code"]
+            user = authenticate(username=user_code, password=serializer.validated_data["password"], request=request)
+            if user is not None:
+                login(request, user)
+                return Response(UserSerializer(user).data)
+            else:
+                return Response({"status": "login_failed"}, status=status.HTTP_401_UNAUTHORIZED)
         else:
-            return Response({"status": "login_failed"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 #  @method_decorator(csrf_protect, name='dispatch')
 class LogoutView(APIView):

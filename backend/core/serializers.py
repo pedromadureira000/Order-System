@@ -4,8 +4,8 @@ from rest_framework import serializers
 from core.models import User
 from rolepermissions.roles import get_user_roles
 from rolepermissions.permissions import available_perm_status
+from core.validators import OnlyLettersNumbersDashAndUnderscoreUsernameValidator
 from .models import Company
-
 
 class CompanySerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,15 +15,12 @@ class CompanySerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    #  TODO add unique toguether constraitValidation
     company = serializers.SerializerMethodField()
-    roles = serializers.SerializerMethodField() # will call get_<field_name> by default
+    roles = serializers.SerializerMethodField()
     permissions = serializers.SerializerMethodField() 
     email = serializers.EmailField()
-    username = serializers.CharField()
-    company_code = serializers.IntegerField(write_only=True)
-    #  company = serializers.RelatedField(read_only=True)  <<< this not work well
-    #  company =  CompanySerializer(read_only=True) # <<< this not work as read_only field
+    username = serializers.CharField(validators=[OnlyLettersNumbersDashAndUnderscoreUsernameValidator])
+    company_code = serializers.CharField(write_only=True)
 
     class Meta:
         ref_name = "User Serializer" # fixes name collision with djoser when fetching urls with swagger
@@ -35,30 +32,31 @@ class UserSerializer(serializers.ModelSerializer):
             'company_code': {'write_only': True}
         }
 
-    def validate_company_code(self, value):
-        print('========================> : INSIDE Validate company_code' )
+    def validate(self, attrs):
         try: 
-            company = Company.objects.get(company_code=value)
-            #  company = Company.objects.filter(company_code=company_code).first()[0]  <=== get or none
-            return company
+            company = Company.objects.get(company_code=attrs['company_code'])
+            self.company = company
         except Company.DoesNotExist:
             raise serializers.ValidationError("Company does not exist.")
 
+        user = company.user_set.filter(username=attrs["username"]).first()
+        if user:
+            raise serializers.ValidationError("This username is already being used.")
+
+
+        return attrs
 
     def create(self, validated_data):  
-        print('========================> : INSIDE CREATE' )
-        username = self.validated_data['username']
-        company = self.validated_data['company_code']
-        #  company_code = self.validated_data['company_code']
+        #  print('========================> : INSIDE CREATE' )
+        username = validated_data['username']
         user = User(
-            first_name=self.validated_data.get('first_name', ''),
-            last_name=self.validated_data.get('last_name', '' ),
-            cpf=self.validated_data.get('cpf', '' ),
+            first_name=validated_data.get('first_name', ''),
+            last_name=validated_data.get('last_name', '' ),
+            cpf=validated_data.get('cpf', '' ),
             username=username,
-            company=company,
-            #  user_code=username + "#" + company_code,
-            user_code=username + "#" + str(company.company_code),
-            email=self.validated_data['email']
+            company=self.company,
+            user_code=username + "#" + self.company.company_code,
+            email=validated_data['email']
         )
         
         password = self.validated_data['password']
@@ -67,7 +65,7 @@ class UserSerializer(serializers.ModelSerializer):
         return user  # this need to be returned
 
     def update(self, instance, validated_data):
-        print('========================> : INSIDE UPDATE' )
+        #  print('========================> : INSIDE UPDATE' )
         instance.first_name = validated_data.get('first_name', instance.first_name)
         instance.last_name = validated_data.get('last_name', instance.last_name)
         instance.email = validated_data.get('email', instance.email)
