@@ -35,7 +35,6 @@ export const actions: ActionTree<UserState, RootState> = {
 	async checkAuthenticated({commit, state}: {commit: Commit, state: UserState}) {
 		try {
 			let data: any = await api.checkAuthenticated()
-			console.log(data)
 			commit("SET_USER", data);
 		} catch (error) {
 			console.log(error);

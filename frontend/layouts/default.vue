@@ -98,9 +98,10 @@
 import footer from '~/components/Footer.vue';
 import loginDialog from '~/components/login-dialog.vue'
 import sessionErrorDialog from '~/components/session-error-dialog.vue'
-import {adminPermissions, agentPermissions, adminAgentPermissions, itemPermissions, categoryPermissions, priceTablePermissions, orderPermissions} from '~/helpers/permissions'
-let itemsMenuPermissions = itemPermissions.concat(categoryPermissions).concat(priceTablePermissions)
-let usersMenuPermissions = adminPermissions.concat(agentPermissions).concat(adminAgentPermissions)
+import {adminAgent, admin, company, agent, item, category, priceTable, order} from '~/helpers/permissions'
+let usersMenuPermissions = adminAgent.concat(admin).concat(company).concat(agent)
+let itemsMenuPermissions = item.concat(category).concat(priceTable)
+let orderPermissions = order
 
 export default {
 	name: "default",

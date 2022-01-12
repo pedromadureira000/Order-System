@@ -12,7 +12,9 @@ const _3d9e2d22 = () => interopDefault(import('../pages/Admin/Item.vue' /* webpa
 const _66833e9c = () => interopDefault(import('../pages/Admin/Item/index.vue' /* webpackChunkName: "pages/Admin/Item/index" */))
 const _48ccfc8a = () => interopDefault(import('../pages/Admin/Item/item_category.vue' /* webpackChunkName: "pages/Admin/Item/item_category" */))
 const _08622438 = () => interopDefault(import('../pages/Admin/Item/price_table.vue' /* webpackChunkName: "pages/Admin/Item/price_table" */))
+const _e9c183b2 = () => interopDefault(import('../pages/Admin/User.vue' /* webpackChunkName: "pages/Admin/User" */))
 const _5d184b6a = () => interopDefault(import('../pages/Admin/User/index.vue' /* webpackChunkName: "pages/Admin/User/index" */))
+const _a7a00d16 = () => interopDefault(import('../pages/Admin/User/Company.vue' /* webpackChunkName: "pages/Admin/User/Company" */))
 const _55f3dafd = () => interopDefault(import('../pages/Client/Orders.vue' /* webpackChunkName: "pages/Client/Orders" */))
 const _3d7d6fc0 = () => interopDefault(import('../pages/Client/Orders/index.vue' /* webpackChunkName: "pages/Client/Orders/index" */))
 const _503cbed8 = () => interopDefault(import('../pages/Client/Orders/_order/index.vue' /* webpackChunkName: "pages/Client/Orders/_order/index" */))
@@ -64,8 +66,16 @@ export const routerOptions = {
     }]
   }, {
     path: "/Admin/User",
-    component: _5d184b6a,
-    name: "Admin-User"
+    component: _e9c183b2,
+    children: [{
+      path: "",
+      component: _5d184b6a,
+      name: "Admin-User"
+    }, {
+      path: "Company",
+      component: _a7a00d16,
+      name: "Admin-User-Company"
+    }]
   }, {
     path: "/Client/Orders",
     component: _55f3dafd,

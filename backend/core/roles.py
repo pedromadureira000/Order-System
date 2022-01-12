@@ -9,6 +9,10 @@ class Admin(AbstractUserRole):
         "update_admin_agent": True,
         "get_all_admin_agents": True,
          #AdminAgent
+        "create_company": True,
+        "get_companies": True,
+        "update_company": True,
+        "delete_company": True,
         "create_agent": True,
         "get_agents": True,
         "update_agent": True,

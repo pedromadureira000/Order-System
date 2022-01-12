@@ -15,7 +15,7 @@ from rolepermissions.checkers import has_permission, has_role
 from django.db import transaction
 import jwt
 from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
+#  from drf_yasg import openapi
 
 def index(request):
     return render(request, 'index.html')
@@ -40,15 +40,12 @@ class CreateUserView(APIView):
     @transaction.atomic  # if there is some error, it will be roolback all transaction
     def post(self, request):
         try:
-            if has_permission(request.user, 'create_admin_agent'):
+            if has_role(request.user, 'admin') or has_role(request.user, 'admin_agent') or has_permission(request.user, 'create_client'):
                 data = request.data
-                serializer =  UserSerializer(data=data)
+                serializer = UserSerializer(data=data, context={"request_user":request.user})
                 #  if serializer.is_valid(raise_exception=True):
                 if serializer.is_valid():
                     serializer.save()
-                    #  company_serialized = serializer.save()
-                    #  user_data = {**serializer.data, 'company': {**company_serialized.data}}
-                    #  return Response(user_data)
                     return Response(serializer.data)
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             return Response(status=status.HTTP_401_UNAUTHORIZED)

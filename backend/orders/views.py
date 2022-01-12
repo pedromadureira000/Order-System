@@ -5,13 +5,14 @@ from orders.serializers import ItemSerializer, ItemUpdateSerializer, \
     PriceTableSerializerGet, ItemPriceSerializerGet, ItemPriceSerializerPost
 from orders.models import Order, Item, ItemCategory, PriceTable, PriceItem
 from rest_framework.views import APIView
+from rolepermissions.checkers import has_role
 
 
 # --------------------------/ Item / --------------------------------------------
 
 class ItemApi(APIView):
     def get(self, request):
-        if request.user.all_api_permissions:
+        if has_role(request.user, "ERPClient"):
             try:
                 itens = Item.objects.all()
             except Item.DoesNotExist:
@@ -23,7 +24,7 @@ class ItemApi(APIView):
                         status=status.HTTP_401_UNAUTHORIZED)
 
     def post(self, request):
-        if request.user.all_api_permissions:
+        if has_role(request.user, "ERPClient"):
             if isinstance(request.data, dict):
                 item = Item()
                 serializer = ItemSerializer(item, data=request.data)
@@ -48,7 +49,7 @@ class ItemApi(APIView):
 class SpecificItemApi(APIView):
     def get(self, request, code):
 
-        if request.user.all_api_permissions:
+        if has_role(request.user, "ERPClient"):
             try:
                 item = Item.objects.get(item_code=code)
             except Item.DoesNotExist:
@@ -60,7 +61,7 @@ class SpecificItemApi(APIView):
                         status=status.HTTP_401_UNAUTHORIZED)
 
     def put(self, request, code):
-        if request.user.all_api_permissions:
+        if has_role(request.user, "ERPClient"):
             try:
                 item = Item.objects.get(item_code=code)
             except Item.DoesNotExist:
@@ -76,7 +77,7 @@ class SpecificItemApi(APIView):
                         status=status.HTTP_401_UNAUTHORIZED)
 
     def delete(self, request, code):
-        if request.user.all_api_permissions:
+        if has_role(request.user, "ERPClient"):
             try:
                 item = Item.objects.get(item_code=code)
             except Item.DoesNotExist:
@@ -99,7 +100,7 @@ class OrderApi(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericA
     serializer_class = OrderSerializer
 
     def get(self, request):
-        if request.user.all_api_permissions:
+        if has_role(request.user, "ERPClient"):
             if request.data.get('status'):
                 try:
                     orders = Order.objects.filter(status=request.data['status'])
@@ -115,7 +116,7 @@ class OrderApi(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericA
 
 class SpecificOrderApi(APIView):
     def get(self, request, code):
-        if request.user.all_api_permissions:
+        if has_role(request.user, "ERPClient"):
             try:
                 order = Order.objects.get(id=code)
             except Order.DoesNotExist:
@@ -179,7 +180,7 @@ class PriceTableApi(APIView):
 
 class ItemPriceApi(APIView):
     def get(self, request):
-        if request.user.all_api_permissions:
+        if has_role(request.user, "ERPClient"):
             item_code = request.data.get('item_code')
             table_code = request.data.get('table_code')
             if not item_code or not table_code:
@@ -251,7 +252,7 @@ class ItemPriceApi(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request):
-        if request.user.all_api_permissions:
+        if has_role(request.user, "ERPClient"):
             item_code = request.data.get('item_code')
             table_code = request.data.get('table_code')
             if not item_code or not table_code:

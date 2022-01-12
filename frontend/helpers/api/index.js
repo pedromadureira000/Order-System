@@ -76,19 +76,31 @@ export default {
 	},
 
 	async createUser(payload){
-		return await axios({ 
-		method: "post",
-		url: "/api/user/createuser",
-		data:{
+    let data_body = {
       username: payload.username,
       company_code: payload.company_code,
 			first_name: payload.first_name,
 			last_name: payload.last_name,
 			email: payload.email,
 			cpf: payload.cpf,
-			password: payload.password 
+			password: payload.password,
+      role: payload.role,
+      agent_permissions: []
 		}
-			}).then((request) => {
+    if (payload.role === "agent"){
+      let permissions = []
+      for (const permission in payload.agentPermissions){
+        if (payload.agentPermissions[permission] === true){
+          permissions.push(permission)
+        }
+      }
+      console.log(">>>>", permissions)
+      data_body["agent_permissions"] =  permissions
+    }
+		return await axios({ 
+		method: "post",
+		url: "/api/user/createuser",
+		data: data_body}).then((request) => {
 					return request.data 
 				})
 	},

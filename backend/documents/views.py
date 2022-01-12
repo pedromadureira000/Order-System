@@ -2,6 +2,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rolepermissions.checkers import has_role
 
 from documents.serializers import BoletoSerializer
 from documents.utils import make_boleto
@@ -50,7 +51,7 @@ post_body = {
 @api_view(['POST', ])
 @permission_classes([IsAuthenticated])
 def gen_boleto(request):
-    if request.user.all_api_permissions:
+    if has_role(request.user, "ERPClient"):
         serializer = BoletoSerializer(data=request.data)
         if serializer.is_valid():
             if serializer.validated_data["comando"] == 'boleto':

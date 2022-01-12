@@ -11,17 +11,15 @@
 </template>
 
 <script>
-  import {item, priceTable, category } from '~/helpers/permissions'
+  import {admin, adminAgent, agent, company} from '~/helpers/permissions'
+  let usersSubMenuPermissions = adminAgent.concat(admin).concat(agent)
   export default {
     middleware: ["authenticated", "admin"],
     data: () => ({ 
-      value: 'user',
+      value: 'User',
       allMenuItems: [
-        {"permissions": item, "title": "Item", "icon":"mdi-cart-variant", "to": "/admin/item"},
-        {"permissions": category, "title": "Item Category", "icon":"mdi-format-list-bulleted-type", "to": "/admin/item/item_category"},
-        {"permissions": priceTable, "title": "Price table", "icon":"mdi-table-large", "to": "/admin/item/price_table"},
-        /** {"permissions": orderPermissions, "title": "Orders", "icon":"mdi-clipboard-check-multiple", "to": "/client/orders"}, */
-        /** {"permission": "client", "title": "Reports", "icon":"mdi-clipboard-list-outline", "to": "/reports"}, */
+        {"permissions": usersSubMenuPermissions, "title": "User", "icon":"mdi-cart-variant", "to": "/admin/user"},
+        {"permissions": company, "title": "Company", "icon":"mdi-format-list-bulleted-type", "to": "/admin/user/company"},
       ],
     }),
 

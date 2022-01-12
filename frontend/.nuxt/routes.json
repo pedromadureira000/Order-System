@@ -57,11 +57,26 @@
     "_name": "_3d9e2d22"
   },
   {
-    "name": "Admin-User",
     "path": "/Admin/User",
-    "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/Admin/User/index.vue",
-    "chunkName": "pages/Admin/User/index",
-    "_name": "_5d184b6a"
+    "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/Admin/User.vue",
+    "chunkName": "pages/Admin/User",
+    "children": [
+      {
+        "name": "Admin-User",
+        "path": "",
+        "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/Admin/User/index.vue",
+        "chunkName": "pages/Admin/User/index",
+        "_name": "_5d184b6a"
+      },
+      {
+        "name": "Admin-User-Company",
+        "path": "Company",
+        "component": "/home/phsw/Projects/phsw-ERP/frontend/pages/Admin/User/Company.vue",
+        "chunkName": "pages/Admin/User/Company",
+        "_name": "_a7a00d16"
+      }
+    ],
+    "_name": "_e9c183b2"
   },
   {
     "path": "/Client/Orders",

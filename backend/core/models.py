@@ -26,7 +26,7 @@ class UserManager(BaseUserManager):
         # managers are by definition working on the real model.
         GlobalUserModel = apps.get_model(self.model._meta.app_label, self.model._meta.object_name)
         username = GlobalUserModel.normalize_username(username)
-        try: 
+        try:
             company_object = Company.objects.get(pk=company)
         except:
            raise ValueError('This company do not exist.') 

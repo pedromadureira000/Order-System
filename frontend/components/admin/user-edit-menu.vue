@@ -43,7 +43,7 @@ export default {
           async click(){
             let data = await this.$store.dispatch(
               'auth/deleteUserByAdmin', 
-              {username: this.user.username, company_code: this.user.company.company_code}
+              {username: this.user.username, company_code: this.user.company_code}
             )
 						if (data === "ok"){
 							this.$emit('user-deleted')

@@ -77,46 +77,6 @@
           @blur="$v.password_confirm.$touch()"
         />
       </div>
-      <h4>User role</h4>
-      <v-container
-        class="px-0"
-        style="display: flex;"
-        fluid
-      >
-        <v-radio-group v-model="userRole" style="width: 25%;">
-          <v-radio
-            v-if="isAdmin() || isAdminAgent() || haveCreateClientPermissions()"
-            label="Client"
-            value="client"
-          ></v-radio>
-          <v-radio
-            v-if="isAdmin() || isAdminAgent()"
-            label="Agent"
-            value="agent"
-          ></v-radio>
-          <v-radio
-            v-if="isAdmin()"
-            label="Admin Agent"
-            value="admin_agent"
-          ></v-radio>
-        </v-radio-group>
-        <v-container
-          class="px-0"
-          fluid
-          v-if="userRole === 'agent'" 
-          style="width: 85%; display: flex; justify-content: space-between;"
-        >
-          <v-row >
-            <v-checkbox 
-              v-for="(value, perm) in agentPermissions"
-              :key="perm"
-              v-model="agentPermissions[perm]"
-              :label="perm"
-              style="margin-right: 27px;"
-            ></v-checkbox>
-          </v-row>
-        </v-container>
-      </v-container>
       <v-btn
         color="primary"
         type="submit"
@@ -136,6 +96,13 @@
       <template v-slot:top>
       </template>
       <template v-slot:item.actions="{ item }">
+        <!-- <v-icon -->
+          <!-- small -->
+          <!-- class="mr-2" -->
+          <!-- @click="test(item)" -->
+        <!-- > -->
+          <!-- mdi-pencil -->
+        <!-- </v-icon> -->
         <user-edit-menu :user="item" @user-deleted="deleteUser(item)" />
       </template>
     </v-data-table>
@@ -153,7 +120,7 @@ import {
   integer
 } from "vuelidate/lib/validators";
 import { validationMixin } from "vuelidate";
- 
+
 export default {
   middleware: ["authenticated", "admin"],
   components: {
@@ -172,25 +139,6 @@ export default {
       password: null,
       password_confirm: null,
       loading: false,
-      userRole: "client",
-      agentPermissions: {
-          create_client: false,
-          get_clients: false,
-          update_client: false,
-          delete_client: false,
-          create_item: false,
-          get_items: false,
-          update_item: false,
-          delete_item: false,
-          create_item_category: false,
-          get_item_category: false,
-          update_item_category: false,
-          delete_item_category: false,
-          create_price_table: false,
-          get_price_tables: false,
-          update_price_table: false,
-          delete_price_table: false
-      },
       users: [],
       headers: [
         { text: 'Username', value: 'username' },
@@ -273,12 +221,9 @@ export default {
           email: this.email,
           cpf: this.cpf,
           password: this.password,
-          role: this.userRole,
-          agentPermissions: this.agentPermissions
         });
         if (data) {
-          this.users.push({username: data.username, complete_name: `${data.first_name} ${data.last_name}`, 
-            email: data.email, cpf: data.cpf, company: data.company.name, company_code: data.company.company_code})
+          this.users.push(data);
         }
         this.loading = false;
       }
@@ -287,18 +232,6 @@ export default {
       this.users = this.users.filter((user) => user.username + "#" + userToDelete.company_code != 
         userToDelete.username + "#" + userToDelete.company_code);
     },
-    haveCreateClientPermissions(){
-			let user = this.$store.state.auth.currentUser;
-      if (user.permissions.includes("create_client" )){return true}
-    },
-    isAdmin(){
-			let user = this.$store.state.auth.currentUser;
-      if (user.roles.includes("admin")) {return true}
-    },
-    isAdminAgent(){
-			let user = this.$store.state.auth.currentUser;
-      if (user.roles.includes("admin_agent")) {return true}
-    }
   },
 
   computed: {

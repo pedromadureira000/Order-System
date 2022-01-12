@@ -1,6 +1,7 @@
 from .models import Order, Item, ItemCategory, OrderedItem, PriceTable
 from django.db.models import Q, Value, Prefetch
 from django.db.models.functions import Concat
+from rolepermissions.checkers import has_role
 
 # ----------------------------/ Orders /-----------------------------
 from core.models import User
@@ -13,7 +14,7 @@ def get_orders(request):
             if term.lower() in status[1].lower():
                 return Order.objects.filter(status=status[0]).all()
         fields = Concat('user__first_name', Value(' '), 'user__last_name')  # Value is needed fo the blank space ' '
-        if request.user.is_admin_agent:    # <<<<<<<<<<
+        if has_role(request.user, "ERPClient"):
             return Order.objects.annotate(full_name=fields).order_by('-order_date').filter(
                 Q(status=term) | Q(company__name__icontains=term) |
                 Q(order_amount__icontains=term) | Q(user__first_name__icontains=term) | Q(user__last_name__icontains=term)
@@ -24,7 +25,7 @@ def get_orders(request):
             Q(order_amount__icontains=term) | Q(user__first_name__icontains=term) | Q(user__last_name__icontains=term)
             | Q(full_name__icontains=term), user=request.user).select_related('company')
 
-    if request.user.is_admin_agent:     # <<<<<<<<<<
+    if has_role(request.user, "ERPClient"):
         return Order.objects.order_by('-order_date').filter(company=request.user.company_id).select_related(
             'company', 'user')
     return Order.objects.order_by('-order_date').filter(user=request.user).select_related(
