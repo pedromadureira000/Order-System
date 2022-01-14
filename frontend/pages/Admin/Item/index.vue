@@ -1,54 +1,61 @@
 <template>
   <div class="ma-3">
     <h3>Create User</h3>
-    <form @submit.prevent="createUser">
+    <form @submit.prevent="createItem">
       <div class="mb-3">
         <v-text-field
-          label="First Name"
-          v-model="first_name"
-          :error-messages="firstNameErrors"
+          label="Name"
+          v-model="name"
           required
-          @blur="$v.first_name.$touch()"
         />
       </div>
       <div class="mb-3">
         <v-text-field
-          label="Last Name"
-          v-model="last_name"
-          :error-messages="lastNameErrors"
+          label="Item code"
+          v-model="item_code"
           required
-          @blur="$v.last_name.$touch()"
         />
       </div>
       <div class="mb-3">
         <v-text-field
-          label="Email"
-          type="email"
-          v-model="email"
-          :error-messages="emailErrors"
+          label="Description"
+          v-model="description"
           required
-          @blur="$v.email.$touch()"
         />
       </div>
       <div class="mb-3">
         <v-text-field
-          type="password"
-          label="Password"
-          v-model="password"
-          :error-messages="passwordErrors"
+          label="Unit"
+          v-model="unit"
           required
-          @blur="$v.password.$touch()"
         />
       </div>
       <div class="mb-3">
         <v-text-field
-          type="password"
-          label="Password Confirm"
-          v-model="password_confirm"
-          :error-messages="passConfirmErrors"
+          label="Barcode"
+          v-model="barcode"
           required
-          @blur="$v.password_confirm.$touch()"
         />
+      </div>
+      <div class="mb-3">
+        <h5>Item Category</h5>
+        <v-radio-group v-model="category" style="width: 25%;">
+          <v-radio
+            v-for="category in categories"
+            :key="category.id"
+            :label="category.verbose_name"
+            :value="category.id"
+          ></v-radio>
+        </v-radio-group>
+      </div>
+      <div class="mb-3">
+        <v-checkbox 
+          v-model="active"
+          label="Active"
+        ></v-checkbox>
+      </div>
+      <div class="mb-3">
+        image_
       </div>
       <v-btn
         color="primary"
@@ -60,168 +67,145 @@
     </form>
 
     <h3 class="mt-6">Edit User</h3>
-    <v-list dense>
-      <v-list-item v-for="user in users" :key="user.id">
-        <template v-slot:default>
-          <v-avatar size="45px" class="mr-9">
-            <img src="~assets/images/default_user.jpg" />
-          </v-avatar>
-          <v-list-item-content>
-            <v-list-item-title
-              >{{ user.first_name }} {{ user.last_name }}</v-list-item-title
-            >
-          </v-list-item-content>
-          <v-list-item-content>
-            <v-list-item-subtitle>{{ user.email }}</v-list-item-subtitle>
-          </v-list-item-content>
-          <v-list-item-action>
-            <user-edit-menu :user="user" @user-deleted="deleteUser(user)" />
-          </v-list-item-action>
-          <v-list-item-content> </v-list-item-content>
-        </template>
-      </v-list-item>
-    </v-list>
+    <v-data-table
+      :headers="headers"
+      :items="items"
+      :items-per-page="10"
+      class="elevation-1"
+    >
+      <template v-slot:item.actions="{ item }">
+        <user-edit-menu :user="item" @user-deleted="deleteUser(item)" />
+      </template>
+    </v-data-table>
   </div>
 </template>
 
 <script>
-import {
-  required,
-  sameAs,
-  minLength,
-  maxLength,
-  email,
-} from "vuelidate/lib/validators";
-import { validationMixin } from "vuelidate";
+/** import { */
+  /** required, */
+  /** maxLength, */
+  /** alphaNum, */
+  /** integer */
+/** } from "vuelidate/lib/validators"; */
+/** import { validationMixin } from "vuelidate"; */
 
 export default {
   middleware: ["authenticated", "admin"],
   components: {
     "user-edit-menu": require("@/components/admin/user-edit-menu.vue").default,
   },
-  mixins: [validationMixin],
+  /** mixins: [validationMixin], */
 
   data() {
     return {
-      first_name: null,
-      last_name: null,
-      email: null,
-      password: null,
-      password_confirm: null,
+      name: null,
+      item_code: null,
+      description: null,
+      category: "default",
+      categories: [],
+      unit: null,
+      barcode: null,
+      active: true,
+      image: null,
       loading: false,
-      users: [],
+      items: [],
+      headers: [
+        { text: 'Image', value: 'image' },
+        { text: 'Name', value: 'name' },
+        { text: 'Item code', value: 'item_code' },
+        { text: 'Description', value: 'description' },
+        { text: 'Category', value: 'category' },
+        { text: 'Unit', value: 'unit' },
+        { text: 'Barcode', value: 'barcode' },
+        { text: 'Active', value: 'active' },
+        { text: 'Actions', value: 'actions' },
+      ]
     };
   },
 
   async fetch() {
-    let users = await this.$store.dispatch("auth/fetchUsersByAdmin");
-    this.users.push(...users);
+    let items = await this.$store.dispatch("orders/fetchItems");
+    /** for (const item_index in items){ */
+      /** let item = items[item_index] */
+      /** this.items.push({name: item.name, item_code: item.item_code, description: item.description, */
+        /** category: item.category, unit: item.unit, barcode: item.barcode, active: item.active, image: item.image}) */
+    /** } */
+    for (const item_index in items){
+      let item = items[item_index]
+      this.items.push(item)
+    }
+    this.categories = await this.$store.dispatch("orders/fetchCategories"); 
+    console.log(this.categories)
   },
 
-  validations: {
-    first_name: {
-      required,
-      maxLength: maxLength(10),
-    },
-    last_name: {
-      required,
-      maxLength: maxLength(10),
-    },
-    email: {
-      required,
-      email,
-    },
-    password: {
-      required,
-      minLength: minLength(6),
-      maxLength: maxLength(20),
-    },
-    password_confirm: {
-      password_confirm: sameAs("password"),
-    },
-    userInfoGroup: [
-      "first_name",
-      "last_name",
-      "email",
-      "password",
-      "password_confirm",
-    ],
-  },
+  /** validations: { */
+    /** name: {  */
+      /** required,  */
+      /** alphaNum,  */
+      /** maxLength: maxLength(12) */
+    /** }, */
+    /** company_code: { */
+      /** required,  */
+      /** integer */
+    /** }, */
+    /** companyInfoGroup: [ */
+      /** "name", */
+      /** "company_code", */
+    /** ], */
+  /** }, */
 
   methods: {
-    async createUser() {
-      this.$v.userInfoGroup.$touch();
-      if (this.$v.userInfoGroup.$invalid) {
-        this.$store.dispatch(
-          "setAlert",
-          { message: "Please fill the form correctly.", alertType: "error" },
-          { root: true }
-        );
-      } else {
+    async createItem() {
+      /** this.$v.companyInfoGroup.$touch(); */
+      /** if (this.$v.companyInfoGroup.$invalid) { */
+        /** this.$store.dispatch("setAlert", { message: "Please fill the form correctly.", alertType: "error" }, { root: true }) */
+      /** } else { */
         this.loading = true;
-        let data = await this.$store.dispatch("auth/createUser", {
-          first_name: this.first_name,
-          last_name: this.last_name,
-          email: this.email,
-          password: this.password,
+        let data = await this.$store.dispatch("orders/createItem", {
+          name: this.name, 
+          item_code: this.item_code,
+          description: this.description,
+          category: this.category, 
+          unit: this.unit, 
+          barcode: this.barcode, 
+          active: this.active,
+          image: this.image
         });
         if (data) {
-          this.users.push(data);
+          this.items.push(data);
         }
         this.loading = false;
-      }
+      /** } */
     },
-    deleteUser(userToDelete) {
-      this.users = this.users.filter((user) => user != userToDelete);
+    deleteItem(itemToDelete) {
+      this.items = this.items.filter((item) => item.item_code != itemToDelete.item_code);
     },
   },
 
-  computed: {
-    firstNameErrors() {
-      const errors = [];
-      if (!this.$v.first_name.$dirty) return errors;
-      !this.$v.first_name.required && errors.push("First name is required.");
-      !this.$v.first_name.maxLength &&
-        errors.push("This field must have up to 10 characters.");
-      return errors;
-    },
-    lastNameErrors() {
-      const errors = [];
-      if (!this.$v.last_name.$dirty) return errors;
-      !this.$v.last_name.required && errors.push("Last name is required.");
-      !this.$v.last_name.maxLength &&
-        errors.push("This field must have up to 10 characters.");
-      return errors;
-    },
-    emailErrors() {
-      const errors = [];
-      if (!this.$v.email.$dirty) return errors;
-      !this.$v.email.email && errors.push("Must be valid e-mail");
-      !this.$v.email.required && errors.push("E-mail is required");
-      return errors;
-    },
-    passwordErrors() {
-      const errors = [];
-      if (!this.$v.password.$dirty) return errors;
-      !this.$v.password.required && errors.push("Password is required.");
-      !this.$v.password.maxLength &&
-        errors.push("This field must have up to 20 characters.");
-      !this.$v.password.minLength &&
-        errors.push("This field must have at least 6 characters.");
-      this.password === this.current_password &&
-        errors.push(
-          "The password should not be equal to the current password."
-        );
-      return errors;
-    },
-    passConfirmErrors() {
-      const errors = [];
-      if (!this.$v.password_confirm.$dirty) return errors;
-      !this.$v.password_confirm.password_confirm &&
-        errors.push("Password must be iqual.");
-      return errors;
-    },
-  },
+  /** computed: { */
+    /** nameErrors() { */
+      /** const errors = []; */
+      /** if (!this.$v.name.$dirty) return errors; */
+      /** !this.$v.name.alphaNum && errors.push("Must have only alphanumeric characters."); */
+      /** !this.$v.name.required && errors.push("Name is required"); */
+      /** !this.$v.name.maxLength && errors.push("This field must have up to 12 characters."); */
+      /** return errors; */
+    /** }, */
+    /** companyCodeErrors() { */
+      /** const errors = []; */
+      /** if (!this.$v.company_code.$dirty) return errors; */
+      /** !this.$v.company_code.integer && errors.push("Must be a integer"); */
+      /** !this.$v.company_code.required && errors.push("Company code required"); */
+      /** return errors; */
+    /** }, */
+    /** cpfErrors() {  */
+      /** const errors = []; */
+      /** if (!this.$v.cpf.$dirty) return errors; */
+      /** !this.$v.cpf.required && errors.push("CPF is required."); */
+      /** !this.$v.cpf.maxLength && errors.push("This field must have up to 14 characters."); */
+      /** return errors; */
+    /** }, */
+  /** }, */
 };
 </script>
 <style scoped>

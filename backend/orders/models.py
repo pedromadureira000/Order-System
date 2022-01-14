@@ -4,12 +4,12 @@ from .utils import image_resize
 
 
 class Item(models.Model):
+    name = models.CharField(max_length=50, verbose_name="Nome")
     item_code = models.CharField(max_length=15, unique=True)
-    category = models.ForeignKey('ItemCategory', on_delete=models.CASCADE, verbose_name="Categoria")
-    verbose_name = models.CharField(max_length=50, verbose_name="Nome")
     description = models.TextField(default="sem descrição", verbose_name="Descrição")
+    category = models.ForeignKey('ItemCategory', on_delete=models.CASCADE, verbose_name="Categoria")
     unit = models.CharField(max_length=10, verbose_name="Unidade")
-    bar_code = models.CharField(max_length=13, verbose_name="Código de barras")
+    barcode = models.CharField(max_length=13, verbose_name="Código de barras")
     active = models.BooleanField(verbose_name='Ativado')
     image = models.ImageField(default="images/items/defaultimage.jpeg", upload_to='images/items/')
 
@@ -38,7 +38,7 @@ class PriceItem(models.Model):
     class Meta:
         unique_together = (('pricetable', 'item'),)
     pricetable = models.ForeignKey('PriceTable', on_delete=models.CASCADE, related_name='price_items', verbose_name="Tabela de preço")
-    item = models.ForeignKey('Item', on_delete=models.CASCADE, verbose_name="Item")
+    item = models.ForeignKey('Item', on_delete=models.CASCADE)
     price_unit = models.DecimalField(max_digits=11, decimal_places=2, verbose_name="Preço unitario")
     date = models.DateTimeField(auto_now_add=True, verbose_name="Data")
 
@@ -46,6 +46,7 @@ class PriceItem(models.Model):
 class PriceTable(models.Model):
     table_code = models.CharField(max_length=7, unique=True)
     verbose_name = models.CharField(max_length=50, verbose_name="Nome")
+    description = models.TextField(default="sem descrição", verbose_name="Descrição")
     items = models.ManyToManyField(Item, through='PriceItem')
 
     def __str__(self):

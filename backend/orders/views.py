@@ -1,18 +1,18 @@
 from rest_framework import status, mixins, generics
 from rest_framework.response import Response
 from orders.serializers import ItemSerializer, ItemUpdateSerializer, \
-    BulkItemCreateSerializer, CategorySerializer, OrderSerializer, PriceTableSerializerPost, \
-    PriceTableSerializerGet, ItemPriceSerializerGet, ItemPriceSerializerPost
+    BulkItemCreateSerializer, CategorySerializer, OrderSerializer, PriceTableSerializer, PriceItemSerializer
 from orders.models import Order, Item, ItemCategory, PriceTable, PriceItem
 from rest_framework.views import APIView
-from rolepermissions.checkers import has_role
+from rolepermissions.checkers import has_permission, has_role
+from drf_yasg.utils import swagger_auto_schema
 
 
 # --------------------------/ Item / --------------------------------------------
 
 class ItemApi(APIView):
     def get(self, request):
-        if has_role(request.user, "ERPClient"):
+        if has_permission(request.user, 'get_items'):
             try:
                 itens = Item.objects.all()
             except Item.DoesNotExist:
@@ -20,11 +20,11 @@ class ItemApi(APIView):
             serializer = ItemSerializer(itens, many=True)
             return Response(serializer.data)
 
-        return Response({'response': 'Nao possui permissoes para acessar esse recurso.'},
+        return Response({"error": "You don't have permissions to access this resource."},
                         status=status.HTTP_401_UNAUTHORIZED)
 
     def post(self, request):
-        if has_role(request.user, "ERPClient"):
+        if has_permission(request.user, 'create_item'):
             if isinstance(request.data, dict):
                 item = Item()
                 serializer = ItemSerializer(item, data=request.data)
@@ -42,14 +42,14 @@ class ItemApi(APIView):
                     return Response(data=data)
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({'response': 'Nao possui permissoes para acessar esse recurso.'},
+        return Response({"error": "You don't have permissions to access this resource."},
                         status=status.HTTP_401_UNAUTHORIZED)
 
 
 class SpecificItemApi(APIView):
     def get(self, request, code):
 
-        if has_role(request.user, "ERPClient"):
+      if has_permission(request.user, 'create_item'):
             try:
                 item = Item.objects.get(item_code=code)
             except Item.DoesNotExist:
@@ -57,11 +57,11 @@ class SpecificItemApi(APIView):
             serializer = ItemSerializer(item)
             return Response(serializer.data)
 
-        return Response({'response': 'Nao possui permissoes para acessar esse recurso.'},
+      return Response({"error": "You don't have permissions to access this resource."},
                         status=status.HTTP_401_UNAUTHORIZED)
 
     def put(self, request, code):
-        if has_role(request.user, "ERPClient"):
+        if has_permission(request.user, 'create_item'):
             try:
                 item = Item.objects.get(item_code=code)
             except Item.DoesNotExist:
@@ -73,11 +73,11 @@ class SpecificItemApi(APIView):
                 data['success'] = 'update successful'
                 return Response(data=data)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'response': 'Nao possui permissoes para acessar esse recurso.'},
+        return Response({"error": "You don't have permissions to access this resource."},
                         status=status.HTTP_401_UNAUTHORIZED)
 
     def delete(self, request, code):
-        if has_role(request.user, "ERPClient"):
+      if has_permission(request.user, 'create_item'):
             try:
                 item = Item.objects.get(item_code=code)
             except Item.DoesNotExist:
@@ -89,7 +89,7 @@ class SpecificItemApi(APIView):
             else:
                 data['failure'] = 'delete failed'
             return Response(data=data)
-        return Response({'response': 'Nao possui permissoes para acessar esse recurso.'},
+      return Response({"error": "You don't have permissions to access this resource."},
                         status=status.HTTP_401_UNAUTHORIZED)
 
 
@@ -100,7 +100,7 @@ class OrderApi(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericA
     serializer_class = OrderSerializer
 
     def get(self, request):
-        if has_role(request.user, "ERPClient"):
+      if has_permission(request.user, 'create_item'):
             if request.data.get('status'):
                 try:
                     orders = Order.objects.filter(status=request.data['status'])
@@ -110,20 +110,20 @@ class OrderApi(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericA
                 return Response(serializer.data, status=status.HTTP_200_OK)
             return Response({'response': "Parameter 'status' is missing."},
                             status=status.HTTP_400_BAD_REQUEST)
-        return Response({'response': 'Nao possui permissoes para acessar esse recurso.'},
+      return Response({"error": "You don't have permissions to access this resource."},
                         status=status.HTTP_401_UNAUTHORIZED)
 
 
 class SpecificOrderApi(APIView):
     def get(self, request, code):
-        if has_role(request.user, "ERPClient"):
+      if has_permission(request.user, 'create_item'):
             try:
                 order = Order.objects.get(id=code)
             except Order.DoesNotExist:
                 return Response(status=status.HTTP_404_NOT_FOUND)
             serializer = OrderSerializer(order)
             return Response(serializer.data)
-        return Response({'response': 'Nao possui permissoes para acessar esse recurso.'},
+      return Response({"error": "You don't have permissions to access this resource."},
                         status=status.HTTP_401_UNAUTHORIZED)
 
 
@@ -140,8 +140,7 @@ class CategoryApi(mixins.ListModelMixin, mixins.CreateModelMixin, generics.Gener
         return self.create(request, *args, **kwargs)
 
 
-class SpecificCategoryApi(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin,
-                          generics.GenericAPIView):
+class SpecificCategoryApi(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.GenericAPIView):
     serializer_class = CategorySerializer
     queryset = ItemCategory.objects.all()
     lookup_url_kwarg = 'code'
@@ -159,28 +158,71 @@ class SpecificCategoryApi(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mi
 # -----------------------------------/ Price Table / ----------------------
 
 class PriceTableApi(APIView):
-    # create
     def get(self, request):
-        if request.data.get('code'):
-            tables = PriceTable.objects.filter(table_code=request.data['code'])
-            serializer = PriceTableSerializerGet(tables, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response({"response": "The 'code' field was not informed."}, status=status.HTTP_400_BAD_REQUEST)
+        pricetables = PriceTable.objects.all()
+        serializer = PriceTableSerializer(data=pricetables, many=True)
+        serializer.is_valid() # i can't access serializer.data before access is_valid()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @swagger_auto_schema(request_body=PriceTableSerializer) 
     def post(self, request):
-        serializer = PriceTableSerializerPost(data=request.data)
+        serializer = PriceTableSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @swagger_auto_schema(request_body=PriceTableSerializer) 
+    def put(self, request):
+        table_code = request.data.get("table_code")
+        if not table_code:
+            return Response({"error": "'table_code' field is missing."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            instance = PriceTable.objects.get(table_code=table_code)
+            serializer = PriceTableSerializer(instance, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except PriceTable.DoesNotExist:
+            return Response({"error": "Price table has not found."}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as error:
+            print(error)
+            return Response({"error": "Something went wrong when trying to update price table."}, status=status.HTTP_400_BAD_REQUEST)
 
-# -----------------------------------/ ItemPrice /-----------------------------
+    @swagger_auto_schema(request_body=PriceTableSerializer) 
+    def delete(self, request):
+        table_code = request.data.get("table_code")
+        if not table_code:
+            return Response({"error": "'table_code' field is missing."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            instance = PriceTable.objects.get(table_code=table_code)
+            instance.delete()
+            return Response({"Successfully deleted"}, status=status.HTTP_200_OK)
+        except PriceTable.DoesNotExist:
+            return Response({"error": "Price table has not found."}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as error:
+            print(error)
+            return Response({"error": "Something went wrong when trying to delete price table."}, status=status.HTTP_400_BAD_REQUEST)
+    
+#  class SpecificPriceTableApi(APIView):
+    #  def get(self, request, code):
+        #  table = PriceTable.objects.filter(table_code=code)
+        #  serializer = PriceTableSerializerGet(tables, many=True)
+        #  return Response(serializer.data, status=status.HTTP_200_OK)
 
+    #  def post(self, request, code):
+        #  serializer = PriceTableSerializerPost()
+        #  if serializer.is_valid():
+            #  serializer.save()
+            #  return Response(serializer.data, status=status.HTTP_201_CREATED)
+        #  return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class ItemPriceApi(APIView):
+# -----------------------------------/ PriceItem /-----------------------------
+
+class PriceItemApi(APIView):
     def get(self, request):
-        if has_role(request.user, "ERPClient"):
+      if has_permission(request.user, 'create_item'):
             item_code = request.data.get('item_code')
             table_code = request.data.get('table_code')
             if not item_code or not table_code:
@@ -194,10 +236,10 @@ class ItemPriceApi(APIView):
             if not priceitem:
                 return Response({"response": "Item preco nao encontrado."},
                                 status=status.HTTP_404_NOT_FOUND)
-            serializer = ItemPriceSerializerGet(priceitem)
+            serializer = PriceItemSerializer(priceitem)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
-        return Response({'response': 'Nao possui permissoes para acessar esse recurso.'},
+      return Response({"error": "You don't have permissions to access this resource."},
                         status=status.HTTP_401_UNAUTHORIZED)
 
     def post(self, request):
@@ -218,7 +260,7 @@ class ItemPriceApi(APIView):
         copy_data['item'] = item.pk
         copy_data['pricetable'] = pricetable.pk
 
-        serializer = ItemPriceSerializerPost(data=copy_data)
+        serializer = PriceItemSerializer(data=copy_data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -245,14 +287,14 @@ class ItemPriceApi(APIView):
             instance = PriceItem.objects.get(item=copy_data['item'], pricetable=copy_data['pricetable'])
         except PriceItem.DoesNotExist:
             return Response({"response": "O PriceItem imformado nao existe."}, status=status.HTTP_404_NOT_FOUND)
-        serializer = ItemPriceSerializerPost(instance, data=copy_data)
+        serializer = PriceItemSerializer(instance, data=copy_data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request):
-        if has_role(request.user, "ERPClient"):
+      if has_permission(request.user, 'create_item'):
             item_code = request.data.get('item_code')
             table_code = request.data.get('table_code')
             if not item_code or not table_code:
@@ -274,5 +316,5 @@ class ItemPriceApi(APIView):
                 data['failure'] = 'delete failed'
             return Response(data, status=status.HTTP_200_OK)
 
-        return Response({'response': 'Nao possui permissoes para acessar esse recurso.'},
+      return Response({"error": "You don't have permissions to access this resource."},
                         status=status.HTTP_401_UNAUTHORIZED)

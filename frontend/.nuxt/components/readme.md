@@ -10,4 +10,5 @@ You can directly use them in pages and other components without the need to impo
 - `<Welcome>` | `<welcome>` (components/Welcome.vue)
 - `<LoginDialog>` | `<login-dialog>` (components/login-dialog.vue)
 - `<SessionErrorDialog>` | `<session-error-dialog>` (components/session-error-dialog.vue)
+- `<AdminPricetableEditMenu>` | `<admin-pricetable-edit-menu>` (components/admin/pricetable-edit-menu.vue)
 - `<AdminUserEditMenu>` | `<admin-user-edit-menu>` (components/admin/user-edit-menu.vue)

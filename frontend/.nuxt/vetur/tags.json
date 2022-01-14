@@ -11,6 +11,9 @@
   "SessionErrorDialog": {
     "description": "Auto imported from components/session-error-dialog.vue"
   },
+  "AdminPricetableEditMenu": {
+    "description": "Auto imported from components/admin/pricetable-edit-menu.vue"
+  },
   "AdminUserEditMenu": {
     "description": "Auto imported from components/admin/user-edit-menu.vue"
   }

@@ -2,7 +2,7 @@ from django.urls import path
 from django.urls.conf import include
 #  from rest_framework.authtoken.views import obtain_auth_token
 from core.views import (
-    CheckAuthenticatedView, DeleteAccountView, GetAllUsers, updateUserProfile, UpdateUserPassword, CreateUserView, LoginView, LogoutView, GetCSRFToken
+    CheckAuthenticatedView, CreateCompanyView, DeleteAccountView, GetAllUsers, GetCompanies, updateUserProfile, UpdateUserPassword, CreateUserView, LoginView, LogoutView, GetCSRFToken
 )
 
 urlpatterns = [
@@ -17,6 +17,8 @@ urlpatterns = [
     #  path('delete', DeleteAccountView.as_view(), name='deleteAccount'),
     path('delete/<str:user_code>', DeleteAccountView.as_view(), name='deleteAccount'),
     path('getusers', GetAllUsers.as_view(), name='deleteAccount'),
+    path('getcompanies', GetCompanies.as_view(), name='deleteAccount'),
+    path('createcompany', CreateCompanyView.as_view()),
     #  path('tokenauth/', include('djoser.urls.authtoken')),
     #  path('gettoken', obtain_auth_token, name='gettoken'),
 ]

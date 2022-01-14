@@ -2,6 +2,7 @@ export { default as Footer } from '../../components/Footer.vue'
 export { default as Welcome } from '../../components/Welcome.vue'
 export { default as LoginDialog } from '../../components/login-dialog.vue'
 export { default as SessionErrorDialog } from '../../components/session-error-dialog.vue'
+export { default as AdminPricetableEditMenu } from '../../components/admin/pricetable-edit-menu.vue'
 export { default as AdminUserEditMenu } from '../../components/admin/user-edit-menu.vue'
 
 // nuxt/nuxt.js#8607

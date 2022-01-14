@@ -141,7 +141,7 @@ export const actions: ActionTree<UserState, RootState> = {
 
 	// -------------------------------------/ admin api 
 
-	async createUser({commit, dispatch}: {commit: Commit, dispatch: Dispatch,}, payload: any){
+	async createUser({dispatch}: {dispatch: Dispatch,}, payload: any){
 		try {
 			let data = await api.createUser(payload)
 			console.log(">>>",data)
@@ -157,9 +157,28 @@ export const actions: ActionTree<UserState, RootState> = {
 		}
 	},
 
+	async createCompany({dispatch}: {dispatch: Dispatch,}, payload: any){
+		try {
+			let data = await api.createCompany(payload)
+			console.log(">>>",data)
+			dispatch("setAlert", {message: "Company created", alertType: "success"}, { root: true })
+			return data
+		}
+		catch(e){
+			let error: string[] = Object.values(e.response.data)
+			let errorMessage = error[0][0]
+			dispatch("setAlert", {message: errorMessage , alertType: "error"}, { root: true })
+		}
+	},
+
 	async fetchUsersByAdmin({dispatch}: {dispatch: Dispatch,}){
 		let users = await api.fetchUsersByAdmin()
 		return users
+	},
+
+	async fetchCompanies({dispatch}: {dispatch: Dispatch,}){
+		let companies = await api.fetchCompanies()
+		return companies
 	},
 
 	async deleteUserByAdmin({commit, dispatch}: {commit: Commit, dispatch: Dispatch,}, payload: any){

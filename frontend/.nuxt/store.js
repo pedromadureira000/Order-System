@@ -20,6 +20,7 @@ let store = {};
   store.modules = store.modules || {}
 
   resolveStoreModules(require('../store/auth.ts'), 'auth.ts')
+  resolveStoreModules(require('../store/orders.ts'), 'orders.ts')
 
   // If the environment supports hot reloading...
 
@@ -28,6 +29,7 @@ let store = {};
     module.hot.accept([
       '../store/auth.ts',
       '../store/index.ts',
+      '../store/orders.ts',
     ], () => {
       // Update `root.modules` with the latest definitions.
       updateModules()

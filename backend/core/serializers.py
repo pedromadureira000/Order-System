@@ -15,7 +15,7 @@ class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
         fields =  ['name', 'cnpj', 'company_code', 'status', 'company_type'  ]
-        read_only_fields =  ['name', 'cnpj', 'company_code', 'status', 'company_type'  ]
+        #  read_only_fields =  ['name', 'cnpj', 'company_code', 'status', 'company_type'  ]
 
 class UserSerializer(serializers.ModelSerializer):
     company = serializers.SerializerMethodField()

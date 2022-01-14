@@ -18,8 +18,8 @@
     data: () => ({ 
       value: 'User',
       allMenuItems: [
-        {"permissions": usersSubMenuPermissions, "title": "User", "icon":"mdi-cart-variant", "to": "/admin/user"},
-        {"permissions": company, "title": "Company", "icon":"mdi-format-list-bulleted-type", "to": "/admin/user/company"},
+        {"permissions": usersSubMenuPermissions, "title": "User", "icon":"mdi-account", "to": "/admin/user"},
+        {"permissions": company, "title": "Company", "icon":"mdi-office-building", "to": "/admin/user/company"},
       ],
     }),
 

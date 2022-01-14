@@ -8,9 +8,9 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.views import APIView
-from core.serializers import UserSerializer, SwaggerLoginSerializer, SwaggerProfilePasswordSerializer
+from core.serializers import CompanySerializer, UserSerializer, SwaggerLoginSerializer, SwaggerProfilePasswordSerializer
 #  from rest_framework.authtoken.models import Token
-from core.models import User
+from core.models import Company, User
 from rolepermissions.checkers import has_permission, has_role
 from django.db import transaction
 import jwt
@@ -51,7 +51,27 @@ class CreateUserView(APIView):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         except Exception as error:
             transaction.rollback()
-            # what else??? TODO
+            print(error)
+            return Response({"error": "Something get wrong when trying to create user."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CreateCompanyView(APIView):
+    @swagger_auto_schema(request_body=CompanySerializer) 
+    @transaction.atomic
+    def post(self, request):
+        try:
+            if has_role(request.user, 'admin') or has_role(request.user, 'admin_agent') or has_permission(request.user, 'create_company'):
+                data = request.data
+                serializer = CompanySerializer(data=data)
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response(serializer.data)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        except Exception as error:
+            transaction.rollback()
+            print(error)
+            return Response({"error": "Something get wrong when trying to create company."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LoginView(APIView):
@@ -90,6 +110,17 @@ class GetAllUsers(APIView):
         if has_permission(user, 'get_all_users'):
             users = User.objects.all().filter(is_superuser=False)
             data = UserSerializer(users, many=True).data
+            return Response(data)
+
+        return Response({'error': "You don't have permission to access this resource."},status=status.HTTP_401_UNAUTHORIZED)
+
+
+class GetCompanies(APIView):
+    def get(self, request):
+        user = request.user
+        if has_permission(user, 'get_companies'):
+            companies = Company.objects.all()
+            data = CompanySerializer(companies, many=True).data
             return Response(data)
 
         return Response({'error': "You don't have permission to access this resource."},status=status.HTTP_401_UNAUTHORIZED)
