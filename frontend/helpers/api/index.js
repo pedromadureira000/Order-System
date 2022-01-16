@@ -122,6 +122,23 @@ export default {
 				})
 	},
 
+	async updateCompany(payload){
+		return await axios({ 
+		method: "put",
+		url: "/api/user/updatecompany",
+		data:{
+      // name: payload.name,
+      // cnpj: payload.cnpj,
+      company_code: payload.company_code,
+      // status: payload.status,
+      // company_type: payload.company_type
+      price_table: payload.price_table
+		}
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
 	async fetchUsersByAdmin(){
 		return await axios({ 
 		method: "get",

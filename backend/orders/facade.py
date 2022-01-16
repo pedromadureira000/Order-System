@@ -6,7 +6,6 @@ from rolepermissions.checkers import has_role
 # ----------------------------/ Orders /-----------------------------
 from core.models import User
 
-
 def get_orders(request):
     if request.GET.get('term') is not None and request.GET.get('term') != '':
         term = request.GET.get('term')
@@ -83,5 +82,3 @@ def get_all_items_by_category():
         Prefetch('item_set', queryset=items, to_attr='items')).all()
 
 
-def edit_items(request):
-    pass

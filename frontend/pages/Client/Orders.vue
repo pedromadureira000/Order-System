@@ -1,22 +1,41 @@
 <template>
   <div>
-    <h2>Orders</h2>
-		<nuxt-child/> <!-- this is for nested pages-->
+    <v-bottom-navigation v-model="value">
+      <v-btn v-for="item in currentMenuItems" :key="item.title" :value="item.title" :to="item.to" nuxt>
+        <span>{{item.title}}</span>
+        <v-icon>{{item.icon}}</v-icon>
+      </v-btn>
+    </v-bottom-navigation>
+		<nuxt-child/>
   </div>
 </template>
 
 <script>
-export default {
-  data() {
-    return {
-    }
-  },
-  methods: {
-      	
-    }
-}
+  import {admin, adminAgent, agent, company} from '~/helpers/permissions'
+  let usersSubMenuPermissions = adminAgent.concat(admin).concat(agent)
+  export default {
+    middleware: ["authenticated", "admin"],
+    data: () => ({ 
+      value: 'User',
+      allMenuItems: [
+        {"permissions": usersSubMenuPermissions, "title": "User", "icon":"mdi-account", "to": "/admin/user"},
+        {"permissions": company, "title": "Company", "icon":"mdi-office-building", "to": "/admin/user/company"},
+      ],
+    }),
+
+    computed: {
+      currentMenuItems() {
+        let user = this.$store.state.auth.currentUser;
+        return this.allMenuItems.filter(MenuItem => {
+          let addItem = false
+          MenuItem.permissions.forEach(permission => {
+            if (user.permissions.includes(permission)){addItem = true; return;}
+          })
+          return addItem
+        })
+      },
+    },
+  }
 </script>
-
-<style>
-
+<style scoped>
 </style>

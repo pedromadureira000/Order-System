@@ -56,7 +56,7 @@ class PriceItemSerializer(serializers.ModelSerializer):
         fields = ['item', 'price_unit']
 
 
-# ------------------------------/ sales table / --------------------------------
+# ------------------------------/ Price table / --------------------------------
 
 class PriceTableSerializer(serializers.ModelSerializer):
     price_items = PriceItemSerializer(many=True)
@@ -122,5 +122,7 @@ class PriceTableSerializer(serializers.ModelSerializer):
         return instance
 
 
-
+class AssignPriceTableSerializer(serializers.Serializer):
+    table_code = serializers.CharField(write_only=True)
+    company_code = serializers.CharField(write_only=True)
 

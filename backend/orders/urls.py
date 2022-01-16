@@ -9,7 +9,7 @@ from orders.views import (
     SpecificOrderApi,
 
     # Category
-    CategoryApi, SpecificCategoryApi, PriceTableApi, PriceItemApi,
+    CategoryApi, SpecificCategoryApi, PriceTableApi, AssignPriceTable
 
 )
 
@@ -27,10 +27,11 @@ urlpatterns = [
     path('category', CategoryApi.as_view(), name='api_category'),
     path('category/<code>', SpecificCategoryApi.as_view(), name='api_specific_category'),
 
-    # Price list
+    # Price table
     path('pricetable', PriceTableApi.as_view(), name='api_pricetable'),
+    path('assign_pricetable', AssignPriceTable.as_view()),
     #  path('pricetable/<code>', SpecificPriceTableApi.as_view(), name='api_pricetable'),
 
     # Item Price
-    path('priceitem/', PriceItemApi.as_view())
+    #  path('priceitem/', PriceItemApi.as_view())
 ]

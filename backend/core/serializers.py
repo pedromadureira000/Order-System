@@ -12,9 +12,10 @@ from rolepermissions.permissions import grant_permission
 from .roles import Agent
 
 class CompanySerializer(serializers.ModelSerializer):
+    price_table = serializers.StringRelatedField()
     class Meta:
         model = Company
-        fields =  ['name', 'cnpj', 'company_code', 'status', 'company_type'  ]
+        fields =  ['name', 'cnpj', 'company_code', 'status', 'company_type', 'price_table']
         #  read_only_fields =  ['name', 'cnpj', 'company_code', 'status', 'company_type'  ]
 
 class UserSerializer(serializers.ModelSerializer):

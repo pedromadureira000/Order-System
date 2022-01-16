@@ -15,6 +15,8 @@ from rolepermissions.checkers import has_permission, has_role
 from django.db import transaction
 import jwt
 from drf_yasg.utils import swagger_auto_schema
+
+from orders.models import PriceTable
 #  from drf_yasg import openapi
 
 def index(request):
@@ -73,6 +75,37 @@ class CreateCompanyView(APIView):
             print(error)
             return Response({"error": "Something get wrong when trying to create company."}, status=status.HTTP_400_BAD_REQUEST)
 
+
+class UpdateCompanyView(APIView):
+    @swagger_auto_schema(request_body=CompanySerializer) 
+    def put(self, request):
+        company_code = request.data.get("company_code")
+        price_table = request.data.get("price_table")
+        if not company_code:
+            return Response({"status": "Company_code is missing"},status=status.HTTP_400_BAD_REQUEST)
+        if price_table != "None":
+            try:
+                price_table = PriceTable.objects.get(table_code=price_table)
+                company = Company.objects.get(company_code=company_code)
+                company.price_table = price_table
+                company.save()
+                return Response("Company updated.")
+            except PriceTable.DoesNotExist:
+                return Response({"error": "'price_table' doesn't match with any price table."},status=status.HTTP_400_BAD_REQUEST)
+            except Company.DoesNotExist:
+                return Response({"error": "'company_code' doesn't match with any company."},status=status.HTTP_400_BAD_REQUEST)
+
+        company = Company.objects.get(company_code=company_code)
+        company.price_table = None
+        company.save()
+        return Response("Company updated.")
+        #  company = Company.objects.get(company_code=company_code)
+        #  serializer = CompanySerializer(company, data=request.data, partial=True) # (partial=True)we dont want to update every field
+        #  if serializer.is_valid(raise_exception=True):  # ????????????????
+            #  serializer.save()
+            #  return Response(serializer.data)
+        #  else:
+            #  return Response({"status": "Bad request."},status=status.HTTP_400_BAD_REQUEST)
 
 class LoginView(APIView):
     permission_classes = (permissions.AllowAny,)

@@ -1,66 +1,70 @@
 <template>
-  <div class="ma-3">
-    <h3>Create User</h3>
-    <form @submit.prevent="createCompany">
-      <div class="mb-3">
-        <v-text-field
-          label="Name"
-          v-model="name"
-          :error-messages="nameErrors"
-          required
-          @blur="$v.name.$touch()"
-        />
-      </div>
-      <div class="mb-3">
-        <v-text-field
-          label="CNPJ"
-          v-model="cnpj"
-          required
-        />
-      </div>
-      <div class="mb-3">
-        <v-text-field
-          label="Company code"
-          v-model="company_code"
-          :error-messages="companyCodeErrors"
-          required
-          @blur="$v.company_code.$touch()"
-        />
-      </div>
-      <div class="mb-3">
-        <v-text-field
-          label="Status"
-          v-model="status"
-          required
-        />
-      </div>
-      <div class="mb-3">
-        <v-text-field
-          label="Company Type"
-          v-model="company_type"
-          required
-        />
-      </div>
-      <v-btn
-        color="primary"
-        type="submit"
-        :loading="loading"
-        :disabled="loading"
-        >Submit</v-btn
-      >
-    </form>
+  <p v-if="$fetchState.pending">Fetching mountains...</p>
+  <p v-else-if="$fetchState.error">An error occurred :(</p>
+  <div v-else>
+    <div class="ma-3">
+      <h3>Create Company</h3>
+      <form @submit.prevent="createCompany">
+        <div class="mb-3">
+          <v-text-field
+            label="Name"
+            v-model="name"
+            :error-messages="nameErrors"
+            required
+            @blur="$v.name.$touch()"
+          />
+        </div>
+        <div class="mb-3">
+          <v-text-field
+            label="CNPJ"
+            v-model="cnpj"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <v-text-field
+            label="Company code"
+            v-model="company_code"
+            :error-messages="companyCodeErrors"
+            required
+            @blur="$v.company_code.$touch()"
+          />
+        </div>
+        <div class="mb-3">
+          <v-text-field
+            label="Status"
+            v-model="status"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <v-text-field
+            label="Company Type"
+            v-model="company_type"
+            required
+          />
+        </div>
+        <v-btn
+          color="primary"
+          type="submit"
+          :loading="loading"
+          :disabled="loading"
+          >Submit</v-btn
+        >
+      </form>
 
-    <h3 class="mt-6">Edit User</h3>
-    <v-data-table
-      :headers="headers"
-      :items="companies"
-      :items-per-page="10"
-      class="elevation-1"
-    >
-      <template v-slot:item.actions="{ item }">
-        <user-edit-menu :user="item" @user-deleted="deleteUser(item)" />
-      </template>
-    </v-data-table>
+      <h3 class="mt-6">Edit Company</h3>
+      <v-data-table
+        :headers="headers"
+        :items="companies"
+        :items-per-page="10"
+        class="elevation-1"
+      >
+        <template v-slot:item.actions="{ item }">
+          <company-edit-menu :company="item" @company-deleted="deleteComapany(item)" />
+        </template>
+      </v-data-table>
+    </div>
   </div>
 </template>
 
@@ -77,7 +81,7 @@ import { validationMixin } from "vuelidate";
 export default {
   middleware: ["authenticated", "admin"],
   components: {
-    "user-edit-menu": require("@/components/admin/user-edit-menu.vue").default,
+    "company-edit-menu": require("@/components/admin/company-edit-menu.vue").default,
   },
   mixins: [validationMixin],
 
@@ -96,6 +100,7 @@ export default {
         { text: 'Company code', value: 'company_code' },
         { text: 'Status', value: 'status' },
         { text: 'Company type', value: 'company_type' },
+        { text: 'Price Table', value: 'price_table' },
         { text: 'Actions', value: 'actions' },
       ]
     };
@@ -106,7 +111,7 @@ export default {
     for (const company_index in companies){
       let company = companies[company_index]
       this.companies.push({name: company.name, cnpj: company.cnpj, company_code: company.company_code,
-        status: company.status, company_type: company.company_type})
+        status: company.status, company_type: company.company_type, price_table: company.price_table})
     }
   },
 
@@ -150,7 +155,7 @@ export default {
         this.loading = false;
       }
     },
-    deleteUser(companyToDelete) {
+    deleteComapany(companyToDelete) {
       this.companies = this.companies.filter((company) => company.company_code != companyToDelete.company_code);
     },
   },

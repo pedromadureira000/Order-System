@@ -1,144 +1,148 @@
 <template>
-  <div class="ma-3">
-    <h3>Create User</h3>
-    <form @submit.prevent="createUser">
-      <div class="mb-3">
-        <v-text-field
-          label="Username"
-          v-model="username"
-          :error-messages="usernameErrors"
-          required
-          @blur="$v.username.$touch()"
-        />
-      </div>
-      <div class="mb-3">
-        <v-text-field
-          label="Company code"
-          v-model="company_code"
-          :error-messages="companyCodeErrors"
-          required
-          @blur="$v.company_code.$touch()"
-        />
-      </div>
-      <div class="mb-3">
-        <v-text-field
-          label="First Name"
-          v-model="first_name"
-          :error-messages="firstNameErrors"
-          required
-          @blur="$v.first_name.$touch()"
-        />
-      </div>
-      <div class="mb-3">
-        <v-text-field
-          label="Last Name"
-          v-model="last_name"
-          :error-messages="lastNameErrors"
-          required
-          @blur="$v.last_name.$touch()"
-        />
-      </div>
-      <div class="mb-3">
-        <v-text-field
-          label="Email"
-          type="email"
-          v-model="email"
-          :error-messages="emailErrors"
-          required
-          @blur="$v.email.$touch()"
-        />
-      </div>
-      <div class="mb-3">
-        <v-text-field
-          label="CPF"
-          v-model="cpf"
-          :error-messages="cpfErrors"
-          required
-          @blur="$v.cpf.$touch()"
-        />
-      </div>
-      <div class="mb-3">
-        <v-text-field
-          type="password"
-          label="Password"
-          v-model="password"
-          :error-messages="passwordErrors"
-          required
-          @blur="$v.password.$touch()"
-        />
-      </div>
-      <div class="mb-3">
-        <v-text-field
-          type="password"
-          label="Password Confirm"
-          v-model="password_confirm"
-          :error-messages="passConfirmErrors"
-          required
-          @blur="$v.password_confirm.$touch()"
-        />
-      </div>
-      <h4>User role</h4>
-      <v-container
-        class="px-0"
-        style="display: flex;"
-        fluid
-      >
-        <v-radio-group v-model="userRole" style="width: 25%;">
-          <v-radio
-            v-if="isAdmin() || isAdminAgent() || haveCreateClientPermissions()"
-            label="Client"
-            value="client"
-          ></v-radio>
-          <v-radio
-            v-if="isAdmin() || isAdminAgent()"
-            label="Agent"
-            value="agent"
-          ></v-radio>
-          <v-radio
-            v-if="isAdmin()"
-            label="Admin Agent"
-            value="admin_agent"
-          ></v-radio>
-        </v-radio-group>
+  <p v-if="$fetchState.pending">Fetching mountains...</p>
+  <p v-else-if="$fetchState.error">An error occurred :(</p>
+  <div v-else>
+    <div class="ma-3">
+      <h3>Create User</h3>
+      <form @submit.prevent="createUser">
+        <div class="mb-3">
+          <v-text-field
+            label="Username"
+            v-model="username"
+            :error-messages="usernameErrors"
+            required
+            @blur="$v.username.$touch()"
+          />
+        </div>
+        <div class="mb-3">
+          <v-text-field
+            label="Company code"
+            v-model="company_code"
+            :error-messages="companyCodeErrors"
+            required
+            @blur="$v.company_code.$touch()"
+          />
+        </div>
+        <div class="mb-3">
+          <v-text-field
+            label="First Name"
+            v-model="first_name"
+            :error-messages="firstNameErrors"
+            required
+            @blur="$v.first_name.$touch()"
+          />
+        </div>
+        <div class="mb-3">
+          <v-text-field
+            label="Last Name"
+            v-model="last_name"
+            :error-messages="lastNameErrors"
+            required
+            @blur="$v.last_name.$touch()"
+          />
+        </div>
+        <div class="mb-3">
+          <v-text-field
+            label="Email"
+            type="email"
+            v-model="email"
+            :error-messages="emailErrors"
+            required
+            @blur="$v.email.$touch()"
+          />
+        </div>
+        <div class="mb-3">
+          <v-text-field
+            label="CPF"
+            v-model="cpf"
+            :error-messages="cpfErrors"
+            required
+            @blur="$v.cpf.$touch()"
+          />
+        </div>
+        <div class="mb-3">
+          <v-text-field
+            type="password"
+            label="Password"
+            v-model="password"
+            :error-messages="passwordErrors"
+            required
+            @blur="$v.password.$touch()"
+          />
+        </div>
+        <div class="mb-3">
+          <v-text-field
+            type="password"
+            label="Password Confirm"
+            v-model="password_confirm"
+            :error-messages="passConfirmErrors"
+            required
+            @blur="$v.password_confirm.$touch()"
+          />
+        </div>
+        <h4>User role</h4>
         <v-container
           class="px-0"
+          style="display: flex;"
           fluid
-          v-if="userRole === 'agent'" 
-          style="width: 85%; display: flex; justify-content: space-between;"
         >
-          <v-row >
-            <v-checkbox 
-              v-for="(value, perm) in agentPermissions"
-              :key="perm"
-              v-model="agentPermissions[perm]"
-              :label="perm"
-              style="margin-right: 27px;"
-            ></v-checkbox>
-          </v-row>
+          <v-radio-group v-model="userRole" style="width: 25%;">
+            <v-radio
+              v-if="isAdmin() || isAdminAgent() || haveCreateClientPermissions()"
+              label="Client"
+              value="client"
+            ></v-radio>
+            <v-radio
+              v-if="isAdmin() || isAdminAgent()"
+              label="Agent"
+              value="agent"
+            ></v-radio>
+            <v-radio
+              v-if="isAdmin()"
+              label="Admin Agent"
+              value="admin_agent"
+            ></v-radio>
+          </v-radio-group>
+          <v-container
+            class="px-0"
+            fluid
+            v-if="userRole === 'agent'" 
+            style="width: 85%; display: flex; justify-content: space-between;"
+          >
+            <v-row >
+              <v-checkbox 
+                v-for="(value, perm) in agentPermissions"
+                :key="perm"
+                v-model="agentPermissions[perm]"
+                :label="perm"
+                style="margin-right: 27px;"
+              ></v-checkbox>
+            </v-row>
+          </v-container>
         </v-container>
-      </v-container>
-      <v-btn
-        color="primary"
-        type="submit"
-        :loading="loading"
-        :disabled="loading"
-        >Submit</v-btn
-      >
-    </form>
+        <v-btn
+          color="primary"
+          type="submit"
+          :loading="loading"
+          :disabled="loading"
+          >Submit</v-btn
+        >
+      </form>
 
-    <h3 class="mt-6">Edit User</h3>
-    <v-data-table
-      :headers="headers"
-      :items="users"
-      :items-per-page="10"
-      class="elevation-1"
-    >
-      <template v-slot:top>
-      </template>
-      <template v-slot:item.actions="{ item }">
-        <user-edit-menu :user="item" @user-deleted="deleteUser(item)" />
-      </template>
-    </v-data-table>
+      <h3 class="mt-6">Edit User</h3>
+      <v-data-table
+        :headers="headers"
+        :items="users"
+        :items-per-page="10"
+        class="elevation-1"
+      >
+        <template v-slot:top>
+        </template>
+        <template v-slot:item.actions="{ item }">
+          <user-edit-menu :user="item" @user-deleted="deleteUser(item)" />
+        </template>
+      </v-data-table>
+    </div>
   </div>
 </template>
 

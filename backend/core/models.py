@@ -167,7 +167,8 @@ class Company(models.Model):
         ("D", "Desativado"),
         ("B", "Bloqueado"),
     )
-    #  price_table = models.ForeignKey('orders.PriceTable', blank=True, null=True, on_delete=models.DO_NOTHING, verbose_name="Tabela preço")
+    price_table = models.ForeignKey('orders.PriceTable', blank=True, null=True,
+            on_delete=models.DO_NOTHING, verbose_name="Tabela preço")
     name = models.CharField(max_length=60, verbose_name="Nome")
     cnpj = CNPJField(masked=True, blank=True, verbose_name="CNPJ")
     client_code = models.CharField(blank=True, max_length=9, verbose_name="Código do cliente")

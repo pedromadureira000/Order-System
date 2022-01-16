@@ -90,7 +90,6 @@ export default {
       let pricetable = pricetables[item_index]
       this.pricetables.push(pricetable)
     }
-    this.pricetables = await this.$store.dispatch("orders/fetchPriceTables"); 
     console.log(this.pricetables)
     let items = await this.$store.dispatch("orders/fetchItems");
     items.forEach((item)=> item["price_unit"] = null)  //Gambiarra: i don't fugure out a way to receve input value without use v-model

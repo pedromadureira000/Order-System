@@ -171,6 +171,18 @@ export const actions: ActionTree<UserState, RootState> = {
 		}
 	},
 
+  async updateCompany({commit, dispatch}: {commit: Commit, dispatch: Dispatch,}, payload: any){
+    try {
+    let data = await api.updateCompany(payload)
+    console.log(">>",data)
+    dispatch("setAlert", {message: "Price table has been updated.", alertType: "success"}, { root: true })
+    }
+    catch(e){
+      handleError(e.response, commit)
+      dispatch("setAlert", {message: "Something get wrong when trying to update price table.", alertType: "error"}, { root: true })
+    }
+  },
+
 	async fetchUsersByAdmin({dispatch}: {dispatch: Dispatch,}){
 		let users = await api.fetchUsersByAdmin()
 		return users

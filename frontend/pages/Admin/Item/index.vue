@@ -1,82 +1,86 @@
 <template>
-  <div class="ma-3">
-    <h3>Create User</h3>
-    <form @submit.prevent="createItem">
-      <div class="mb-3">
-        <v-text-field
-          label="Name"
-          v-model="name"
-          required
-        />
-      </div>
-      <div class="mb-3">
-        <v-text-field
-          label="Item code"
-          v-model="item_code"
-          required
-        />
-      </div>
-      <div class="mb-3">
-        <v-text-field
-          label="Description"
-          v-model="description"
-          required
-        />
-      </div>
-      <div class="mb-3">
-        <v-text-field
-          label="Unit"
-          v-model="unit"
-          required
-        />
-      </div>
-      <div class="mb-3">
-        <v-text-field
-          label="Barcode"
-          v-model="barcode"
-          required
-        />
-      </div>
-      <div class="mb-3">
-        <h5>Item Category</h5>
-        <v-radio-group v-model="category" style="width: 25%;">
-          <v-radio
-            v-for="category in categories"
-            :key="category.id"
-            :label="category.verbose_name"
-            :value="category.id"
-          ></v-radio>
-        </v-radio-group>
-      </div>
-      <div class="mb-3">
-        <v-checkbox 
-          v-model="active"
-          label="Active"
-        ></v-checkbox>
-      </div>
-      <div class="mb-3">
-        image_
-      </div>
-      <v-btn
-        color="primary"
-        type="submit"
-        :loading="loading"
-        :disabled="loading"
-        >Submit</v-btn
-      >
-    </form>
+  <p v-if="$fetchState.pending">Fetching mountains...</p>
+  <p v-else-if="$fetchState.error">An error occurred :(</p>
+  <div v-else>
+    <div class="ma-3">
+      <h3>Create User</h3>
+      <form @submit.prevent="createItem">
+        <div class="mb-3">
+          <v-text-field
+            label="Name"
+            v-model="name"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <v-text-field
+            label="Item code"
+            v-model="item_code"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <v-text-field
+            label="Description"
+            v-model="description"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <v-text-field
+            label="Unit"
+            v-model="unit"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <v-text-field
+            label="Barcode"
+            v-model="barcode"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <h5>Item Category</h5>
+          <v-radio-group v-model="category" style="width: 25%;">
+            <v-radio
+              v-for="category in categories"
+              :key="category.id"
+              :label="category.verbose_name"
+              :value="category.id"
+            ></v-radio>
+          </v-radio-group>
+        </div>
+        <div class="mb-3">
+          <v-checkbox 
+            v-model="active"
+            label="Active"
+          ></v-checkbox>
+        </div>
+        <div class="mb-3">
+          image_
+        </div>
+        <v-btn
+          color="primary"
+          type="submit"
+          :loading="loading"
+          :disabled="loading"
+          >Submit</v-btn
+        >
+      </form>
 
-    <h3 class="mt-6">Edit User</h3>
-    <v-data-table
-      :headers="headers"
-      :items="items"
-      :items-per-page="10"
-      class="elevation-1"
-    >
-      <template v-slot:item.actions="{ item }">
-        <user-edit-menu :user="item" @user-deleted="deleteUser(item)" />
-      </template>
-    </v-data-table>
+      <h3 class="mt-6">Edit User</h3>
+      <v-data-table
+        :headers="headers"
+        :items="items"
+        :items-per-page="10"
+        class="elevation-1"
+      >
+        <template v-slot:item.actions="{ item }">
+          <user-edit-menu :user="item" @user-deleted="deleteUser(item)" />
+        </template>
+      </v-data-table>
+    </div>
   </div>
 </template>
 
