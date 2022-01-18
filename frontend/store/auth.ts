@@ -80,16 +80,19 @@ export const actions: ActionTree<UserState, RootState> = {
 		}
 	},
 
-	async updateUserProfile({commit, dispatch}: {commit: Commit, dispatch: Dispatch,}, payload: any){
+	async updateCurrentUserProfile({commit, dispatch}: {commit: Commit, dispatch: Dispatch,}, payload: any){
 		try {
-		let data = await api.updateUserProfile(payload)
+		let data = await api.updateCurrentUserProfile(payload)
 		console.log(">>",data)
 		commit("SET_USER", data )
 		dispatch("setAlert", {message: "Your profile has been updated.", alertType: "success"}, { root: true })
 		}
 		catch(e){
 			handleError(e.response, commit)
-			dispatch("setAlert", {message: "Something get wrong when trying to update profile.", alertType: "error"}, { root: true })
+			let error: string[] = Object.values(e.response.data)
+			let errorMessage = error[0][0]
+			dispatch("setAlert", {message: errorMessage , alertType: "error"}, { root: true })
+			// dispatch("setAlert", {message: "Something get wrong when trying to update profile.", alertType: "error"}, { root: true })
 		}
 	},
 
@@ -109,35 +112,35 @@ export const actions: ActionTree<UserState, RootState> = {
 		}
 	},
 
-	async passwordReset({commit, dispatch}: {commit: Commit, dispatch: Dispatch,}, payload: any){
-		try {
-			await api.passwordReset(payload)
-			dispatch("setAlert", {message: "Email has been sent", alertType: "success"}, { root: true })
-		}
-		catch(e){
-      console.log('error>>>>>>>>>>>>>>>>',e)
-			dispatch("setAlert", {message: "Something get wrong, the email was not been sent.", alertType: "error"}, { root: true })
-		}
-	},
+	// async passwordReset({commit, dispatch}: {commit: Commit, dispatch: Dispatch,}, payload: any){
+		// try {
+			// await api.passwordReset(payload)
+			// dispatch("setAlert", {message: "Email has been sent", alertType: "success"}, { root: true })
+		// }
+		// catch(e){
+      // console.log('error>>>>>>>>>>>>>>>>',e)
+			// dispatch("setAlert", {message: "Something get wrong, the email was not been sent.", alertType: "error"}, { root: true })
+		// }
+	// },
 
-	async passwordResetConfirm({dispatch}: {dispatch: Dispatch,}, payload: any){
-		try {
-			let data: any = await api.passwordResetConfirm(payload)
-			if (data["error"]){
-				if (data.message === "Invalid token for given user."){
-					dispatch("setAlert", {message: "This link is invalid." , alertType: "error"}, { root: true })
-				} else {
-					dispatch("setAlert", {message: data.message , alertType: "error"}, { root: true })
-				}
-			} else{
-				dispatch("setAlert", {message: "The password was been changed", alertType: "success"}, { root: true })
-			}
-		}
-		catch(e){
-			console.log(">>>>>>>>>>", e)	
-			dispatch("setAlert", {message: "Something get wrong, the password was not been changed.", alertType: "error"}, { root: true })
-		}
-	},
+	// async passwordResetConfirm({dispatch}: {dispatch: Dispatch,}, payload: any){
+		// try {
+			// let data: any = await api.passwordResetConfirm(payload)
+			// if (data["error"]){
+				// if (data.message === "Invalid token for given user."){
+					// dispatch("setAlert", {message: "This link is invalid." , alertType: "error"}, { root: true })
+				// } else {
+					// dispatch("setAlert", {message: data.message , alertType: "error"}, { root: true })
+				// }
+			// } else{
+				// dispatch("setAlert", {message: "The password was been changed", alertType: "success"}, { root: true })
+			// }
+		// }
+		// catch(e){
+			// console.log(">>>>>>>>>>", e)	
+			// dispatch("setAlert", {message: "Something get wrong, the password was not been changed.", alertType: "error"}, { root: true })
+		// }
+	// },
 
 	// -------------------------------------/ admin api 
 
@@ -182,6 +185,21 @@ export const actions: ActionTree<UserState, RootState> = {
       dispatch("setAlert", {message: "Something get wrong when trying to update price table.", alertType: "error"}, { root: true })
     }
   },
+
+	async deleteComapany({commit, dispatch}: {commit: Commit, dispatch: Dispatch,}, payload: any){
+		try {
+			let data = await api.deleteComapany(payload)
+			console.log(">>>",data)
+			dispatch("setAlert", {message: "Company deleted", alertType: "success"}, { root: true })
+			return "ok"
+		}
+		catch(e){
+			// dispatch("setAlert", {message: "Something get wrong when trying to delete user.", alertType: "error"}, { root: true })
+			let error: string[] = Object.values(e.response.data)
+			let errorMessage = error[0]
+			dispatch("setAlert", {message: errorMessage, alertType: "error"}, { root: true })
+		}
+	},
 
 	async fetchUsersByAdmin({dispatch}: {dispatch: Dispatch,}){
 		let users = await api.fetchUsersByAdmin()

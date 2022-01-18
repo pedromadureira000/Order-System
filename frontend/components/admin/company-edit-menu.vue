@@ -99,11 +99,11 @@ export default {
           icon: 'mdi-delete',
           async click(){
             let data = await this.$store.dispatch(
-              'auth/deleteUserByAdmin', 
-              {username: this.user.username, company_code: this.user.company_code}
+              'auth/deleteComapany', 
+              {company_code: this.company.company_code}
             )
 						if (data === "ok"){
-							this.$emit('user-deleted')
+							this.$emit('company-deleted')
 						}
           }
         },

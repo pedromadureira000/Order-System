@@ -18,15 +18,11 @@ export const admin = [
   "delete_admin_agent",
   "update_admin_agent",
   "get_all_admin_agents",
-
 ]
 
-export const company = [
-  "create_company",
-  "get_companies",
-  "update_company",
-  "delete_company",
-
+export const companySubMenuPermissions = [
+  "create_contracting_company",
+  "create_client_company",
 ]
 export const order = [
   "crud_order",

@@ -3,21 +3,25 @@ from rolepermissions.roles import AbstractUserRole
 
 class Admin(AbstractUserRole):
     available_permissions = {
+        "create_contracting_company": True,
+        "get_companies": True,
+        "update_contracting_company": True,
+        "delete_contracting_company": True,
         "get_all_users": True,
         "create_admin_agent": True,
         "delete_admin_agent": True,
         "update_admin_agent": True,
         "get_all_admin_agents": True,
-         #AdminAgent
+        #AdminAgent
+        "create_client_company": True,
+        "get_client_companies": True,
+        "update_client_company": True,
+        "delete_client_company": True,
         "create_agent": True,
         "get_agents": True,
         "update_agent": True,
         "delete_agent": True,
         # Agent
-        "create_company": True,
-        "get_companies": True,
-        "update_company": True,
-        "delete_company": True,
         "create_client": True,
         "get_clients": True,
         "update_client": True,
@@ -39,6 +43,10 @@ class Admin(AbstractUserRole):
 
 class AdminAgent(AbstractUserRole):
     available_permissions = {
+        "create_client_company": True,
+        "get_client_companies": True,
+        "update_client_company": True,
+        "delete_client_company": True,
         "create_agent": True,
         "get_agents": True,
         "update_agent": True,

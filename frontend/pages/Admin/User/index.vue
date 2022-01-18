@@ -202,6 +202,7 @@ export default {
         { text: 'Email', value: 'email' },
         { text: 'CPF', value: 'cpf' },
         { text: 'Company', value: 'company' },
+        { text: 'Role', value: 'role' },
         { text: 'Actions', value: 'actions' },
       ]
     };
@@ -211,8 +212,9 @@ export default {
     let users = await this.$store.dispatch("auth/fetchUsersByAdmin");
     for (const user_index in users){
       let user = users[user_index]
+      console.log(">>>>>>> ", user)
       this.users.push({username: user.username, complete_name: `${user.first_name} ${user.last_name}`, 
-        email: user.email, cpf: user.cpf, company: user.company.name, company_code: user.company.company_code})
+        email: user.email, cpf: user.cpf, company: user.company.name, role:user.roles[0],company_code: user.company.company_code})
     }
   },
 

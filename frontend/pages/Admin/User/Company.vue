@@ -30,20 +30,44 @@
             @blur="$v.company_code.$touch()"
           />
         </div>
-        <div class="mb-3">
-          <v-text-field
-            label="Status"
-            v-model="status"
-            required
-          />
-        </div>
-        <div class="mb-3">
-          <v-text-field
-            label="Company Type"
-            v-model="company_type"
-            required
-          />
-        </div>
+        <h5>Status da empresa</h5>
+        <v-radio-group v-model="status" style="width: 25%;">
+          <v-radio
+            label="Ativado"
+            value="A"
+          ></v-radio>
+          <v-radio
+            label="Desativado"
+            value="D"
+          ></v-radio>
+          <v-radio
+            label="Bloqueado"
+            value="B"
+          ></v-radio>
+        </v-radio-group>
+        <h5>Tipo de empresa</h5>
+        <v-radio-group v-model="company_type" style="width: 25%;">
+          <v-radio
+            v-if="isAdmin()"
+            label="Contratante"
+            value="C"
+          ></v-radio>
+          <v-radio
+            v-if="isAdmin() || isAdminAgent() || haveCreateClientPermissions()"
+            label="Distribuidora"
+            value="D"
+          ></v-radio>
+          <v-radio
+            v-if="isAdmin() || isAdminAgent() || haveCreateClientPermissions()"
+            label="Logista"
+            value="L"
+          ></v-radio>
+          <v-radio
+            v-if="isAdmin() || isAdminAgent() || haveCreateClientPermissions()"
+            label="Outros"
+            value="O"
+          ></v-radio>
+        </v-radio-group>
         <v-btn
           color="primary"
           type="submit"
@@ -71,7 +95,6 @@
 <script>
 import {
   required,
-  minLength,
   maxLength,
   alphaNum,
   integer
@@ -158,6 +181,18 @@ export default {
     deleteComapany(companyToDelete) {
       this.companies = this.companies.filter((company) => company.company_code != companyToDelete.company_code);
     },
+    haveCreateClientPermissions(){
+			let user = this.$store.state.auth.currentUser;
+      if (user.permissions.includes("create_client" )){return true}
+    },
+    isAdmin(){
+			let user = this.$store.state.auth.currentUser;
+      if (user.roles.includes("admin")) {return true}
+    },
+    isAdminAgent(){
+			let user = this.$store.state.auth.currentUser;
+      if (user.roles.includes("admin_agent")) {return true}
+    }
   },
 
   computed: {

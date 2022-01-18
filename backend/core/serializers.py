@@ -15,15 +15,55 @@ class CompanySerializer(serializers.ModelSerializer):
     price_table = serializers.StringRelatedField()
     class Meta:
         model = Company
-        fields =  ['name', 'cnpj', 'company_code', 'status', 'company_type', 'price_table']
-        #  read_only_fields =  ['name', 'cnpj', 'company_code', 'status', 'company_type'  ]
+        fields =  ['name', 'cnpj', 'company_code', 'status', 'company_type', 'price_table', 'client_code', 'vendor_code', 'note']
+        read_only_fields =  ['price_table']
+
+    #  def company_type(self, value):
+        #  request_user = self.context.get("request_user")
+        #  if value == "C" and not has_permission(request_user, "create_contracting_company"): 
+            ##if have create permission, it goes for update too.
+            #  raise serializers.ValidationError(f"You can't create/update contracting companies.")
+
+        #  if value != "C" and not has_permission(request_user, "create_client_company"):
+            #  raise serializers.ValidationError(f"You can't create/update client companies.")
+        #  return value
+
+    def validate(self, attrs):
+        # - Company type
+        request_user = self.context.get("request_user")
+        if attrs.get('company_type') == "C" and not has_permission(request_user, "create_contracting_company"): 
+            ##  if have create permission, it goes for update too.
+            raise serializers.ValidationError(f"You can't create/update contracting companies.")
+
+        if attrs.get('company_type') != "C" and not has_permission(request_user, "create_client_company"):
+            raise serializers.ValidationError(f"You can't create/update client companies.")
+        return attrs
+
+    def create(self, validated_data):  
+        request_user = self.context.get("request_user")
+
+        company = Company(
+            name=validated_data.get('name', ''),
+            cnpj=validated_data.get('cnpj', '' ),
+            company_code=validated_data.get('company_code', '' ),
+            status=validated_data.get('status', '' ),
+            company_type=validated_data.get('company_type', '' ),
+            client_code=validated_data.get('client_code', '' ),
+            vendor_code=validated_data.get('vendor_code', '' ),
+            note=validated_data.get('note', '' ),
+        )
+        if company.company_type != "C":
+            company.contracting_company = request_user.company
+        company.save()
+
+        return company
+
 
 class UserSerializer(serializers.ModelSerializer):
     company = serializers.SerializerMethodField()
     roles = serializers.SerializerMethodField()
     permissions = serializers.SerializerMethodField() 
     role =  serializers.ChoiceField(["admin_agent", "agent", "client"], write_only=True)
-    #  agent_permissions =  serializers.DictField(child=serializers.BooleanField(), write_only=True)
     agent_permissions =  serializers.ListField(child=serializers.CharField(), write_only=True)
     email = serializers.EmailField()
     username = serializers.CharField(validators=[OnlyLettersNumbersDashAndUnderscoreUsernameValidator])
@@ -42,34 +82,59 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
     def validate(self, attrs):
-        # ---/ Company Code
-        try: 
-            company = Company.objects.get(company_code=attrs['company_code'])
-            self.company = company
-        except Company.DoesNotExist:
-            raise serializers.ValidationError("Company does not exist.")
+        if self.context.get("method") == "post":
+            request_user = self.context.get("request_user")
 
-        # ---/ Username
-        user = company.user_set.filter(username=attrs["username"]).first()
-        if user:
-            raise serializers.ValidationError("This username is already being used.")
+            # ---/ Role
 
-        # ---/ Role
-        request_user = self.context.get("request_user")
-        role = attrs.get("role")
-        create_user_permission = "create_" + role
-        if not has_permission(request_user, create_user_permission):
-            raise serializers.ValidationError(f"You can't assign '{role}' role to an user.")
+            role = attrs.get("role")
+            create_user_permission = "create_" + role
+            if not has_permission(request_user, create_user_permission):
+                raise serializers.ValidationError(f"You can't assign '{role}' role to an user.")
 
-        # ---/ Agent Permissions
+            # ---/ Company 
 
-        if role == "agent":
-            agent_permissions = attrs.get("agent_permissions")
-            for permission in agent_permissions:
-                if not permission in Agent.available_permissions.keys():
-                    raise serializers.ValidationError(f"You can't assign '{permission}' permission to an agent.")
+            try: 
+                company = Company.objects.get(company_code=attrs['company_code'])
+                self.company = company
+            except Company.DoesNotExist:
+                raise serializers.ValidationError("Company does not exist.")
 
-        return attrs
+            #  print(">>>>>>>>>>>>>>>company.contracting_company:", company.contracting_company)
+            #  print(">>>>>>>>>>>>>>>request_user.company:",  request_user.company)
+            if role == "agent" and not has_role(request_user, 'admin'):
+                if company != request_user.company:
+                    raise serializers.ValidationError("You can't assign to an agent a different company then yours.")
+                if company.company_type !=  "C":
+                    raise serializers.ValidationError("The agent's company must be a contracting company.")
+
+            if role == "client":
+                if company.company_type ==  "C":
+                    raise serializers.ValidationError("You can't assign a contracting company to a client.")
+                if company.contracting_company != request_user.company:
+                    # You shouldn't assign a company that does not belong to your company
+                    raise serializers.ValidationError("You can't assign this company to a client.")
+
+
+            if role == "admin_agent" and company.company_type !=  "C":
+                raise serializers.ValidationError("You can't assign this company to an admin_agent, because it's not a contracting company.")
+            # ---/ Username
+
+            user = company.user_set.filter(username=attrs["username"]).first()
+            if user:
+                raise serializers.ValidationError("This username is already being used.")
+
+            # ---/ Agent Permissions
+
+            if role == "agent": 
+                agent_permissions = attrs.get("agent_permissions")
+                for permission in agent_permissions:
+                    if not permission in Agent.available_permissions.keys():
+                        raise serializers.ValidationError(f"You can't assign '{permission}' permission to an agent.")
+            return attrs
+
+        if self.context.get("method") == "put":
+            return attrs
 
     def create(self, validated_data):  
         #  print('========================> : INSIDE CREATE' )

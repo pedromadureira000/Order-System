@@ -100,13 +100,13 @@ export default {
     data: () => ({
       show_edit_dialog: false,
       menu_items: [
-        { 
-          title: 'Edit',
-          icon: 'mdi-pencil',
-          async click(){
-            this.show_edit_dialog = true
-          }
-        },
+        /** {  */
+          /** title: 'Edit', */
+          /** icon: 'mdi-pencil', */
+          /** async click(){ */
+            /** this.show_edit_dialog = true */
+          /** } */
+        /** }, */
         { 
           title: 'Delete',
           icon: 'mdi-delete',

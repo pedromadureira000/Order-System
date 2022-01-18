@@ -1,37 +1,41 @@
 from django.urls import path
 from orders.views import (
     # Item
-    ItemApi,
-    SpecificItemApi,
+    ItemView,
+    SpecificItemView,
 
     # Order
-    OrderApi,
-    SpecificOrderApi,
+    OrderView,
+    SpecificOrderView,
 
     # Category
-    CategoryApi, SpecificCategoryApi, PriceTableApi, AssignPriceTable
+    CategoryView, SpecificCategoryView, 
+
+    #Price Table
+    PriceTableView, AssignPriceTableView,
+    SpecificPriceTableView
 
 )
 
 app_name = 'orders'
 urlpatterns = [
     # Order
-    path('order', OrderApi.as_view(), name='api_order'),
-    path('order/<code>', SpecificOrderApi.as_view(), name='api_specific_order'),
+    path('order', OrderView.as_view(), name='api_order'),
+    path('order/<code>', SpecificOrderView.as_view(), name='api_specific_order'),
 
     # Item
-    path('item', ItemApi.as_view(), name='api_item'),
-    path('item/<code>', SpecificItemApi.as_view(), name='api_specific_item'),
+    path('item', ItemView.as_view(), name='api_item'),
+    path('item/<code>', SpecificItemView.as_view(), name='api_specific_item'),
 
     # Category
-    path('category', CategoryApi.as_view(), name='api_category'),
-    path('category/<code>', SpecificCategoryApi.as_view(), name='api_specific_category'),
+    path('category', CategoryView.as_view(), name='api_category'),
+    path('category/<code>', SpecificCategoryView.as_view(), name='api_specific_category'),
 
     # Price table
-    path('pricetable', PriceTableApi.as_view(), name='api_pricetable'),
-    path('assign_pricetable', AssignPriceTable.as_view()),
-    #  path('pricetable/<code>', SpecificPriceTableApi.as_view(), name='api_pricetable'),
+    path('pricetable', PriceTableView.as_view(), name='api_pricetable'),
+    path('pricetable/<table_code>', SpecificPriceTableView.as_view(), name='api_pricetable'),
+    path('assign_pricetable', AssignPriceTableView.as_view()),
 
     # Item Price
-    #  path('priceitem/', PriceItemApi.as_view())
+    #  path('priceitem/', PriceItem.as_view())
 ]

@@ -11,7 +11,7 @@
 </template>
 
 <script>
-  import {admin, adminAgent, agent, company} from '~/helpers/permissions'
+  import {admin, adminAgent, agent, companySubMenuPermissions} from '~/helpers/permissions'
   let usersSubMenuPermissions = adminAgent.concat(admin).concat(agent)
   export default {
     middleware: ["authenticated", "admin"],
@@ -19,7 +19,7 @@
       value: 'User',
       allMenuItems: [
         {"permissions": usersSubMenuPermissions, "title": "User", "icon":"mdi-account", "to": "/admin/user"},
-        {"permissions": company, "title": "Company", "icon":"mdi-office-building", "to": "/admin/user/company"},
+        {"permissions": companySubMenuPermissions, "title": "Company", "icon":"mdi-office-building", "to": "/admin/user/company"},
       ],
     }),
 

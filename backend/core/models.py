@@ -107,6 +107,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(_('email address'))
     cpf = CPFField(masked=True, blank=True, verbose_name="CPF")
     company = models.ForeignKey('Company', on_delete=models.PROTECT, verbose_name="Empresa")
+    note = models.CharField(max_length=150, blank=True)
 
     is_staff = models.BooleanField(
         _('staff status'),
@@ -158,6 +159,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class Company(models.Model):
     type_choices = (
+        ("C", "Contratante"),
         ("D", "Distribuidora"),
         ("L", "Lojista"),
         ("O", "Outros")
@@ -176,6 +178,8 @@ class Company(models.Model):
     company_code = models.CharField(verbose_name="Código da empresa", unique=True, max_length=9)
     status = models.CharField(max_length=1, choices=status_choices)
     company_type = models.CharField(max_length=1, choices=type_choices)
+    contracting_company = models.ForeignKey('core.Company', on_delete=models.PROTECT, verbose_name="Empresa Contratante", null=True)
+    note = models.CharField(max_length=150, blank=True)
 
     def __str__(self):
         return f'Empresa: {self.name}'

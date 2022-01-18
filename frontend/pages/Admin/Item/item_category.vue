@@ -1,6 +1,6 @@
 <template>
   <div class="ma-3">
-    <h3>Create User</h3>
+    <h3>Create Item Category</h3>
     <form @submit.prevent="createCategory">
       <div class="mb-3">
         <v-text-field
@@ -32,7 +32,7 @@
       >
     </form>
 
-    <h3 class="mt-6">Edit User</h3>
+    <h3 class="mt-6">Edit Item Category</h3>
     <v-data-table
       :headers="headers"
       :items="categories"

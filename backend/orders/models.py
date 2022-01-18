@@ -12,6 +12,7 @@ class Item(models.Model):
     barcode = models.CharField(max_length=13, verbose_name="Código de barras")
     active = models.BooleanField(verbose_name='Ativado')
     image = models.ImageField(default="images/items/defaultimage.jpeg", upload_to='images/items/')
+    contracting_company = models.ForeignKey('core.Company', on_delete=models.PROTECT, verbose_name="Empresa Contratante")
 
     def __str__(self):
         return f'{self.item_code}'
@@ -29,6 +30,7 @@ class ItemCategory(models.Model):
     category_code = models.CharField(max_length=8, unique=True)
     description = models.TextField(default="sem descrição", verbose_name="Descrição")
     verbose_name = models.CharField(max_length=15, verbose_name="Nome")
+    contracting_company = models.ForeignKey('core.Company', on_delete=models.PROTECT, verbose_name="Empresa Contratante")
 
     def __str__(self):
         return f'Categoria: {self.verbose_name}'
@@ -48,6 +50,7 @@ class PriceTable(models.Model):
     verbose_name = models.CharField(max_length=50, verbose_name="Nome")
     description = models.TextField(default="sem descrição", verbose_name="Descrição")
     items = models.ManyToManyField(Item, through='PriceItem')
+    contracting_company = models.ForeignKey('core.Company', on_delete=models.PROTECT, verbose_name="Empresa Contratante")
 
     def __str__(self):
         return f'{self.table_code}'

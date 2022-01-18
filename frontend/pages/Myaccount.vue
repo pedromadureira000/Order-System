@@ -2,7 +2,7 @@
   <div>
     <div class="ma-3">
       <h3>Update Account Information</h3>
-      <form @submit.prevent="updateUserProfile">
+      <form @submit.prevent="updateCurrentUserProfile">
         <div class="mb-3">
           <v-text-field
             label="First Name"
@@ -158,7 +158,7 @@ export default {
   },
 
   methods: {
-    async updateUserProfile() {
+    async updateCurrentUserProfile() {
       this.$v.profileGroup.$touch();
       if (this.$v.profileGroup.$invalid) {
         this.$store.dispatch("setAlert", { message: "Please fill the form correctly.", alertType: "error" }, { root: true })
@@ -171,7 +171,7 @@ export default {
         ){ this.$store.dispatch('setAlert', {message: "You must change some field to update profile.", alertType: 'warning'}, { root: true }) }
         else {
           this.loading_profile = true;
-          await this.$store.dispatch('auth/updateUserProfile', {
+          await this.$store.dispatch('auth/updateCurrentUserProfile', {
             first_name: this.first_name,
             last_name: this.last_name,
             email: this.email,

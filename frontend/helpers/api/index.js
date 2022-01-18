@@ -28,52 +28,6 @@ export default {
 			})
 				.then(() => {})
 		},
-	async updateUserProfile(payload){
-		return await axios({ 
-		method: "put",
-		url: "/api/user/update_user_profile",
-		data:{
-			first_name: payload.first_name,
-			last_name: payload.last_name,
-			email: payload.email,
-			cpf: payload.cpf,
-		}
-			}).then((request) => {
-					return request.data 
-				})
-	},
-
-	async updatePassword(payload){
-		return await axios({ 
-		method: "put",
-		url: "/api/user/update_user_password",
-		data:{
-			current_password: payload.current_password,
-			password: payload.password,
-		}
-			}).then((request) => {
-					return request.data 
-				})
-	},
-
-	async passwordReset(email){
-      return await axios({
-        method: "post",
-        url: "/api/user/passwordreset/users/reset_password/",
-        data: { email: email},
-      })
-        .then(() => {})
-	},
-
-	async passwordResetConfirm(payload){
-      return await axios({
-        method: "post",
-        url: "/api/user/passwordreset/users/reset_password_confirm/",
-        data: { new_password: payload.new_password, token: payload.token, uid: payload.uid},
-      })
-        .then(() => {})
-				.catch((error) => {return {error: 'error', message: Object.values(error.response.data)[0][0]}})
-	},
 
 	async createUser(payload){
     let data_body = {
@@ -99,11 +53,77 @@ export default {
     }
 		return await axios({ 
 		method: "post",
-		url: "/api/user/createuser",
+		url: "/api/user/user",
 		data: data_body}).then((request) => {
 					return request.data 
 				})
 	},
+
+	async fetchUsersByAdmin(){
+		return await axios({ 
+		method: "get",
+		url: "/api/user/user",
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async deleteUserByAdmin(payload){
+		return await axios({ 
+		method: "delete",
+		// url: `/api/user/${payload.username}&${payload.company_code}`,
+		url: `/api/user/user/${payload.username}/${payload.company_code}`,
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async updateCurrentUserProfile(payload){
+		return await axios({ 
+		method: "put",
+		url: "/api/user/user",
+		data:{
+			first_name: payload.first_name,
+			last_name: payload.last_name,
+			email: payload.email,
+			cpf: payload.cpf,
+		}
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async updatePassword(payload){
+		return await axios({ 
+		method: "put",
+		url: "/api/user/update_user_password",
+		data:{
+			current_password: payload.current_password,
+			password: payload.password,
+		}
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	// async passwordReset(email){
+      // return await axios({
+        // method: "post",
+        // url: "/api/user/passwordreset/users/reset_password/",
+        // data: { email: email},
+      // })
+        // .then(() => {})
+	// },
+
+	// async passwordResetConfirm(payload){
+      // return await axios({
+        // method: "post",
+        // url: "/api/user/passwordreset/users/reset_password_confirm/",
+        // data: { new_password: payload.new_password, token: payload.token, uid: payload.uid},
+      // })
+        // .then(() => {})
+				// .catch((error) => {return {error: 'error', message: Object.values(error.response.data)[0][0]}})
+	// },
 
 
 	async createCompany(payload){
@@ -116,7 +136,7 @@ export default {
 		}
 		return await axios({ 
 		method: "post",
-		url: "/api/user/createcompany",
+		url: "/api/user/company",
 		data: data_body}).then((request) => {
 					return request.data 
 				})
@@ -125,7 +145,7 @@ export default {
 	async updateCompany(payload){
 		return await axios({ 
 		method: "put",
-		url: "/api/user/updatecompany",
+		url: `/api/user/company/${payload.company_code}`,
 		data:{
       // name: payload.name,
       // cnpj: payload.cnpj,
@@ -138,29 +158,20 @@ export default {
 					return request.data 
 				})
 	},
-
-	async fetchUsersByAdmin(){
-		return await axios({ 
-		method: "get",
-		url: "/api/user/getusers",
-			}).then((request) => {
-					return request.data 
-				})
-	},
-
+  
 	async fetchCompanies(){
 		return await axios({ 
 		method: "get",
-		url: "/api/user/getcompanies",
+		url: "/api/user/company",
 			}).then((request) => {
 					return request.data 
 				})
 	},
 
-	async deleteUserByAdmin(payload){
+	async deleteComapany(payload){
 		return await axios({ 
 		method: "delete",
-		url: `/api/user/delete/${payload.username}&${payload.company_code}`,
+		url: `/api/user/company/${payload.company_code}`,
 			}).then((request) => {
 					return request.data 
 				})
@@ -187,6 +198,15 @@ export default {
 				})
 	},
 
+	async fetchItems(){
+		return await axios({ 
+		method: "get",
+		url: "/api/orders/item",
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
 	async createCategory(payload){
     let data_body = {
         verbose_name: payload.verbose_name, 
@@ -197,6 +217,15 @@ export default {
 		method: "post",
 		url: "/api/orders/category",
 		data: data_body}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async fetchCategories(){
+		return await axios({ 
+		method: "get",
+		url: "/api/orders/category",
+			}).then((request) => {
 					return request.data 
 				})
 	},
@@ -220,31 +249,13 @@ export default {
 	async updatePriceTable(payload){
 		return await axios({ 
 		method: "put",
-		url: "/api/orders/pricetable",
+		url: `/api/orders/pricetable/${payload.table_code}`,
 		data:{
       verbose_name: payload.verbose_name, 
       table_code: payload.table_code,
       description: payload.description,
       price_items: payload.price_items
 		}
-			}).then((request) => {
-					return request.data 
-				})
-	},
-
-	async fetchItems(){
-		return await axios({ 
-		method: "get",
-		url: "/api/orders/item",
-			}).then((request) => {
-					return request.data 
-				})
-	},
-
-	async fetchCategories(){
-		return await axios({ 
-		method: "get",
-		url: "/api/orders/category",
 			}).then((request) => {
 					return request.data 
 				})

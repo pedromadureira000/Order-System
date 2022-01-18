@@ -21,6 +21,9 @@ from sentry_sdk.integrations.django import DjangoIntegration
 
 import datetime
 
+from django.conf import settings
+from drf_yasg.generators import OpenAPISchemaGenerator, EndpointEnumerator
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
@@ -58,7 +61,6 @@ INSTALLED_APPS = [
     'anymail',
     #  'axes',
     'rest_framework',
-    'djoser',
     'rest_framework.authtoken',
     'rolepermissions',
     'django_cpf_cnpj',
@@ -113,29 +115,6 @@ REST_FRAMEWORK = {
 }
 
 WSGI_APPLICATION = 'settings.wsgi.application'
-
-DJOSER = {
-        "PASSWORD_RESET_CONFIRM_URL": "password/reset/confirm/{uid}/{token}",
-        "EMAIL": {
-            "password_reset": "core.email.PasswordResetEmail"
-        },
-        "PERMISSIONS":{
-            'password_reset': ['rest_framework.permissions.AllowAny'],
-            'password_reset_confirm': ['rest_framework.permissions.AllowAny'],
-            'activation': ['rest_framework.permissions.IsAdminUser'],
-            'set_password': ['rest_framework.permissions.IsAdminUser'],
-            'username_reset': ['rest_framework.permissions.IsAdminUser'],
-            'username_reset_confirm': ['rest_framework.permissions.IsAdminUser'],
-            'set_username': ['rest_framework.permissions.IsAdminUser'],
-            'user_create': ['rest_framework.permissions.IsAdminUser'],
-            'user_delete': ['rest_framework.permissions.IsAdminUser'],
-            'user': ['rest_framework.permissions.IsAdminUser'],
-            'user_list': ['rest_framework.permissions.IsAdminUser'],
-            'token_create': ['rest_framework.permissions.IsAdminUser'],
-            'token_destroy': ['rest_framework.permissions.IsAdminUser'],
-
-        }
-    }
 
 
 # SMTP

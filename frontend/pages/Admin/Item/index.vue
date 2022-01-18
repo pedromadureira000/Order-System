@@ -3,7 +3,7 @@
   <p v-else-if="$fetchState.error">An error occurred :(</p>
   <div v-else>
     <div class="ma-3">
-      <h3>Create User</h3>
+      <h3>Create Item</h3>
       <form @submit.prevent="createItem">
         <div class="mb-3">
           <v-text-field
@@ -69,7 +69,7 @@
         >
       </form>
 
-      <h3 class="mt-6">Edit User</h3>
+      <h3 class="mt-6">Edit Item</h3>
       <v-data-table
         :headers="headers"
         :items="items"

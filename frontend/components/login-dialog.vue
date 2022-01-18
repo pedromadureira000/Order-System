@@ -28,13 +28,13 @@
 						@keyup.enter="login"
 					></v-text-field>
 
-					<router-link
-						to="/passwordreset" 
-						tabindex="-1"
-						@click="visible = false"
-					>
-						<div @click="visible = false">I forgot my password</div>
-					</router-link><br />
+					<!-- <router-link -->
+						<!-- to="/passwordreset"  -->
+						<!-- tabindex="-1" -->
+						<!-- @click="visible = false" -->
+					<!-- > -->
+						<!-- <div @click="visible = false">I forgot my password</div> -->
+					<!-- </router-link><br /> -->
 
         </v-container>
       </v-card-text>

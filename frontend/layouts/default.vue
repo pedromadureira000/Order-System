@@ -98,8 +98,8 @@
 import footer from '~/components/Footer.vue';
 import loginDialog from '~/components/login-dialog.vue'
 import sessionErrorDialog from '~/components/session-error-dialog.vue'
-import {adminAgent, admin, company, agent, item, category, priceTable, order} from '~/helpers/permissions'
-let usersMenuPermissions = adminAgent.concat(admin).concat(company).concat(agent)
+import {adminAgent, admin, companySubMenuPermissions, agent, item, category, priceTable, order} from '~/helpers/permissions'
+let usersMenuPermissions = adminAgent.concat(admin).concat(companySubMenuPermissions).concat(agent)
 let itemsMenuPermissions = item.concat(category).concat(priceTable)
 let orderPermissions = order
 

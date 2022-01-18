@@ -2,24 +2,18 @@ from django.urls import path
 from django.urls.conf import include
 #  from rest_framework.authtoken.views import obtain_auth_token
 from core.views import (
-    CheckAuthenticatedView, CreateCompanyView, DeleteAccountView, GetAllUsers, GetCompanies, updateUserProfile, UpdateUserPassword, CreateUserView, LoginView, LogoutView, GetCSRFToken, UpdateCompanyView
+    CheckAuthenticated, UpdateUserPassword, UserView, SpecificUser, CompanyView, SpecificCompany, Login, Logout, GetCSRFToken
 )
 
 urlpatterns = [
-    path('createuser', CreateUserView.as_view()),
-    path('login', LoginView.as_view()),
-    path('logout', LogoutView.as_view()),
+    path('user', UserView.as_view()),
+    path('user/<username>/<company_code>', SpecificUser.as_view()),
+    path('login', Login.as_view()),
+    path('logout', Logout.as_view()),
     path('getcsrf', GetCSRFToken.as_view()),
-    path('checkauth', CheckAuthenticatedView.as_view()),
-    path('update_user_profile', updateUserProfile.as_view()),
+    path('checkauth', CheckAuthenticated.as_view()),
+    path('company', CompanyView.as_view()),
+    path('company/<company_code>', SpecificCompany.as_view()),
     path('update_user_password', UpdateUserPassword.as_view()),
-    path('passwordreset/', include('djoser.urls')),
-    #  path('delete', DeleteAccountView.as_view(), name='deleteAccount'),
-    path('delete/<str:user_code>', DeleteAccountView.as_view(), name='deleteAccount'),
-    path('getusers', GetAllUsers.as_view(), name='deleteAccount'),
-    path('getcompanies', GetCompanies.as_view(), name='deleteAccount'),
-    path('createcompany', CreateCompanyView.as_view()),
-    path('updatecompany', UpdateCompanyView.as_view()),
-    #  path('tokenauth/', include('djoser.urls.authtoken')),
     #  path('gettoken', obtain_auth_token, name='gettoken'),
 ]

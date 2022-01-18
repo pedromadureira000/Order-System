@@ -7,7 +7,7 @@ import time
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        comp = Company(name="PHSW", company_code='123', cnpj="40.229.893/0001-66", status="A", company_type="O")
+        comp = Company(name="PHSW", company_code='123', cnpj="40.229.893/0001-66", status="A", company_type="C")
         comp.save()
         print(comp)
         user = User.objects.create_superuser(
@@ -18,8 +18,6 @@ class Command(BaseCommand):
             username="admin",
             company=comp.id,
             user_code="admin#123",
-            is_superuser=True,
-            is_staff=True
         )
         user.set_password('asdf1234')
         user.save()

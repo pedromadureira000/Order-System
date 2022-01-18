@@ -12,7 +12,7 @@ from drf_yasg.utils import swagger_auto_schema
 
 # --------------------------/ Item / --------------------------------------------
 
-class ItemApi(APIView):
+class ItemView(APIView):
     def get(self, request):
         if has_permission(request.user, 'get_items'):
             try:
@@ -48,7 +48,7 @@ class ItemApi(APIView):
                         status=status.HTTP_401_UNAUTHORIZED)
 
 
-class SpecificItemApi(APIView):
+class SpecificItemView(APIView):
     def get(self, request, code):
 
       if has_permission(request.user, 'create_item'):
@@ -98,7 +98,7 @@ class SpecificItemApi(APIView):
 # --------------------------------/ Orders /---------------------------------/
 
 
-class OrderApi(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
+class OrderView(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
     serializer_class = OrderSerializer
 
     def get(self, request):
@@ -116,7 +116,7 @@ class OrderApi(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericA
                         status=status.HTTP_401_UNAUTHORIZED)
 
 
-class SpecificOrderApi(APIView):
+class SpecificOrderView(APIView):
     def get(self, request, code):
       if has_permission(request.user, 'create_item'):
             try:
@@ -131,7 +131,7 @@ class SpecificOrderApi(APIView):
 
 # -----------------------------------/ Category / ----------------------
 
-class CategoryApi(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
+class CategoryView(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
     serializer_class = CategorySerializer
     queryset = ItemCategory.objects.all()
 
@@ -142,7 +142,7 @@ class CategoryApi(mixins.ListModelMixin, mixins.CreateModelMixin, generics.Gener
         return self.create(request, *args, **kwargs)
 
 
-class SpecificCategoryApi(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.GenericAPIView):
+class SpecificCategoryView(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.GenericAPIView):
     serializer_class = CategorySerializer
     queryset = ItemCategory.objects.all()
     lookup_url_kwarg = 'code'
@@ -159,7 +159,7 @@ class SpecificCategoryApi(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mi
 
 # -----------------------------------/ Price Table / ----------------------
 
-class PriceTableApi(APIView):
+class PriceTableView(APIView):
     def get(self, request):
         pricetables = PriceTable.objects.all()
         serializer = PriceTableSerializer(data=pricetables, many=True)
@@ -174,11 +174,12 @@ class PriceTableApi(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+class SpecificPriceTableView(APIView):
     @swagger_auto_schema(request_body=PriceTableSerializer) 
-    def put(self, request):
-        table_code = request.data.get("table_code")
-        if not table_code:
-            return Response({"error": "'table_code' field is missing."}, status=status.HTTP_400_BAD_REQUEST)
+    def put(self, request, table_code):
+        #  if not table_code:
+            #  return Response({"error": "'table_code' field is missing."}, status=status.HTTP_400_BAD_REQUEST)
         try:
             instance = PriceTable.objects.get(table_code=table_code)
             serializer = PriceTableSerializer(instance, data=request.data)
@@ -193,10 +194,7 @@ class PriceTableApi(APIView):
             return Response({"error": "Something went wrong when trying to update price table."}, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(request_body=PriceTableSerializer) 
-    def delete(self, request):
-        table_code = request.data.get("table_code")
-        if not table_code:
-            return Response({"error": "'table_code' field is missing."}, status=status.HTTP_400_BAD_REQUEST)
+    def delete(self, request, table_code):
         try:
             instance = PriceTable.objects.get(table_code=table_code)
             instance.delete()
@@ -208,7 +206,7 @@ class PriceTableApi(APIView):
             return Response({"error": "Something went wrong when trying to delete price table."}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class AssignPriceTable(APIView):
+class AssignPriceTableView(APIView):
     @swagger_auto_schema(request_body=AssignPriceTableSerializer) 
     def post(self, request):
         serializer = AssignPriceTableSerializer(data=request.data)
@@ -234,7 +232,7 @@ class AssignPriceTable(APIView):
 
 # -----------------------------------/ PriceItem /-----------------------------
 
-#  class PriceItemApi(APIView):
+#  class PriceItemView(APIView):
     #  def get(self, request):
       #  if has_permission(request.user, 'create_item'):
             #  item_code = request.data.get('item_code')

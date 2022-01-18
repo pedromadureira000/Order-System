@@ -43,7 +43,7 @@ export default {
 		return mockasync("User logged out.")
 	},
 
-	updateUserProfile(payload){ 
+	updateCurrentUserProfile(payload){ 
     //TODO some fields should be optional
 		if (typeof payload.first_name === 'string' && typeof payload.last_name === 'string' 
       && typeof payload.email === 'string' && payload.cpf === 'string'){
