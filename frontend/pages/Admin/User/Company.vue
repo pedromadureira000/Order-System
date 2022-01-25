@@ -30,6 +30,26 @@
             @blur="$v.company_code.$touch()"
           />
         </div>
+        <div class="mb-3">
+          <v-text-field
+            label="Client code"
+            v-model="client_code"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <v-text-field
+            label="Vendor code"
+            v-model="vendor_code"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <v-text-field
+            label="Note"
+            v-model="note"
+          />
+        </div>
         <h5>Status da empresa</h5>
         <v-radio-group v-model="status" style="width: 25%;">
           <v-radio
@@ -115,6 +135,9 @@ export default {
       company_code: null,
       status: null,
       company_type: null,
+      client_code: null,
+      vendor_code: null,
+      note: null,
       loading: false,
       companies: [],
       headers: [
@@ -124,6 +147,9 @@ export default {
         { text: 'Status', value: 'status' },
         { text: 'Company type', value: 'company_type' },
         { text: 'Price Table', value: 'price_table' },
+        { text: 'Client code', value: 'client_code' },
+        { text: 'Vendor code', value: 'vendor_code' },
+        { text: 'Note', value: 'note' },
         { text: 'Actions', value: 'actions' },
       ]
     };
@@ -133,8 +159,10 @@ export default {
     let companies = await this.$store.dispatch("auth/fetchCompanies");
     for (const company_index in companies){
       let company = companies[company_index]
-      this.companies.push({name: company.name, cnpj: company.cnpj, company_code: company.company_code,
-        status: company.status, company_type: company.company_type, price_table: company.price_table})
+      /** this.companies.push({name: company.name, cnpj: company.cnpj, company_code: company.company_code, */
+        /** status: company.status, company_type: company.company_type, price_table: company.price_table}) */
+    /** } */
+      this.companies.push(company)
     }
   },
 
@@ -170,7 +198,10 @@ export default {
           cnpj: this.cnpj,
           company_code: this.company_code,
           status: this.status,
-          company_type: this.company_type
+          company_type: this.company_type,
+          client_code: this.client_code,
+          vendor_code: this.vendor_code,
+          note: this.note
         });
         if (data) {
           this.companies.push(data);

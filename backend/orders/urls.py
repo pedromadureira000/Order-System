@@ -13,7 +13,11 @@ from orders.views import (
 
     #Price Table
     PriceTableView, AssignPriceTableView,
-    SpecificPriceTableView
+    SpecificPriceTableView,
+
+    #Item Price
+    PriceItemView,
+    SpecificPriceItemView
 
 )
 
@@ -37,5 +41,6 @@ urlpatterns = [
     path('assign_pricetable', AssignPriceTableView.as_view()),
 
     # Item Price
-    #  path('priceitem/', PriceItem.as_view())
+    path('priceitem/', PriceItemView.as_view()),
+    path('priceitem/<item_code>/<table_code>', SpecificPriceItemView.as_view())
 ]

@@ -8,7 +8,7 @@
         <div class="mb-3">
           <v-text-field
             label="Name"
-            v-model="verbose_name"
+            v-model="name"
             required
           />
         </div>
@@ -68,7 +68,7 @@ export default {
 
   data() {
     return {
-      verbose_name: null,
+      name: null,
       table_code: null,
       description: null,
       price_items: [],
@@ -76,7 +76,7 @@ export default {
       items: [],
       loading: false,
       headers: [
-        { text: 'Name', value: 'verbose_name' },
+        { text: 'Name', value: 'name' },
         { text: 'Table code', value: 'table_code' },
         { text: 'Description', value: 'description' },
         { text: 'Actions', value: 'actions' },
@@ -90,7 +90,7 @@ export default {
       let pricetable = pricetables[item_index]
       this.pricetables.push(pricetable)
     }
-    console.log(this.pricetables)
+    /** console.log(">>>>>>>>>>", this.pricetables[0]) */
     let items = await this.$store.dispatch("orders/fetchItems");
     items.forEach((item)=> item["price_unit"] = null)  //Gambiarra: i don't fugure out a way to receve input value without use v-model
     this.items =  items
@@ -121,7 +121,7 @@ export default {
       /** } else { */
         this.loading = true;
         let data = await this.$store.dispatch("orders/createPriceTable", {
-          verbose_name: this.verbose_name, 
+          name: this.name, 
           table_code: this.table_code,
           description: this.description,
           price_items: this.price_items

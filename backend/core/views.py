@@ -224,7 +224,7 @@ class SpecificCompany(APIView):
         price_table = request.data.get("price_table")
         if not company_code:
             return Response({"status": "Company_code is missing"},status=status.HTTP_400_BAD_REQUEST)
-        if not has_role(request.user, 'admin') or not has_role(request.user, 'admin_agent'):
+        if not has_role(request.user, 'admin') and not has_role(request.user, 'admin_agent'):
             return Response({'error': "You don't have permission to access this resource."},status=status.HTTP_401_UNAUTHORIZED)
         if price_table != "None":
             try:
@@ -232,7 +232,7 @@ class SpecificCompany(APIView):
                 company = Company.objects.get(company_code=company_code)
                 if has_role(request.user, 'admin') or (has_role(request.user, 'admin_agent') and 
                         request.user.company == company.contracting_company):
-                    if price_table.contracting_company != request.user.company:
+                    if price_table.contracting_company == request.user.company:
                         company.price_table = price_table
                         company.save()
                         return Response("Company updated.")

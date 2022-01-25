@@ -13,6 +13,7 @@ class Item(models.Model):
     active = models.BooleanField(verbose_name='Ativado')
     image = models.ImageField(default="images/items/defaultimage.jpeg", upload_to='images/items/')
     contracting_company = models.ForeignKey('core.Company', on_delete=models.PROTECT, verbose_name="Empresa Contratante")
+    note = models.TextField(blank=True)
 
     def __str__(self):
         return f'{self.item_code}'
@@ -29,11 +30,12 @@ class Item(models.Model):
 class ItemCategory(models.Model):
     category_code = models.CharField(max_length=8, unique=True)
     description = models.TextField(default="sem descrição", verbose_name="Descrição")
-    verbose_name = models.CharField(max_length=15, verbose_name="Nome")
+    name = models.CharField(max_length=15, verbose_name="Nome")
     contracting_company = models.ForeignKey('core.Company', on_delete=models.PROTECT, verbose_name="Empresa Contratante")
+    note = models.TextField(blank=True)
 
     def __str__(self):
-        return f'Categoria: {self.verbose_name}'
+        return f'Categoria: {self.name}'
 
 
 class PriceItem(models.Model):
@@ -47,10 +49,11 @@ class PriceItem(models.Model):
 
 class PriceTable(models.Model):
     table_code = models.CharField(max_length=7, unique=True)
-    verbose_name = models.CharField(max_length=50, verbose_name="Nome")
+    name = models.CharField(max_length=50, verbose_name="Nome")
     description = models.TextField(default="sem descrição", verbose_name="Descrição")
     items = models.ManyToManyField(Item, through='PriceItem')
     contracting_company = models.ForeignKey('core.Company', on_delete=models.PROTECT, verbose_name="Empresa Contratante")
+    note = models.TextField(blank=True)
 
     def __str__(self):
         return f'{self.table_code}'
@@ -65,13 +68,14 @@ class Order(models.Model):
         ("5", "Entregue"),
         ("9", "Cancelado")
     )
-    company = models.ForeignKey('core.Company', on_delete=models.CASCADE, verbose_name="Empresa")
+    company = models.ForeignKey('core.Company', on_delete=models.PROTECT, verbose_name="Empresa")
     user = models.ForeignKey('core.User', on_delete=models.PROTECT, verbose_name="Usuário")
     status = models.CharField(max_length=1, choices=status_choices)
-    # numero_nota = formato(' 999.999.999')
+    invoice_number = models.CharField(max_length=9, null=True)
     order_date = models.DateTimeField(default=timezone.now, verbose_name="Data do pedido")
     billing_date = models.DateTimeField(blank=True, null=True, verbose_name="Data do faturamento")
     order_amount = models.DecimalField(max_digits=11, decimal_places=2, verbose_name="Valor total")
+    table_code = models.CharField(max_length=7, unique=True)
 
     def __str__(self):
         return f'Pedido N. {self.pk}'

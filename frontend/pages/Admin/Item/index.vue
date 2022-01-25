@@ -46,7 +46,7 @@
             <v-radio
               v-for="category in categories"
               :key="category.id"
-              :label="category.verbose_name"
+              :label="category.name"
               :value="category.id"
             ></v-radio>
           </v-radio-group>
@@ -77,7 +77,7 @@
         class="elevation-1"
       >
         <template v-slot:item.actions="{ item }">
-          <user-edit-menu :user="item" @user-deleted="deleteUser(item)" />
+          <!-- <user-edit-menu :user="item" @user-deleted="deleteUser(item)" /> -->
         </template>
       </v-data-table>
     </div>

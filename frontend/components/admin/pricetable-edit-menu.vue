@@ -36,7 +36,7 @@
         <v-card-text>
           <v-container fluid>
             <v-text-field
-              v-model="pricetable.verbose_name"
+              v-model="pricetable.name"
               label="Name"
               required
               type="text"
@@ -119,7 +119,6 @@ export default {
           title: 'Delete',
           icon: 'mdi-delete',
           async click(){
-            console.log(">>>>>>> ", this.pricetable.table_code)
             let data = await this.$store.dispatch(
               'orders/deletePriceTable', 
               {table_code: this.pricetable.table_code}
@@ -133,24 +132,22 @@ export default {
     }),
     methods: {
       handleClick(index){
-        //this.menu_items[id].click()  #will get erros, because of function click will no can access propertie with it's own 'this'
+        //this.menu_items[item_code].click()  #will get erros, because of function click will no can access propertie with it's own 'this'
         this.menu_items[index].click.call(this) // will call the function but the function will use the vue instance 'this' context.
       },
       removeItem(item){
         this.pricetable.price_items = this.pricetable.price_items.filter((obj)=> obj !== item)
       },
       addItem(item){
-        this.pricetable.price_items = this.pricetable.price_items.concat([{item: item.id, price_unit: item.price_unit}])
+        this.pricetable.price_items = this.pricetable.price_items.concat([{item: item.item_code, price_unit: item.price_unit}])
         item.price_unit = null
       },
-      itemName(id){
-        let item = this.items.filter((item)=> item.id === id)[0]
-        console.log('_----_----',item)
+      itemName(item_code){
+        let item = this.items.filter((item)=> item.item_code === item_code)[0]
         return item.name
       },
       updatePriceTable(){
         this.$store.dispatch("orders/updatePriceTable", this.pricetable)
-
       }
   },
 
@@ -160,7 +157,7 @@ export default {
         let return_value = true
         let price_items = this.pricetable.price_items
         for (const prop in price_items){
-          if (price_items[prop].item === item.id){
+          if (price_items[prop].item === item.item_code){
             return_value = false
           }
         }
@@ -168,6 +165,6 @@ export default {
       })
 
     }
-  }
+  },
 }
 </script>

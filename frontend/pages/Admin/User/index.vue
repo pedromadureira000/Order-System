@@ -5,6 +5,62 @@
     <div class="ma-3">
       <h3>Create User</h3>
       <form @submit.prevent="createUser">
+        <v-container
+          class="px-0"
+          style="display: flex;"
+          fluid
+        >
+          <v-radio-group v-model="userRole" style="width: 25%;" label="User Role">
+            <v-radio
+              v-if="isAdmin() || isAdminAgent() || haveCreateClientPermissions()"
+              label="Client"
+              value="client"
+            ></v-radio>
+            <v-radio
+              v-if="isAdmin() || isAdminAgent()"
+              label="Agent"
+              value="agent"
+            ></v-radio>
+            <v-radio
+              v-if="isAdmin()"
+              label="Admin Agent"
+              value="admin_agent"
+            ></v-radio>
+          </v-radio-group>
+          <v-container
+            class="px-0"
+            fluid
+            v-if="userRole === 'agent'" 
+            style="width: 85%; display: flex; justify-content: space-between;"
+          >
+            <v-row >
+              <v-checkbox 
+                v-for="(value, perm) in agentPermissions"
+                :key="perm"
+                v-model="agentPermissions[perm]"
+                :label="perm"
+                style="margin-right: 27px;"
+              ></v-checkbox>
+            </v-row>
+          </v-container>
+        </v-container>
+        <v-radio-group v-model="company_code" style="width: 25%;" v-if="userRole === 'client' && !isAdmin()" label="User company">
+          <v-radio 
+            v-for="(company, key) in companies"
+            :key="key"
+            :label="company.name"
+            :value="company.company_code"
+          ></v-radio>
+        </v-radio-group>
+        <div class="mb-3" v-if="isAdmin()">
+          <v-text-field
+            label="Company code"
+            v-model="company_code"
+            :error-messages="companyCodeErrors"
+            required
+            @blur="$v.company_code.$touch()"
+          />
+        </div>
         <div class="mb-3">
           <v-text-field
             label="Username"
@@ -12,15 +68,6 @@
             :error-messages="usernameErrors"
             required
             @blur="$v.username.$touch()"
-          />
-        </div>
-        <div class="mb-3">
-          <v-text-field
-            label="Company code"
-            v-model="company_code"
-            :error-messages="companyCodeErrors"
-            required
-            @blur="$v.company_code.$touch()"
           />
         </div>
         <div class="mb-3">
@@ -80,46 +127,6 @@
             @blur="$v.password_confirm.$touch()"
           />
         </div>
-        <h4>User role</h4>
-        <v-container
-          class="px-0"
-          style="display: flex;"
-          fluid
-        >
-          <v-radio-group v-model="userRole" style="width: 25%;">
-            <v-radio
-              v-if="isAdmin() || isAdminAgent() || haveCreateClientPermissions()"
-              label="Client"
-              value="client"
-            ></v-radio>
-            <v-radio
-              v-if="isAdmin() || isAdminAgent()"
-              label="Agent"
-              value="agent"
-            ></v-radio>
-            <v-radio
-              v-if="isAdmin()"
-              label="Admin Agent"
-              value="admin_agent"
-            ></v-radio>
-          </v-radio-group>
-          <v-container
-            class="px-0"
-            fluid
-            v-if="userRole === 'agent'" 
-            style="width: 85%; display: flex; justify-content: space-between;"
-          >
-            <v-row >
-              <v-checkbox 
-                v-for="(value, perm) in agentPermissions"
-                :key="perm"
-                v-model="agentPermissions[perm]"
-                :label="perm"
-                style="margin-right: 27px;"
-              ></v-checkbox>
-            </v-row>
-          </v-container>
-        </v-container>
         <v-btn
           color="primary"
           type="submit"
@@ -196,6 +203,7 @@ export default {
           delete_price_table: false
       },
       users: [],
+      companies: [],
       headers: [
         { text: 'Username', value: 'username' },
         { text: 'Complete name', value: 'complete_name' },
@@ -215,6 +223,14 @@ export default {
       console.log(">>>>>>> ", user)
       this.users.push({username: user.username, complete_name: `${user.first_name} ${user.last_name}`, 
         email: user.email, cpf: user.cpf, company: user.company.name, role:user.roles[0],company_code: user.company.company_code})
+    }
+    let companies = await this.$store.dispatch("auth/fetchCompanies");
+    for (const company_index in companies){
+      let company = companies[company_index]
+      /** this.companies.push({name: company.name, cnpj: company.cnpj, company_code: company.company_code, */
+        /** status: company.status, company_type: company.company_type, price_table: company.price_table}) */
+    /** } */
+      this.companies.push(company)
     }
   },
 
@@ -284,7 +300,7 @@ export default {
         });
         if (data) {
           this.users.push({username: data.username, complete_name: `${data.first_name} ${data.last_name}`, 
-            email: data.email, cpf: data.cpf, company: data.company.name, company_code: data.company.company_code})
+            email: data.email, cpf: data.cpf, company: data.company.name, company_code: data.company.company_code, role: data.roles[0]})
         }
         this.loading = false;
       }
@@ -375,6 +391,14 @@ export default {
       return errors;
     },
   },
+  watch: {
+    userRole: function(userRole){
+      if (userRole === "agent" && !this.isAdmin()){
+        this.company_code = this.$store.state.auth.currentUser.company.company_code
+        /** console.log(">>>>>>> watcher userRole passed") */
+      }
+    }
+  }
 };
 </script>
 <style scoped>

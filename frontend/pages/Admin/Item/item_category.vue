@@ -5,7 +5,7 @@
       <div class="mb-3">
         <v-text-field
           label="Name"
-          v-model="verbose_name"
+          v-model="name"
           required
         />
       </div>
@@ -40,7 +40,7 @@
       class="elevation-1"
     >
       <template v-slot:item.actions="{ item }">
-        <user-edit-menu :user="item" @user-deleted="deleteUser(item)" />
+        <!-- <user-edit-menu :user="item" @user-deleted="deleteUser(item)" /> -->
       </template>
     </v-data-table>
   </div>
@@ -64,13 +64,13 @@ export default {
 
   data() {
     return {
-      verbose_name: null,
+      name: null,
       category_code: null,
       description: null,
       categories: [],
       loading: false,
       headers: [
-        { text: 'Name', value: 'verbose_name' },
+        { text: 'Name', value: 'name' },
         { text: 'Category code', value: 'category_code' },
         { text: 'Description', value: 'description' },
         { text: 'Actions', value: 'actions' },
@@ -112,7 +112,7 @@ export default {
       /** } else { */
         this.loading = true;
         let data = await this.$store.dispatch("orders/createCategory", {
-          verbose_name: this.verbose_name, 
+          name: this.name, 
           category_code: this.category_code,
           description: this.description,
         });

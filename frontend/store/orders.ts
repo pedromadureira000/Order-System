@@ -64,7 +64,11 @@ export const actions: ActionTree<OrdersState, RootState> = {
     }
     catch(e){
       handleError(e.response, commit)
-      dispatch("setAlert", {message: "Something get wrong when trying to update price table.", alertType: "error"}, { root: true })
+      dispatch("setAlert", {message: "Something went wrong when trying to update price table.", alertType: "error"}, { root: true })
+      // handleError(e.response, commit)
+      // let error: string[] = Object.values(e.response.data)  TODO ??
+      // let errorMessage = error[0][0]
+      // dispatch("setAlert", {message: errorMessage , alertType: "error"}, { root: true })
     }
   },
 

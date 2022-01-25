@@ -179,10 +179,14 @@ export const actions: ActionTree<UserState, RootState> = {
     let data = await api.updateCompany(payload)
     console.log(">>",data)
     dispatch("setAlert", {message: "Price table has been updated.", alertType: "success"}, { root: true })
+    return data
     }
     catch(e){
       handleError(e.response, commit)
-      dispatch("setAlert", {message: "Something get wrong when trying to update price table.", alertType: "error"}, { root: true })
+			let error: string[] = Object.values(e.response.data)
+			let errorMessage = error[0][0]
+			dispatch("setAlert", {message: errorMessage , alertType: "error"}, { root: true })
+      // dispatch("setAlert", {message: "Something get wrong when trying to update price table.", alertType: "error"}, { root: true })
     }
   },
 

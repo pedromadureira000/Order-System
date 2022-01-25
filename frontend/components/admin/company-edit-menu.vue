@@ -58,7 +58,7 @@
                 <v-radio
                   v-for="(pricetable, key) in pricetables"
                   :key="key"
-                  :label="pricetable.verbose_name"
+                  :label="pricetable.name"
                   :value="pricetable.table_code"
                 ></v-radio>
                 <v-radio
@@ -121,11 +121,19 @@ export default {
         //this.menu_items[id].click()  #will get erros, because of function click will no can access propertie with it's own 'this'
         this.menu_items[index].click.call(this) // will call the function but the function will use the vue instance 'this' context.
       },
-      updateCompany(){
-        this.$store.dispatch("auth/updateCompany", {
+      async updateCompany(){
+        let data = await this.$store.dispatch("auth/updateCompany", {
           company_code: this.company.company_code,
           price_table: this.companyPriceTable
         })
+        /** console.log(">>>>>>> ", data) */
+        if (data){    //just reactivity
+          if (this.companyPriceTable === 'None'){  
+            this.company.price_table = null
+          }else{
+            this.company.price_table = this.companyPriceTable
+          }
+        }
       }
   },
 

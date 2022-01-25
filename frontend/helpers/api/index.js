@@ -132,7 +132,10 @@ export default {
       cnpj: payload.cnpj,
       company_code: payload.company_code,
       status: payload.status,
-      company_type: payload.company_type
+      company_type: payload.company_type,
+      client_code: payload.client_code,
+      vendor_code: payload.vendor_code,
+      note: payload.note,
 		}
 		return await axios({ 
 		method: "post",
@@ -209,7 +212,7 @@ export default {
 
 	async createCategory(payload){
     let data_body = {
-        verbose_name: payload.verbose_name, 
+        name: payload.name, 
         category_code: payload.category_code,
         description: payload.description,
 		}
@@ -232,7 +235,7 @@ export default {
 
 	async createPriceTable(payload){
     let data_body = {
-        verbose_name: payload.verbose_name, 
+        name: payload.name, 
         table_code: payload.table_code,
         description: payload.description,
         price_items: payload.price_items
@@ -251,7 +254,7 @@ export default {
 		method: "put",
 		url: `/api/orders/pricetable/${payload.table_code}`,
 		data:{
-      verbose_name: payload.verbose_name, 
+      name: payload.name, 
       table_code: payload.table_code,
       description: payload.description,
       price_items: payload.price_items

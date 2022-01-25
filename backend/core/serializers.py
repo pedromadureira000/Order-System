@@ -18,7 +18,7 @@ class CompanySerializer(serializers.ModelSerializer):
         fields =  ['name', 'cnpj', 'company_code', 'status', 'company_type', 'price_table', 'client_code', 'vendor_code', 'note']
         read_only_fields =  ['price_table']
 
-    #  def company_type(self, value):
+    #  def validate_company_type(self, value):
         #  request_user = self.context.get("request_user")
         #  if value == "C" and not has_permission(request_user, "create_contracting_company"): 
             ##if have create permission, it goes for update too.
@@ -104,13 +104,15 @@ class UserSerializer(serializers.ModelSerializer):
             #  print(">>>>>>>>>>>>>>>request_user.company:",  request_user.company)
             if role == "agent" and not has_role(request_user, 'admin'):
                 if company != request_user.company:
-                    raise serializers.ValidationError("You can't assign to an agent a different company then yours.")
+                    raise serializers.ValidationError("You can't assign this company to an agent.")
+                    #  raise serializers.ValidationError("You can't assign to an agent a different company then yours.") <--
                 if company.company_type !=  "C":
                     raise serializers.ValidationError("The agent's company must be a contracting company.")
 
             if role == "client":
                 if company.company_type ==  "C":
-                    raise serializers.ValidationError("You can't assign a contracting company to a client.")
+                    #  raise serializers.ValidationError("You can't assign a contracting company to a client.")  <--
+                    raise serializers.ValidationError("You can't assign this company to a client.")
                 if company.contracting_company != request_user.company:
                     # You shouldn't assign a company that does not belong to your company
                     raise serializers.ValidationError("You can't assign this company to a client.")
