@@ -276,10 +276,7 @@ export default {
 	async deletePriceTable(payload){
 		return await axios({ 
 		method: "delete",
-		url: "/api/orders/pricetable",
-		data:{
-      table_code: payload.table_code,
-		}
+		url: `/api/orders/pricetable/${payload.table_code}`
 			}).then((request) => {
 					return request.data 
 				})

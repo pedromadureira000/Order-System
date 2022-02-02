@@ -42,12 +42,13 @@
         </div>
         <div class="mb-3">
           <h5>Item Category</h5>
+          <p v-if="categories.length === 0">No category was created.</p>
           <v-radio-group v-model="category" style="width: 25%;">
             <v-radio
               v-for="category in categories"
-              :key="category.id"
+              :key="category.category_code"
               :label="category.name"
-              :value="category.id"
+              :value="category.category_code"
             ></v-radio>
           </v-radio-group>
         </div>
@@ -139,7 +140,9 @@ export default {
       this.items.push(item)
     }
     this.categories = await this.$store.dispatch("orders/fetchCategories"); 
-    console.log(this.categories)
+    if (this.categories.length > 0){
+      this.category = this.categories[0]["category_code"]
+    }
   },
 
   /** validations: { */

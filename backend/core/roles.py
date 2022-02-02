@@ -1,31 +1,49 @@
 from rolepermissions.roles import AbstractUserRole
 
 
-class Admin(AbstractUserRole):
+class Erp(AbstractUserRole):
     available_permissions = {
-        "create_contracting_company": True,
+        #ERP
+        "create_company": True,
         "get_companies": True,
-        "update_contracting_company": True,
-        "delete_contracting_company": True,
-        "get_all_users": True,
+        "update_company": True,
+        "delete_company": True,
+        "create_establishment": True,
+        "get_establishments": True,
+        "update_establishment": True,
+        "delete_establishment": True,
+        "create_item_table": True,
+        "update_item_table": True,
+        "get_item_tables": True,
+        "delete_item_table": True,
+        "assign_item_table": True,
+        "create_client_table": True,
+        "update_client_table": True,
+        "get_client_tables": True,
+        "delete_client_table": True,
+        "assign_client_table": True,
+        "generate_boleto": True,
+        "get_transfered_orders": True, #TODO do it is not the same as filtred 'get_orders' ?
+        #AdminAgent
         "create_admin_agent": True,
         "delete_admin_agent": True,
         "update_admin_agent": True,
-        "get_all_admin_agents": True,
-        #AdminAgent
-        "create_client_company": True,
-        "get_client_companies": True,
-        "update_client_company": True,
-        "delete_client_company": True,
+        "get_admin_agents": True,
         "create_agent": True,
         "get_agents": True,
         "update_agent": True,
         "delete_agent": True,
+        "update_orders_status": True,
         # Agent
+        "access_all_establishments": True,
         "create_client": True,
-        "get_clients": True,
+        "get_client": True,
         "update_client": True,
         "delete_client": True,
+        "create_client_user": True,
+        "get_client_users": True,
+        "update_client_user": True,
+        "delete_client_user": True,
         "create_item": True,
         "get_items": True,
         "update_item": True,
@@ -38,24 +56,34 @@ class Admin(AbstractUserRole):
         "get_price_tables": True,
         "update_price_table": True,
         "delete_price_table": True,
+        "add_establishment_to_client": True,
+        "get_client_establishments": True,
+        "remove_establishment_from_client": True,
+        "assign_pricetable_to_client": True,
+        "get_orders":True
     }
-
 
 class AdminAgent(AbstractUserRole):
     available_permissions = {
-        "create_client_company": True,
-        "get_client_companies": True,
-        "update_client_company": True,
-        "delete_client_company": True,
+        "create_admin_agent": True,
+        "delete_admin_agent": True,
+        "update_admin_agent": True,
+        "get_admin_agents": True,
         "create_agent": True,
         "get_agents": True,
         "update_agent": True,
         "delete_agent": True,
+        "update_orders_status": True,
         # Agent
+        "access_all_establishments": True,
         "create_client": True,
-        "get_clients": True,
+        "get_client": True,
         "update_client": True,
         "delete_client": True,
+        "create_client_user": True,
+        "get_client_users": True,
+        "update_client_user": True,
+        "delete_client_user": True,
         "create_item": True,
         "get_items": True,
         "update_item": True,
@@ -68,14 +96,24 @@ class AdminAgent(AbstractUserRole):
         "get_price_tables": True,
         "update_price_table": True,
         "delete_price_table": True,
+        "add_establishment_to_client": True,
+        "get_client_establishments": True,
+        "remove_establishment_from_client": True,
+        "assign_pricetable_to_client": True,
+        "get_orders":True
     }
 
 class Agent(AbstractUserRole):
     available_permissions = {
+        "access_all_establishments": False,
         "create_client": False,
-        "get_clients": False,
+        "get_client": False,
         "update_client": False,
         "delete_client": False,
+        "create_client_user": False,
+        "get_client_users": False,
+        "update_client_user": False,
+        "delete_client_user": False,
         "create_item": False,
         "get_items": False,
         "update_item": False,
@@ -88,19 +126,18 @@ class Agent(AbstractUserRole):
         "get_price_tables": False,
         "update_price_table": False,
         "delete_price_table": False,
+        "add_establishment_to_client": False,
+        "get_client_establishments": False,
+        "remove_establishment_from_client": False,
+        "assign_pricetable_to_client": False,
+        "get_orders":False
     }
 
-class Client(AbstractUserRole):
+class ClientUser(AbstractUserRole):
     available_permissions = {
-        "crud_order": True,
-    }
-
-class ERPClient(AbstractUserRole):
-    available_permissions = {
-        "generate_boleto": True,
-        "get_transfered_orders": True,                                                                                                             
-        "update_orders_status": True,                                                                                                              
-        "update_price_table": True,                                                                                                                
-        "update_items_table": True,                                                                                                                
-        "update_item_category": True,    
+        "make_order": True,
+        "get_orders": True,
+        "edit_order_in_typing": True,
+        "save_order_as_template": True,
+        "transfer_order": True
     }

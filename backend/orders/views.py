@@ -161,7 +161,7 @@ class SpecificPriceTableView(APIView):
             return Response({"error": "Something went wrong when trying to update price table."}, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(request_body=PriceTableSerializer) 
-    def delete(self, request, table_code):
+    def delete(self, request, table_code): #TODO: permissions
         try:
             instance = PriceTable.objects.get(table_code=table_code)
             instance.delete()

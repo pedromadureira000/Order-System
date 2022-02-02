@@ -92,7 +92,7 @@ export const actions: ActionTree<UserState, RootState> = {
 			let error: string[] = Object.values(e.response.data)
 			let errorMessage = error[0][0]
 			dispatch("setAlert", {message: errorMessage , alertType: "error"}, { root: true })
-			// dispatch("setAlert", {message: "Something get wrong when trying to update profile.", alertType: "error"}, { root: true })
+			// dispatch("setAlert", {message: "Something went wrong when trying to update profile.", alertType: "error"}, { root: true })
 		}
 	},
 
@@ -108,7 +108,7 @@ export const actions: ActionTree<UserState, RootState> = {
 		}
 		catch(e){
 			console.log("error in updatePassword action: ", e);
-			dispatch("setAlert", {message: "Something get wrong when trying to update password.", alertType: "error"}, { root: true })
+			dispatch("setAlert", {message: "Something went wrong when trying to update password.", alertType: "error"}, { root: true })
 		}
 	},
 
@@ -119,7 +119,7 @@ export const actions: ActionTree<UserState, RootState> = {
 		// }
 		// catch(e){
       // console.log('error>>>>>>>>>>>>>>>>',e)
-			// dispatch("setAlert", {message: "Something get wrong, the email was not been sent.", alertType: "error"}, { root: true })
+			// dispatch("setAlert", {message: "Something went wrong, the email was not been sent.", alertType: "error"}, { root: true })
 		// }
 	// },
 
@@ -138,7 +138,7 @@ export const actions: ActionTree<UserState, RootState> = {
 		// }
 		// catch(e){
 			// console.log(">>>>>>>>>>", e)	
-			// dispatch("setAlert", {message: "Something get wrong, the password was not been changed.", alertType: "error"}, { root: true })
+			// dispatch("setAlert", {message: "Something went wrong, the password was not been changed.", alertType: "error"}, { root: true })
 		// }
 	// },
 
@@ -152,7 +152,7 @@ export const actions: ActionTree<UserState, RootState> = {
 			return data
 		}
 		catch(e){
-			// dispatch("setAlert", {message: "Something get wrong when trying to create user.", alertType: "error"}, { root: true })
+			// dispatch("setAlert", {message: "Something went wrong when trying to create user.", alertType: "error"}, { root: true })
 			// let errorMessage: string = Object.values(e.response.data)[0][0] <<< why i got this ts error? "Object is of type "unknown""
 			let error: string[] = Object.values(e.response.data)
 			let errorMessage = error[0][0]
@@ -186,7 +186,7 @@ export const actions: ActionTree<UserState, RootState> = {
 			let error: string[] = Object.values(e.response.data)
 			let errorMessage = error[0][0]
 			dispatch("setAlert", {message: errorMessage , alertType: "error"}, { root: true })
-      // dispatch("setAlert", {message: "Something get wrong when trying to update price table.", alertType: "error"}, { root: true })
+      // dispatch("setAlert", {message: "Something went wrong when trying to update price table.", alertType: "error"}, { root: true })
     }
   },
 
@@ -198,7 +198,7 @@ export const actions: ActionTree<UserState, RootState> = {
 			return "ok"
 		}
 		catch(e){
-			// dispatch("setAlert", {message: "Something get wrong when trying to delete user.", alertType: "error"}, { root: true })
+			// dispatch("setAlert", {message: "Something went wrong when trying to delete user.", alertType: "error"}, { root: true })
 			let error: string[] = Object.values(e.response.data)
 			let errorMessage = error[0]
 			dispatch("setAlert", {message: errorMessage, alertType: "error"}, { root: true })
@@ -223,7 +223,7 @@ export const actions: ActionTree<UserState, RootState> = {
 			return "ok"
 		}
 		catch(e){
-			// dispatch("setAlert", {message: "Something get wrong when trying to delete user.", alertType: "error"}, { root: true })
+			// dispatch("setAlert", {message: "Something went wrong when trying to delete user.", alertType: "error"}, { root: true })
 			let error: string[] = Object.values(e.response.data)
 			let errorMessage = error[0]
 			dispatch("setAlert", {message: errorMessage, alertType: "error"}, { root: true })

@@ -25,8 +25,7 @@ urlpatterns = [
     path('api/user/', include('core.urls')),
 
     # Management System
-    path('api/orders/', include('orders.urls')),
-    path('api/documents/', include('documents.urls')),
+    #  path('api/orders/', include('orders.urls')),
 ] 
 
 if settings.DEBUG:

@@ -8,8 +8,6 @@ class ItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
         fields = ['name', 'item_code','category', 'description', 'unit', 'barcode', 'active', 'image', 'note'] 
-        #i use 'id' to add item_price in price_table in 'pricetable-edit-menu.vue' file
-
 
     def create(self, validated_data):
         contracting_company = self.context.get('request_user').company
@@ -34,7 +32,7 @@ class OrderSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = ItemCategory
-        fields = ['id', 'category_code', 'name', 'description', 'note']
+        fields = ['category_code', 'name', 'description', 'note']
 
     def create(self, validated_data):
         contracting_company = self.context.get('request_user').company
