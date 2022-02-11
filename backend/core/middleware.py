@@ -25,7 +25,8 @@ class OneSessionPerUserMiddleware:
             if stored_session_key and stored_session_key != request.session.session_key:
                 return HttpResponseForbidden("Session already open.")
               #  raise exceptions.APIException("There was a problem!", 403)
-
+            if not stored_session_key and request.session.session_key: # When i exclude user stored_session_key for exemple
+                request.session.session_key = None
             response = self.get_response(request)
             return response
         response = self.get_response(request)

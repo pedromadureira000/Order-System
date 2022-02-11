@@ -11,7 +11,7 @@ class ItemTable(models.Model):
     class Meta:
         #  unique_together = (('contracting', 'item_table_code'),)
         constraints = [UniqueConstraint(fields=['contracting', 'item_table_code'], name='ItemTable compound primary key')]
-    #  item_table_id = models.CharField('Id da tabela de itens', max_length=10, primary_key=True, editable=False)
+    #  item_table_compound_id = models.CharField('Id da tabela de itens', max_length=10, primary_key=True, editable=False)
     contracting = models.ForeignKey('core.Contracting', on_delete=models.PROTECT, verbose_name="Contracting Company")
     item_table_code = models.SlugField("Item Table code", max_length=3)
     description = models.CharField(max_length=60, verbose_name="Description")
@@ -62,6 +62,7 @@ class PriceTable(models.Model):
     class Meta:
         #  unique_together = (('company', 'table_code'),)
         constraints = [UniqueConstraint(fields=['company', 'table_code'], name='PriceTable compound primary key')]
+    price_table_compound_id = models.SlugField(max_length=15) # 999#999#9999999
     company = models.ForeignKey('core.Company', on_delete=models.PROTECT)
     table_code = models.SlugField(max_length=7)
     description = models.CharField(max_length=60)

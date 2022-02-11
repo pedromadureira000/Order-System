@@ -10,7 +10,7 @@ class ItemSerializer(serializers.ModelSerializer):
         fields = ['name', 'item_code','category', 'description', 'unit', 'barcode', 'active', 'image', 'note'] 
 
     def create(self, validated_data):
-        contracting_company = self.context.get('request_user').company
+        contracting_company = self.context.get('request').user.company
         item = Item.objects.create(contracting_company=contracting_company, **validated_data)
         item.save()
         return item
@@ -35,7 +35,7 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ['category_code', 'name', 'description', 'note']
 
     def create(self, validated_data):
-        contracting_company = self.context.get('request_user').company
+        contracting_company = self.context.get('request').user.company
         item_category = ItemCategory.objects.create(contracting_company=contracting_company, **validated_data)
         item_category.save()
         return item_category
@@ -92,17 +92,16 @@ class PriceTableSerializer(serializers.ModelSerializer):
         model = PriceTable
         fields = ['table_code', 'name', 'description', 'price_items', 'note']
 
-
     def validate_price_items(self, value):
         for price_item in value:
-            if price_item["item"].contracting_company != self.context.get('request_user').company:
+            if price_item["item"].contracting_company != self.context.get('request').user.company:
                 raise serializers.ValidationError(f"You cannot add this item as a item_price.")
         return value
 
     def validate_table_code(self, value):
         if self.context.get('method') == "put":
             price_table = PriceTable.objects.get(table_code=value)
-            if price_table.contracting_company != self.context.get('request_user').company:
+            if price_table.contracting_company != self.context.get('request').user.company:
                 raise serializers.ValidationError(f"You cannot update this price table.")
             return value
         if self.context.get('method') == "post":
@@ -110,7 +109,7 @@ class PriceTableSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         price_items = validated_data.pop('price_items')
-        price_table = PriceTable.objects.create(contracting_company=self.context.get('request_user').company, **validated_data)
+        price_table = PriceTable.objects.create(contracting_company=self.context.get('request').user.company, **validated_data)
         price_table.save()
         for priceitem in price_items:
             PriceItem.objects.create(pricetable=price_table, **priceitem)

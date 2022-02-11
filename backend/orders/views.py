@@ -27,7 +27,7 @@ class ItemView(APIView):
     def post(self, request):
         if has_permission(request.user, 'create_item'):
             if isinstance(request.data, dict):
-                serializer = ItemSerializer(data=request.data, context={"request_user": request.user})
+                serializer = ItemSerializer(data=request.data, context={"request": request})
                 if serializer.is_valid():
                     serializer.save()
                     return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -102,7 +102,7 @@ class CategoryView(mixins.ListModelMixin, mixins.CreateModelMixin, generics.Gene
 
     def post(self, request):
         if has_permission(request.user, 'create_item_category'):
-            serializer = CategorySerializer(data=request.data, context={"request_user": request.user})
+            serializer = CategorySerializer(data=request.data, context={"request": request})
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data)
@@ -134,7 +134,7 @@ class PriceTableView(APIView):
     @swagger_auto_schema(request_body=PriceTableSerializer) 
     def post(self, request):
         if has_permission(request.user, 'create_price_table'):
-            serializer = PriceTableSerializer(data=request.data, context={"request_user": request.user, "method": "post"})
+            serializer = PriceTableSerializer(data=request.data, context={"request": request, "method": "post"})
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -145,14 +145,12 @@ class PriceTableView(APIView):
 class SpecificPriceTableView(APIView):
     @swagger_auto_schema(request_body=PriceTableSerializer) 
     def put(self, request, table_code):
-        if not table_code:
-            return Response({"error": "'table_code' field is missing."}, status=status.HTTP_400_BAD_REQUEST)
         try:
             instance = PriceTable.objects.get(table_code=table_code)
-            serializer = PriceTableSerializer(instance, data=request.data, context={"request_user": request.user, "method": "put"})
+            serializer = PriceTableSerializer(instance, data=request.data, context={"request": request, "method": "put"})
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return Response(serializer.data)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except PriceTable.DoesNotExist:
             return Response({"error": "Price table has not found."}, status=status.HTTP_400_BAD_REQUEST)

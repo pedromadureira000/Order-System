@@ -34,7 +34,7 @@ class Company(models.Model):
     # Establishment_set
     class Meta:
         constraints = [UniqueConstraint(fields=['contracting', 'company_code'], name='Company compound primary key')]
-    company_id = models.CharField('Id da empresa', max_length=7, unique=True, editable=False) 
+    company_compound_id = models.CharField('Id da empresa', max_length=7, unique=True, editable=False) 
     contracting = models.ForeignKey('Contracting', on_delete=models.PROTECT)
     company_code = models.SlugField('Codigo da empresa', max_length=3)
     item_table = models.ForeignKey('orders.ItemTable', blank=True, null=True, on_delete=models.PROTECT)
@@ -53,7 +53,7 @@ class Establishment(models.Model):
     # AgentEstablishment_set
     class Meta:
         constraints = [UniqueConstraint(fields=['company', 'establishment_code'], name='Establishment compound primary key')]
-    establishment_id = models.CharField('Id do estabelecimento', max_length=11, editable=False, unique=True) 
+    establishment_compound_id = models.CharField('Id do estabelecimento', max_length=11, editable=False, unique=True) 
     company = models.ForeignKey('Company', on_delete=models.PROTECT)
     establishment_code = models.SlugField(max_length=3)
     name = models.CharField(max_length=60)
@@ -69,7 +69,7 @@ class ClientTable(models.Model):
     #  Client_set
     class Meta:
         constraints = [UniqueConstraint(fields=['contracting', 'client_table_code'], name='ClientTable compound primary key')]
-    client_table_id = models.CharField('Id da tabela de clientes', max_length=6, unique=True, editable=False)
+    client_table_compound_id = models.CharField('Id da tabela de clientes', max_length=6, unique=True, editable=False)
     contracting = models.ForeignKey('Contracting', on_delete=models.PROTECT)
     client_table_code = models.SlugField("Código da tabela de cliente", max_length=2)
     description = models.CharField(max_length=60)
@@ -81,7 +81,7 @@ class Client(models.Model):
     # ClientEstablishment_set
     class Meta:
         constraints = [UniqueConstraint(fields=['client_table', 'client_code'], name='Client compound primary key')]
-    client_id = models.CharField('Id do Cliente', max_length=16, editable=False, unique=True,) 
+    client_compound_id = models.CharField('Id do Cliente', max_length=16, editable=False, unique=True,) 
     client_table = models.ForeignKey('ClientTable',on_delete=models.PROTECT)
     client_code = models.SlugField(blank=True, max_length=9)
     vendor_code = models.CharField(blank=True, max_length=9)
@@ -97,8 +97,8 @@ class Client(models.Model):
 class ClientEstablishment(models.Model):
     class Meta:
         constraints = [UniqueConstraint(fields=['client', 'establishment'], name='ClientEstablishment compound primary key')]
-    establishment = models.ForeignKey('Establishment',on_delete=models.PROTECT)
-    client = models.ForeignKey('Client',on_delete=models.PROTECT)
+    establishment = models.ForeignKey('Establishment',on_delete=models.CASCADE)
+    client = models.ForeignKey('Client',on_delete=models.CASCADE, related_name='client_establishments')
     price_table = models.ForeignKey('orders.PriceTable', blank=True, null=True, on_delete=models.SET_NULL)
 
 
@@ -106,7 +106,7 @@ class AgentEstablishment(models.Model):
     class Meta:
         constraints = [UniqueConstraint(fields=['agent', 'establishment'], name='AgentEstablishment compound primary key')]
     establishment = models.ForeignKey('Establishment',on_delete=models.PROTECT)
-    agent = models.ForeignKey('User',on_delete=models.PROTECT)
+    agent = models.ForeignKey('User',on_delete=models.CASCADE, related_name='agent_establishments')
 
 
 class UserManager(BaseUserManager):

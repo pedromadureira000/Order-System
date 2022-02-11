@@ -33,12 +33,14 @@ class Erp(AbstractUserRole):
         "get_agents": True,
         "update_agent": True,
         "delete_agent": True,
-        "update_orders_status": True,
         # Agent
         "access_all_establishments": True,
         "create_client": True,
-        "get_client": True,
+        "get_clients": True,
         "update_client": True,
+            #  "add_establishment_to_client": True,
+            #  "remove_establishment_from_client": True,
+            #  "assign_pricetable_to_client": True,
         "delete_client": True,
         "create_client_user": True,
         "get_client_users": True,
@@ -56,11 +58,8 @@ class Erp(AbstractUserRole):
         "get_price_tables": True,
         "update_price_table": True,
         "delete_price_table": True,
-        "add_establishment_to_client": True,
-        "get_client_establishments": True,
-        "remove_establishment_from_client": True,
-        "assign_pricetable_to_client": True,
-        "get_orders":True
+        "get_orders":True,
+        "update_orders_status": True,
     }
 
 class AdminAgent(AbstractUserRole):
@@ -73,11 +72,10 @@ class AdminAgent(AbstractUserRole):
         "get_agents": True,
         "update_agent": True,
         "delete_agent": True,
-        "update_orders_status": True,
         # Agent
         "access_all_establishments": True,
         "create_client": True,
-        "get_client": True,
+        "get_clients": True,
         "update_client": True,
         "delete_client": True,
         "create_client_user": True,
@@ -96,18 +94,15 @@ class AdminAgent(AbstractUserRole):
         "get_price_tables": True,
         "update_price_table": True,
         "delete_price_table": True,
-        "add_establishment_to_client": True,
-        "get_client_establishments": True,
-        "remove_establishment_from_client": True,
-        "assign_pricetable_to_client": True,
-        "get_orders":True
+        "get_orders":True,
+        "update_orders_status": True
     }
 
 class Agent(AbstractUserRole):
     available_permissions = {
         "access_all_establishments": False,
         "create_client": False,
-        "get_client": False,
+        "get_clients": False,
         "update_client": False,
         "delete_client": False,
         "create_client_user": False,
@@ -126,11 +121,12 @@ class Agent(AbstractUserRole):
         "get_price_tables": False,
         "update_price_table": False,
         "delete_price_table": False,
-        "add_establishment_to_client": False,
-        "get_client_establishments": False,
-        "remove_establishment_from_client": False,
-        "assign_pricetable_to_client": False,
-        "get_orders":False
+        #  "add_establishment_to_client": False,
+        #  "get_client_establishments": False,
+        #  "remove_establishment_from_client": False,
+        #  "assign_pricetable_to_client": False,
+        "get_orders":False,
+        "update_orders_status": False
     }
 
 class ClientUser(AbstractUserRole):
