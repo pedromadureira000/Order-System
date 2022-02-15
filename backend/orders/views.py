@@ -1,15 +1,87 @@
+from django.db import transaction
 from rest_framework import status, mixins, generics
 from rest_framework.response import Response
 from core.models import User
-from orders.serializers import ItemSerializer, CategorySerializer, OrderSerializer, PriceTableSerializer, \
-    PriceItemSerializer, AssignPriceTableSerializer, SpecificPriceItemSerializer
-from orders.models import Order, Item, ItemCategory, PriceTable, PriceItem
+from orders.serializers import ItemSerializer, CategorySerializer, ItemTableSerializer, OrderSerializer, PriceTableSerializer
+from orders.models import ItemTable, Order, Item, ItemCategory, PriceTable, PriceItem
 from rest_framework.views import APIView
 from rolepermissions.checkers import has_permission, has_role
 from drf_yasg.utils import swagger_auto_schema
 
 
-# --------------------------/ Item / --------------------------------------------
+class ItemTableView(APIView):
+    def get(self, request):
+        user = request.user
+        if has_permission(user, 'get_item_tables'):
+            item_table = ItemTable.objects.filter(contracting=user.contracting)
+            data = ItemTableSerializer(item_table, many=True).data
+            return Response(data)
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+    @swagger_auto_schema(request_body=ItemTableSerializer) 
+    @transaction.atomic
+    def post(self, request):
+            if has_permission(request.user, 'create_company'):
+                data = request.data
+                serializer = ItemTableSerializer(data=data, context={"request":request})
+                if serializer.is_valid():
+                    try:
+                        serializer.save()
+                        return Response(serializer.data)
+                    except Exception as error:
+                        transaction.rollback()
+                        print(error)
+                        return Response({"error": "Something went wrong when trying to create item table."},
+                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': "You don't have permission to access this resource."},status=status.HTTP_401_UNAUTHORIZED)
+
+class SpecificItemTable(APIView):
+    @transaction.atomic
+    @swagger_auto_schema(request_body=ItemTableSerializer) 
+    def put(self, request, item_table_compound_id):
+        if has_permission(request.user, 'update_item_table'):
+            if item_table_compound_id.split("#")[0] != request.user.contracting.contracting_code:
+                return Response(status=status.HTTP_404_NOT_FOUND) 
+            try:
+                item_table = ItemTable.objects.get(item_table_compound_id=item_table_compound_id)
+            except ItemTable.DoesNotExist:
+                return Response({"error": "'item_table_compound_id' doesn't match with any item table."},
+                        status=status.HTTP_400_BAD_REQUEST)
+            serializer = ItemTableSerializer(item_table, data=request.data, partial=True)
+            if serializer.is_valid():
+                try:
+                    serializer.save()
+                    return Response(serializer.data)
+                except Exception as error:
+                    transaction.rollback()
+                    print(error)
+                    return Response({"error": "Something went wrong when trying to update item table."},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': "You don't have permission to access this resource."},status=status.HTTP_401_UNAUTHORIZED)
+    @transaction.atomic
+    def delete(self, request, item_table_compound_id):
+        if has_permission(request.user, 'delete_item_table'):
+            if item_table_compound_id.split("#")[0] != request.user.contracting.contracting_code:
+                return Response(status=status.HTTP_404_NOT_FOUND) 
+            try:
+                item_table = ItemTable.objects.get(item_table_compound_id=item_table_compound_id)
+            except ItemTable.DoesNotExist:
+                return Response({"error": "'item_table_compound_id' doesn't match with any item table."},
+                        status=status.HTTP_400_BAD_REQUEST)
+            try:
+                item_table.delete()
+                return Response("Item table deleted.")
+            except ProtectedError:
+                return Response({"error": "you cannot delete this item table because it has records linked to it."}, 
+                        status=status.HTTP_400_BAD_REQUEST)
+            except Exception as error:
+                transaction.rollback()
+                print(error)
+                return Response({"error": "Something went wrong when trying to delete item table."},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'error': "You don't have permission to access this resource."},status=status.HTTP_401_UNAUTHORIZED)
+
 
 class ItemView(APIView):
     def get(self, request):
@@ -171,37 +243,37 @@ class SpecificPriceTableView(APIView):
             return Response({"error": "Something went wrong when trying to delete price table."}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class AssignPriceTableView(APIView):
-    @swagger_auto_schema(request_body=AssignPriceTableSerializer) 
-    def post(self, request):
-        serializer = AssignPriceTableSerializer(data=request.data)
-        if serializer.is_valid():
-            table_code = serializer.validated_data['table_code']
-            company_code = serializer.validated_data['company_code']
-            try:
-                company = Company.objects.get(company_code=company_code)
-                price_table = PriceTable.objects.get(table_code=table_code)
-                company.price_table = price_table
-                company.save()
-                return Response("The price table has been assigned", status=status.HTTP_200_OK)
-            except Company.DoesNotExist:
-                return Response({"error": "Company has not found."}, status=status.HTTP_400_BAD_REQUEST)
-            except Exception as error:
-                print(error)
-                return Response({"error": "Something went wrong when trying assign price table to user."},
-                        status=status.HTTP_400_BAD_REQUEST)
+#  class AssignPriceTableView(APIView):
+    #  @swagger_auto_schema(request_body=AssignPriceTableSerializer) 
+    #  def post(self, request):
+        #  serializer = AssignPriceTableSerializer(data=request.data)
+        #  if serializer.is_valid():
+            #  table_code = serializer.validated_data['table_code']
+            #  company_code = serializer.validated_data['company_code']
+            #  try:
+                #  company = Company.objects.get(company_code=company_code)
+                #  price_table = PriceTable.objects.get(table_code=table_code)
+                #  company.price_table = price_table
+                #  company.save()
+                #  return Response("The price table has been assigned", status=status.HTTP_200_OK)
+            #  except Company.DoesNotExist:
+                #  return Response({"error": "Company has not found."}, status=status.HTTP_400_BAD_REQUEST)
+            #  except Exception as error:
+                #  print(error)
+                #  return Response({"error": "Something went wrong when trying assign price table to user."},
+                        #  status=status.HTTP_400_BAD_REQUEST)
 
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            #  return Response(serializer.data, status=status.HTTP_201_CREATED)
+        #  return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
 
 # -----------------------------------/ PriceItem /-----------------------------
 
-class PriceItemView(APIView):
-    @swagger_auto_schema(request_body=PriceItemSerializer) 
-    def post(self, request):
-        if has_role(request.user, 'ERPClient'):
+#  class PriceItemView(APIView):
+    #  @swagger_auto_schema(request_body=PriceItemSerializer) 
+    #  def post(self, request):
+        #  if has_role(request.user, 'ERPClient'):
             #  item = request.data.get('item')
             #  pricetable = request.data.get('pricetable')
             #  if not item or not pricetable:
@@ -222,75 +294,75 @@ class PriceItemView(APIView):
             #  copy_data['pricetable'] = pricetable.pk
 
             #  serializer = PriceItemSerializer(data=copy_data)
-            serializer = PriceItemSerializer(data=request.data, context={"currentUser": request.user})
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response({"error": "You don't have permissions to access this resource."},
-                        status=status.HTTP_401_UNAUTHORIZED)
+            #  serializer = PriceItemSerializer(data=request.data, context={"currentUser": request.user})
+            #  if serializer.is_valid():
+                #  serializer.save()
+                #  return Response(serializer.data, status=status.HTTP_201_CREATED)
+            #  return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        #  return Response({"error": "You don't have permissions to access this resource."},
+                        #  status=status.HTTP_401_UNAUTHORIZED)
 
 
-class SpecificPriceItemView(APIView):
-    def get(self, request, item_code, table_code):
-        if has_role(request.user, 'ERPClient'):
-            try:
-                priceitem = PriceItem.objects.get(pricetable__table_code=table_code, item__item_code=item_code)
-            except PriceItem.DoesNotExist:
-                return Response(status=status.HTTP_404_NOT_FOUND)
-            if priceitem.pricetable.contracting_company != request.user.company:
-                return Response(status=status.HTTP_400_BAD_REQUEST)
-            serializer = PriceItemSerializer(priceitem)
-            return Response(serializer.data)
+#  class SpecificPriceItemView(APIView):
+    #  def get(self, request, item_code, table_code):
+        #  if has_role(request.user, 'ERPClient'):
+            #  try:
+                #  priceitem = PriceItem.objects.get(pricetable__table_code=table_code, item__item_code=item_code)
+            #  except PriceItem.DoesNotExist:
+                #  return Response(status=status.HTTP_404_NOT_FOUND)
+            #  if priceitem.pricetable.contracting_company != request.user.company:
+                #  return Response(status=status.HTTP_400_BAD_REQUEST)
+            #  serializer = PriceItemSerializer(priceitem)
+            #  return Response(serializer.data)
 
-        return Response({"error": "You don't have permissions to access this resource."},
-                        status=status.HTTP_401_UNAUTHORIZED)
-    @swagger_auto_schema(request_body=SpecificPriceItemSerializer) 
-    def put(self, request, item_code, table_code):
-        if has_role(request.user, 'ERPClient'):
-            try:
-                pricetable = PriceTable.objects.get(table_code=table_code)
-            except PriceTable.DoesNotExist:
-                return Response({"response":"A tabela informada nao existe."}, status=status.HTTP_404_NOT_FOUND)
-            try:
-                item = Item.objects.get(item_code=item_code)
-            except Item.DoesNotExist:
-                return Response({"response": "O item informado nao existe."}, status=status.HTTP_404_NOT_FOUND)
-            if pricetable.contracting_company != request.user.company:
-                return Response("You cannot access this price table.", status=status.HTTP_400_BAD_REQUEST)
-            try:
-                instance = PriceItem.objects.get(item__item_code=item_code, pricetable__table_code=table_code)
-            except PriceItem.DoesNotExist:
-                return Response({"response": "O PriceItem imformado nao existe."}, status=status.HTTP_404_NOT_FOUND)
-            serializer = SpecificPriceItemSerializer(instance, data=request.data, context={'currentUser': request.user, 'method': 'put'})
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response({"error": "You don't have permissions to access this resource."},
-                        status=status.HTTP_401_UNAUTHORIZED)
+        #  return Response({"error": "You don't have permissions to access this resource."},
+                        #  status=status.HTTP_401_UNAUTHORIZED)
+    #  @swagger_auto_schema(request_body=SpecificPriceItemSerializer) 
+    #  def put(self, request, item_code, table_code):
+        #  if has_role(request.user, 'ERPClient'):
+            #  try:
+                #  pricetable = PriceTable.objects.get(table_code=table_code)
+            #  except PriceTable.DoesNotExist:
+                #  return Response({"response":"A tabela informada nao existe."}, status=status.HTTP_404_NOT_FOUND)
+            #  try:
+                #  item = Item.objects.get(item_code=item_code)
+            #  except Item.DoesNotExist:
+                #  return Response({"response": "O item informado nao existe."}, status=status.HTTP_404_NOT_FOUND)
+            #  if pricetable.contracting_company != request.user.company:
+                #  return Response("You cannot access this price table.", status=status.HTTP_400_BAD_REQUEST)
+            #  try:
+                #  instance = PriceItem.objects.get(item__item_code=item_code, pricetable__table_code=table_code)
+            #  except PriceItem.DoesNotExist:
+                #  return Response({"response": "O PriceItem imformado nao existe."}, status=status.HTTP_404_NOT_FOUND)
+            #  serializer = SpecificPriceItemSerializer(instance, data=request.data, context={'currentUser': request.user, 'method': 'put'})
+            #  if serializer.is_valid():
+                #  serializer.save()
+                #  return Response(serializer.data, status=status.HTTP_201_CREATED)
+            #  return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        #  return Response({"error": "You don't have permissions to access this resource."},
+                        #  status=status.HTTP_401_UNAUTHORIZED)
 
-    def delete(self, request, item_code, table_code):
-        if has_role(request.user, 'ERPClient'):
-            try:
-                priceitem = PriceItem.objects.get(pricetable__table_code=table_code, item__item_code=item_code)
-            except PriceItem.DoesNotExist:
-                return Response(status=status.HTTP_404_NOT_FOUND)
-            if not priceitem:
-                return Response({"response": "Item preco nao encontrado."},
-                                status=status.HTTP_404_NOT_FOUND)
-            if priceitem.pricetable.contracting_company != request.user.company:
-                return Response("You cannot access this price table.", status=status.HTTP_400_BAD_REQUEST)
-            operation = priceitem.delete()
-            data = {}
-            if operation:
-                data['success'] = 'deleted successful'
-            else:
-                data['failure'] = 'delete failed'
-            return Response(data, status=status.HTTP_200_OK)
+    #  def delete(self, request, item_code, table_code):
+        #  if has_role(request.user, 'ERPClient'):
+            #  try:
+                #  priceitem = PriceItem.objects.get(pricetable__table_code=table_code, item__item_code=item_code)
+            #  except PriceItem.DoesNotExist:
+                #  return Response(status=status.HTTP_404_NOT_FOUND)
+            #  if not priceitem:
+                #  return Response({"response": "Item preco nao encontrado."},
+                                #  status=status.HTTP_404_NOT_FOUND)
+            #  if priceitem.pricetable.contracting_company != request.user.company:
+                #  return Response("You cannot access this price table.", status=status.HTTP_400_BAD_REQUEST)
+            #  operation = priceitem.delete()
+            #  data = {}
+            #  if operation:
+                #  data['success'] = 'deleted successful'
+            #  else:
+                #  data['failure'] = 'delete failed'
+            #  return Response(data, status=status.HTTP_200_OK)
 
-        return Response({"error": "You don't have permissions to access this resource."},
-                        status=status.HTTP_401_UNAUTHORIZED)
+        #  return Response({"error": "You don't have permissions to access this resource."},
+                        #  status=status.HTTP_401_UNAUTHORIZED)
 
 
 # --------------------------------/ Orders /---------------------------------/

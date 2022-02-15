@@ -2,7 +2,7 @@ from django.urls import path
 from django.urls.conf import include
 #  from rest_framework.authtoken.views import obtain_auth_token
 from core.views import (
-    CheckAuthenticated, ClientTableView, ClientView, ContractingView, EstablishmentView, SpecificClient, SpecificClientTable, SpecificContracting, SpecificEstablishment, UpdateUserPassword, UserView, SpecificUser, CompanyView, SpecificCompany, Login, Logout, GetCSRFToken
+    AdminAgentView, AgentView, ClientTableView, ClientUserView, ClientView, ContractingView, EstablishmentView, OwnProfileView, SpecificAdminAgent, SpecificAgent, SpecificClient, SpecificClientTable, SpecificClientUser, SpecificContracting, SpecificEstablishment, UpdateUserPassword, CompanyView, SpecificCompany, Login, Logout, GetCSRFToken
 )
 
 urlpatterns = [
@@ -10,7 +10,6 @@ urlpatterns = [
     path('login', Login.as_view()),
     path('logout', Logout.as_view()),
     path('getcsrf', GetCSRFToken.as_view()),
-    path('checkauth', CheckAuthenticated.as_view()),
     #Organization
     path('contracting', ContractingView.as_view()),
     path('contracting/<contracting_code>', SpecificContracting.as_view()),
@@ -23,8 +22,13 @@ urlpatterns = [
     path('client', ClientView.as_view()),
     path('client/<client_compound_id>', SpecificClient.as_view()),
     #User
-    path('user', UserView.as_view()),
-    path('user/<username>/<contracting_code>', SpecificUser.as_view()),
+    path('own_profile', OwnProfileView.as_view()),
+    path('admin_agent', AdminAgentView.as_view()),
+    path('admin_agent/<username>/<contracting_code>', SpecificAdminAgent.as_view()),
+    path('agent', AgentView.as_view()),
+    path('agent/<username>/<contracting_code>', SpecificAgent.as_view()),
+    path('client_user', ClientUserView.as_view()),
+    path('client_user/<username>/<contracting_code>', SpecificClientUser.as_view()),
     path('update_user_password', UpdateUserPassword.as_view()),
     #  path('gettoken', obtain_auth_token, name='gettoken'),
 ]

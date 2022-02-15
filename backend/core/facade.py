@@ -3,7 +3,7 @@ from django.db.models.query_utils import Q
 from rolepermissions.checkers import has_permission, has_role
 from rolepermissions.permissions import available_perm_status, grant_permission, revoke_permission
 from core.models import AgentEstablishment, Client, ClientEstablishment, ClientTable, Company, User
-from orders.models import PriceTable
+from orders.models import ItemTable, PriceItem, PriceTable
 from .roles import Agent
 
 
@@ -24,12 +24,19 @@ def get_all_client_users_by_agent(user):
         return User.objects.filter(Q(contracting=user.contracting), Q(groups__name='client_user'))
     return User.objects.filter(Q(contracting=user.contracting), Q(groups__name='client_user'), Q(client__client_table__company__in=Company.objects.filter(establishment__in=user.establishments.all())))
 
+def get_agent_companies(agent):
+    return Company.objects.filter(establishment__in=agent.establishments.all())
+
 def get_agent_client_tables(agent):
-    return ClientTable.objects.filter(company__in=Company.objects.filter(establishment__in=agent.establishments.all()))
+    return ClientTable.objects.filter(company__in=get_agent_companies(agent))
+
+def get_agent_item_tables(agent):
+    return ItemTable.objects.filter(company__in=get_agent_companies(agent))
 
 def get_clients_by_agent(user):
     client_tables = get_agent_client_tables(user)
     return Client.objects.filter(client_table__in=client_tables)
+
 
 #------------------------------------/Reverse Foreign key Batch Updates/---------------------------------------------------
 def update_client_establishments(client, client_establishments):
@@ -71,3 +78,16 @@ def update_agent_establishments(agent, agent_establishments):
     establishments_to_create = list(filter(lambda estab: estab["establishment"].establishment_compound_id in to_create, agent_establishments))
     agent_establishments_to_create = [AgentEstablishment(establishment=obj['establishment'], agent=agent) for obj in establishments_to_create]
     agent.agent_establishments.bulk_create(agent_establishments_to_create)
+
+def update_price_items_from_price_table(price_table, price_items):
+    price_items_set = {(price_item['item'].item_compound_id, price_item['unit_price']) for price_item in price_items}
+    current_price_items = PriceItem.objects.filter(price_table=price_table)
+    current_price_items_set = set(current_price_items.values_list('item__item_compound_id', 'unit_price'))
+    intersection = price_items_set.intersection(current_price_items_set)
+    to_delete = current_price_items_set.difference(intersection)
+    to_create = price_items_set.difference(intersection)
+    current_price_items.filter(item__item_compound_id__in=to_delete).delete()
+    price_items_to_create = list(filter(lambda price_item: (price_item["item"].item_compound_id, price_item['unit_price']) in \
+            to_create, price_items))
+    price_items_to_create = [PriceItem(item=obj[0], unit_price=obj[1], price_table=price_table) for obj in price_items_to_create]
+    price_table.price_items.bulk_create(price_items_to_create)

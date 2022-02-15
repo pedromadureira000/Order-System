@@ -15,7 +15,7 @@ Including another URLconf
 """
 #  from django.conf.urls import url # this is deprecated in django 4.0
 from django.contrib import admin
-from django.urls import path, include, re_path
+from django.urls import path, include
 from django.conf import settings
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
@@ -25,7 +25,7 @@ urlpatterns = [
     path('api/user/', include('core.urls')),
 
     # Management System
-    #  path('api/orders/', include('orders.urls')),
+    path('api/orders/', include('orders.urls')),
 ] 
 
 if settings.DEBUG:

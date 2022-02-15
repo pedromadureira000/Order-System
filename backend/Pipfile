@@ -20,9 +20,9 @@ django-anymail = "*"
 gunicorn = "*"
 django-cpf-cnpj = "*"
 pillow = "*"
-python-barcode = "*"
-pdfkit = "*"
-jinja2 = "*"
+# python-barcode = "*"
+# pdfkit = "*"
+# jinja2 = "*"
 
 [dev-packages]
 # pytest = "*"

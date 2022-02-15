@@ -3,6 +3,7 @@ from rest_framework import exceptions, status
 from django.contrib.sessions.models import Session
 from datetime import datetime
 from .models import LoggedInUser
+from django.contrib.auth import logout
 
 class OneSessionPerUserMiddleware:
     # Called only once when the web server starts
@@ -10,24 +11,21 @@ class OneSessionPerUserMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        print('inside onesession middleware: ', datetime.now())
+        #  print('inside onesession middleware: ', datetime.now())
         if request.user.is_authenticated:
             path = request.get_full_path()
-            #  stored_session_key = request.user.logged_in_user.session_key
-            stored_session_key = LoggedInUser.objects.get_or_create(user=request.user)[0].session_key 
-            # this will avoid "user don't have 'logged_in_user'" errors.
-            if path == '/api/user/checkauth':
+            try:
+                stored_session_key = LoggedInUser.objects.get(user=request.user).session_key 
+            except LoggedInUser.DoesNotExist:
+                # This will occur when an user attempt to access an API with a old valid session after he has being logged out.
+                logout(request)
+                return HttpResponseForbidden("Invalid session. Try to login again.")
+            if path == '/api/user/own_profile' and request.method == 'GET':
                 request.user.logged_in_user.session_key = request.session.session_key
                 request.user.logged_in_user.save()
                 response = self.get_response(request)
                 return response
-
-            if stored_session_key and stored_session_key != request.session.session_key:
-                return HttpResponseForbidden("Session already open.")
-              #  raise exceptions.APIException("There was a problem!", 403)
-            if not stored_session_key and request.session.session_key: # When i exclude user stored_session_key for exemple
-                request.session.session_key = None
-            response = self.get_response(request)
-            return response
+            if  stored_session_key != request.session.session_key:
+                return HttpResponseForbidden("Session already open.") #TODO change this for drf forbidden response
         response = self.get_response(request)
         return response

@@ -2,7 +2,7 @@ import re
 from rest_framework import serializers
 from rolepermissions.checkers import has_permission, has_role
 from rolepermissions.roles import get_user_roles
-from core.facade import get_agent_client_tables
+from core.facade import get_agent_client_tables, get_agent_companies, get_agent_item_tables
 
 from core.models import ClientTable
 from core.roles import Agent
@@ -59,25 +59,24 @@ def contracting_can_create_user(contracting):
         return False
     return True
 
-def agent_has_access_to_this_client(user, client):
-    client_tables = get_agent_client_tables(user)
+def agent_has_access_to_this_client(agent, client):
+    client_tables = get_agent_client_tables(agent)
     if client.client_table not in client_tables:
         return False
     else: 
         return True
 
-def agent_has_permission_to_assign_this_client_table_to_client(user, client_table):
-    client_tables = get_agent_client_tables(user)
+def agent_has_permission_to_assign_this_client_table_to_client(agent, client_table):
+    client_tables = get_agent_client_tables(agent)
     if not client_table in client_tables:
         return False
     return True
 
-def agent_has_permission_to_assign_this_establishment_to_client(user, establishment):
-    client_tables = get_agent_client_tables(user)
+def agent_has_permission_to_assign_this_establishment_to_client(agent, establishment):
+    client_tables = get_agent_client_tables(agent)
     if not establishment.company.client_table in client_tables:
         return False
     return True
-
 
 def agent_permissions_exist(agent_permissions):
     for permission in agent_permissions:
@@ -85,6 +84,22 @@ def agent_permissions_exist(agent_permissions):
             print('========================> : Terrible error' )
             raise serializers.ValidationError(f"You can't assign '{permission}' permission to an agent.")
 
+def req_user_is_agent_without_all_estabs(request_user):
+    return has_role(request_user, 'agent') and not has_permission(request_user, 'access_all_establishments')
+
+def agent_has_access_to_this_item_table(agent, item_table):
+    item_tables = get_agent_item_tables(agent)
+    if item_table not in item_tables:
+        return False
+    else: 
+        return True
+
+def agent_has_access_to_this_price_table(agent, price_table):
+    companies = get_agent_companies(agent)
+    if price_table.company not in companies:
+        return False
+    else: 
+        return True
 
 #----------------/ Django default Field Method
 class UserContracting:

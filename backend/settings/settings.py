@@ -18,11 +18,7 @@ import dj_database_url
 from decouple import config, Csv
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
-
 import datetime
-
-from django.conf import settings
-from drf_yasg.generators import OpenAPISchemaGenerator, EndpointEnumerator
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -44,13 +40,15 @@ AUTH_USER_MODEL = 'core.User'
 
 ROLEPERMISSIONS_MODULE = 'core.roles'
 
+ROLEPERMISSIONS_SUPERUSER_SUPERPOWERS = False
 
+CSRF_TRUSTED_ORIGINS = ['http://localhost:3000'] 
 # Application definition
 
 INSTALLED_APPS = [
     'core',
     'orders',
-    'documents',
+    #  'documents',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -97,6 +95,7 @@ TEMPLATES = [
     },
 ]
 
+
 AUTHENTICATION_BACKENDS = [
     # AxesBackend should be the first backend in the AUTHENTICATION_BACKENDS list.
     #  'axes.backends.AxesBackend',
@@ -105,14 +104,16 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
+#'rest_framework.authentication.TokenAuthentication'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication', #'rest_framework.authentication.TokenAuthentication'
+        'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ]
 }
+
 
 WSGI_APPLICATION = 'settings.wsgi.application'
 
@@ -135,7 +136,6 @@ else:
     ANYMAIL = {'MAILGUN_API_KEY': config('MAILGUN_API_KEY'),
                'MAILGUN_SENDER_DOMAIN': config('MAILGUN_SENDER_DOMAIN'),
                }
-
 
 # Sentry
 

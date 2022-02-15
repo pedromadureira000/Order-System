@@ -8,13 +8,14 @@ from django.db import models
 from django.db.models.constraints import UniqueConstraint
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django_cpf_cnpj.fields import CPFField, CNPJField
+from django_cpf_cnpj.fields import CNPJField
 from rolepermissions.roles import assign_role
 
 status_choices = (
-    (1, "Ativado"),
     (0, "Desativado"),
+    (1, "Ativado")
 )
+
 
 class Contracting(models.Model):
     # ItemTable_set
@@ -83,7 +84,7 @@ class Client(models.Model):
         constraints = [UniqueConstraint(fields=['client_table', 'client_code'], name='Client compound primary key')]
     client_compound_id = models.CharField('Id do Cliente', max_length=16, editable=False, unique=True,) 
     client_table = models.ForeignKey('ClientTable',on_delete=models.PROTECT)
-    client_code = models.SlugField(blank=True, max_length=9)
+    client_code = models.SlugField(max_length=9)
     vendor_code = models.CharField(blank=True, max_length=9)
     name = models.CharField(max_length=60)
     cnpj = models.CharField(max_length=10)
@@ -188,10 +189,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     establishments = models.ManyToManyField("Establishment", through='AgentEstablishment', verbose_name="Agent establishments")
     user_code = models.CharField('User code', max_length=50, unique=True, editable=False)
     username = models.SlugField(_('username'), max_length=50)
-    first_name = models.CharField(_('first name'), max_length=50)
+    first_name = models.CharField(_('first name'), max_length=50, blank=True)
     last_name = models.CharField(_('last name'), max_length=50, blank=True)
     email = models.EmailField(_('email address'))
-    cpf = CPFField(masked=True, blank=True, verbose_name="CPF")
     status = models.IntegerField(choices=status_choices)
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
     note = models.TextField(blank=True)
