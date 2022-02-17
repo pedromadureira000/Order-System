@@ -38,7 +38,7 @@ class ItemSerializer(serializers.ModelSerializer):
         request_user = self.context['request'].user
         item_table = attrs.get('item_table')
         category = attrs.get('category')
-        if self.context['method'] == 'post':
+        if self.context['request'].method == 'POST':
             # item_table belongs to user contracting
             if item_table.contracting != request_user.contracting:
                 raise serializers.ValidationError(f"You cannot access this item_table.")
@@ -51,7 +51,7 @@ class ItemSerializer(serializers.ModelSerializer):
             # Agent without access to all establishments can't access an item from item_table which he doesn't have access.
             if req_user_is_agent_without_all_estabs(request_user) and not agent_has_access_to_this_item_table(request_user, item_table):
                 raise serializers.ValidationError(f"You have no access to this item table.")
-        if self.context['method'] == "put":
+        if self.context['request'].method == 'PUT':
             if attrs.get('category'):
                 # Category belongs to user contracting
                 if category.item_table.contracting != request_user.contracting:
@@ -88,7 +88,7 @@ class CategorySerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         request_user = self.context['request'].user
         item_table = attrs.get('item_table')
-        if self.context['method'] == 'post':
+        if self.context['request'].method == 'POST':
             # item_table belongs to user contracting
             if item_table.contracting != request_user.contracting:
                 raise serializers.ValidationError(f"You cannot access this item_table")
@@ -96,7 +96,7 @@ class CategorySerializer(serializers.ModelSerializer):
             if req_user_is_agent_without_all_estabs(request_user) and not agent_has_access_to_this_item_table(request_user, item_table):
                 raise serializers.ValidationError(f"You cannot access this item_table")
         # If the request is for update the instance, some related fields may not be sent since 'parcial=True' is being used
-        if self.context['method'] == 'put':
+        if self.context['request'].method == 'PUT':
             item_table = self.instance.item_table
             # Agent without access to all establishments can't access an category from an item_table which he doesn't have access.
             if req_user_is_agent_without_all_estabs(request_user) and not agent_has_access_to_this_item_table(request_user, item_table):
@@ -153,14 +153,14 @@ class PriceTableSerializer(serializers.ModelSerializer):
                     #TODO test
                     raise serializers.ValidationError(f"You cannot add this item as a item_price.")
         #---------------------------/ Company
-        if self.context['method'] == 'post':
+        if self.context['request'].method == 'POST':
             # Company is from the same contracting that request_user
             if company.contracting != request_user.contracting:
                 raise serializers.ValidationError(f"You have no access to this company.")
             # User is agent without all estabs and don't have access to this company
             if request_user_is_agent_without_all_estabs and company not in get_agent_companies(request_user): #TODO test
                 raise serializers.ValidationError(f"You have no access to this company.")
-        if self.context['method'] == 'put':
+        if self.context['request'].method == 'PUT':
             # Agent without access to all establishments should not access some price_tables
             if request_user_is_agent_without_all_estabs and not agent_has_access_to_this_price_table(request_user, self.instance):
                 raise serializers.ValidationError(f"You cannot update this price table.")

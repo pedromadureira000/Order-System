@@ -1,5 +1,6 @@
 from typing import OrderedDict
 from rest_framework import serializers
+from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.validators import UniqueTogetherValidator
 from core.facade import update_agent_establishments, update_agent_permissions, update_client_establishments
 from core.models import User
@@ -26,7 +27,6 @@ class ContractingSerializer(serializers.ModelSerializer):
 class CompanySerializer(serializers.ModelSerializer):
     client_table=serializers.SlugRelatedField(slug_field='client_table_compound_id', 
             queryset=ClientTable.objects.all(), allow_null=True)
-            #  queryset=ClientTable.objects.filter(contracting=sel), allow_null=True)
     item_table=serializers.SlugRelatedField(slug_field='item_table_compound_id',
             queryset=ItemTable.objects.all(), allow_null=True)
     contracting=serializers.HiddenField(default=UserContracting())
@@ -39,15 +39,17 @@ class CompanySerializer(serializers.ModelSerializer):
 
     def validate_client_table(self, value):
         if value:
+            # Contracting Ownership
             if value.contracting != self.context["request"].user.contracting:
-                raise serializers.ValidationError(f"You can't access this client_table.")
+                raise NotFound(detail={"detail": ["Client table not found"]})
             return value
         return value
 
     def validate_item_table(self, value):
         if value:
+            # Contracting Ownership
             if value.contracting != self.context["request"].user.contracting:
-                raise serializers.ValidationError(f"You can't access this item_table.")
+                raise NotFound(detail={"detail": ["Item table not found"]})
             return value
         return value
 
@@ -74,7 +76,7 @@ class EstablishmentSerializer(serializers.ModelSerializer):
     def validate_company(self, value):
         if value:
             if value.contracting != self.context["request"].user.contracting:
-                raise serializers.ValidationError(f"You can't access this company.")
+                raise serializers.ValidationError(f"Company not found")
             return value
         return value
 
@@ -130,7 +132,7 @@ class ClientEstablishmentToClientSerializer(serializers.ModelSerializer):
         if value:
         # - Contracting owership
             if value.company.contracting != self.context["request"].user.contracting:
-                raise serializers.ValidationError(f"Can't access this establishment.")
+                raise serializers.ValidationError(f"Establishment not found")
         return value
 
 
@@ -165,15 +167,15 @@ class ClientSerializer(serializers.ModelSerializer):
                     # Check if agent can access establishment
                     if not agent_has_permission_to_assign_this_establishment_to_client(request_user, client_establishment['establishment']):
                         raise serializers.ValidationError(f"You can't add this establishment to this client.")
-        if self.context['method'] == 'post':
+        if self.context['request'].method == 'POST':
             # ----------------/ Client Table
             # Contracting owership
             if attrs.get('client_table').contracting != request_user.contracting:
-                raise serializers.ValidationError(f"Can't access this client_table.")
+                raise serializers.ValidationError(f"Client table not found")
             if request_user_is_agent_without_all_estabs:
                 if not agent_has_permission_to_assign_this_client_table_to_client(request_user, attrs.get('client_table')):
                     raise serializers.ValidationError(f"Can't access this client_table.")
-        if self.context['method'] == 'put':
+        if self.context['request'].method == 'PUT':
             # Check if agent without all estabs have access to this client
             if request_user_is_agent_without_all_estabs and not agent_has_access_to_this_client(request_user, self.instance):
                 raise serializers.ValidationError(f"You can't update this client.")
@@ -248,20 +250,20 @@ class UserSerializer(serializers.ModelSerializer):
             message="The field 'username' must be unique.")]
 
     def validate(self, attrs):
-        if self.context["method"] == "put":
-            # I need to call it manualy in the update view, because HiddenField don't work with partial=True
+        if self.context['request'].method == 'PUT':
+            # I need to call it manually in the update view, because HiddenField don't work with partial=True
             self.validate_contracting(self.context["request"].user.contracting)
         return attrs
 
     def validate_contracting(self, value):
-        if self.context["method"] == "post":
+        if self.context['request'].method == 'POST':
             # validate the limit of users by contracting
             if not contracting_can_create_user(value):
                 raise serializers.ValidationError(f"You cannot create more users. Your contracting company already reach the active users limit.")
-        # Validate contracting owership
-        if self.context["method"] == "put":
+        # Validate contracting ownership
+        if self.context['request'].method == 'PUT': # There is any problem for double validation?
             if self.instance.contracting.contracting_code != value.contracting_code:
-                raise serializers.ValidationError(f"You cannot update this user.")
+                raise serializers.ValidationError(f"User not found")
         return value
 
     def update(self, instance, validated_data):
@@ -307,9 +309,9 @@ class AgentEstablishmentToUserSerializer(serializers.ModelSerializer):
         model=AgentEstablishment
         fields = ['establishment']
     def validate_establishment(self, value):
-    # Contracting Owership
+    # Contracting Ownership
         if value.company.contracting != self.context['request'].user.contracting: 
-            raise serializers.ValidationError(f"Can't access this establishment.")
+            raise serializers.ValidationError(f"Establishment not found")
         return value
 
 class OwnProfileSerializer(UserSerializer):
@@ -398,10 +400,10 @@ class ClientUserSerializer(UserSerializer):
 
     def validate_client(self, value):
         request_user = self.context["request"].user
-        if self.context["method"] == "post":
+        if self.context['request'].method == 'POST':
             # Check if client is from the same contracting as the request user
             if value.client_table.contracting != request_user.contracting:
-                raise serializers.ValidationError(f"You can't assign this client to this client user.")
+                raise serializers.ValidationError(f"Client table not found")
             # Check if request user is agent without all estabs and can assign this client for a user_client
             if req_user_is_agent_without_all_estabs(request_user) and not agent_has_access_to_this_client(request_user, value):
                 raise serializers.ValidationError(f"You have no permission to assign this client to this client user.") 

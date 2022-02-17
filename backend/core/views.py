@@ -3,8 +3,6 @@ from django.contrib.auth import authenticate, login, logout
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework import status, permissions
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.decorators import api_view, permission_classes, authentication_classes
 #  from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -12,12 +10,33 @@ from core.facade import get_clients_by_agent
 from core.serializers import AdminAgentSerializer, AgentSerializer, ClientSerializer, ClientTableSerializer, ClientUserSerializer, CompanySerializer, ContractingSerializer, EstablishmentSerializer, OwnProfileSerializer, UserSerializer, SwaggerLoginSerializer, SwaggerProfilePasswordSerializer
 from core.models import Client, ClientTable, Company, Contracting, Establishment, User
 from rolepermissions.checkers import has_permission, has_role
-#  from rolepermissions.mixins import HasRoleMixin, HasPermissionsMixin
 from django.db import transaction
 from drf_yasg.utils import swagger_auto_schema
 from core.validators import agent_has_access_to_this_client, req_user_is_agent_without_all_estabs
 from django.db.models import Q
-#  from drf_yasg import openapi
+
+unauthorized_response = Response({'error': [ "You don't have permission to access this resource."]},status=status.HTTP_401_UNAUTHORIZED)
+
+def success_response(detail, status=status.HTTP_200_OK):
+    return Response(data={"success": [detail]}, status=status)
+
+#This is to format error responses in drf format to have a pattern for error responses.
+def error_response(detail, status):
+    return Response(data={"error": [detail]}, status=status)
+
+def not_found_response(object_name): 
+    return Response({"error": f"{object_name} was not found."},  status=status.HTTP_404_NOT_FOUND)
+
+def serializer_invalid_response(errors):
+    return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+def protected_error_response(object_name): 
+    return Response({"error": f"you cannot delete this {object_name} because it has records linked to it."}, 
+                        status=status.HTTP_400_BAD_REQUEST)
+def unknown_exception_response(action): 
+    return Response({"error": f"Something went wrong when trying to {action}."}, 
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 #------------------------/ Organizations Views
 
@@ -28,7 +47,7 @@ class ContractingView(APIView):
             contractings = Contracting.objects.all()
             data = ContractingSerializer(contractings, many=True).data
             return Response(data)
-        return Response({'error': "You don't have permission to access this resource."},status=status.HTTP_401_UNAUTHORIZED)
+        return unauthorized_response
     @swagger_auto_schema(request_body=ContractingSerializer) 
     @transaction.atomic
     def post(self, request):
@@ -43,14 +62,11 @@ class ContractingView(APIView):
                     except Exception as error:
                         transaction.rollback()
                         print(error)
-                        return Response({"error": "Something went wrong when trying to create contracting."},
-                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+                        return unknown_exception_response(action="create contracting")
+                return serializer_invalid_response(serializer.errors)
+            return unauthorized_response
 
 class SpecificContracting(APIView):
-    #  def patch(self, request):
-        #  return Response({'success': "ahdflasjdflajdf"})
     @swagger_auto_schema(request_body=ContractingSerializer) 
     @transaction.atomic
     def put(self, request, contracting_code):
@@ -58,8 +74,9 @@ class SpecificContracting(APIView):
             try:
                 contracting = Contracting.objects.get(contracting_code=contracting_code)
             except Contracting.DoesNotExist:
-                return Response({"error": "'contracting_code' doesn't match with any Contracting."},
-                        status=status.HTTP_400_BAD_REQUEST)
+                # I write 'The contracting' becouse in portuguese it need to be translated according to the noun gender. 
+                # Ex: "A contratante", "O estabelecimento"
+                return not_found_response(object_name='The contracting')
             serializer = ContractingSerializer(contracting, data=request.data, partial=True)
             if serializer.is_valid():
                 try:
@@ -68,30 +85,26 @@ class SpecificContracting(APIView):
                 except Exception as error:
                     transaction.rollback()
                     print(error)
-                    return Response({"error": "Something went wrong when trying to update contracting."},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'error': "You don't have permission to access this resource."},status=status.HTTP_401_UNAUTHORIZED)
+                    return unknown_exception_response(action='update contracting')
+            return serializer_invalid_response(serializer.errors)
+        return unauthorized_response
     @transaction.atomic
     def delete(self, request, contracting_code):
         if request.user.is_superuser:
             try:
                 contracting = Contracting.objects.get(contracting_code=contracting_code)
             except Company.DoesNotExist:
-                return Response({"error": "'contracting_code' doesn't match with any contracting."},
-                        status=status.HTTP_400_BAD_REQUEST)
+                return not_found_response(object_name='The contracting')
             try:
                 contracting.delete()
-                return Response("Contracting deleted.")
+                return success_response(detail="Contracting deleted.")
             except ProtectedError:
-                return Response({"error": "you cannot delete this contracting because it has records linked to it."}, 
-                        status=status.HTTP_400_BAD_REQUEST)
+                return protected_error_response(object_name='contracting')
             except Exception as error:
                 transaction.rollback()
                 print(error)
-                return Response({"error": "Something went wrong when trying to delete contracting."},
-                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return Response({'error': "You don't have permission to access this resource."},status=status.HTTP_401_UNAUTHORIZED)
+                return unknown_exception_response(action='delete contracting')
+        return unauthorized_response
 
 class CompanyView(APIView):
     def get(self, request):
@@ -100,24 +113,23 @@ class CompanyView(APIView):
             companies = Company.objects.filter(contracting=user.contracting)
             data = CompanySerializer(companies, many=True, context={"request": request}).data
             return Response(data)
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
+        return unauthorized_response
     @swagger_auto_schema(request_body=CompanySerializer) 
     @transaction.atomic
     def post(self, request):
-            if has_permission(request.user, 'create_company'):
-                data = request.data
-                serializer = CompanySerializer(data=data, context={"request": request})
-                if serializer.is_valid():
-                    try:
-                        serializer.save()
-                        return Response(serializer.data)
-                    except Exception as error:
-                        transaction.rollback()
-                        print(error)
-                        return Response({"error": "Something went wrong when trying to create company."},
-                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            return Response({'error': "You don't have permission to access this resource."},status=status.HTTP_401_UNAUTHORIZED)
+        if has_permission(request.user, 'create_company'):
+            data = request.data
+            serializer = CompanySerializer(data=data, context={"request": request})
+            if serializer.is_valid():
+                try:
+                    serializer.save()
+                    return Response(serializer.data)
+                except Exception as error:
+                    transaction.rollback()
+                    print(error)
+                return unknown_exception_response(action='create company')
+            return serializer_invalid_response(serializer.errors)
+        return unauthorized_response
 
 class SpecificCompany(APIView):
     @transaction.atomic
@@ -125,11 +137,11 @@ class SpecificCompany(APIView):
     def put(self, request, company_compound_id):
         if has_permission(request.user, 'update_company'):
             if company_compound_id.split("#")[0] != request.user.contracting.contracting_code:
-                return Response(status=status.HTTP_404_NOT_FOUND) 
+                return not_found_response(object_name='The company')
             try:
                 company = Company.objects.get(company_compound_id=company_compound_id)
             except Company.DoesNotExist:
-                return Response({"error": "'company_compound_id' doesn't match with any company."},status=status.HTTP_400_BAD_REQUEST)
+                return not_found_response(object_name='The company')
             serializer = CompanySerializer(company, data=request.data, partial=True, context={"request": request})
             if serializer.is_valid():
                 try:
@@ -138,32 +150,28 @@ class SpecificCompany(APIView):
                 except Exception as error:
                     transaction.rollback()
                     print(error)
-                    return Response({"error": "Something went wrong when trying to update company."},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'error': "You don't have permission to access this resource."},status=status.HTTP_401_UNAUTHORIZED)
+                    return unknown_exception_response(action='update company')
+            return serializer_invalid_response(serializer.errors)
+        return unauthorized_response
     @transaction.atomic
     def delete(self, request, company_compound_id):
         if has_permission(request.user, 'delete_company'):
             if company_compound_id.split("#")[0] != request.user.contracting.contracting_code:
-                return Response(status=status.HTTP_404_NOT_FOUND) 
+                return not_found_response(object_name='The company')
             try:
                 company = Company.objects.get(company_compound_id=company_compound_id)
             except Company.DoesNotExist:
-                return Response({"error": "'company_compound_id' doesn't match with any company."},status=status.HTTP_400_BAD_REQUEST)
+                return not_found_response(object_name='The company')
             try:
                 company.delete()
+                return success_response(detail="Company deleted")
             except ProtectedError:
-                return Response({"error": "you cannot delete this company because it has records linked to it."}, 
-                        status=status.HTTP_400_BAD_REQUEST)
+                return protected_error_response(object_name='company')
             except Exception as error:
                 transaction.rollback()
                 print(error)
-                return Response({"error": "Something went wrong when trying to delete company."},
-                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            return Response("Company deleted.")
-        return Response({'error': "You don't have permission to access this resource."},status=status.HTTP_401_UNAUTHORIZED)
+                return unknown_exception_response(action='delete company')
+        return unauthorized_response
 
 class EstablishmentView(APIView):
     def get(self, request):
@@ -172,7 +180,7 @@ class EstablishmentView(APIView):
             establishments = Establishment.objects.filter(company__contracting=user.contracting)
             data = EstablishmentSerializer(establishments, many=True).data
             return Response(data)
-        return Response({'error': "You don't have permission to access this resource."},status=status.HTTP_401_UNAUTHORIZED)
+        return unauthorized_response
     @swagger_auto_schema(request_body=EstablishmentSerializer) 
     @transaction.atomic
     def post(self, request):
@@ -186,22 +194,20 @@ class EstablishmentView(APIView):
                 except Exception as error:
                     transaction.rollback()
                     print(error)
-                    return Response({"error": "Something went wrong when trying to create establishment."},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
+                    return unknown_exception_response(action='create establishment')
+            return serializer_invalid_response(serializer.errors)
+        return unauthorized_response
 
 class SpecificEstablishment(APIView):
     @swagger_auto_schema(request_body=EstablishmentSerializer) 
     def put(self, request, establishment_compound_id):
         if has_permission(request.user, 'update_establishment'):
-            if establishment_compound_id.split("#")[0] != request.user.contracting.contracting_code:
-                return Response(status=status.HTTP_404_NOT_FOUND) 
+            if establishment_compound_id.split("#")[0] != request.user.contracting.contracting_code: #TODO
+                return not_found_response(object_name='The establishment')
             try:
                 establishment = Establishment.objects.get(establishment_compound_id=establishment_compound_id)
             except Establishment.DoesNotExist:
-                return Response({"error": "'establishment_compound_id' doesn't match with any establishment."},
-                        status=status.HTTP_400_BAD_REQUEST)
+                return not_found_response(object_name='The establishment')
             serializer = EstablishmentSerializer(establishment, data=request.data, partial=True, context={"request":request} )
             if serializer.is_valid():
                 try:
@@ -210,32 +216,27 @@ class SpecificEstablishment(APIView):
                 except Exception as error:
                     transaction.rollback()
                     print(error)
-                    return Response({"error": "Something went wrong when trying to update establishment."},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'error': "You don't have permission to access this resource."},status=status.HTTP_401_UNAUTHORIZED)
+                    return unknown_exception_response(action='update establishment')
+            return serializer_invalid_response(serializer.errors)
+        return unauthorized_response
     def delete(self, request, establishment_compound_id):
         if has_permission(request.user, 'delete_establishment'):
             if establishment_compound_id.split("#")[0] != request.user.contracting.contracting_code:
-                return Response(status=status.HTTP_404_NOT_FOUND) 
+                return not_found_response(object_name='The establishment')
             try:
                 establishment = Establishment.objects.get(establishment_compound_id=establishment_compound_id)
             except Establishment.DoesNotExist:
-                return Response({"error": "'establishment_compound_id' doesn't match with any establishment."},
-                        status=status.HTTP_400_BAD_REQUEST)
+                return not_found_response(object_name='The establishment')
             try:
                 establishment.delete()
+                return success_response(detail="Establishment deleted")
             except ProtectedError:
-                return Response({"error": "you cannot delete this establishment because it has records linked to it."}, 
-                        status=status.HTTP_400_BAD_REQUEST)
+                return protected_error_response(object_name='establishment')
             except Exception as error:
                 transaction.rollback()
                 print(error)
-                return Response({"error": "Something went wrong when trying to delete establishment."},
-                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            return Response("Establishment deleted.")
-        return Response({'error': "You don't have permission to access this resource."},
-                status=status.HTTP_401_UNAUTHORIZED)
+                return unknown_exception_response(action='delete establishment')
+        return unauthorized_response
 
 class ClientTableView(APIView):
     def get(self, request):
@@ -244,7 +245,7 @@ class ClientTableView(APIView):
             client_table = ClientTable.objects.filter(contracting=user.contracting)
             data = ClientTableSerializer(client_table, many=True).data
             return Response(data)
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
+        return unauthorized_response
     @swagger_auto_schema(request_body=ClientTableSerializer) 
     @transaction.atomic
     def post(self, request):
@@ -258,10 +259,9 @@ class ClientTableView(APIView):
                     except Exception as error:
                         transaction.rollback()
                         print(error)
-                        return Response({"error": "Something went wrong when trying to create client table."},
-                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            return Response({'error': "You don't have permission to access this resource."},status=status.HTTP_401_UNAUTHORIZED)
+                        return unknown_exception_response(action='create client table')
+                return serializer_invalid_response(serializer.errors)
+            return unauthorized_response
 
 class SpecificClientTable(APIView):
     @transaction.atomic
@@ -269,12 +269,11 @@ class SpecificClientTable(APIView):
     def put(self, request, client_table_compound_id):
         if has_permission(request.user, 'update_client_table'):
             if client_table_compound_id.split("#")[0] != request.user.contracting.contracting_code:
-                return Response(status=status.HTTP_404_NOT_FOUND) 
+                return not_found_response(object_name='The client table')
             try:
                 client_table = ClientTable.objects.get(client_table_compound_id=client_table_compound_id)
             except ClientTable.DoesNotExist:
-                return Response({"error": "'client_table_compound_id' doesn't match with any client table."},
-                        status=status.HTTP_400_BAD_REQUEST)
+                return not_found_response(object_name='The client table')
             serializer = ClientTableSerializer(client_table, data=request.data, partial=True)
             if serializer.is_valid():
                 try:
@@ -283,32 +282,28 @@ class SpecificClientTable(APIView):
                 except Exception as error:
                     transaction.rollback()
                     print(error)
-                    return Response({"error": "Something went wrong when trying to update client table."},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'error': "You don't have permission to access this resource."},status=status.HTTP_401_UNAUTHORIZED)
+                    return unknown_exception_response(action='update client table')
+            return serializer_invalid_response(serializer.errors)
+        return unauthorized_response
     @transaction.atomic
     def delete(self, request, client_table_compound_id):
         if has_permission(request.user, 'delete_client_table'):
             if client_table_compound_id.split("#")[0] != request.user.contracting.contracting_code:
-                return Response(status=status.HTTP_404_NOT_FOUND) 
+                return not_found_response(object_name='The client table')
             try:
                 client_table = ClientTable.objects.get(client_table_compound_id=client_table_compound_id)
             except ClientTable.DoesNotExist:
-                return Response({"error": "'client_table_compound_id' doesn't match with any client table."},
-                        status=status.HTTP_400_BAD_REQUEST)
+                return not_found_response(object_name='The client table')
             try:
                 client_table.delete()
-                return Response("Client table deleted.")
+                return success_response(detail="Client table deleted")
             except ProtectedError:
-                return Response({"error": "you cannot delete this client table because it has records linked to it."}, 
-                        status=status.HTTP_400_BAD_REQUEST)
+                return protected_error_response(object_name='client table')
             except Exception as error:
                 transaction.rollback()
                 print(error)
-                return Response({"error": "Something went wrong when trying to delete client table."},
-                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return Response({'error': "You don't have permission to access this resource."},status=status.HTTP_401_UNAUTHORIZED)
+                return unknown_exception_response(action='delete client table')
+        return unauthorized_response
 
 class ClientView(APIView):
     def get(self, request):
@@ -321,13 +316,13 @@ class ClientView(APIView):
             clients = get_clients_by_agent(user)
             data = ClientSerializer(clients, many=True).data
             return Response(data)
-        return Response({'error': "You don't have permission to access this resource."},status=status.HTTP_401_UNAUTHORIZED)
+        return unauthorized_response
     @swagger_auto_schema(request_body=ClientSerializer) 
     @transaction.atomic
     def post(self, request):
             user = request.user
             if has_permission(user, 'create_client'):
-                serializer = ClientSerializer(data=request.data, context={"request":request, "method": "post"})
+                serializer = ClientSerializer(data=request.data, context={"request":request})
                 if serializer.is_valid():
                     try:
                         serializer.save()
@@ -335,10 +330,9 @@ class ClientView(APIView):
                     except Exception as error:
                         transaction.rollback()
                         print(error)
-                        return Response({"error": "Something went wrong when trying to create contracting."},
-                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+                        return unknown_exception_response(action='create client')
+                return serializer_invalid_response(serializer.errors)
+            return unauthorized_response
 
 class SpecificClient(APIView):
     @swagger_auto_schema(request_body=ClientSerializer) 
@@ -348,13 +342,12 @@ class SpecificClient(APIView):
         if has_permission(user, 'update_client'):
             # Is from the same Contracting
             if client_compound_id.split("#")[0] != user.contracting.contracting_code:
-                return Response(status=status.HTTP_404_NOT_FOUND) 
+                return not_found_response(object_name='The client')
             try:
                 client = Client.objects.get(client_compound_id=client_compound_id)
             except Client.DoesNotExist:
-                return Response({"error": "'client_compound_id' doesn't match with any client."},
-                        status=status.HTTP_400_BAD_REQUEST)
-            serializer = ClientSerializer(client, data=request.data, partial=True, context={"request":request, "method": "put"})
+                return not_found_response(object_name='The client')
+            serializer = ClientSerializer(client, data=request.data, partial=True, context={"request":request})
             if serializer.is_valid():
                 try:
                     serializer.save()
@@ -362,38 +355,32 @@ class SpecificClient(APIView):
                 except Exception as error:
                     transaction.rollback()
                     print(error)
-                    return Response({"error": "Something went wrong when trying to update client."},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
+                    return unknown_exception_response(action='update client')
+            return serializer_invalid_response(serializer.errors)
+        return unauthorized_response
     @transaction.atomic
     def delete(self, request, client_compound_id):
         if has_permission(request.user, 'delete_client'):
             # Is from the same Contracting
             if client_compound_id.split("#")[0] != request.user.contracting.contracting_code:
-                return Response(status=status.HTTP_404_NOT_FOUND) 
+                return not_found_response(object_name='The client')
             try:
                 client = Client.objects.get(client_compound_id=client_compound_id)
             except Client.DoesNotExist:
-                return Response({"error": "'client_compound_id' doesn't match with any client."},
-                        status=status.HTTP_400_BAD_REQUEST)
+                return not_found_response(object_name='The client')
             if has_role(request.user, 'agent') and not has_permission(request.user, 'access_all_establishments') and \
                     not agent_has_access_to_this_client(request.user, client):
-                return Response(status=status.HTTP_401_UNAUTHORIZED)
-
+                return unauthorized_response
             try:
                 client.delete()
-                return Response("Client deleted.")
+                return success_response(detail="Client deleted")
             except ProtectedError as er:
-                print('>>>>>>>>>>>>>>>>:', er)
-                return Response({"error": "you cannot delete this client because it has records linked to it."}, 
-                        status=status.HTTP_400_BAD_REQUEST)
+                return protected_error_response(object_name='client')
             except Exception as error:
                 transaction.rollback()
                 print(error)
-                return Response({"error": "Something went wrong when trying to delete client."},
-                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return Response({'error': "You don't have permission to access this resource."}, status=status.HTTP_401_UNAUTHORIZED)
+                return unknown_exception_response(action='delete client')
+        return unauthorized_response
 
 #------------------------/ Auth Views
 
@@ -401,14 +388,14 @@ class SpecificClient(APIView):
 class GetCSRFToken(APIView):
     permission_classes = (permissions.AllowAny,)
     def get(self, request):
-        return Response({"success": "csrf cookie set"})
+        return success_response(detail= "csrf cookie set")
 # If the user has status != 1, it will be considered disabled and the user can't log in.
 class Login(APIView):
     permission_classes = (permissions.AllowAny,)
     @swagger_auto_schema(request_body=SwaggerLoginSerializer) 
     def post(self, request):
         if request.user.is_authenticated:
-            return Response({"status": "already_authenticated."})
+            return success_response(detail="User is already authenticated")
         serializer = SwaggerLoginSerializer(data=request.data)
         if serializer.is_valid():
             user_code = serializer.validated_data["username" ] + "#" + serializer.validated_data["contracting_code"]
@@ -417,20 +404,19 @@ class Login(APIView):
                 if user.status == 1:
                     login(request, user)
                     return Response(OwnProfileSerializer(user).data)
-                return Response({"status": "Your account is disabled."}, status=status.HTTP_401_UNAUTHORIZED)
+                return error_response(detail="Your account is disabled.", status=status.HTTP_401_UNAUTHORIZED)
             else:
-                return Response({"status": "login_failed"}, status=status.HTTP_401_UNAUTHORIZED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return error_response(detail="The login failed", status=status.HTTP_401_UNAUTHORIZED)
+        return serializer_invalid_response(serializer.errors)
 
 class Logout(APIView):
     def post(self, request):
         try:
             logout(request)
-            return Response({'success': 'Logged out'})
+            return success_response(detail= 'Logged out')
         except Exception as error:
             print(error)
-            return Response({'error': 'Something went wrong when trying to logout.'})
+            unknown_exception_response(action='log out')
 
 #-------------------------------------------/ Users Views / -------------------------------------
 
@@ -441,22 +427,18 @@ class OwnProfileView(APIView):
             return Response(data)
         except Exception as error:
             print(error)
-            return Response({'status': 'error', 'description': 'Something went wrong trying to get the request user profile.'}, 
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return unknown_exception_response(action='get request user profile')
     @swagger_auto_schema(request_body=OwnProfileSerializer) 
     def put(self, request):
-        serializer = UserSerializer(request.user, data=request.data, partial=True, context={"request": request,
-            "method": "put", "view": "update own profile"})
+        serializer = UserSerializer(request.user, data=request.data, partial=True, context={"request": request, "view": "update own profile"})
         if serializer.is_valid():
             try:
                 serializer.save()
                 return Response(serializer.data)
             except Exception as error:
                 print(error)
-                return Response({'error': 'Something went wrong when trying to update request user profile.'}, 
-                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return unknown_exception_response(action='update request user profile')
+        return serializer_invalid_response(serializer.errors)
 
 class AdminAgentView(APIView):
     def get(self, request):
@@ -465,12 +447,12 @@ class AdminAgentView(APIView):
             user = request.user
             agents = User.objects.filter(Q(contracting=user.contracting), Q(groups__name='admin_agent'))
             return Response(AdminAgentSerializer(agents, many=True).data)
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
+        return unauthorized_response
     @swagger_auto_schema(request_body=AdminAgentSerializer) 
     @transaction.atomic
     def post(self, request):
         if has_permission(request.user, 'create_admin_agent'):
-            serializer = AdminAgentSerializer(data=request.data, context={"request":request, "method": "post"})
+            serializer = AdminAgentSerializer(data=request.data, context={"request":request})
             if serializer.is_valid():
                 try:
                     serializer.save()
@@ -478,22 +460,23 @@ class AdminAgentView(APIView):
                 except Exception as error:
                     transaction.rollback()
                     print(error)
-                    return Response({"error": "Something went wrong when trying to create admin agent."},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
+                    return unknown_exception_response(action='create admin agent')
+            return serializer_invalid_response(serializer.errors)
+        return unauthorized_response
 
 class SpecificAdminAgent(APIView):
     @swagger_auto_schema(request_body=AdminAgentSerializer) 
     def put(self, request, username, contracting_code):
         if has_permission(request.user, 'update_admin_agent'):
+            if contracting_code != request.user.contracting.contracting_code:
+                return not_found_response(object_name='The client')
             user_code = username + "#" + contracting_code
             try: 
                 user = User.objects.get(user_code=user_code, groups__name='admin_agent')
             except User.DoesNotExist:
-                return Response({"error": "Admin agent not found."}, status=status.HTTP_404_NOT_FOUND)
+                return not_found_response(object_name='The admin agent')
             serializer = AdminAgentSerializer(user, data=request.data, partial=True,
-                    context={"request": request,"method": "put"})
+                    context={"request": request})
             if serializer.is_valid():
                 try:
                     serializer.save()
@@ -502,35 +485,30 @@ class SpecificAdminAgent(APIView):
                     transaction.rollback()
                     print(error)
                     #  raise error
-                    return Response({"error": "Something went wrong when trying to update admin agent."},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
+                    return unknown_exception_response(action='update admin agent')
+            return serializer_invalid_response(serializer.errors)
+        return unauthorized_response
     @transaction.atomic  
     def delete(self, request, username, contracting_code):
-        if has_permission(request.user, 'delete_agent'):
-            # Contracting Owership
+        if has_permission(request.user, 'delete_admin_agent'):
+            # Contracting Ownership
             if contracting_code != request.user.contracting.contracting_code:
-                return Response(status=status.HTTP_404_NOT_FOUND) 
+                return not_found_response(object_name='The admin agent')
             user_code = username + "#" + contracting_code
             try:
-                user = User.objects.get(user_code=user_code, groups__name='admin_agent') #TODO TEst
+                user = User.objects.get(user_code=user_code, groups__name='admin_agent')
             except User.DoesNotExist:
-                return Response(status=status.HTTP_404_NOT_FOUND) 
+                return not_found_response(object_name='The admin agent')
             try:
                 user.delete()
-                return Response({"success": "User deleted successfully."})
+                return success_response(detail="Admin agent deleted successfully.")
             except ProtectedError as er:
-                print('>>>>: ', er)
-                return Response({"error": "you cannot delete this user because it has records linked to it."}, 
-                        status=status.HTTP_400_BAD_REQUEST)
+                return protected_error_response(object_name='admin agent')
             except Exception as error:
                 transaction.rollback()
                 print(error)
-                return Response({"error": "Something went wrong when trying to delete user."},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return Response({'error': "You don't have permission to delete this user."},
-                status=status.HTTP_401_UNAUTHORIZED)
+                return unknown_exception_response(action='delete admin agent')
+        return unauthorized_response
 
 class AgentView(APIView):
     def get(self, request):
@@ -538,12 +516,12 @@ class AgentView(APIView):
             user = request.user
             agents = User.objects.filter(Q(contracting=user.contracting), Q(groups__name='agent'))
             return Response(AgentSerializer(agents, many=True).data)
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
+        return unauthorized_response
     @swagger_auto_schema(request_body=AgentSerializer) 
     @transaction.atomic
     def post(self, request):
         if has_permission(request.user, 'create_agent'):
-            serializer = AgentSerializer(data=request.data, context={"request":request, "method": "post"})
+            serializer = AgentSerializer(data=request.data, context={"request":request})
             if serializer.is_valid():
                 try:
                     serializer.save()
@@ -551,22 +529,23 @@ class AgentView(APIView):
                 except Exception as error:
                     transaction.rollback()
                     print(error)
-                    return Response({"error": "Something went wrong when trying to create agent."},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
+                    return unknown_exception_response(action='create agent')
+            return serializer_invalid_response(serializer.errors)
+        return unauthorized_response
 
 class SpecificAgent(APIView):
     @swagger_auto_schema(request_body=AgentSerializer) 
     def put(self, request, username, contracting_code):
         if has_permission(request.user, 'update_agent'):
+            if contracting_code != request.user.contracting.contracting_code:
+                return not_found_response(object_name='The agent')
             user_code = username + "#" + contracting_code
             try: 
                 user = User.objects.get(user_code=user_code, groups__name='agent')
             except User.DoesNotExist:
-                return Response({"error": "Agent not found."}, status=status.HTTP_404_NOT_FOUND)
+                return not_found_response(object_name='The agent')
             serializer = AgentSerializer(user, data=request.data, partial=True,
-                    context={"request": request,"method": "put"})
+                    context={"request": request})
             if serializer.is_valid():
                 try:
                     serializer.save()
@@ -575,35 +554,30 @@ class SpecificAgent(APIView):
                     transaction.rollback()
                     print(error)
                     #  raise error
-                    return Response({"error": "Something went wrong when trying to update agent."},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
+                    return unknown_exception_response(action='update agent')
+            return serializer_invalid_response(serializer.errors)
+        return unauthorized_response
     @transaction.atomic  
     def delete(self, request, username, contracting_code):
         if has_permission(request.user, 'delete_agent'):
-            # Contracting Owership
+            # Contracting Ownership
             if contracting_code != request.user.contracting.contracting_code:
-                return Response(status=status.HTTP_404_NOT_FOUND) 
+                return not_found_response(object_name='The agent')
             user_code = username + "#" + contracting_code
             try:
                 user = User.objects.get(user_code=user_code, groups__name='agent')
             except User.DoesNotExist:
-                return Response(status=status.HTTP_404_NOT_FOUND) 
+                return not_found_response(object_name='The agent')
             try:
                 user.delete()
-                return Response({"success": "User deleted successfully."})
+                return success_response(detail= "Agent deleted successfully")
             except ProtectedError as er:
-                print('>>>>: ', er)
-                return Response({"error": "you cannot delete this agent because it has records linked to it."}, 
-                        status=status.HTTP_400_BAD_REQUEST)
+                return protected_error_response(object_name='agent')
             except Exception as error:
                 transaction.rollback()
                 print(error)
-                return Response({"error": "Something went wrong when trying to delete agent."},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return Response({'error': "You don't have permission to delete this agent."},
-                status=status.HTTP_401_UNAUTHORIZED)
+                return unknown_exception_response(action='delete agent')
+        return unauthorized_response
 
 class ClientUserView(APIView):
     def get(self, request):
@@ -611,12 +585,12 @@ class ClientUserView(APIView):
             user = request.user
             client_users = User.objects.filter(Q(contracting=user.contracting), Q(groups__name='client_user'))
             return Response(ClientUserSerializer(client_users, many=True).data)
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
+        return unauthorized_response
     @swagger_auto_schema(request_body=ClientUserSerializer) 
     @transaction.atomic
     def post(self, request):
         if has_permission(request.user, 'create_client_user'):
-                serializer = ClientUserSerializer(data=request.data, context={"request":request, "method": "post"})
+                serializer = ClientUserSerializer(data=request.data, context={"request":request})
                 #  if serializer.is_valid(raise_exception=True):
                 if serializer.is_valid():
                     try:
@@ -625,24 +599,23 @@ class ClientUserView(APIView):
                     except Exception as error:
                         transaction.rollback()
                         print(error)
-                        return Response({"error": "Something went wrong when trying to create user."},
-                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
+                        return unknown_exception_response(action='create client user')
+                return serializer_invalid_response(serializer.errors)
+        return unauthorized_response
 
 class SpecificClientUser(APIView):
     @swagger_auto_schema(request_body=ClientUserSerializer) 
     def put(self, request, username, contracting_code):
         if has_permission(request.user, 'update_client_user'):
             if contracting_code != request.user.contracting.contracting_code:
-                return Response(status=status.HTTP_404_NOT_FOUND) 
+                return not_found_response(object_name='The client user')
             user_code = username + "#" + contracting_code
             try:
                 user = User.objects.get(user_code=user_code, groups__name='client_user')
             except User.DoesNotExist:
-                return Response({"error": "User not found."}, status=status.HTTP_400_BAD_REQUEST)
+                return not_found_response(object_name='The client user')
             serializer = ClientUserSerializer(user, data=request.data, partial=True,
-                    context={"request": request,"method": "put"})
+                    context={"request": request})
             if serializer.is_valid():
                 try:
                     serializer.save()
@@ -651,37 +624,33 @@ class SpecificClientUser(APIView):
                     transaction.rollback()
                     print(error)
                     #  raise error
-                    return Response({"error": "Something went wrong when trying to update user."},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
+                    return unknown_exception_response(action='update client user')
+            return serializer_invalid_response(serializer.errors)
+        return unauthorized_response
     @transaction.atomic  
     def delete(self, request, username, contracting_code):
         if has_permission(request.user, 'delete_client_user'):
             if contracting_code != request.user.contracting.contracting_code:
-                return Response(status=status.HTTP_404_NOT_FOUND) 
+                return not_found_response(object_name='The client user')
             user_code = username + "#" + contracting_code
             try:
                 client_user = User.objects.get(user_code=user_code, groups__name='client_user')
             except User.DoesNotExist:
-                return Response(status=status.HTTP_404_NOT_FOUND) 
+                return not_found_response(object_name='The client user')
             # If request user is agent without all estabs and not has access to this client
             if req_user_is_agent_without_all_estabs(request.user) and not agent_has_access_to_this_client(request.user, 
                     client_user.client):
-                return Response({'error': "You don't have permission to delete this user."},
-                        status=status.HTTP_401_UNAUTHORIZED)
+                return unauthorized_response
             try:
                 client_user.delete()
-                return Response({"success": "User deleted successfully."})
+                return success_response(detail= "Client user deleted successfully")
             except ProtectedError as er:
-                return Response({"error": "you cannot delete this user because it has records linked to it."}, 
-                        status=status.HTTP_400_BAD_REQUEST)
+                return protected_error_response(object_name='client user')
             except Exception as error:
                 transaction.rollback()
                 print(error)
-                return Response({"error": "Something went wrong when trying to delete user."},
-                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
+                return unknown_exception_response(action='delete client user')
+        return unauthorized_response
 
 class UpdateUserPassword(APIView):
     @swagger_auto_schema(request_body=SwaggerProfilePasswordSerializer) 
@@ -689,11 +658,11 @@ class UpdateUserPassword(APIView):
         user = request.user
         data = request.data
         if not data.get('password'):
-            return Response({"status": "Password field not sent."}, status=status.HTTP_400_BAD_REQUEST)
+            return error_response(detail="Password field not sent", status=status.HTTP_400_BAD_REQUEST )
         if not data.get('current_password'):
-            return Response({"status": "Current Password field not sent."},status=status.HTTP_400_BAD_REQUEST)
+            return error_response(detail="Current Password field not sent", status=status.HTTP_400_BAD_REQUEST )
         if user.check_password(data.get('current_password')):
             user.set_password(data['password'])
             user.save()
-            return Response({"status": "Password updated"})
-        return Response({"status": "passwords don't match"},status=status.HTTP_400_BAD_REQUEST)
+            return success_response(detail= "Password updated")
+        return error_response(detail="passwords don't match", status=status.HTTP_400_BAD_REQUEST )

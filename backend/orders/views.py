@@ -7,6 +7,7 @@ from orders.models import ItemTable, Order, Item, ItemCategory, PriceTable, Pric
 from rest_framework.views import APIView
 from rolepermissions.checkers import has_permission, has_role
 from drf_yasg.utils import swagger_auto_schema
+from core.views import serializer_invalid_response, unauthorized_response
 
 
 class ItemTableView(APIView):
@@ -16,7 +17,7 @@ class ItemTableView(APIView):
             item_table = ItemTable.objects.filter(contracting=user.contracting)
             data = ItemTableSerializer(item_table, many=True).data
             return Response(data)
-        return Response(status=status.HTTP_401_UNAUTHORIZED)
+        return unauthorized_response
     @swagger_auto_schema(request_body=ItemTableSerializer) 
     @transaction.atomic
     def post(self, request):
@@ -32,8 +33,8 @@ class ItemTableView(APIView):
                         print(error)
                         return Response({"error": "Something went wrong when trying to create item table."},
                                 status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            return Response({'error': "You don't have permission to access this resource."},status=status.HTTP_401_UNAUTHORIZED)
+                return serializer_invalid_response(serializer.errors)
+            return unauthorized_response
 
 class SpecificItemTable(APIView):
     @transaction.atomic
@@ -57,8 +58,8 @@ class SpecificItemTable(APIView):
                     print(error)
                     return Response({"error": "Something went wrong when trying to update item table."},
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'error': "You don't have permission to access this resource."},status=status.HTTP_401_UNAUTHORIZED)
+            return serializer_invalid_response(serializer.errors)
+        return unauthorized_response
     @transaction.atomic
     def delete(self, request, item_table_compound_id):
         if has_permission(request.user, 'delete_item_table'):
@@ -80,7 +81,7 @@ class SpecificItemTable(APIView):
                 print(error)
                 return Response({"error": "Something went wrong when trying to delete item table."},
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        return Response({'error': "You don't have permission to access this resource."},status=status.HTTP_401_UNAUTHORIZED)
+        return unauthorized_response
 
 
 class ItemView(APIView):
@@ -103,7 +104,7 @@ class ItemView(APIView):
                 if serializer.is_valid():
                     serializer.save()
                     return Response(serializer.data, status=status.HTTP_201_CREATED)
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return serializer_invalid_response(serializer.errors)
 
             #  if isinstance(request.data, list):
                 #  serializer = ItemSerializer(data=request.data, many=True)
@@ -145,7 +146,7 @@ class SpecificItemView(APIView):
                 #  serializer.save()
                 #  data['success'] = 'update successful'
                 #  return Response(data=data)
-            #  return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                #  return serializer_invalid_response(serializer.errors)
         #  return Response({"error": "You don't have permissions to access this resource."},
                         #  status=status.HTTP_401_UNAUTHORIZED)
 
@@ -178,7 +179,7 @@ class CategoryView(mixins.ListModelMixin, mixins.CreateModelMixin, generics.Gene
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data)
-            return Response(serializer.errors)
+            return serializer_invalid_response(serializer.errors)
         return Response({"error": "You don't have permissions to access this resource."}, status=status.HTTP_401_UNAUTHORIZED)
 
 
@@ -210,7 +211,7 @@ class PriceTableView(APIView):
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return serializer_invalid_response(serializer.errors)
         return Response({"error": "You don't have permissions to access this resource."}, status=status.HTTP_401_UNAUTHORIZED)
 
 
@@ -223,7 +224,7 @@ class SpecificPriceTableView(APIView):
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return serializer_invalid_response(serializer.errors)
         except PriceTable.DoesNotExist:
             return Response({"error": "Price table has not found."}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as error:
@@ -264,7 +265,7 @@ class SpecificPriceTableView(APIView):
                         #  status=status.HTTP_400_BAD_REQUEST)
 
             #  return Response(serializer.data, status=status.HTTP_201_CREATED)
-        #  return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        #  return serializer_invalid_response(serializer.errors)
     
 
 
@@ -298,7 +299,7 @@ class SpecificPriceTableView(APIView):
             #  if serializer.is_valid():
                 #  serializer.save()
                 #  return Response(serializer.data, status=status.HTTP_201_CREATED)
-            #  return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        #  return serializer_invalid_response(serializer.errors)
         #  return Response({"error": "You don't have permissions to access this resource."},
                         #  status=status.HTTP_401_UNAUTHORIZED)
 
@@ -338,7 +339,7 @@ class SpecificPriceTableView(APIView):
             #  if serializer.is_valid():
                 #  serializer.save()
                 #  return Response(serializer.data, status=status.HTTP_201_CREATED)
-            #  return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            #  return serializer_invalid_response(serializer.errors)
         #  return Response({"error": "You don't have permissions to access this resource."},
                         #  status=status.HTTP_401_UNAUTHORIZED)
 
