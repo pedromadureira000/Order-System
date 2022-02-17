@@ -34,7 +34,6 @@ django-extensions = "*"
 ipython = "*"
 neovim = "*"
 faker = "*"
-# ropevim = "*"
 
 [requires]
 python_version = "3.9"

@@ -48,7 +48,6 @@ CSRF_TRUSTED_ORIGINS = ['http://localhost:3000']
 INSTALLED_APPS = [
     'core',
     'orders',
-    #  'documents',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
