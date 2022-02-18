@@ -78,10 +78,13 @@ def agent_has_permission_to_assign_this_establishment_to_client(agent, establish
         return False
     return True
 
-def agent_permissions_exist(agent_permissions):
+def agent_permissions_exist_and_does_not_have_duplicates(agent_permissions):
+    check_for_duplicate_values = []
     for permission in agent_permissions:
+        if permission in check_for_duplicate_values:
+            raise serializers.ValidationError(f"There are duplicate values for agent_permissions")
+        check_for_duplicate_values.append(permission)
         if not permission in Agent.available_permissions.keys():
-            print('========================> : Terrible error' )
             raise serializers.ValidationError(f"You can't assign '{permission}' permission to an agent.")
 
 def req_user_is_agent_without_all_estabs(request_user):

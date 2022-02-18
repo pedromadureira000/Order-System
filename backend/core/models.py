@@ -16,7 +16,6 @@ status_choices = (
     (1, "Ativado")
 )
 
-
 class Contracting(models.Model):
     # ItemTable_set
     # ClientTable_set
@@ -30,9 +29,9 @@ class Contracting(models.Model):
     def __str__(self):
         return f'Contratante: {self.name}'
 
-
 class Company(models.Model):
     # Establishment_set
+    # PriceTable_set
     class Meta:
         constraints = [UniqueConstraint(fields=['contracting', 'company_code'], name='Company compound primary key')]
     company_compound_id = models.CharField('Id da empresa', max_length=7, unique=True, editable=False) 
@@ -47,11 +46,10 @@ class Company(models.Model):
     def __str__(self):
         return f'Empresa: {self.name}'
 
-
 class Establishment(models.Model):
     # ClientEstablishment_set
-    # Order_set
     # AgentEstablishment_set
+    # Order_set
     class Meta:
         constraints = [UniqueConstraint(fields=['company', 'establishment_code'], name='Establishment compound primary key')]
     establishment_compound_id = models.CharField('Id do estabelecimento', max_length=11, editable=False, unique=True) 
@@ -64,7 +62,6 @@ class Establishment(models.Model):
     def __str__(self):
         return f'Estabelecimento: {self.name}'
 
-
 class ClientTable(models.Model):
     #  Company_set
     #  Client_set
@@ -75,7 +72,6 @@ class ClientTable(models.Model):
     client_table_code = models.SlugField("Código da tabela de cliente", max_length=2)
     description = models.CharField(max_length=60)
     note = models.TextField(blank=True)
-
 
 class Client(models.Model):
     # User_set
@@ -94,7 +90,6 @@ class Client(models.Model):
     def __str__(self):
         return f'Cliente: {self.name}'
 
-
 class ClientEstablishment(models.Model):
     class Meta:
         constraints = [UniqueConstraint(fields=['client', 'establishment'], name='ClientEstablishment compound primary key')]
@@ -102,13 +97,11 @@ class ClientEstablishment(models.Model):
     client = models.ForeignKey('Client',on_delete=models.CASCADE, related_name='client_establishments')
     price_table = models.ForeignKey('orders.PriceTable', blank=True, null=True, on_delete=models.SET_NULL)
 
-
 class AgentEstablishment(models.Model):
     class Meta:
         constraints = [UniqueConstraint(fields=['agent', 'establishment'], name='AgentEstablishment compound primary key')]
     establishment = models.ForeignKey('Establishment',on_delete=models.PROTECT)
     agent = models.ForeignKey('User',on_delete=models.CASCADE, related_name='agent_establishments')
-
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -175,7 +168,6 @@ class UserManager(BaseUserManager):
             #  )
         #  return self.none()
 
-
 class User(AbstractBaseUser, PermissionsMixin):
     # AgentEstablishment_set
     # OrderHistory_set
@@ -229,7 +221,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     def email_user(self, subject, message, from_email=None, **kwargs):
         """Send an email to this user."""
         send_mail(subject, message, from_email, [self.email], **kwargs)
-
 
 class LoggedInUser(models.Model):
     #  user = models.OneToOneField(User, on_delete=models.CASCADE)

@@ -6,7 +6,7 @@ from core.facade import update_agent_establishments, update_agent_permissions, u
 from core.models import User
 from rolepermissions.roles import get_user_roles
 from rolepermissions.permissions import available_perm_status
-from core.validators import UserContracting, agent_has_permission_to_assign_this_client_table_to_client, agent_has_permission_to_assign_this_establishment_to_client, agent_permissions_exist, contracting_can_create_user, agent_has_access_to_this_client, req_user_is_agent_without_all_estabs
+from core.validators import UserContracting, agent_has_permission_to_assign_this_client_table_to_client, agent_has_permission_to_assign_this_establishment_to_client, agent_permissions_exist_and_does_not_have_duplicates, contracting_can_create_user, agent_has_access_to_this_client, req_user_is_agent_without_all_estabs
 from orders.models import ItemTable
 from .models import Client, ClientEstablishment, ClientTable, Company, Contracting, AgentEstablishment, Establishment
 from rolepermissions.roles import assign_role
@@ -155,9 +155,9 @@ class ClientSerializer(serializers.ModelSerializer):
         if client_establishments or client_establishments == []:
             establishments_list = []
             for client_establishment in client_establishments:
-                # Deny duplicated establishments
+                # Deny duplicate establishments
                 if client_establishment['establishment'] in establishments_list:
-                    raise serializers.ValidationError(f"There is a duplicated establishment in 'client_establishments'")
+                    raise serializers.ValidationError(f"There is a duplicate establishment in 'client_establishments'")
                 establishments_list.append(client_establishment['establishment'])
                 # Check if establishment.company.client_table belongs to Client client_table
                 if client_establishment['establishment'].company.client_table != attrs.get("client_table"):
@@ -222,10 +222,6 @@ class SwaggerLoginSerializer(serializers.Serializer):
     username = serializers.CharField(write_only=True)
     contracting_code = serializers.CharField(write_only=True)
     password = serializers.CharField(write_only=True)
-
-    #  def validate(self, attrs):
-        #  return super().validate(attrs)
- 
 
 class SwaggerProfilePasswordSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
@@ -349,11 +345,18 @@ class AgentSerializer(UserSerializer):
             'password': {'write_only': True},
             'agent_permissions': {'write_only': True},
         }
+    def validate_agent_establishments(self, value):
+        # Deny duplicate values
+        check_for_duplicate_values = []
+        for establishment in value:
+            if establishment in check_for_duplicate_values:
+                raise serializers.ValidationError(f"There are duplicate values for agent_establishments")
+            check_for_duplicate_values.append(establishment)
+        return value
 
     def validate_agent_permissions(self, value):
-        # i imagine that it will not come to it if there is no value
         if value or value == []:
-            agent_permissions_exist(value)
+            agent_permissions_exist_and_does_not_have_duplicates(value)
         return value
 
     def create(self, validated_data):  

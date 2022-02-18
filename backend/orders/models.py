@@ -17,7 +17,6 @@ class ItemTable(models.Model):
     description = models.CharField(max_length=60, verbose_name="Description")
     note = models.TextField(blank=True, verbose_name="Note")
 
-
 class Item(models.Model):
     # OrderedItem_set
     # PriceItem_set
@@ -42,7 +41,6 @@ class Item(models.Model):
             image_resize(self.image, 115, 76.24)
         super().save(*args, **kwargs)
 
-
 class ItemCategory(models.Model):
     #Item_set
     class Meta:
@@ -55,7 +53,6 @@ class ItemCategory(models.Model):
     note = models.TextField(blank=True)
     def __str__(self):
         return f'Categoria: {self.description}'
-
 
 class PriceTable(models.Model):
     #Order_set
@@ -73,7 +70,6 @@ class PriceTable(models.Model):
     def __str__(self):
         return f'{self.table_code}'
 
-
 class PriceItem(models.Model):
     class Meta:
         #  unique_together = (('price_table', 'item'),)
@@ -83,7 +79,6 @@ class PriceItem(models.Model):
     unit_price = models.DecimalField(max_digits=11, decimal_places=2, verbose_name="Unit Price")
     last_modified = models.DateTimeField(auto_now_add=True)
     creation_date = models.DateTimeField(default=timezone.now)
-
 
 class Order(models.Model):
     status_choices = (
@@ -112,7 +107,6 @@ class Order(models.Model):
     def __str__(self):
         return f'Pedido N. {self.pk}'
 
-
 class OrderedItem(models.Model):
     class Meta:
         constraints = [UniqueConstraint(fields=['order', 'item'], name='OrderedItem unique_together')]
@@ -123,7 +117,6 @@ class OrderedItem(models.Model):
     quantity = models.DecimalField(max_digits=11, decimal_places=2)
     unit_price = models.DecimalField(max_digits=11, decimal_places=2)
     date = models.DateTimeField(auto_now_add=True)
-
 
 class OrderHistory(models.Model):
     type_choices = (

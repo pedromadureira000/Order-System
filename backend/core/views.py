@@ -401,10 +401,13 @@ class Login(APIView):
             user_code = serializer.validated_data["username" ] + "#" + serializer.validated_data["contracting_code"]
             user = authenticate(username=user_code, password=serializer.validated_data["password"], request=request)
             if user is not None:
-                if user.status == 1:
-                    login(request, user)
-                    return Response(OwnProfileSerializer(user).data)
-                return error_response(detail="Your account is disabled.", status=status.HTTP_401_UNAUTHORIZED)
+                if user.status != 1:
+                    return error_response(detail="Your account is disabled.", status=status.HTTP_401_UNAUTHORIZED)
+                # If the contracting is disabled of if the user is client user with a client company disabled, then raise a error
+                if user.contracting.status != 1 or (user.client != None and user.client.status != 1) :
+                    return error_response(detail="The login is disabled", status=status.HTTP_401_UNAUTHORIZED)
+                login(request, user)
+                return Response(OwnProfileSerializer(user).data)
             else:
                 return error_response(detail="The login failed", status=status.HTTP_401_UNAUTHORIZED)
         return serializer_invalid_response(serializer.errors)
