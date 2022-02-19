@@ -4,6 +4,7 @@ from django.contrib.sessions.models import Session
 from datetime import datetime
 from .models import LoggedInUser
 from django.contrib.auth import logout
+from django.utils.translation import gettext_lazy as _
 
 class OneSessionPerUserMiddleware:
     # Called only once when the web server starts
@@ -19,13 +20,13 @@ class OneSessionPerUserMiddleware:
             except LoggedInUser.DoesNotExist:
                 # This will occur when an user attempt to access an API with a old valid session after he has being logged out.
                 logout(request)
-                return HttpResponseForbidden("Invalid session. Try to login again.")
+                return HttpResponseForbidden(_("Invalid session. Try to login again."))
             if path == '/api/user/own_profile' and request.method == 'GET':
                 request.user.logged_in_user.session_key = request.session.session_key
                 request.user.logged_in_user.save()
                 response = self.get_response(request)
                 return response
             if  stored_session_key != request.session.session_key:
-                return HttpResponseForbidden("Session already open.") #TODO change this for drf forbidden response
+                return HttpResponseForbidden(_("Session already open.")) #TODO change this for drf forbidden response
         response = self.get_response(request)
         return response

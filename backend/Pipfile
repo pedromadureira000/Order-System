@@ -6,7 +6,6 @@ name = "pypi"
 [packages] 
 django = "*"
 djangorestframework = "*"
-# djangorestframework = "==3.12"
 drf-yasg = "*"
 django-role-permissions = "*"
 django-axes = "*"
@@ -20,9 +19,6 @@ django-anymail = "*"
 gunicorn = "*"
 django-cpf-cnpj = "*"
 pillow = "*"
-# python-barcode = "*"
-# pdfkit = "*"
-# jinja2 = "*"
 
 [dev-packages]
 # pytest = "*"

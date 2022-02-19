@@ -12,8 +12,8 @@ from django_cpf_cnpj.fields import CNPJField
 from rolepermissions.roles import assign_role
 
 status_choices = (
-    (0, "Desativado"),
-    (1, "Ativado")
+    (0, _("Disabled")),
+    (1, _( "Active"))
 )
 
 class Contracting(models.Model):
@@ -21,87 +21,103 @@ class Contracting(models.Model):
     # ClientTable_set
     # Company_set
     # User_set
-    contracting_code = models.SlugField('Contracting Code', max_length=3, unique=True )
-    name = models.CharField(max_length=60)
-    status = models.IntegerField(choices=status_choices)
-    active_users_limit = models.IntegerField(default=3, verbose_name="Active users limit")
-    note = models.TextField(blank=True)
+    class Meta:
+        verbose_name = _('contracting')
+        verbose_name_plural = _('contractings')
+    contracting_code = models.SlugField(_("contracting code"), max_length=3, unique=True)
+    name = models.CharField(max_length=60, verbose_name=_("name"))
+    status = models.IntegerField(choices=status_choices, default=1)
+    active_users_limit = models.IntegerField(default=5, verbose_name=_("active users limit"))
+    note = models.TextField(blank=True, verbose_name=_('note'))
     def __str__(self):
-        return f'Contratante: {self.name}'
+        return f'Contracting: {self.name}'
 
 class Company(models.Model):
     # Establishment_set
     # PriceTable_set
     class Meta:
+        verbose_name = _('company')
+        verbose_name_plural = _('companies')
         constraints = [UniqueConstraint(fields=['contracting', 'company_code'], name='Company compound primary key')]
-    company_compound_id = models.CharField('Id da empresa', max_length=7, unique=True, editable=False) 
-    contracting = models.ForeignKey('Contracting', on_delete=models.PROTECT)
-    company_code = models.SlugField('Codigo da empresa', max_length=3)
-    item_table = models.ForeignKey('orders.ItemTable', blank=True, null=True, on_delete=models.PROTECT)
-    client_table = models.ForeignKey('ClientTable', blank=True, null=True,on_delete=models.PROTECT)
-    name = models.CharField(max_length=60)
-    cnpj = models.CharField(max_length=10,verbose_name="Raiz do CNPJ")
-    status = models.IntegerField(choices=status_choices)
-    note = models.TextField(blank=True)
+    company_compound_id = models.CharField(_('company compound id'), max_length=7, unique=True, editable=False) 
+    contracting = models.ForeignKey('Contracting', on_delete=models.PROTECT, verbose_name=_('contracting'))
+    company_code = models.SlugField(_('company code'), max_length=3)
+    item_table = models.ForeignKey('orders.ItemTable', blank=True, null=True, on_delete=models.PROTECT, verbose_name=_('item table'))
+    client_table = models.ForeignKey('ClientTable', blank=True, null=True,on_delete=models.PROTECT, verbose_name=_('client table'))
+    name = models.CharField(max_length=60, verbose_name=_('name'))
+    cnpj = models.CharField(max_length=10, verbose_name=_('CNPJ root'))
+    status = models.IntegerField(choices=status_choices, default=1)
+    note = models.TextField(blank=True, verbose_name=_('note'))
     def __str__(self):
-        return f'Empresa: {self.name}'
+        return f'Company: {self.name}'
 
 class Establishment(models.Model):
     # ClientEstablishment_set
     # AgentEstablishment_set
     # Order_set
     class Meta:
+        verbose_name = _('establishment')
+        verbose_name_plural = _('establishments')
         constraints = [UniqueConstraint(fields=['company', 'establishment_code'], name='Establishment compound primary key')]
-    establishment_compound_id = models.CharField('Id do estabelecimento', max_length=11, editable=False, unique=True) 
-    company = models.ForeignKey('Company', on_delete=models.PROTECT)
-    establishment_code = models.SlugField(max_length=3)
-    name = models.CharField(max_length=60)
+    establishment_compound_id = models.CharField(_('establishment compound id'), max_length=11, editable=False, unique=True) 
+    company = models.ForeignKey('Company', on_delete=models.PROTECT, verbose_name=_('company'))
+    establishment_code = models.SlugField(max_length=3, verbose_name=_('establishment code'))
+    name = models.CharField(max_length=60, verbose_name=_("name"))
     cnpj = CNPJField(masked=True, verbose_name="CNPJ")
-    status = models.IntegerField(choices=status_choices)
-    note = models.TextField(blank=True)
+    status = models.IntegerField(choices=status_choices, default=1)
+    note = models.TextField(blank=True, verbose_name=_('note'))
     def __str__(self):
-        return f'Estabelecimento: {self.name}'
+        return f'Establishment: {self.name}'
 
 class ClientTable(models.Model):
     #  Company_set
     #  Client_set
     class Meta:
+        verbose_name = _('client table')
+        verbose_name_plural = _('client tables')
         constraints = [UniqueConstraint(fields=['contracting', 'client_table_code'], name='ClientTable compound primary key')]
-    client_table_compound_id = models.CharField('Id da tabela de clientes', max_length=6, unique=True, editable=False)
-    contracting = models.ForeignKey('Contracting', on_delete=models.PROTECT)
-    client_table_code = models.SlugField("Código da tabela de cliente", max_length=2)
-    description = models.CharField(max_length=60)
-    note = models.TextField(blank=True)
+    client_table_compound_id = models.CharField(_('client table compound id'), max_length=6, unique=True, editable=False)
+    contracting = models.ForeignKey('Contracting', on_delete=models.PROTECT, verbose_name=_('contracting'))
+    client_table_code = models.SlugField(_('client table code'), max_length=2)
+    description = models.CharField(max_length=60, verbose_name=_('description'))
+    note = models.TextField(blank=True, verbose_name=_('note'))
 
 class Client(models.Model):
     # User_set
     # ClientEstablishment_set
     class Meta:
+        verbose_name = 'client'
+        verbose_name_plural = 'clients'
         constraints = [UniqueConstraint(fields=['client_table', 'client_code'], name='Client compound primary key')]
-    client_compound_id = models.CharField('Id do Cliente', max_length=16, editable=False, unique=True,) 
-    client_table = models.ForeignKey('ClientTable',on_delete=models.PROTECT)
-    client_code = models.SlugField(max_length=9)
-    vendor_code = models.CharField(blank=True, max_length=9)
-    name = models.CharField(max_length=60)
-    cnpj = models.CharField(max_length=10)
-    status = models.IntegerField(choices=status_choices)
-    establishments = models.ManyToManyField(Establishment, through='ClientEstablishment')
-    note = models.TextField(blank=True)
+    client_compound_id = models.CharField(_('client compound id'), max_length=16, editable=False, unique=True,) 
+    client_table = models.ForeignKey('ClientTable',on_delete=models.PROTECT, verbose_name=_('client table'))
+    client_code = models.SlugField(max_length=9, verbose_name=_('client code'))
+    vendor_code = models.CharField(blank=True, max_length=9, verbose_name=_('vendor code'))
+    name = models.CharField(max_length=60, verbose_name=_('name'))
+    cnpj = models.CharField(max_length=10, verbose_name='CNPJ')
+    status = models.IntegerField(choices=status_choices, default=1)
+    establishments = models.ManyToManyField(Establishment, through='ClientEstablishment', verbose_name=_('establishments'))
+    note = models.TextField(blank=True, verbose_name=_('note'))
     def __str__(self):
         return f'Cliente: {self.name}'
 
 class ClientEstablishment(models.Model):
     class Meta:
+        verbose_name = _('client establishment')
+        verbose_name_plural = _('client establishments')
         constraints = [UniqueConstraint(fields=['client', 'establishment'], name='ClientEstablishment compound primary key')]
-    establishment = models.ForeignKey('Establishment',on_delete=models.CASCADE)
-    client = models.ForeignKey('Client',on_delete=models.CASCADE, related_name='client_establishments')
-    price_table = models.ForeignKey('orders.PriceTable', blank=True, null=True, on_delete=models.SET_NULL)
+    establishment = models.ForeignKey('Establishment',on_delete=models.CASCADE, verbose_name=_('establishment')) 
+    client = models.ForeignKey('Client',on_delete=models.CASCADE, related_name='client_establishments', verbose_name=_('client'))
+    price_table = models.ForeignKey('orders.PriceTable', blank=True, null=True, on_delete=models.SET_NULL, 
+            verbose_name=_('price table'))
 
 class AgentEstablishment(models.Model):
     class Meta:
+        verbose_name = _('agent establishment')
+        verbose_name_plural = _('agent establishments')
         constraints = [UniqueConstraint(fields=['agent', 'establishment'], name='AgentEstablishment compound primary key')]
-    establishment = models.ForeignKey('Establishment',on_delete=models.PROTECT)
-    agent = models.ForeignKey('User',on_delete=models.CASCADE, related_name='agent_establishments')
+    establishment = models.ForeignKey('Establishment',on_delete=models.PROTECT, verbose_name=_('establishment'))
+    agent = models.ForeignKey('User',on_delete=models.CASCADE, related_name='agent_establishments', verbose_name=_('agent'))
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -131,75 +147,33 @@ class UserManager(BaseUserManager):
             assign_role(user, 'erp')
         return user
     def create_user(self, username=None, contracting=None, password=None, **extra_fields):
-        #  extra_fields.setdefault('is_staff', False)
         extra_fields.setdefault('is_superuser', False)
         return self._create_user(username, contracting, password, **extra_fields)
     def create_superuser(self, username, contracting=None, password=None, **extra_fields):
-        #  extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
-        #  if extra_fields.get('is_staff') is not True:
-            #  raise ValueError('Superuser must have is_staff=True.')
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
         return self._create_user(username, contracting, password, **extra_fields)
-    #  def with_perm(self, perm, is_active=True, include_superusers=True, backend=None, obj=None):
-        #  if backend is None:
-            #  backends = auth._get_backends(return_tuples=True)
-            #  if len(backends) == 1:
-                #  backend, _ = backends[0]
-            #  else:
-                #  raise ValueError(
-                    #  'You have multiple authentication backends configured and '
-                    #  'therefore must provide the `backend` argument.'
-                #  )
-        #  elif not isinstance(backend, str):
-            #  raise TypeError(
-                #  'backend must be a dotted import path string (got %r).'
-                #  % backend
-            #  )
-        #  else:
-            #  backend = auth.load_backend(backend)
-        #  if hasattr(backend, 'with_perm'):
-            #  return backend.with_perm(
-                #  perm,
-                #  is_active=is_active,
-                #  include_superusers=include_superusers,
-                #  obj=obj,
-            #  )
-        #  return self.none()
 
 class User(AbstractBaseUser, PermissionsMixin):
     # AgentEstablishment_set
     # OrderHistory_set
     # Order_set
     class Meta:
-        constraints = [UniqueConstraint(fields=['username', 'contracting'], name='Username compound primary key')]
         verbose_name = _('user')
         verbose_name_plural = _('users')
-    contracting = models.ForeignKey('Contracting', on_delete=models.PROTECT)
-    client = models.ForeignKey('Client', on_delete=models.PROTECT, verbose_name="Client company", null=True, blank=True)
-    establishments = models.ManyToManyField("Establishment", through='AgentEstablishment', verbose_name="Agent establishments")
-    user_code = models.CharField('User code', max_length=50, unique=True, editable=False)
+        constraints = [UniqueConstraint(fields=['username', 'contracting'], name='Username compound primary key')]
+    contracting = models.ForeignKey('Contracting', on_delete=models.PROTECT, verbose_name=_('contracting'))
+    client = models.ForeignKey('Client', on_delete=models.PROTECT, null=True, blank=True, verbose_name=_("client company"))
+    establishments = models.ManyToManyField("Establishment", through='AgentEstablishment', verbose_name=_("agent establishments"))
+    user_code = models.CharField(_('user code'), max_length=50, unique=True, editable=False)
     username = models.SlugField(_('username'), max_length=50)
     first_name = models.CharField(_('first name'), max_length=50, blank=True)
     last_name = models.CharField(_('last name'), max_length=50, blank=True)
-    email = models.EmailField(_('email address'))
-    status = models.IntegerField(choices=status_choices)
+    email = models.EmailField('email')
+    status = models.IntegerField(choices=status_choices, default=1)
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
-    note = models.TextField(blank=True)
-    #  is_staff = models.BooleanField(
-        #  _('staff status'),
-        #  default=False,
-        #  help_text=_('Designates whether the user can log into this admin site.'),
-    #  )
-    #  is_active = models.BooleanField(
-        #  _('active'),
-        #  default=True,
-        #  help_text=_(
-            #  'Designates whether this user should be treated as active. '
-            #  'Unselect this instead of deleting accounts.'
-        #  ),
-    #  )
+    note = models.TextField(blank=True, verbose_name=_('note'))
     objects = UserManager()
     EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'user_code'
@@ -223,9 +197,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         send_mail(subject, message, from_email, [self.email], **kwargs)
 
 class LoggedInUser(models.Model):
-    #  user = models.OneToOneField(User, on_delete=models.CASCADE)
-    user = models.OneToOneField(User, related_name='logged_in_user', on_delete=models.CASCADE)
+    user = models.OneToOneField(User, related_name='logged_in_user', on_delete=models.CASCADE, verbose_name=_('user'))
     # Session keys are 32 characters long
-    session_key = models.CharField(max_length=32, null=True, blank=True)
+    session_key = models.CharField(max_length=32, null=True, blank=True, verbose_name=_('sesssion key'))
     def __str__(self):
         return self.user.first_name

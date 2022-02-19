@@ -1,0 +1,754 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-02-19 12:12-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: core/middleware.py:23
+msgid "Invalid session. Try to login again."
+msgstr "Sessão invalida. Tente logar novamente."
+
+#: core/middleware.py:30
+msgid "Session already open."
+msgstr "A Sessão já esta aberta."
+
+#: core/models.py:15
+msgid "Disabled"
+msgstr "Desabilitado"
+
+#: core/models.py:16
+msgid "Active"
+msgstr "Ativo"
+
+#: core/models.py:25 core/models.py:43 core/models.py:80 core/models.py:166
+#: core/views.py:103 orders/models.py:17
+msgid "contracting"
+msgstr "contratante"
+
+#: core/models.py:26
+msgid "contractings"
+msgstr "contratantes"
+
+#: core/models.py:27
+msgid "contracting code"
+msgstr "código da contratante"
+
+#: core/models.py:28 core/models.py:47 core/models.py:65 core/models.py:96
+msgid "name"
+msgstr "nome"
+
+#: core/models.py:30
+msgid "active users limit"
+msgstr "limite de usuários ativos"
+
+#: core/models.py:31 core/models.py:50 core/models.py:68 core/models.py:83
+#: core/models.py:100 core/models.py:176 orders/models.py:20
+#: orders/models.py:34 orders/models.py:75 orders/models.py:116
+msgid "note"
+msgstr "observação"
+
+#: core/models.py:39 core/models.py:63 core/views.py:170 orders/models.py:71
+#: orders/models.py:108
+msgid "company"
+msgstr "empresa"
+
+#: core/models.py:40
+msgid "companies"
+msgstr "empresas"
+
+#: core/models.py:42
+msgid "company compound id"
+msgstr "id composto da empresa"
+
+#: core/models.py:44
+msgid "company code"
+msgstr "código da empresa"
+
+#: core/models.py:45 orders/models.py:13 orders/models.py:45
+msgid "item table"
+msgstr "tabela de itens"
+
+#: core/models.py:46 core/models.py:76 core/models.py:93 core/views.py:302
+msgid "client table"
+msgstr "tabela de clientes"
+
+#: core/models.py:48
+msgid "CNPJ root"
+msgstr "Raiz do CNPJ"
+
+#: core/models.py:59 core/models.py:109 core/models.py:119 core/views.py:235
+#: orders/models.py:109
+msgid "establishment"
+msgstr "estabelecimento"
+
+#: core/models.py:60 core/models.py:99
+msgid "establishments"
+msgstr "estabelecimentos"
+
+#: core/models.py:62
+msgid "establishment compound id"
+msgstr "id composto do estabelecimento"
+
+#: core/models.py:64
+msgid "establishment code"
+msgstr "código do estabelecimento"
+
+#: core/models.py:77
+msgid "client tables"
+msgstr "tabelas de clientes"
+
+#: core/models.py:79
+msgid "client table compound id"
+msgstr "id composto da tabela de clientes"
+
+#: core/models.py:81
+msgid "client table code"
+msgstr "código da tabela de cliente"
+
+#: core/models.py:82 orders/models.py:19 orders/models.py:33
+#: orders/models.py:49 orders/models.py:73
+msgid "description"
+msgstr "descrição"
+
+#: core/models.py:92
+msgid "client compound id"
+msgstr "id composto do cliente"
+
+#: core/models.py:94
+msgid "client code"
+msgstr "código do cliente"
+
+#: core/models.py:95
+msgid "vendor code"
+msgstr "código do vendedor"
+
+#: core/models.py:106
+msgid "client establishment"
+msgstr "estabelecimento do cliente"
+
+#: core/models.py:107
+msgid "client establishments"
+msgstr "estabelecimentos do cliente"
+
+#: core/models.py:110 core/views.py:379
+msgid "client"
+msgstr "cliente"
+
+#: core/models.py:112 orders/models.py:67 orders/models.py:85
+#: orders/models.py:110
+msgid "price table"
+msgstr "tabela de preço"
+
+#: core/models.py:116
+msgid "agent establishment"
+msgstr "estabelecimento do agente"
+
+#: core/models.py:117 core/models.py:168
+msgid "agent establishments"
+msgstr "estabelecimentos do agente"
+
+#: core/models.py:120 core/views.py:579
+msgid "agent"
+msgstr "agente"
+
+#: core/models.py:163 core/models.py:200 orders/models.py:143
+msgid "user"
+msgstr "usuário"
+
+#: core/models.py:164
+msgid "users"
+msgstr "usuários"
+
+#: core/models.py:167
+msgid "client company"
+msgstr "empresa do cliente"
+
+#: core/models.py:169
+msgid "user code"
+msgstr "código do usuário"
+
+#: core/models.py:170
+msgid "username"
+msgstr "username"
+
+#: core/models.py:171
+msgid "first name"
+msgstr "nome"
+
+#: core/models.py:172
+msgid "last name"
+msgstr "sobrenome"
+
+#: core/models.py:175
+msgid "date joined"
+msgstr "data de entrada"
+
+#: core/models.py:202
+msgid "sesssion key"
+msgstr "chave da sessão"
+
+#: core/serializers.py:39
+msgid "The field 'company_code' must be unique."
+msgstr "O campo 'company_code' deve ser único"
+
+#: core/serializers.py:45 core/serializers.py:175 core/serializers.py:410
+msgid "Client table not found."
+msgstr "Tabela de cliente não encontrada."
+
+#: core/serializers.py:53
+msgid "Item table not found."
+msgstr "Tabela de itens não encontrada."
+
+#: core/serializers.py:75
+msgid "The field 'establishment_code' must be unique by company."
+msgstr "O campo 'establishment_code' deve ser único por empresa."
+
+#: core/serializers.py:80
+msgid "Company not found."
+msgstr "Empresa não encontrada."
+
+#: core/serializers.py:104
+msgid "The field 'client_table_code' must be unique."
+msgstr "O campo 'client_table_code' deve ser único."
+
+#: core/serializers.py:136 core/serializers.py:311
+msgid "Establishment not found."
+msgstr "Estabelecimento não encontrado."
+
+#: core/serializers.py:149
+msgid "The field 'client_code' must be unique by client table."
+msgstr "O campo 'client_code' deve ser único por tabela de cliente."
+
+#: core/serializers.py:161
+msgid "There is a duplicate establishment in 'client_establishments'"
+msgstr "Existe um estabelecimento duplicado em 'client_establishments'"
+
+#: core/serializers.py:165
+msgid ""
+"The 'client_table' field must correspond to the company client_table "
+"associated with the added establishments."
+msgstr ""
+"O campo 'client_table' deve corresponder com a tabela de clientes da empresa "
+"associada com os estabelecimentos adicionados."
+
+#: core/serializers.py:170
+msgid "You can't add this establishment to this client."
+msgstr "Você não pode adicionar esse estabelecimento nesse cliente."
+
+#: core/serializers.py:178
+msgid "Can't access this client_table."
+msgstr "Não pode acessar essa tabela de cliente."
+
+#: core/serializers.py:182
+msgid "You can't update this client."
+msgstr "Você não pode atualizar esse cliente."
+
+#: core/serializers.py:247
+msgid "The field 'username' must be unique."
+msgstr "O campo 'username' deve ser único."
+
+#: core/serializers.py:259
+msgid ""
+"You cannot create more users. Your contracting company already reach the "
+"active users limit."
+msgstr ""
+"Você não pode criar mais usuários. Sua contratante já alcançou o limite de "
+"usuários ativos."
+
+#: core/serializers.py:263
+msgid "User not found."
+msgstr "Usuário não encontrado."
+
+#: core/serializers.py:354
+msgid "There are duplicate values for agent_establishments."
+msgstr "Existem valores duplicados para 'agent_establishments'"
+
+#: core/serializers.py:413
+msgid "You have no permission to assign this client to this client user."
+msgstr "Você não possui permissão para atribuir esse cliente a esse usuário cliente."
+
+#: core/templates/password_reset.html:4
+#, python-format
+msgid "Password reset on %(site_name)s"
+msgstr "Redefinição de senha em %(site_name)s"
+
+#: core/templates/password_reset.html:9 core/templates/password_reset.html:22
+#, python-format
+msgid ""
+"You're receiving this email because you requested a password reset for your "
+"user account at %(site_name)s."
+msgstr ""
+"Você está recebendo esse email por que requisitou uma redefinição de senha "
+"em sua conta de usuário em %(site_name)s."
+
+#: core/templates/password_reset.html:11 core/templates/password_reset.html:24
+msgid "Please go to the following page and choose a new password:"
+msgstr "Por favor vá para a seguinte página e crie uma nova senha:"
+
+#: core/templates/password_reset.html:13 core/templates/password_reset.html:26
+msgid "Your email, in case you've forgotten:"
+msgstr "Seu email, caso você tenha esquecido:"
+
+#: core/templates/password_reset.html:15 core/templates/password_reset.html:28
+msgid "Thanks for using our site!"
+msgstr "Obrigado por usar nosso site!"
+
+#: core/templates/password_reset.html:17 core/templates/password_reset.html:30
+#, python-format
+msgid "The %(site_name)s team"
+msgstr "Equipe %(site_name)s "
+
+#: core/validators.py:76
+msgid "There are duplicate values for agent_permissions"
+msgstr "Existem valores duplicados para 'agent_permissions'"
+
+#: core/validators.py:79
+#, python-brace-format
+msgid "You can't assign '{permission}' permission to an agent."
+msgstr "Você não pode atribuir a permissão '{permission}' para um agente."
+
+#: core/views.py:19
+msgid "You don't have permission to access this resource."
+msgstr "Você não tem permissão para acessar esse recurso."
+
+#: core/views.py:29
+#, python-brace-format
+msgid "{object_name} was not found."
+msgstr "{object_name} não foi encontrado."
+
+#: core/views.py:35
+#, python-brace-format
+msgid ""
+"You cannot delete this {object_name} because it has records linked to it."
+msgstr ""
+"Você não pode deletar esse {object_name} pois ele possui registro ligados a ele."
+
+#: core/views.py:38
+#, python-brace-format
+msgid "Something went wrong when trying to {action}."
+msgstr "Algo deu errado ao tentar {action}."
+
+#: core/views.py:66
+msgid "create contracting"
+msgstr "criar contratante"
+
+#: core/views.py:80 core/views.py:98
+msgid "The contracting"
+msgstr "A contratante"
+
+#: core/views.py:89
+msgid "update contracting"
+msgstr "atualizar contratante"
+
+#: core/views.py:101
+msgid "Contracting deleted."
+msgstr "Contratante excluída."
+
+#: core/views.py:107
+msgid "delete contracting"
+msgstr "excluir contratante"
+
+#: core/views.py:131
+msgid "create company"
+msgstr "criar empresa"
+
+#: core/views.py:141 core/views.py:145 core/views.py:161 core/views.py:165
+msgid "The company"
+msgstr "A empresa"
+
+#: core/views.py:154
+msgid "update company"
+msgstr "atualizar empresa"
+
+#: core/views.py:168
+msgid "Company deleted"
+msgstr "Empresa excluída"
+
+#: core/views.py:174
+msgid "delete company"
+msgstr "empresa excluída"
+
+#: core/views.py:198
+msgid "create establishment"
+msgstr "criar estabelecimento"
+
+#: core/views.py:207 core/views.py:211 core/views.py:226 core/views.py:230
+msgid "The establishment"
+msgstr "O estabelecimento"
+
+#: core/views.py:220
+msgid "update establishment"
+msgstr "atualizar estabelecimento"
+
+#: core/views.py:233
+msgid "Establishment deleted"
+msgstr "Estabelecimento excluído"
+
+#: core/views.py:239
+msgid "delete establishment"
+msgstr "excluir estabelecimento"
+
+#: core/views.py:263
+msgid "create client table"
+msgstr "criar tabela de clientes"
+
+#: core/views.py:273 core/views.py:277 core/views.py:293 core/views.py:297
+msgid "The client table"
+msgstr "A tabela de clientes"
+
+#: core/views.py:286
+msgid "update client table"
+msgstr "atualizar tabela de clientes"
+
+#: core/views.py:300
+msgid "Client table deleted"
+msgstr "Tabela de clientes excluída"
+
+#: core/views.py:306
+msgid "delete client table"
+msgstr "tabela de clientes"
+
+#: core/views.py:334
+msgid "create client"
+msgstr "criar cliente"
+
+#: core/views.py:346 core/views.py:350 core/views.py:367 core/views.py:371
+msgid "The client"
+msgstr "O cliente"
+
+#: core/views.py:359
+msgid "update client"
+msgstr "atualizar cliente"
+
+#: core/views.py:377
+msgid "Client deleted"
+msgstr "Cliente excluído"
+
+#: core/views.py:383
+msgid "delete client"
+msgstr "cliente excluído"
+
+#: core/views.py:392
+msgid "csrf cookie set"
+msgstr "cookie csrf enviado"
+
+#: core/views.py:399
+msgid "User is already authenticated"
+msgstr "O usuário já está autenticado"
+
+#: core/views.py:406
+msgid "Your account is disabled."
+msgstr "Sua conta está desabilitada"
+
+#: core/views.py:409
+msgid "The login is disabled"
+msgstr "O login está desabilitado"
+
+#: core/views.py:413
+msgid "The login failed"
+msgstr "O login falhou"
+
+#: core/views.py:420
+msgid "Logged out"
+msgstr "Deslogado"
+
+#: core/views.py:423
+msgid "log out"
+msgstr "deslogar"
+
+#: core/views.py:434
+msgid "get request user profile"
+msgstr "obter perfil do usuário da requisição"
+
+#: core/views.py:444
+msgid "update request user profile"
+msgstr "atualizar perfil do usuário da requisição"
+
+#: core/views.py:467
+msgid "create admin agent"
+msgstr "criar agente administrador"
+
+#: core/views.py:492
+msgid "update admin agent"
+msgstr "atualizar agente administrador"
+
+#: core/views.py:500 core/views.py:505
+msgid "The admin agent"
+msgstr "O agente administrador"
+
+#: core/views.py:508
+msgid "Admin agent deleted successfully."
+msgstr "Agente administrador excluído com sucesso."
+
+#: core/views.py:510
+msgid "admin agent"
+msgstr "agente administrador"
+
+#: core/views.py:514
+msgid "delete admin agent"
+msgstr "excluir agente administrador"
+
+#: core/views.py:536
+msgid "create agent"
+msgstr "criar agente"
+
+#: core/views.py:545 core/views.py:550 core/views.py:569 core/views.py:574
+msgid "The agent"
+msgstr "O agente"
+
+#: core/views.py:561
+msgid "update agent"
+msgstr "atualizar agente"
+
+#: core/views.py:577
+msgid "Agent deleted successfully"
+msgstr "Agente excluído com sucesso"
+
+#: core/views.py:583
+msgid "delete agent"
+msgstr "excluir agente"
+
+#: core/views.py:606
+msgid "create client user"
+msgstr "criar usuário cliente"
+
+#: core/views.py:615 core/views.py:620 core/views.py:638 core/views.py:643
+msgid "The client user"
+msgstr "O usuário cliente"
+
+#: core/views.py:631
+msgid "update client user"
+msgstr "atualizar usuário cliente"
+
+#: core/views.py:652 orders/models.py:107
+msgid "client user"
+msgstr "usuário cliente"
+
+#: core/views.py:656
+msgid "delete client user"
+msgstr "excluir usuário cliente"
+
+#: core/views.py:665
+msgid "Password field not sent"
+msgstr "Senha não enviada"
+
+#: core/views.py:667
+msgid "Current Password field not sent"
+msgstr "A senha atual não foi enviada"
+
+#: core/views.py:671
+msgid "Password updated"
+msgstr "Senha atualizada"
+
+#: core/views.py:672
+msgid "passwords don't match"
+msgstr "senhas não coincidem"
+
+#: orders/models.py:14
+msgid "item tables"
+msgstr "tabelas de itens"
+
+#: orders/models.py:16
+msgid "item table compound id"
+msgstr "id composto da tabela de itens"
+
+#: orders/models.py:18
+msgid "item table code"
+msgstr "código da tabela de itens"
+
+#: orders/models.py:27
+msgid "item category"
+msgstr "categoria de item"
+
+#: orders/models.py:28
+msgid "item categories"
+msgstr "categorias de item"
+
+#: orders/models.py:31
+msgid "item category compound id"
+msgstr "id composto da categoria de item"
+
+#: orders/models.py:32
+msgid "category code"
+msgstr "código da categoria"
+
+#: orders/models.py:42 orders/models.py:86 orders/models.py:126
+msgid "item"
+msgstr "item"
+
+#: orders/models.py:43 orders/models.py:74
+msgid "items"
+msgstr "itens"
+
+#: orders/models.py:46
+msgid "item compound id"
+msgstr "id composto do item"
+
+#: orders/models.py:47
+msgid "item code"
+msgstr "código do item"
+
+#: orders/models.py:48
+msgid "category"
+msgstr "categoria"
+
+#: orders/models.py:50
+msgid "unit"
+msgstr "unidade"
+
+#: orders/models.py:51
+msgid "barcode"
+msgstr "código de barra"
+
+#: orders/models.py:53
+msgid "image"
+msgstr "imagem"
+
+#: orders/models.py:54
+msgid "technical description"
+msgstr "descrição técnica"
+
+#: orders/models.py:68
+msgid "price tables"
+msgstr "tabelas de preço"
+
+#: orders/models.py:70
+msgid "price table compound id"
+msgstr "id composto da tabela de preço"
+
+#: orders/models.py:72
+msgid "table_code"
+msgstr "código da tabela"
+
+#: orders/models.py:81
+msgid "price item"
+msgstr "item preço"
+
+#: orders/models.py:82
+msgid "price items"
+msgstr "itens preço"
+
+#: orders/models.py:87 orders/models.py:128
+msgid "unit price"
+msgstr "preço unitário"
+
+#: orders/models.py:88
+msgid "last modified"
+msgstr "última modificação"
+
+#: orders/models.py:89
+msgid "creation date"
+msgstr "data de criação"
+
+#: orders/models.py:93
+msgid "Typing"
+msgstr "Digitação"
+
+#: orders/models.py:94
+msgid "Transferred"
+msgstr "Transferido"
+
+#: orders/models.py:95
+msgid "Registered"
+msgstr "Registrado"
+
+#: orders/models.py:96
+msgid "Billed"
+msgstr "Faturado"
+
+#: orders/models.py:97
+msgid "Delivered"
+msgstr "Entregue"
+
+#: orders/models.py:98
+msgid "Canceled"
+msgstr "Cancelado"
+
+#: orders/models.py:103 orders/models.py:125 orders/models.py:145
+msgid "order"
+msgstr "pedido"
+
+#: orders/models.py:104
+msgid "orders"
+msgstr "pedidos"
+
+#: orders/models.py:106
+msgid "order number"
+msgstr "número do pedido"
+
+#: orders/models.py:112
+msgid "order date"
+msgstr "data do pedido"
+
+#: orders/models.py:113
+msgid "billing date"
+msgstr "data de faturamento"
+
+#: orders/models.py:114
+msgid "invoice number"
+msgstr "numero da nota"
+
+#: orders/models.py:115
+msgid "order amount"
+msgstr "valor total do pedido"
+
+#: orders/models.py:122
+msgid "ordered Item"
+msgstr "item pedido"
+
+#: orders/models.py:123
+msgid "ordered Items"
+msgstr "itens pedidos"
+
+#: orders/models.py:127
+msgid "quantity"
+msgstr "quantidade"
+
+#: orders/models.py:129 orders/models.py:144
+msgid "date"
+msgstr "data"
+
+#: orders/models.py:133 orders/models.py:134
+msgid "order history"
+msgstr "histórico do pedido"
+
+#: orders/models.py:137
+msgid "Inclusion"
+msgstr "Inclusão"
+
+#: orders/models.py:138
+msgid "Alteration"
+msgstr "Alteração"
+
+#: orders/models.py:139
+msgid "Exclusion"
+msgstr "Exclusão"
+
+#: orders/models.py:140
+msgid "Printed"
+msgstr "Impressão"
+
+#: orders/models.py:141
+msgid "Note"
+msgstr "Observação"
+
+#: orders/models.py:146
+msgid "history type"
+msgstr "tipo do histórico"
+
+#: orders/models.py:147
+msgid "history description"
+msgstr "descrição do histórico"

@@ -1,23 +1,14 @@
-import re
 from rest_framework import serializers
 from rolepermissions.checkers import has_permission, has_role
 from rolepermissions.roles import get_user_roles
 from core.facade import get_agent_client_tables, get_agent_companies, get_agent_item_tables
-
-from core.models import ClientTable
 from core.roles import Agent
+from django.utils.translation import gettext_lazy as _
 
-# ---------------/ DRF Serializer Field Validators
+# ---------------/ Django Role Permissions Validators
 
-def OnlyLettersNumbersDashAndUnderscoreUsernameValidator(value):
-    if not re.fullmatch('^[a-zA-Z0-9_.-]*$', value):
-        raise serializers.ValidationError('The username must have only letters, numbers, "-" and "_".')
-
-
-# ---------------/ Django Role Permissions Object Validators
 def is_adminAgent_or_erpClient(user):
     return has_role(user, ['erp', 'admin_agent'])
-
 
 def has_any_permission_to_create_user(user):
     return True if is_adminAgent_or_erpClient(user) or has_permission(user, 'create_client_user') else False
@@ -82,10 +73,10 @@ def agent_permissions_exist_and_does_not_have_duplicates(agent_permissions):
     check_for_duplicate_values = []
     for permission in agent_permissions:
         if permission in check_for_duplicate_values:
-            raise serializers.ValidationError(f"There are duplicate values for agent_permissions")
+            raise serializers.ValidationError(_("There are duplicate values for agent_permissions"))
         check_for_duplicate_values.append(permission)
         if not permission in Agent.available_permissions.keys():
-            raise serializers.ValidationError(f"You can't assign '{permission}' permission to an agent.")
+            raise serializers.ValidationError(_(f"You can't assign '{permission}' permission to an agent.").format(permission=permission))
 
 def req_user_is_agent_without_all_estabs(request_user):
     return has_role(request_user, 'agent') and not has_permission(request_user, 'access_all_establishments')
