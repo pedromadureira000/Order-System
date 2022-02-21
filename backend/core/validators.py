@@ -57,6 +57,13 @@ def agent_has_access_to_this_client(agent, client):
     else: 
         return True
 
+def agent_has_access_to_this_client_user(agent, client_user):
+    client_tables = get_agent_client_tables(agent)
+    if client_user.client_table not in client_tables:
+        return False
+    else: 
+        return True
+
 def agent_has_permission_to_assign_this_client_table_to_client(agent, client_table):
     client_tables = get_agent_client_tables(agent)
     if not client_table in client_tables:

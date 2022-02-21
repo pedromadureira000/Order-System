@@ -1,10 +1,10 @@
 from .models import Order, Item, ItemCategory, OrderedItem, PriceTable
 from django.db.models import Q, Value, Prefetch
 from django.db.models.functions import Concat
-from rolepermissions.checkers import has_role
+from rolepermissions.checkers import has_permission, has_role
 
 # ----------------------------/ Orders /-----------------------------
-from core.models import User
+from core.models import Company, User
 
 def get_orders(request):
     if request.GET.get('term') is not None and request.GET.get('term') != '':
@@ -34,33 +34,40 @@ def get_orders(request):
 def get_order(request):
     return OrderedItem.objects.filter(order_id=request.POST.get('id_order')).all()
 
-
 def make_order(request):
     pass
 
-
 # ------------------------------/ Items /--------------------------------------
+def get_categories_by_agent(agent):
+    if has_permission(agent, 'access_all_establishments'):
+        return ItemCategory.objects.filter(item_table__contracting=agent.contracting).all()
+    return ItemCategory.objects.filter(item_table__company__in=Company.objects.filter(establishment__in=agent.establishments.all())).all()
+
+def get_items_by_agent(agent):
+    if has_permission(agent, 'access_all_establishments'):
+        return Item.objects.filter(item_table__contracting=agent.contracting).all()
+    return Item.objects.filter(item_table__company__in=Company.objects.filter(establishment__in=agent.establishments.all())).all()
+
+def get_price_tables_by_agent(agent):
+    if has_permission(agent, 'access_all_establishments'):
+        return PriceTable.objects.filter(company__contracting=agent.contracting).all()
+    return PriceTable.objects.filter(company__in=Company.objects.filter(establishment__in=agent.establishments.all())).all()
 
 def get_items_by_category():
     itens_actives = Item.objects.filter(active=True)
     return ItemCategory.objects.prefetch_related(
         Prefetch('item_set', queryset=itens_actives, to_attr='items')).all()
 
-
 def user_category_items_queryset(request):
-
     if not request.user.company:
         return None
-
     try:
         table = PriceTable.objects.get(company=request.user.company)
     except PriceTable.DoesNotExist:
         return None
-
     items = Item.objects.filter(active=True).filter(pricetable=table)
     return ItemCategory.objects.prefetch_related(
         Prefetch('item_set', queryset=items, to_attr='items')).all()
-
     # >> itens = Item.objects.prefetch_related('item_code').filter(pricetable=user.company.pricetable)
     # items = request.user.company.pricetable.itens_preco.select_related('item')
     # items = request.user.company.pricetable.itens.prefetch_related('item_code')
@@ -75,10 +82,8 @@ def user_category_items_queryset(request):
     # return ItemCategory.objects.prefetch_related(
     #     Prefetch('item_set', queryset=items, to_attr='itens')).all()
 
-
 def get_all_items_by_category():
     items = Item.objects.all()
     return ItemCategory.objects.prefetch_related(
         Prefetch('item_set', queryset=items, to_attr='items')).all()
-
 

@@ -1,12 +1,12 @@
 from typing import OrderedDict
 from rest_framework import serializers
-from rest_framework.exceptions import NotFound, PermissionDenied
+from rest_framework.exceptions import NotFound
 from rest_framework.validators import UniqueTogetherValidator
 from core.facade import update_agent_establishments, update_agent_permissions, update_client_establishments
 from core.models import User
 from rolepermissions.roles import get_user_roles
 from rolepermissions.permissions import available_perm_status
-from core.validators import UserContracting, agent_has_permission_to_assign_this_client_table_to_client, agent_has_permission_to_assign_this_establishment_to_client, agent_permissions_exist_and_does_not_have_duplicates, contracting_can_create_user, agent_has_access_to_this_client, req_user_is_agent_without_all_estabs
+from core.validators import UserContracting, agent_has_access_to_this_client_user, agent_has_permission_to_assign_this_client_table_to_client, agent_has_permission_to_assign_this_establishment_to_client, agent_permissions_exist_and_does_not_have_duplicates, contracting_can_create_user, agent_has_access_to_this_client, req_user_is_agent_without_all_estabs
 from orders.models import ItemTable
 from .models import Client, ClientEstablishment, ClientTable, Company, Contracting, AgentEstablishment, Establishment
 from rolepermissions.roles import assign_role
@@ -131,7 +131,7 @@ class ClientEstablishmentToClientSerializer(serializers.ModelSerializer):
 
     def validate_establishment(self, value):
         if value:
-        # - Contracting owership
+        # - Contracting ownership
             if value.company.contracting != self.context["request"].user.contracting:
                 raise serializers.ValidationError(_("Establishment not found."))
         return value
@@ -170,7 +170,7 @@ class ClientSerializer(serializers.ModelSerializer):
                         raise serializers.ValidationError(_("You can't add this establishment to this client."))
         if self.context['request'].method == 'POST':
             # ----------------/ Client Table
-            # Contracting owership
+            # Contracting ownership
             if attrs.get('client_table').contracting != request_user.contracting:
                 raise serializers.ValidationError(_("Client table not found."))
             if request_user_is_agent_without_all_estabs:
@@ -183,7 +183,7 @@ class ClientSerializer(serializers.ModelSerializer):
         return attrs
 
         # - Price Table
-            #  if client_establishment['price_table']:  <-----------/ validate price_table owership
+            #  if client_establishment['price_table']:  <-----------/ validate price_table ownership
                 #  if client_establishment['price_table'].company.contracting != request_user.contracting:
                     #  raise serializers.ValidationError(f"You can't access this resource.")
 
@@ -208,8 +208,8 @@ class ClientSerializer(serializers.ModelSerializer):
         return client
 
     def update(self, instance, validated_data):
-        validated_data['client_code'] = instance.client_code
-        validated_data['client_table'] = instance.client_table
+        if validated_data.get('client_code'): validated_data.pop('client_code')
+        if validated_data.get('client_table'): validated_data.pop('client_table')
         # When using 'return super().update ...' i can't return validated_data with nested related values to update
         client_establishments = validated_data.get('client_establishments')
         if client_establishments or client_establishments == []:
@@ -401,6 +401,15 @@ class ClientUserSerializer(UserSerializer):
     class Meta(UserSerializer.Meta):
         fields = ['username',  'contracting', 'client', 'roles', 'permissions', 'first_name',
                 'last_name', 'email', 'status', 'password', 'note']
+
+    def validate(self, attrs):
+        request_user = self.context["request"].user
+        if self.context['request'].method == 'PUT':
+            # Deny agent without all estabs to update access any user client
+            if req_user_is_agent_without_all_estabs(request_user) and not \
+                    agent_has_access_to_this_client_user(request_user, self.instance):
+                raise serializers.ValidationError(_("Client user not found."))
+        return super().validate(attrs)
 
     def validate_client(self, value):
         request_user = self.context["request"].user

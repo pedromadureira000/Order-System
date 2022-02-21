@@ -19,10 +19,11 @@ def get_all_users_by_erp(user):
 def get_all_users_by_admin_agent(user):
     return User.objects.filter(Q(is_superuser=False), Q(contracting=user.contracting), ~Q(groups__name='erp'))
 
-def get_all_client_users_by_agent(user):
-    if has_permission(user, 'access_all_establishments'):
-        return User.objects.filter(Q(contracting=user.contracting), Q(groups__name='client_user'))
-    return User.objects.filter(Q(contracting=user.contracting), Q(groups__name='client_user'), Q(client__client_table__company__in=Company.objects.filter(establishment__in=user.establishments.all())))
+def get_all_client_users_by_agent(agent):
+    if has_permission(agent, 'access_all_establishments'):
+        return User.objects.filter(Q(contracting=agent.contracting), Q(groups__name='client_user'))
+    return User.objects.filter(Q(contracting=agent.contracting), Q(groups__name='client_user'), 
+            Q(client__client_table__company__in=Company.objects.filter(establishment__in=agent.establishments.all())))
 
 def get_agent_companies(agent):
     return Company.objects.filter(establishment__in=agent.establishments.all())

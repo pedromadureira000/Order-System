@@ -6,7 +6,7 @@ from rest_framework import status, permissions
 #  from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from core.facade import get_clients_by_agent
+from core.facade import get_all_client_users_by_agent, get_clients_by_agent
 from core.serializers import AdminAgentSerializer, AgentSerializer, ClientSerializer, ClientTableSerializer, ClientUserSerializer, CompanySerializer, ContractingSerializer, EstablishmentSerializer, OwnProfileSerializer, UserSerializer, SwaggerLoginSerializer, SwaggerProfilePasswordSerializer
 from core.models import Client, ClientTable, Company, Contracting, Establishment, User
 from rolepermissions.checkers import has_permission, has_role
@@ -201,6 +201,7 @@ class EstablishmentView(APIView):
 
 class SpecificEstablishment(APIView):
     @swagger_auto_schema(request_body=EstablishmentSerializer) 
+    @transaction.atomic
     def put(self, request, establishment_compound_id):
         if has_permission(request.user, 'update_establishment'):
             if establishment_compound_id.split("#")[0] != request.user.contracting.contracting_code: #TODO
@@ -220,6 +221,7 @@ class SpecificEstablishment(APIView):
                     return unknown_exception_response(action=_('update establishment'))
             return serializer_invalid_response(serializer.errors)
         return unauthorized_response
+    @transaction.atomic
     def delete(self, request, establishment_compound_id):
         if has_permission(request.user, 'delete_establishment'):
             if establishment_compound_id.split("#")[0] != request.user.contracting.contracting_code:
@@ -309,12 +311,12 @@ class SpecificClientTable(APIView):
 class ClientView(APIView):
     def get(self, request):
         user = request.user
-        if has_role(request.user, ["erp", "admin_agent"]) or has_permission(user, 'access_all_establishments'):
-            clients = Client.objects.filter(client_table__contracting=user.contracting)
-            data = ClientSerializer(clients, many=True).data
-            return Response(data)
         if has_permission(user, 'get_clients'):
-            clients = get_clients_by_agent(user)
+            if has_role(user, 'agent'):
+                clients = get_clients_by_agent(user)
+                data = ClientSerializer(clients, many=True).data
+                return Response(data)
+            clients = Client.objects.filter(client_table__contracting=user.contracting)
             data = ClientSerializer(clients, many=True).data
             return Response(data)
         return unauthorized_response
@@ -368,8 +370,8 @@ class SpecificClient(APIView):
             try:
                 client = Client.objects.get(client_compound_id=client_compound_id)
             except Client.DoesNotExist:
-                return not_found_response(object_name=_('The client'))
-            if has_role(request.user, 'agent') and not has_permission(request.user, 'access_all_establishments') and \
+                return not_found_response(object_name=_('The client')) 
+            if req_user_is_agent_without_all_estabs(request.user) and \
                     not agent_has_access_to_this_client(request.user, client):
                 return unauthorized_response
             try:
@@ -414,6 +416,7 @@ class Login(APIView):
         return serializer_invalid_response(serializer.errors)
 
 class Logout(APIView):
+    @transaction.atomic
     def post(self, request):
         try:
             logout(request)
@@ -425,6 +428,7 @@ class Logout(APIView):
 #-------------------------------------------/ Users Views / -------------------------------------
 
 class OwnProfileView(APIView):
+    @transaction.atomic
     def get(self, request):
         try:
             data = OwnProfileSerializer(request.user).data
@@ -433,6 +437,7 @@ class OwnProfileView(APIView):
             print(error)
             return unknown_exception_response(action=_('get request user profile'))
     @swagger_auto_schema(request_body=OwnProfileSerializer) 
+    @transaction.atomic
     def put(self, request):
         serializer = UserSerializer(request.user, data=request.data, partial=True, context={"request": request, "view": "update own profile"})
         if serializer.is_valid():
@@ -470,6 +475,7 @@ class AdminAgentView(APIView):
 
 class SpecificAdminAgent(APIView):
     @swagger_auto_schema(request_body=AdminAgentSerializer) 
+    @transaction.atomic
     def put(self, request, username, contracting_code):
         if has_permission(request.user, 'update_admin_agent'):
             if contracting_code != request.user.contracting.contracting_code:
@@ -539,6 +545,7 @@ class AgentView(APIView):
 
 class SpecificAgent(APIView):
     @swagger_auto_schema(request_body=AgentSerializer) 
+    @transaction.atomic
     def put(self, request, username, contracting_code):
         if has_permission(request.user, 'update_agent'):
             if contracting_code != request.user.contracting.contracting_code:
@@ -587,6 +594,9 @@ class ClientUserView(APIView):
     def get(self, request):
         if has_permission(request.user, 'get_client_users'):
             user = request.user
+            if has_role(user, 'agent'):
+                client_users = get_all_client_users_by_agent(user)
+                return Response(ClientUserSerializer(client_users, many=True).data)
             client_users = User.objects.filter(Q(contracting=user.contracting), Q(groups__name='client_user'))
             return Response(ClientUserSerializer(client_users, many=True).data)
         return unauthorized_response
@@ -609,6 +619,7 @@ class ClientUserView(APIView):
 
 class SpecificClientUser(APIView):
     @swagger_auto_schema(request_body=ClientUserSerializer) 
+    @transaction.atomic
     def put(self, request, username, contracting_code):
         if has_permission(request.user, 'update_client_user'):
             if contracting_code != request.user.contracting.contracting_code:
@@ -658,6 +669,7 @@ class SpecificClientUser(APIView):
 
 class UpdateUserPassword(APIView):
     @swagger_auto_schema(request_body=SwaggerProfilePasswordSerializer) 
+    @transaction.atomic
     def put(self, request):
         user = request.user
         data = request.data

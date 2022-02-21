@@ -1,14 +1,17 @@
 from django.db import transaction
+from django.db.models.deletion import ProtectedError
 from rest_framework import status, mixins, generics
 from rest_framework.response import Response
 from core.models import User
+from core.validators import agent_has_access_to_this_item_table, agent_has_access_to_this_price_table, req_user_is_agent_without_all_estabs
+from orders.facade import get_categories_by_agent, get_items_by_agent, get_price_tables_by_agent
 from orders.serializers import ItemSerializer, CategorySerializer, ItemTableSerializer, OrderSerializer, PriceTableSerializer
 from orders.models import ItemTable, Order, Item, ItemCategory, PriceTable, PriceItem
 from rest_framework.views import APIView
 from rolepermissions.checkers import has_permission, has_role
 from drf_yasg.utils import swagger_auto_schema
-from core.views import serializer_invalid_response, unauthorized_response
-
+from core.views import not_found_response, protected_error_response, serializer_invalid_response, success_response, unauthorized_response, unknown_exception_response
+from django.utils.translation import gettext_lazy as _
 
 class ItemTableView(APIView):
     def get(self, request):
@@ -21,7 +24,7 @@ class ItemTableView(APIView):
     @swagger_auto_schema(request_body=ItemTableSerializer) 
     @transaction.atomic
     def post(self, request):
-            if has_permission(request.user, 'create_company'):
+            if has_permission(request.user, 'create_item_table'):
                 data = request.data
                 serializer = ItemTableSerializer(data=data, context={"request":request})
                 if serializer.is_valid():
@@ -31,8 +34,7 @@ class ItemTableView(APIView):
                     except Exception as error:
                         transaction.rollback()
                         print(error)
-                        return Response({"error": "Something went wrong when trying to create item table."},
-                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                        return unknown_exception_response(action=_('create item table'))
                 return serializer_invalid_response(serializer.errors)
             return unauthorized_response
 
@@ -42,12 +44,11 @@ class SpecificItemTable(APIView):
     def put(self, request, item_table_compound_id):
         if has_permission(request.user, 'update_item_table'):
             if item_table_compound_id.split("#")[0] != request.user.contracting.contracting_code:
-                return Response(status=status.HTTP_404_NOT_FOUND) 
+                return not_found_response(object_name=_('Item table'))
             try:
                 item_table = ItemTable.objects.get(item_table_compound_id=item_table_compound_id)
             except ItemTable.DoesNotExist:
-                return Response({"error": "'item_table_compound_id' doesn't match with any item table."},
-                        status=status.HTTP_400_BAD_REQUEST)
+                return not_found_response(object_name=_('Item table'))
             serializer = ItemTableSerializer(item_table, data=request.data, partial=True)
             if serializer.is_valid():
                 try:
@@ -56,196 +57,247 @@ class SpecificItemTable(APIView):
                 except Exception as error:
                     transaction.rollback()
                     print(error)
-                    return Response({"error": "Something went wrong when trying to update item table."},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    return unknown_exception_response(action=_('update item table'))
             return serializer_invalid_response(serializer.errors)
         return unauthorized_response
     @transaction.atomic
     def delete(self, request, item_table_compound_id):
         if has_permission(request.user, 'delete_item_table'):
             if item_table_compound_id.split("#")[0] != request.user.contracting.contracting_code:
-                return Response(status=status.HTTP_404_NOT_FOUND) 
+                return not_found_response(object_name=_('Item table'))
             try:
                 item_table = ItemTable.objects.get(item_table_compound_id=item_table_compound_id)
             except ItemTable.DoesNotExist:
-                return Response({"error": "'item_table_compound_id' doesn't match with any item table."},
-                        status=status.HTTP_400_BAD_REQUEST)
+                return not_found_response(object_name=_('Item table'))
             try:
                 item_table.delete()
-                return Response("Item table deleted.")
+                return success_response(detail=_("Item table deleted"))
             except ProtectedError:
-                return Response({"error": "you cannot delete this item table because it has records linked to it."}, 
-                        status=status.HTTP_400_BAD_REQUEST)
+                return protected_error_response(object_name=_('item table'))
             except Exception as error:
                 transaction.rollback()
                 print(error)
-                return Response({"error": "Something went wrong when trying to delete item table."},
-                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return unknown_exception_response(action=_('delete item table'))
         return unauthorized_response
 
-
-class ItemView(APIView):
-    def get(self, request):
-        if has_permission(request.user, 'get_items'):
-            try:
-                itens = Item.objects.filter(contracting_company=request.user.company).all()
-            except Item.DoesNotExist:
-                return Response(status=status.HTTP_404_NOT_FOUND)
-            serializer = ItemSerializer(itens, many=True)
-            return Response(serializer.data)
-
-        return Response({"error": "You don't have permissions to access this resource."},
-                        status=status.HTTP_401_UNAUTHORIZED)
-
-    def post(self, request):
-        if has_permission(request.user, 'create_item'):
-            if isinstance(request.data, dict):
-                serializer = ItemSerializer(data=request.data, context={"request": request})
-                if serializer.is_valid():
-                    serializer.save()
-                    return Response(serializer.data, status=status.HTTP_201_CREATED)
-                return serializer_invalid_response(serializer.errors)
-
-            #  if isinstance(request.data, list):
-                #  serializer = ItemSerializer(data=request.data, many=True)
-                #  data = {}
-                #  if serializer.is_valid():
-                    #  data['success'] = 'criado com sucesso'
-                    #  serializer.save()
-                    #  return Response(data=data)
-                #  return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        return Response({"error": "You don't have permissions to access this resource."},
-                        status=status.HTTP_401_UNAUTHORIZED)
-
-
-class SpecificItemView(APIView):
-    #  def get(self, request, code):
-
-      #  if has_permission(request.user, 'create_item'):
-            #  try:
-                #  item = Item.objects.get(item_code=code)
-            #  except Item.DoesNotExist:
-                #  return Response(status=status.HTTP_404_NOT_FOUND)
-            #  serializer = ItemSerializer(item)
-            #  return Response(serializer.data)
-
-      #  return Response({"error": "You don't have permissions to access this resource."},
-                        #  status=status.HTTP_401_UNAUTHORIZED)
-
-    #  def put(self, request, code):
-        #  if has_permission(request.user, 'create_item'):
-            #  try:
-                #  item = Item.objects.get(item_code=code)
-            #  except Item.DoesNotExist:
-                #  return Response(status=status.HTTP_404_NOT_FOUND)
-            #  serializer = ItemSerializer(item, data=request.data)
-            #  data = {}
-            #  if serializer.is_valid():
-                #  serializer.save()
-                #  data['success'] = 'update successful'
-                #  return Response(data=data)
-                #  return serializer_invalid_response(serializer.errors)
-        #  return Response({"error": "You don't have permissions to access this resource."},
-                        #  status=status.HTTP_401_UNAUTHORIZED)
-
-    def delete(self, request, code):
-        if has_permission(request.user, 'delete_item'):
-            try:
-                item = Item.objects.get(item_code=code)
-            except Item.DoesNotExist:
-                return Response(status=status.HTTP_404_NOT_FOUND)
-            if request.user.company == item.contracting_company:
-                item.delete()
-                return Response("ok")
-            return Response({"error": "You can't delete this item."}, status=status.HTTP_401_UNAUTHORIZED)
-        return Response({"error": "You don't have permissions to access this resource."}, status=status.HTTP_401_UNAUTHORIZED)
-
-
-# -----------------------------------/ Category / ----------------------
-
-class CategoryView(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
+class CategoryView(APIView):
     def get(self, request):
         if has_permission(request.user, 'get_item_category'):
-            item_categories = ItemCategory.objects.filter(contracting_company=request.user.company).all()
+            if has_role(request.user, 'agent'):
+                item_categories = get_categories_by_agent(request.user)
+                return Response(CategorySerializer(item_categories, many=True).data)
+            item_categories = ItemCategory.objects.filter(item_table__contracting=request.user.contracting).all()
             serializer = CategorySerializer(item_categories, many=True)
             return Response(serializer.data)
-        return Response({"error": "You don't have permissions to access this resource."}, status=status.HTTP_401_UNAUTHORIZED)
-
+        return unauthorized_response
+    @transaction.atomic
+    @swagger_auto_schema(request_body=CategorySerializer) 
     def post(self, request):
         if has_permission(request.user, 'create_item_category'):
             serializer = CategorySerializer(data=request.data, context={"request": request})
             if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data)
+                try:
+                    serializer.save()
+                    return Response(serializer.data)
+                except Exception as error:
+                    transaction.rollback()
+                    print(error)
+                    return unknown_exception_response(action=_('create item category'))
             return serializer_invalid_response(serializer.errors)
-        return Response({"error": "You don't have permissions to access this resource."}, status=status.HTTP_401_UNAUTHORIZED)
-
+        return unauthorized_response
 
 class SpecificCategoryView(APIView):
-    def delete(self, request, category_code):
+    @transaction.atomic
+    @swagger_auto_schema(request_body=CategorySerializer) 
+    def put(self, request, category_compound_id):
+        user = request.user
+        if has_permission(user, 'update_item_category'):
+            if category_compound_id.split("#")[0] != request.user.contracting.contracting_code:
+                return not_found_response(object_name=_('The item category')) 
+            try:
+                item_category = ItemCategory.objects.get(category_compound_id=category_compound_id)
+            except ItemCategory.DoesNotExist:
+                return not_found_response(object_name=_('The item category')) 
+            serializer = CategorySerializer(item_category, data=request.data, partial=True, context={"request":request})
+            if serializer.is_valid():
+                try:
+                    serializer.save()
+                    return Response(serializer.data)
+                except Exception as error:
+                    transaction.rollback()
+                    print(error)
+                    return unknown_exception_response(action=_('update item category'))
+            return serializer_invalid_response(serializer.errors)
+        return unauthorized_response
+    @transaction.atomic
+    def delete(self, request, category_compound_id):
         if has_permission(request.user, 'delete_item_category'):
-            item_category = ItemCategory.objects.filter(category_code=category_code).first()
-            if item_category.contracting_company == request.user.company:
+            if category_compound_id.split("#")[0] != request.user.contracting.contracting_code:
+                return not_found_response(object_name=_('The category'))
+            try:
+                item_category = ItemCategory.objects.get(category_compound_id=category_compound_id)
+            except ItemCategory.DoesNotExist:
+                return not_found_response(object_name=_('The item category')) 
+            if req_user_is_agent_without_all_estabs(request.user) and \
+                    not agent_has_access_to_this_item_table(request.user, item_category.item_table):
+                return unauthorized_response
+            try:
                 item_category.delete()
-                return Response({"success": "Item category deleted successfully."})
-            return Response({"error": "You can't delete this item category."}, status=status.HTTP_401_UNAUTHORIZED)
-        return Response({"error": "You don't have permissions to access this resource."}, status=status.HTTP_401_UNAUTHORIZED)
+                return success_response(detail=_("Item category deleted"))
+            except ProtectedError as er:
+                return protected_error_response(object_name=_('item category'))
+            except Exception as error:
+                transaction.rollback()
+                print(error)
+                return unknown_exception_response(action=_('delete item category'))
+        return unauthorized_response
 
+class ItemView(APIView):
+    def get(self, request):
+        if has_permission(request.user, 'get_items'):
+            if has_role(request.user, 'agent'):
+                items = get_items_by_agent(request.user)
+                return Response(ItemSerializer(items, many=True).data)
+            items = Item.objects.filter(item_table__contracting=request.user.contracting).all()
+            return Response(ItemSerializer(items, many=True).data)
+        return unauthorized_response
+    @transaction.atomic
+    @swagger_auto_schema(request_body=ItemSerializer) 
+    def post(self, request):
+        if has_permission(request.user, 'create_item'):
+            serializer = ItemSerializer(data=request.data, context={"request": request})
+            if serializer.is_valid():
+                try:
+                    serializer.save()
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                except Exception as error:
+                    transaction.rollback()
+                    print(error)
+                    return unknown_exception_response(action=_('create item'))
+            return serializer_invalid_response(serializer.errors)
+        return unauthorized_response
 
-# -----------------------------------/ Price Table / ----------------------
+class SpecificItemView(APIView):
+    @transaction.atomic
+    @swagger_auto_schema(request_body=ItemSerializer) 
+    def put(self, request, item_compound_id):
+        if has_permission(request.user, 'update_item'):
+            if item_compound_id.split("#")[0] != request.user.contracting.contracting_code:
+                return not_found_response(object_name=_('The item'))
+            try:
+                item = Item.objects.get(item_compound_id=item_compound_id)
+            except Item.DoesNotExist:
+                return not_found_response(object_name=_('The item'))
+            serializer = ItemSerializer(item, data=request.data)
+            if serializer.is_valid():
+                try:
+                    serializer.save()
+                    return Response(data=serializer.data)
+                except Exception as error:
+                    transaction.rollback()
+                    print(error)
+                    return unknown_exception_response(action=_('update item'))
+            return serializer_invalid_response(serializer.errors)
+        return unauthorized_response
+    @transaction.atomic
+    def delete(self, request, item_compound_id):
+        if has_permission(request.user, 'delete_item'):
+            if item_compound_id.split("#")[0] != request.user.contracting.contracting_code:
+                return not_found_response(object_name=_('The item'))
+            try:
+                item = Item.objects.get(item_compound_id=item_compound_id)
+            except Item.DoesNotExist:
+                return not_found_response(object_name=_('The item'))
+            if req_user_is_agent_without_all_estabs(request.user) and \
+                    not agent_has_access_to_this_item_table(request.user, item.item_table):
+                return unauthorized_response
+            try:
+                item.delete()
+                return success_response(detail=_("Item deleted"))
+            except ProtectedError:
+                return protected_error_response(object_name=_('item'))
+            except Exception as error:
+                transaction.rollback()
+                print(error)
+                return unknown_exception_response(action=_('delete item'))
+        return unauthorized_response
 
 class PriceTableView(APIView):
     def get(self, request):
         if has_permission(request.user, 'get_price_tables'):
-            pricetables = PriceTable.objects.filter(contracting_company=request.user.company).all()
-            serializer = PriceTableSerializer(pricetables, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response({"error": "You don't have permissions to access this resource."}, status=status.HTTP_401_UNAUTHORIZED)
-
+            if has_role(request.user, 'agent'):
+                pricetables = get_price_tables_by_agent(request.user)
+                return Response(PriceTableSerializer(pricetables, many=True).data)
+            pricetables = PriceTable.objects.filter(company__contracting=request.user.contracting).all()
+            return Response(PriceTableSerializer(pricetables, many=True).data)
+        return unauthorized_response
     @swagger_auto_schema(request_body=PriceTableSerializer) 
+    @transaction.atomic
     def post(self, request):
         if has_permission(request.user, 'create_price_table'):
-            serializer = PriceTableSerializer(data=request.data, context={"request": request, "method": "post"})
+            req_user_is_agent_without_all_estabs(request.user)
+            serializer = PriceTableSerializer(data=request.data, context={"request": request,
+                "req_user_is_agent_without_all_estabs":req_user_is_agent_without_all_estabs})
             if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                try:
+                    serializer.save()
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                except Exception as error:
+                    transaction.rollback()
+                    print(error)
+                    return unknown_exception_response(action=_('create price table'))
             return serializer_invalid_response(serializer.errors)
-        return Response({"error": "You don't have permissions to access this resource."}, status=status.HTTP_401_UNAUTHORIZED)
-
+        return unauthorized_response
 
 class SpecificPriceTableView(APIView):
+    @transaction.atomic
     @swagger_auto_schema(request_body=PriceTableSerializer) 
-    def put(self, request, table_code):
-        try:
-            instance = PriceTable.objects.get(table_code=table_code)
-            serializer = PriceTableSerializer(instance, data=request.data, context={"request": request, "method": "put"})
+    def put(self, request, price_table_compound_id):
+        if has_permission(request.user, 'update_price_table'):
+            if price_table_compound_id.split("#")[0] != request.user.contracting.contracting_code:
+                return not_found_response(object_name=_('The price table'))
+            try:
+                instance = PriceTable.objects.get(price_table_compound_id=price_table_compound_id)
+            except PriceTable.DoesNotExist:
+                return not_found_response(object_name=_('The price table'))
+            req_user_is_agent_without_all_estabs(request.user)
+            serializer = PriceTableSerializer(instance, data=request.data, context={"request": request,
+                "req_user_is_agent_without_all_estabs":req_user_is_agent_without_all_estabs})
             if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data)
+                try:
+                    serializer.save()
+                    return Response(serializer.data)
+                except Exception as error:
+                    transaction.rollback()
+                    print(error)
+                    return unknown_exception_response(action=_('update price table'))
             return serializer_invalid_response(serializer.errors)
-        except PriceTable.DoesNotExist:
-            return Response({"error": "Price table has not found."}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as error:
-            print(error)
-            return Response({"error": "Something went wrong when trying to update price table."}, status=status.HTTP_400_BAD_REQUEST)
-
-    @swagger_auto_schema(request_body=PriceTableSerializer) 
-    def delete(self, request, table_code): #TODO: permissions
-        try:
-            instance = PriceTable.objects.get(table_code=table_code)
-            instance.delete()
-            return Response({"Successfully deleted"}, status=status.HTTP_200_OK)
-        except PriceTable.DoesNotExist:
-            return Response({"error": "Price table has not found."}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as error:
-            print(error)
-            return Response({"error": "Something went wrong when trying to delete price table."}, status=status.HTTP_400_BAD_REQUEST)
-
+        return unauthorized_response
+    @transaction.atomic
+    def delete(self, request, price_table_compound_id):
+        if has_permission(request.user, 'delete_price_table'):
+            if price_table_compound_id.split("#")[0] != request.user.contracting.contracting_code:
+                return not_found_response(object_name=_('The price table'))
+            try:
+                instance = PriceTable.objects.get(price_table_compound_id=price_table_compound_id)
+            except PriceTable.DoesNotExist:
+                return not_found_response(object_name=_('The price table'))
+            if req_user_is_agent_without_all_estabs(request.user) and \
+                    not agent_has_access_to_this_price_table(request.user, instance):
+                return unauthorized_response
+            try:
+                instance.delete()
+                return success_response(detail=_("Price table deleted successfully"))
+            except ProtectedError:
+                return protected_error_response(object_name=_('price table'))
+            except Exception as error:
+                print(error)
+                return unknown_exception_response(action=_('delete price table'))
+        return unauthorized_response
 
 #  class AssignPriceTableView(APIView):
     #  @swagger_auto_schema(request_body=AssignPriceTableSerializer) 
+    #  @transaction.atomic
     #  def post(self, request):
         #  serializer = AssignPriceTableSerializer(data=request.data)
         #  if serializer.is_valid():
@@ -261,18 +313,14 @@ class SpecificPriceTableView(APIView):
                 #  return Response({"error": "Company has not found."}, status=status.HTTP_400_BAD_REQUEST)
             #  except Exception as error:
                 #  print(error)
-                #  return Response({"error": "Something went wrong when trying assign price table to user."},
-                        #  status=status.HTTP_400_BAD_REQUEST)
+                #  return unknown_exception_response(action=_('assign price table to client'))
 
             #  return Response(serializer.data, status=status.HTTP_201_CREATED)
         #  return serializer_invalid_response(serializer.errors)
     
-
-
-# -----------------------------------/ PriceItem /-----------------------------
-
 #  class PriceItemView(APIView):
     #  @swagger_auto_schema(request_body=PriceItemSerializer) 
+    #  @transaction.atomic
     #  def post(self, request):
         #  if has_role(request.user, 'ERPClient'):
             #  item = request.data.get('item')
@@ -318,7 +366,8 @@ class SpecificPriceTableView(APIView):
 
         #  return Response({"error": "You don't have permissions to access this resource."},
                         #  status=status.HTTP_401_UNAUTHORIZED)
-    #  @swagger_auto_schema(request_body=SpecificPriceItemSerializer) 
+    #  @swagger_auto_schema(request_body=PriceItemSerializer) 
+    #  @transaction.atomic
     #  def put(self, request, item_code, table_code):
         #  if has_role(request.user, 'ERPClient'):
             #  try:
@@ -343,6 +392,7 @@ class SpecificPriceTableView(APIView):
         #  return Response({"error": "You don't have permissions to access this resource."},
                         #  status=status.HTTP_401_UNAUTHORIZED)
 
+    #  @transaction.atomic
     #  def delete(self, request, item_code, table_code):
         #  if has_role(request.user, 'ERPClient'):
             #  try:
@@ -365,10 +415,6 @@ class SpecificPriceTableView(APIView):
         #  return Response({"error": "You don't have permissions to access this resource."},
                         #  status=status.HTTP_401_UNAUTHORIZED)
 
-
-# --------------------------------/ Orders /---------------------------------/
-
-
 class OrderView(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
     serializer_class = OrderSerializer
 
@@ -386,7 +432,6 @@ class OrderView(mixins.ListModelMixin, mixins.CreateModelMixin, generics.Generic
       return Response({"error": "You don't have permissions to access this resource."},
                         status=status.HTTP_401_UNAUTHORIZED)
 
-
 class SpecificOrderView(APIView):
     def get(self, request, code):
         if has_permission(request.user, 'create_item'):
@@ -397,4 +442,3 @@ class SpecificOrderView(APIView):
             serializer = OrderSerializer(order)
             return Response(serializer.data)
         return Response({"error": "You don't have permissions to access this resource."}, status=status.HTTP_401_UNAUTHORIZED)
-
