@@ -2,10 +2,10 @@ from django.db import transaction
 from django.db.models.deletion import ProtectedError
 from rest_framework import status, mixins, generics
 from rest_framework.response import Response
-from core.models import User
+from core.models import Client, ClientEstablishment, User
 from core.validators import agent_has_access_to_this_item_table, agent_has_access_to_this_price_table, req_user_is_agent_without_all_estabs
 from orders.facade import get_categories_by_agent, get_items_by_agent, get_price_tables_by_agent
-from orders.serializers import ItemSerializer, CategorySerializer, ItemTableSerializer, OrderSerializer, PriceTableSerializer
+from orders.serializers import AssignPriceTableToClientEstablishment, ItemSerializer, CategorySerializer, ItemTableSerializer, OrderSerializer, PriceTableSerializer
 from orders.models import ItemTable, Order, Item, ItemCategory, PriceTable, PriceItem
 from rest_framework.views import APIView
 from rolepermissions.checkers import has_permission, has_role
@@ -234,10 +234,9 @@ class PriceTableView(APIView):
     @swagger_auto_schema(request_body=PriceTableSerializer) 
     @transaction.atomic
     def post(self, request):
-        if has_permission(request.user, 'create_price_table'):
-            req_user_is_agent_without_all_estabs(request.user)
+        if has_permission(request.user, 'create_price_table'): 
             serializer = PriceTableSerializer(data=request.data, context={"request": request,
-                "req_user_is_agent_without_all_estabs":req_user_is_agent_without_all_estabs})
+                "req_user_is_agent_without_all_estabs":req_user_is_agent_without_all_estabs(request.user)})
             if serializer.is_valid():
                 try:
                     serializer.save()
@@ -260,9 +259,8 @@ class SpecificPriceTableView(APIView):
                 instance = PriceTable.objects.get(price_table_compound_id=price_table_compound_id)
             except PriceTable.DoesNotExist:
                 return not_found_response(object_name=_('The price table'))
-            req_user_is_agent_without_all_estabs(request.user)
             serializer = PriceTableSerializer(instance, data=request.data, context={"request": request,
-                "req_user_is_agent_without_all_estabs":req_user_is_agent_without_all_estabs})
+                "req_user_is_agent_without_all_estabs":req_user_is_agent_without_all_estabs(request.user)})
             if serializer.is_valid():
                 try:
                     serializer.save()
@@ -295,29 +293,32 @@ class SpecificPriceTableView(APIView):
                 return unknown_exception_response(action=_('delete price table'))
         return unauthorized_response
 
-#  class AssignPriceTableView(APIView):
-    #  @swagger_auto_schema(request_body=AssignPriceTableSerializer) 
-    #  @transaction.atomic
-    #  def post(self, request):
-        #  serializer = AssignPriceTableSerializer(data=request.data)
-        #  if serializer.is_valid():
-            #  table_code = serializer.validated_data['table_code']
-            #  company_code = serializer.validated_data['company_code']
-            #  try:
-                #  company = Company.objects.get(company_code=company_code)
-                #  price_table = PriceTable.objects.get(table_code=table_code)
-                #  company.price_table = price_table
-                #  company.save()
-                #  return Response("The price table has been assigned", status=status.HTTP_200_OK)
-            #  except Company.DoesNotExist:
-                #  return Response({"error": "Company has not found."}, status=status.HTTP_400_BAD_REQUEST)
-            #  except Exception as error:
-                #  print(error)
-                #  return unknown_exception_response(action=_('assign price table to client'))
+class AssignPriceTableView(APIView):
+    @swagger_auto_schema(request_body=AssignPriceTableToClientEstablishment) 
+    @transaction.atomic
+    def put(self, request, client_compound_id, establishment_compound_id):
+        if has_permission(request.user, 'update_client'):
+            if client_compound_id.split("#")[0] != request.user.contracting.contracting_code:
+                return not_found_response(object_name=_('The client'))
+            if establishment_compound_id.split("#")[0] != request.user.contracting.contracting_code:
+                return not_found_response(object_name=_('The establishment'))
+            try:
+                instance = ClientEstablishment.objects.get(client__client_compound_id=client_compound_id,
+                        establishment__establishment_compound_id=establishment_compound_id)
+            except ClientEstablishment.DoesNotExist:
+                return not_found_response(object_name=_('The client_establishment'))
+            serializer = AssignPriceTableToClientEstablishment(instance, data=request.data, context={"request": request})
+            if serializer.is_valid():
+                try:
+                    serializer.save()
+                    return Response(serializer.data)
+                except Exception as error:
+                    transaction.rollback()
+                    print(error)
+                    return unknown_exception_response(action=_('assign price table to client'))
+            return serializer_invalid_response(serializer.errors)
+        return unauthorized_response
 
-            #  return Response(serializer.data, status=status.HTTP_201_CREATED)
-        #  return serializer_invalid_response(serializer.errors)
-    
 #  class PriceItemView(APIView):
     #  @swagger_auto_schema(request_body=PriceItemSerializer) 
     #  @transaction.atomic
@@ -350,7 +351,6 @@ class SpecificPriceTableView(APIView):
         #  return serializer_invalid_response(serializer.errors)
         #  return Response({"error": "You don't have permissions to access this resource."},
                         #  status=status.HTTP_401_UNAUTHORIZED)
-
 
 #  class SpecificPriceItemView(APIView):
     #  def get(self, request, item_code, table_code):
@@ -417,7 +417,6 @@ class SpecificPriceTableView(APIView):
 
 class OrderView(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
     serializer_class = OrderSerializer
-
     def get(self, request):
       if has_permission(request.user, 'create_item'):
             if request.data.get('status'):

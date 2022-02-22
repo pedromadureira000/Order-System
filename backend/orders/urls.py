@@ -1,6 +1,7 @@
 from django.urls import path
 from orders.views import (
     # Item
+    AssignPriceTableView,
     ItemTableView,
     ItemView,
     SpecificItemTable,
@@ -33,11 +34,9 @@ urlpatterns = [
     path('item/<item_compound_id>', SpecificItemView.as_view()),
     path('pricetable', PriceTableView.as_view()),
     path('pricetable/<pricetable_compound_id>', SpecificPriceTableView.as_view()),
-    #  path('assign_pricetable', AssignPriceTableView.as_view()),
-    # Item Price
+    path('assign_pricetable/<client_compound_id>/<establishment_compound_id>', AssignPriceTableView.as_view()),
     #  path('priceitem/', PriceItemView.as_view()),
     #  path('priceitem/<item_code>/<table_code>', SpecificPriceItemView.as_view()),
-    # Order
     path('order', OrderView.as_view()),
     path('order/<code>', SpecificOrderView.as_view()),
 ]

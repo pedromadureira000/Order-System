@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from core.facade import get_agent_companies, get_agent_item_tables, update_price_items_from_price_table
-from core.models import Company
+from core.models import ClientEstablishment, Company, Establishment
 from core.validators import UserContracting, agent_has_access_to_this_item_table, agent_has_access_to_this_price_table, req_user_is_agent_without_all_estabs
 from orders.models import ItemTable, Order, Item, ItemCategory, PriceTable, PriceItem
 from django.utils.translation import gettext_lazy as _
@@ -121,7 +121,7 @@ class ItemSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 class ForTablePriceItemSerializer(serializers.ModelSerializer):
-    item = serializers.SlugRelatedField(slug_field='item_code', queryset=Item.objects.all())
+    item = serializers.SlugRelatedField(slug_field='item_compound_id', queryset=Item.objects.all())
 
     class Meta:
         model = PriceItem
@@ -146,7 +146,8 @@ class PriceTableSerializer(serializers.ModelSerializer):
     class Meta:
         model = PriceTable
         fields = ['price_table_compound_id', 'company', 'price_items', 'table_code', 'description', 'note']
-        validators = [UniqueTogetherValidator(queryset=ItemCategory.objects.all(), fields=['company', 'table_code'], 
+        read_only_fields = ['price_table_compound_id']
+        validators = [UniqueTogetherValidator(queryset=PriceTable.objects.all(), fields=['company', 'table_code'], 
             message="The field 'table_code' must be unique by 'company'.")]
 
     def validate(self, attrs):
@@ -169,7 +170,9 @@ class PriceTableSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         price_items = validated_data.pop('price_items')
-        price_table = PriceTable.objects.create(company=validated_data['company'], **validated_data)
+        validated_data['price_table_compound_id'] = self.context['request'].user.contracting.contracting_code + \
+                "#" + validated_data['company'].company_compound_id + "#" + validated_data["table_code"]
+        price_table = PriceTable.objects.create(**validated_data)
         price_table.save()
         price_items_list = []
         for price_item in price_items:
@@ -186,19 +189,37 @@ class PriceTableSerializer(serializers.ModelSerializer):
             update_price_items_from_price_table(instance, price_items)
         return super().update(instance, validated_data)
 
-#  class AssignPriceTableSerializer(serializers.Serializer):
-    #  table_code = serializers.CharField(write_only=True)
-    #  company_code = serializers.CharField(write_only=True)
+class AssignPriceTableToClientEstablishment(serializers.ModelSerializer):
+    establishment = serializers.SlugRelatedField(slug_field='establishment_compound_id', read_only=True)
+    client = serializers.SlugRelatedField(slug_field='client_compound_id', read_only=True)
+    price_table = serializers.SlugRelatedField(slug_field='price_table_compound_id', queryset=PriceTable.objects.all(), 
+            allow_null=True)
+    class Meta:
+        model=ClientEstablishment
+        fields = ['establishment', 'price_table', 'client']
+        validators = [UniqueTogetherValidator(queryset=ClientEstablishment.objects.all(), fields=['client', 'establishment'], 
+            message="The field 'establishment' must be unique per client.")]
+
+    #OBS: if the agent without all estabs can't access to an establishment this goes for the 'price_table' too.
+    def validate(self, attrs):
+        price_table = attrs.get('price_table')
+        establishment = self.instance.establishment
+        if price_table:
+            # validate if price_table belongs to the same company as the establishment
+            if price_table.company != establishment.company:
+                raise serializers.ValidationError(_("You can't add this price table to this 'client_establishment'."))
+        return super().validate(attrs)
+
+    def update(self, instance, validated_data):
+        return super().update(instance, validated_data)
 
 #  class PriceItemSerializer(serializers.ModelSerializer):
     #  item = serializers.SlugRelatedField(slug_field='item_code', queryset=Item.objects.all())
     #  price_table = serializers.SlugRelatedField(slug_field='table_code', queryset=PriceTable.objects.all())
-
     #  class Meta:
         #  model = PriceItem
         #  fields = ['item', 'price_table', 'unit_price', 'date']
         #  read_only_fields =  ['date']
-
     #  def validate(self, attrs):
         #  try:
             #  item = Item.objects.get(item_code=attrs.get('item'))
@@ -216,14 +237,21 @@ class PriceTableSerializer(serializers.ModelSerializer):
 #  class SpecificPriceItemSerializer(serializers.ModelSerializer):
     #  item = serializers.SlugRelatedField(slug_field='item_code', read_only=True)
     #  price_table = serializers.SlugRelatedField(slug_field='table_code', read_only=True)
-
     #  class Meta:
         #  model = PriceItem
         #  fields = ['item', 'price_table','unit_price', 'date']
 
-
-class OrderSerializer(serializers.ModelSerializer):
-
+class OrderedItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ['order_number', 'company', 'establishment', 'client_user', 'price_table', 'status', 'order_date', 'billing_date', 'order_amount', 'invoice_number', 'note']
+
+class OrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['order_number', 'company', 'establishment', 'client_user', 'price_table', 'status', 'order_date', 'billing_date', 'order_amount', 'invoice_number', 'note']
+
+class OrderHistory(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = []

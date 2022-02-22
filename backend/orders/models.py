@@ -67,7 +67,8 @@ class PriceTable(models.Model):
         verbose_name = _('price table')
         verbose_name_plural = _('price tables')
         constraints = [UniqueConstraint(fields=['company', 'table_code'], name='PriceTable compound primary key')]
-    price_table_compound_id = models.SlugField(max_length=15, verbose_name=_('price table compound id')) # 999#999#9999999
+    price_table_compound_id = models.SlugField(max_length=15, verbose_name=_('price table compound id'), unique=True, 
+            editable=False) # 999#999#9999999
     company = models.ForeignKey('core.Company', on_delete=models.PROTECT, verbose_name=_('company'))
     table_code = models.SlugField(max_length=7, verbose_name=_('table_code'))
     description = models.CharField(max_length=60, verbose_name=_('description'))

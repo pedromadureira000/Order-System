@@ -7,7 +7,7 @@ from core.models import User
 from rolepermissions.roles import get_user_roles
 from rolepermissions.permissions import available_perm_status
 from core.validators import UserContracting, agent_has_access_to_this_client_user, agent_has_permission_to_assign_this_client_table_to_client, agent_has_permission_to_assign_this_establishment_to_client, agent_permissions_exist_and_does_not_have_duplicates, contracting_can_create_user, agent_has_access_to_this_client, req_user_is_agent_without_all_estabs
-from orders.models import ItemTable
+from orders.models import ItemTable, PriceTable
 from .models import Client, ClientEstablishment, ClientTable, Company, Contracting, AgentEstablishment, Establishment
 from rolepermissions.roles import assign_role
 from rolepermissions.permissions import available_perm_status
@@ -115,27 +115,19 @@ class ClientTableSerializer(serializers.ModelSerializer):
         validated_data['contracting'] = instance.contracting
         return super().update(instance, validated_data)
 
-#  class ClientEstablishmentSerializer(serializers.ModelSerializer):
-    #  establishment = serializers.SlugRelatedField(slug_field='establishment_compound_id', queryset=Establishment.objects.all())
-    #  price_table = serializers.SlugRelatedField(slug_field='price_table_compound_id', allow_null=True,
-            #  queryset=PriceTable.objects.all(), required=False)
-    #  class Meta:
-        #  model=ClientEstablishment
-        #  fields = ['establishment', 'price_table']
-
 class ClientEstablishmentToClientSerializer(serializers.ModelSerializer):
     establishment = serializers.SlugRelatedField(slug_field='establishment_compound_id', queryset=Establishment.objects.all())
+    price_table = serializers.SlugRelatedField(slug_field='price_table_compound_id', read_only=True)
     class Meta:
         model=ClientEstablishment
-        fields = ['establishment']
+        fields = ['establishment', 'price_table']
+        read_only_fields = ['price_table']
 
     def validate_establishment(self, value):
-        if value:
-        # - Contracting ownership
-            if value.company.contracting != self.context["request"].user.contracting:
-                raise serializers.ValidationError(_("Establishment not found."))
+        # Contracting ownership
+        if value.company.contracting != self.context["request"].user.contracting:
+            raise serializers.ValidationError(_("Establishment not found."))
         return value
-
 
 class ClientSerializer(serializers.ModelSerializer):
     client_establishments = ClientEstablishmentToClientSerializer(many=True)
@@ -160,10 +152,16 @@ class ClientSerializer(serializers.ModelSerializer):
                 if client_establishment['establishment'] in establishments_list:
                     raise serializers.ValidationError(_("There is a duplicate establishment in 'client_establishments'"))
                 establishments_list.append(client_establishment['establishment'])
-                # Check if establishment.company.client_table belongs to Client client_table
-                if client_establishment['establishment'].company.client_table != attrs.get("client_table"):
-                    raise serializers.ValidationError(_("The 'client_table' field must correspond to the company client_table "\
-                            "associated with the added establishments."))
+                # Check if establishment.company.client_table belongs to Client client_table on POST request
+                if self.context['request'].method == 'POST':
+                    if client_establishment['establishment'].company.client_table != attrs.get("client_table"):
+                        raise serializers.ValidationError(_("The 'client_table' field must correspond to the company client_table "\
+                                "associated with the added establishments."))
+                # Check if establishment.company.client_table belongs to Client client_table on PUT request
+                if self.context['request'].method == 'PUT':
+                    if client_establishment['establishment'].company.client_table != self.instance.client_table:
+                        raise serializers.ValidationError(_("The 'client_table' field must correspond to the company client_table "\
+                                "associated with the added establishments."))
                 if request_user_is_agent_without_all_estabs:
                     # Check if agent can access establishment
                     if not agent_has_permission_to_assign_this_establishment_to_client(request_user, client_establishment['establishment']):
@@ -181,11 +179,6 @@ class ClientSerializer(serializers.ModelSerializer):
             if request_user_is_agent_without_all_estabs and not agent_has_access_to_this_client(request_user, self.instance):
                 raise serializers.ValidationError(_("You can't update this client."))
         return attrs
-
-        # - Price Table
-            #  if client_establishment['price_table']:  <-----------/ validate price_table ownership
-                #  if client_establishment['price_table'].company.contracting != request_user.contracting:
-                    #  raise serializers.ValidationError(f"You can't access this resource.")
 
     def create(self, validated_data):
         # Create client_compound_id

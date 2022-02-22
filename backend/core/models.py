@@ -24,7 +24,7 @@ class Contracting(models.Model):
     class Meta:
         verbose_name = _('contracting')
         verbose_name_plural = _('contractings')
-    contracting_code = models.SlugField(_("contracting code"), max_length=3, unique=True)
+    contracting_code = models.SlugField(_("contracting code"), max_length=3, unique=True) #TODO editable = False?
     name = models.CharField(max_length=60, verbose_name=_("name"))
     status = models.IntegerField(choices=status_choices, default=1)
     active_users_limit = models.IntegerField(default=5, verbose_name=_("active users limit"))
