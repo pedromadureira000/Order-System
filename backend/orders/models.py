@@ -85,8 +85,8 @@ class PriceItem(models.Model):
     price_table = models.ForeignKey('PriceTable', on_delete=models.CASCADE, related_name='price_items', 
             verbose_name=_('price table'))
     item = models.ForeignKey('Item', on_delete=models.PROTECT, verbose_name=_('item'))
-    unit_price = models.DecimalField(max_digits=11, decimal_places=2, verbose_name=_('unit price'))
-    last_modified = models.DateTimeField(auto_now_add=True, verbose_name=_('last modified'))
+    unit_price = models.DecimalField(max_digits=11, decimal_places=2, verbose_name=_('unit price'), default=0)
+    last_modified = models.DateTimeField(auto_now=True, verbose_name=_('last modified'))
     creation_date = models.DateTimeField(default=timezone.now, verbose_name=_('creation date'))
 
 class Order(models.Model):

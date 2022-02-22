@@ -16,14 +16,12 @@ class Erp(AbstractUserRole):
         "update_item_table": True,
         "get_item_tables": True,
         "delete_item_table": True,
-        "assign_item_table": True,
         "create_client_table": True,
         "update_client_table": True,
         "get_client_tables": True,
         "delete_client_table": True,
-        "assign_client_table": True,
-        "generate_boleto": True,
         "get_transfered_orders": True, #TODO do it is not the same as filtred 'get_orders' ?
+        "create_or_update_price_item": True,
         #AdminAgent
         "create_admin_agent": True,
         "delete_admin_agent": True,

@@ -131,10 +131,6 @@ class ForTablePriceItemSerializer(serializers.ModelSerializer):
         request_user_is_agent_without_all_estabs = self.context['req_user_is_agent_without_all_estabs']
         request_user = self.context['request'].user
         item_id =  value.item_compound_id
-        # If price_item is from the same contracting
-        if value.item_compound_id.split("#")[0] != request_user.contracting.contracting_code:
-            raise NotFound(detail={"detail": [_("Item with id '{item_id}' was not found.").format(item_id=item_id)]})
-        # If request user is agent without all estabs and have access to this item
         if request_user_is_agent_without_all_estabs and not agent_has_access_to_this_item_table(request_user,value.item_table):
             raise NotFound(detail={"detail": [_("Item with id '{item_id}' was not found.").format(item_id=item_id)]})
         return value
@@ -154,6 +150,14 @@ class PriceTableSerializer(serializers.ModelSerializer):
         request_user = self.context['request'].user
         company = attrs.get('company')
         request_user_is_agent_without_all_estabs = self.context['req_user_is_agent_without_all_estabs']
+        for price_item in attrs.get('price_items'):
+            # Check if the item belongs to the company's item table
+            if self.context['request'].method == 'POST':
+                if price_item['item'].item_table != company.item_table:
+                    raise NotFound(detail={"detail": [_("The item must belong to the company that owns the price table.")]})
+            if self.context['request'].method == 'PUT':
+                if price_item['item'].item_table != self.instance.company.item_table:
+                    raise NotFound(detail={"detail": [_("The item must belong to the company that owns the price table.")]})
         #---------------------------/ Company
         if self.context['request'].method == 'POST':
             # Company is from the same contracting that request_user
@@ -213,33 +217,14 @@ class AssignPriceTableToClientEstablishment(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         return super().update(instance, validated_data)
 
-#  class PriceItemSerializer(serializers.ModelSerializer):
-    #  item = serializers.SlugRelatedField(slug_field='item_code', queryset=Item.objects.all())
-    #  price_table = serializers.SlugRelatedField(slug_field='table_code', queryset=PriceTable.objects.all())
-    #  class Meta:
-        #  model = PriceItem
-        #  fields = ['item', 'price_table', 'unit_price', 'date']
-        #  read_only_fields =  ['date']
-    #  def validate(self, attrs):
-        #  try:
-            #  item = Item.objects.get(item_code=attrs.get('item'))
-            #  price_table = PriceTable.objects.get(table_code=attrs.get('price_table'))
-        #  except Item.DoesNotExist:
-            #  raise serializers.ValidationError(f"Item not found.")
-        #  except PriceTable.DoesNotExist:
-            #  raise serializers.ValidationError(f"Price table note found.")
-        #  if item.contracting_company != self.context.get('currentUser').company:
-            #  raise serializers.ValidationError(f"You cannot access this item.")
-        #  if price_table.contracting_company != self.context.get('currentUser').company:
-            #  raise serializers.ValidationError(f"You cannot access this price table.")
-        #  return attrs
-
-#  class SpecificPriceItemSerializer(serializers.ModelSerializer):
-    #  item = serializers.SlugRelatedField(slug_field='item_code', read_only=True)
-    #  price_table = serializers.SlugRelatedField(slug_field='table_code', read_only=True)
-    #  class Meta:
-        #  model = PriceItem
-        #  fields = ['item', 'price_table','unit_price', 'date']
+class SpecificPriceItemSerializer(serializers.ModelSerializer):
+    item = serializers.SlugRelatedField(slug_field='item_compound_id', read_only=True)
+    price_table = serializers.SlugRelatedField(slug_field='price_table_compound_id', read_only=True)
+    unit_price = serializers.DecimalField(max_digits=11, decimal_places=2,required=True)
+    class Meta:
+        model = PriceItem
+        fields = ['item', 'price_table', 'unit_price', 'last_modified', 'creation_date']
+        read_only_fields =  ['item', 'price_table', 'last_modified', 'creation_date']
 
 class OrderedItemSerializer(serializers.ModelSerializer):
     class Meta:
