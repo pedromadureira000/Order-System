@@ -4,6 +4,7 @@ from rolepermissions.checkers import has_role
 from core.facade import get_agent_companies, get_agent_item_tables, update_price_items_from_price_table
 from core.models import ClientEstablishment, Company, Establishment
 from core.validators import ClientCompanyFromCurrentUser, UserContracting, agent_has_access_to_this_item_table, agent_has_access_to_this_price_table, req_user_is_agent_without_all_estabs
+from orders.facade import update_ordered_items
 from orders.models import ItemTable, Order, Item, ItemCategory, OrderedItem, PriceTable, PriceItem
 from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import NotFound, PermissionDenied
@@ -247,10 +248,6 @@ class OrderedItemSerializer(serializers.ModelSerializer):
         fields = ['item', 'quantity', 'unit_price', 'date']
         read_only_fields = ['unit_price', 'date']
 
-    #  def validate_item(self, value):
-        #  request_user = self.context['request'].user
-        #  return value
-
 class OrderPOSTSerializer(serializers.ModelSerializer):
     company = serializers.SlugRelatedField(slug_field='company_compound_id', read_only=True)
     establishment = serializers.SlugRelatedField(slug_field='establishment_compound_id', queryset=Establishment.objects.all())
@@ -268,7 +265,7 @@ class OrderPOSTSerializer(serializers.ModelSerializer):
     def validate_status(self, value):
         # An order can be created with 'typing' or 'transferred' status
         if value not in [1, 2]:
-            raise serializers.ValidationError(_("You cannot choose this option as status."))
+            raise serializers.ValidationError(_("Client user cannot choose a status other then 'Typing' and 'Transferred' when creating an order."))
         return value
 
     def validate_establishment(self, value):
@@ -344,21 +341,28 @@ class OrderPOSTSerializer(serializers.ModelSerializer):
 # PUT will be used by client_user to edit ordered_items and note, and to change status to 'transferred'. This can only be done when the order status is 'typing'. 
 #  agent/admin_agent/erp can update order status and create notes in the order history
 class OrderPUTSerializer(serializers.ModelSerializer):
-    client=serializers.HiddenField(default=ClientCompanyFromCurrentUser())
+    company = serializers.SlugRelatedField(slug_field='company_compound_id', read_only=True)
+    establishment = serializers.SlugRelatedField(slug_field='establishment_compound_id', read_only=True)
+    client = serializers.SlugRelatedField(slug_field='client_compound_id', read_only=True)
+    client_user = serializers.SlugRelatedField(slug_field='user_code', read_only=True)
+    price_table = serializers.SlugRelatedField(slug_field='price_table_compound_id', read_only=True)
+    ordered_items = OrderedItemSerializer(many=True)
+    agent_note = serializers.CharField(max_length=800, allow_blank=True, write_only=True)
     class Meta:
         model = Order
-        fields = ['order_number', 'company', 'establishment', 'client', 'client_user', 'price_table', 'ordered_items', 'status', 
-                'order_date', 'billing_date', 'order_amount', 'invoice_number', 'note']
+        fields = ['order_number', 'company', 'establishment', 'client', 'client_user', 'price_table', 'ordered_items', 
+                'order_amount', 'status', 'order_date', 'billing_date', 'invoice_number', 'note', 'agent_note']
         read_only_fields = ['order_number', 'company', 'establishment', 'client', 'client_user', 'price_table', 
-                'order_date', 'order_amount', 'ordered_items', 'note']
+                'order_date', 'note', 'order_amount']
 
     def validate_status(self, value):
         # Client user can only update status from 1 to 2 or from 1 to 0 (typing to transferred or typing to canceled)
         if has_role(self.context['request'].user, 'client_user'): 
             if self.instance.status == 1 and value not in [0, 1, 2]:
-                raise serializers.ValidationError(_("You cannot choose this option as status."))
+                raise serializers.ValidationError(_("Client user cannot choose a status other then 'Typing' and 'Transferred' when updating an order."))
+            # Client user can only update order if status is "Typing"
             if self.instance.status != 1:
-                raise serializers.ValidationError(_("You cannot choose this option as status."))
+                raise serializers.ValidationError(_("You cannot update this order."))
         #  Order with 'Typing' status can only be transferred, canceled or stay with the same status
         if self.instance.status == 1 and value not in [0, 1, 2]:
             raise serializers.ValidationError(_("You cannot choose this option as status."))
@@ -396,10 +400,6 @@ class OrderPUTSerializer(serializers.ModelSerializer):
         status = attrs["status"]
         invoice_number = attrs.get("invoice_number")
         billing_date = attrs.get("billing_date")
-        try:
-            client_establishment = ClientEstablishment.objects.get(client=client, establishment=establishment)
-        except ClientEstablishment.DoesNotExist:
-            raise PermissionDenied(detail={"detail": [_("Establishment not found.")]})
         #Check if the request_user is active
         if request_user.status != 1:
             raise PermissionDenied(detail={"detail": [_("Your account is disabled.")]})
@@ -407,20 +407,50 @@ class OrderPUTSerializer(serializers.ModelSerializer):
         if request_user.contracting.status != 1:
             raise PermissionDenied(detail={"detail": [_("Your contracting is disabled.")]})
         # Deny setting wrong invoice_number
-        if invoice_number and status != 4 or self.instance.status != 3:
+        if (invoice_number and status != 4) or (invoice_number and status == 4 and self.instance.status != 3):
             raise serializers.ValidationError(_("You can only add invoice number when order status has changed from 'Registered' to 'Billed'."))
         # Deny setting wrong billing_date
-        if billing_date and status != 4 or self.instance.status != 3:
+        if (billing_date and status != 4) or (billing_date and status == 4 and self.instance.status != 3):
             raise serializers.ValidationError(_("You can only add billing date when order status has changed from 'Registered 'to 'Billed'."))
+        # Force setting invoice_number when status changes from 'Registered' to 'Billed'.
+        if status == 4 and self.instance.status == 3 and not invoice_number:
+            raise serializers.ValidationError(_("You need send invoice number when order status has changed from 'Registered' to 'Billed'."))
+        # Force setting billing_date when status changes from 'Registered' to 'Billed'.
+        if status == 4 and self.instance.status == 3 and not billing_date:
+            raise serializers.ValidationError(_("You need send billing date when order status has changed from 'Registered 'to 'Billed'."))
+        if has_role(request_user, 'client_user'):
+            try:
+                client_establishment = ClientEstablishment.objects.get(client=client, establishment=establishment)
+            except ClientEstablishment.DoesNotExist:
+                raise PermissionDenied(detail={"detail": [_("Establishment not found.")]})
+            check_for_duplicate_values = []
+            order_amount = 0
+            if self.instance.status != 1:
+                raise serializers.ValidationError(_("You cannot update this order."))
+            # client user cannot remove all items from the order.
+            if attrs['ordered_items'] == []:
+                raise serializers.ValidationError(_("You must add at least one item to the order."))
+            available_items = client_establishment.price_table.items.all()
+            for ordered_item in attrs['ordered_items']:
+                if ordered_item['item'] not in available_items:
+                    raise serializers.ValidationError(_("You cannot add this item to the order."))
+                # Deny duplicate values
+                if ordered_item in check_for_duplicate_values:
+                    raise serializers.ValidationError(_("There are duplicate items."))
+                check_for_duplicate_values.append(ordered_item)
+                # Add unit_price to ordered_item
+                ordered_item['unit_price'] = client_establishment.price_table.price_items.get(item=ordered_item['item']).unit_price 
+                #TODO N+1 query
+                order_amount += ordered_item['unit_price'] * ordered_item['quantity'] 
+            attrs['order_amount'] = order_amount
         return super().validate(attrs)
 
     def update(self, instance, validated_data):
-        #  if validated_data.get('table_code'): validated_data.pop('table_code')
-        #  if validated_data.get('company'): validated_data.pop('company')
-        #  price_items = validated_data.get('price_items')
-        #  if price_items or price_items == []:
-            #  price_items = validated_data.pop('price_items')
-            #  update_price_items_from_price_table(instance, price_items)
+        ordered_items = validated_data.get('ordered_items')
+        if ordered_items or ordered_items == []:
+            ordered_items = validated_data.pop('ordered_items')  
+        if has_role(self.context['request'].user, 'client_user') and ordered_items:
+            update_ordered_items(instance, ordered_items)
         return super().update(instance, validated_data)
 
 class OrderHistory(serializers.ModelSerializer):

@@ -28,7 +28,7 @@ class Contracting(models.Model):
     name = models.CharField(max_length=60, verbose_name=_("name"))
     status = models.IntegerField(choices=status_choices, default=1)
     active_users_limit = models.IntegerField(default=5, verbose_name=_("active users limit"))
-    note = models.TextField(blank=True, verbose_name=_('note'))
+    note = models.CharField(blank=True, verbose_name=_('note'), max_length=800)
     def __str__(self):
         return f'Contracting: {self.name}'
 
@@ -47,7 +47,7 @@ class Company(models.Model):
     name = models.CharField(max_length=60, verbose_name=_('name'))
     cnpj = models.CharField(max_length=10, verbose_name=_('CNPJ root'))
     status = models.IntegerField(choices=status_choices, default=1)
-    note = models.TextField(blank=True, verbose_name=_('note'))
+    note = models.CharField(blank=True, verbose_name=_('note'), max_length=800)
     def __str__(self):
         return f'Company: {self.name}'
 
@@ -65,7 +65,7 @@ class Establishment(models.Model):
     name = models.CharField(max_length=60, verbose_name=_("name"))
     cnpj = CNPJField(masked=True, verbose_name="CNPJ")
     status = models.IntegerField(choices=status_choices, default=1)
-    note = models.TextField(blank=True, verbose_name=_('note'))
+    note = models.CharField(blank=True, verbose_name=_('note'), max_length=800)
     def __str__(self):
         return f'Establishment: {self.name}'
 
@@ -80,7 +80,7 @@ class ClientTable(models.Model):
     contracting = models.ForeignKey('Contracting', on_delete=models.PROTECT, verbose_name=_('contracting'))
     client_table_code = models.SlugField(_('client table code'), max_length=2)
     description = models.CharField(max_length=60, verbose_name=_('description'))
-    note = models.TextField(blank=True, verbose_name=_('note'))
+    note = models.CharField(blank=True, verbose_name=_('note'), max_length=800)
 
 class Client(models.Model):
     # User_set
@@ -97,7 +97,7 @@ class Client(models.Model):
     cnpj = models.CharField(max_length=10, verbose_name='CNPJ')
     status = models.IntegerField(choices=status_choices, default=1)
     establishments = models.ManyToManyField(Establishment, through='ClientEstablishment', verbose_name=_('establishments'))
-    note = models.TextField(blank=True, verbose_name=_('note'))
+    note = models.CharField(blank=True, verbose_name=_('note'), max_length=800)
     def __str__(self):
         return f'Cliente: {self.name}'
 
@@ -173,7 +173,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField('email')
     status = models.IntegerField(choices=status_choices, default=1)
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
-    note = models.TextField(blank=True, verbose_name=_('note'))
+    note = models.CharField(blank=True, verbose_name=_('note'), max_length=800)
     objects = UserManager()
     EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'user_code'

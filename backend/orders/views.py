@@ -400,7 +400,7 @@ class OrderView(APIView):
         return unauthorized_response
 
 class SpecificOrderView(APIView):
-    def get(self, request, code):
+    def get(self, request, establishment_compound_id, order_number):
         if has_permission(request.user, 'get_orders'):
             try:
                 order = Order.objects.get(id=code)
@@ -411,14 +411,12 @@ class SpecificOrderView(APIView):
         return unauthorized_response
     @transaction.atomic
     @swagger_auto_schema(request_body=OrderPUTSerializer) 
-    def put(self, request, order_number):
+    def put(self, request, establishment_compound_id, order_number):
         if has_role(request.user, ['client_user', 'agent', 'admin_agent', 'erp']):
-            #  if user.status != 1:
-                #  return error_response(detail=_("Your account is disabled."), status=status.HTTP_401_UNAUTHORIZED)
-            #  if  user.client.status != 1 or user.contracting.status != 1:
-                #  return unauthorized_response
+            if establishment_compound_id.split("#")[0] != request.user.contracting.contracting_code:
+                return not_found_response(object_name=_('The order'))
             try:
-                order = Order.objects.get(order_number=order_number)
+                order = Order.objects.get(establishment__establishment_compound_id=establishment_compound_id, order_number=order_number)
             except Order.DoesNotExist:
                 return not_found_response(object_name=_('The order'))
             if has_role(request.user, 'client_user'):
@@ -427,7 +425,7 @@ class SpecificOrderView(APIView):
             if req_user_is_agent_without_all_estabs(request.user):
                 if order.establishment not in request.user.establishments.all():
                     return not_found_response(object_name=_('The order'))
-            serializer = OrderPUTSerializer(order, data=request.data, context={"request": request})
+            serializer = OrderPUTSerializer(order, data=request.data, partial=True, context={"request": request})
             if serializer.is_valid():
                 try:
                     serializer.save()

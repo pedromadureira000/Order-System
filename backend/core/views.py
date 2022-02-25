@@ -204,7 +204,7 @@ class SpecificEstablishment(APIView):
     @transaction.atomic
     def put(self, request, establishment_compound_id):
         if has_permission(request.user, 'update_establishment'):
-            if establishment_compound_id.split("#")[0] != request.user.contracting.contracting_code: #TODO
+            if establishment_compound_id.split("#")[0] != request.user.contracting.contracting_code:
                 return not_found_response(object_name=_('The establishment'))
             try:
                 establishment = Establishment.objects.get(establishment_compound_id=establishment_compound_id)

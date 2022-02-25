@@ -17,7 +17,7 @@ class ItemTable(models.Model):
     contracting = models.ForeignKey('core.Contracting', on_delete=models.PROTECT, verbose_name=_('contracting'))
     item_table_code = models.SlugField(max_length=3, verbose_name=_('item table code'))
     description = models.CharField(max_length=60, verbose_name=_('description'))
-    note = models.TextField(blank=True, verbose_name=_('note'))
+    note = models.CharField(blank=True, verbose_name=_('note'), max_length=800)
     def __str__(self):
         return f'Item Table: {self.description}'
 
@@ -31,7 +31,7 @@ class ItemCategory(models.Model):
     category_compound_id = models.CharField(_('item category compound id'), max_length=16, unique=True, editable=False)
     category_code = models.SlugField(max_length=8, verbose_name=_('category code'))
     description = models.CharField(max_length=60, verbose_name=_('description'))
-    note = models.TextField(blank=True, verbose_name=_('note'))
+    note = models.CharField(blank=True, verbose_name=_('note'), max_length=800)
     def __str__(self):
         return f'Category: {self.description}'
 
@@ -51,7 +51,7 @@ class Item(models.Model):
     barcode = models.CharField(max_length=13,blank=True, verbose_name=_('barcode'))
     status = models.IntegerField(choices=status_choices, default=1)
     image = models.ImageField(default="images/items/defaultimage.jpeg", upload_to='images/items/', verbose_name=_('image'))
-    technical_description = models.TextField(blank=True, verbose_name=_('technical description'))
+    technical_description = models.CharField(blank=True, verbose_name=_('technical description'), max_length=800)
     def __str__(self):
         return f'{self.item_code}'
     def save(self, *args, **kwargs):
@@ -73,7 +73,7 @@ class PriceTable(models.Model):
     table_code = models.SlugField(max_length=7, verbose_name=_('table_code'))
     description = models.CharField(max_length=60, verbose_name=_('description'))
     items = models.ManyToManyField(Item, through='PriceItem', verbose_name=_('items'))
-    note = models.TextField(blank=True, verbose_name=_('note'))
+    note = models.CharField(blank=True, verbose_name=_('note'), max_length=800)
     def __str__(self):
         return f'{self.table_code}'
 
@@ -116,7 +116,8 @@ class Order(models.Model):
     billing_date = models.DateTimeField(blank=True, null=True, verbose_name=_('billing date'))
     invoice_number = models.CharField(max_length=9, blank=True, verbose_name=_('invoice number'))
     order_amount = models.DecimalField(max_digits=11, decimal_places=2, verbose_name=_('order amount'))
-    note = models.TextField(blank=True, verbose_name=_('note'))
+    note = models.CharField(blank=True, verbose_name=_('note'), max_length=800)
+    agent_note = models.CharField(blank=True, verbose_name=_('agent note'), max_length=800)
     def __str__(self):
         return f'Order N. {self.order_number}'
 
@@ -147,4 +148,5 @@ class OrderHistory(models.Model):
     date = models.DateTimeField(auto_now_add=True, verbose_name=_('date'))
     order = models.ForeignKey('Order', on_delete=models.CASCADE, verbose_name=_('order'))
     history_type = models.CharField(choices=type_choices, max_length=2,verbose_name=_('history type'))
-    history_description = models.TextField(blank=True, verbose_name=_('history description'))
+    history_description = models.CharField(blank=True, verbose_name=_('history description'),max_length=800)
+    agent_note = models.CharField(blank=True, verbose_name=_('agent note'), max_length=800)
