@@ -129,8 +129,8 @@ class Agent(AbstractUserRole):
 
 class ClientUser(AbstractUserRole):
     available_permissions = {
-        "make_order": True,
         "get_orders": True,
+        "make_order": True,
         "edit_order_in_typing": True,
         "save_order_as_template": True,
         "transfer_order": True

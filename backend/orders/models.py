@@ -87,7 +87,7 @@ class PriceItem(models.Model):
     item = models.ForeignKey('Item', on_delete=models.PROTECT, verbose_name=_('item'))
     unit_price = models.DecimalField(max_digits=11, decimal_places=2, verbose_name=_('unit price'), default=0)
     last_modified = models.DateTimeField(auto_now=True, verbose_name=_('last modified'))
-    creation_date = models.DateTimeField(default=timezone.now, verbose_name=_('creation date'))
+    creation_date = models.DateTimeField(auto_now_add=True, verbose_name=_('creation date'))
 
 class Order(models.Model):
     status_choices = (
@@ -104,26 +104,28 @@ class Order(models.Model):
         verbose_name = _('order')
         verbose_name_plural = _('orders')
         constraints = [UniqueConstraint(fields=['order_number', 'establishment'], name='order compound primary key')]
-    order_number = models.IntegerField(_('order number'))
-    client_user = models.ForeignKey('core.User', on_delete=models.PROTECT, verbose_name=_('client user'))
+    order_number = models.IntegerField(_('order number'), editable=False)
+    client_user = models.ForeignKey('core.User', on_delete=models.PROTECT, verbose_name=_('client user'),)
+    client = models.ForeignKey('core.Client', on_delete=models.PROTECT, verbose_name=_('client'))
     company = models.ForeignKey('core.Company', on_delete=models.PROTECT, verbose_name=_('company'))
     establishment = models.ForeignKey('core.Establishment', on_delete=models.PROTECT, verbose_name=_('establishment'))
     price_table = models.ForeignKey('PriceTable', on_delete=models.PROTECT, verbose_name=_('price table'))
+    items = models.ManyToManyField(Item, through='OrderedItem', verbose_name=_('items'))
     status = models.IntegerField(choices=status_choices)
-    order_date = models.DateTimeField(default=timezone.now, verbose_name=_('order date'))
+    order_date = models.DateTimeField(auto_now_add=True, verbose_name=_('order date'))
     billing_date = models.DateTimeField(blank=True, null=True, verbose_name=_('billing date'))
     invoice_number = models.CharField(max_length=9, blank=True, verbose_name=_('invoice number'))
     order_amount = models.DecimalField(max_digits=11, decimal_places=2, verbose_name=_('order amount'))
     note = models.TextField(blank=True, verbose_name=_('note'))
     def __str__(self):
-        return f'Order N. {self.pk}'
+        return f'Order N. {self.order_number}'
 
 class OrderedItem(models.Model):
     class Meta:
         verbose_name = _('ordered Item')
         verbose_name_plural = _('ordered Items')
         constraints = [UniqueConstraint(fields=['order', 'item'], name='OrderedItem unique_together')]
-    order = models.ForeignKey('Order', on_delete=models.CASCADE, verbose_name=_('order'))
+    order = models.ForeignKey('Order', on_delete=models.CASCADE, related_name='ordered_items', verbose_name=_('order'))
     item = models.ForeignKey('Item', on_delete=models.PROTECT, verbose_name=_('item'))
     quantity = models.DecimalField(max_digits=11, decimal_places=2, verbose_name=_('quantity'))
     unit_price = models.DecimalField(max_digits=11, decimal_places=2, verbose_name=_('unit price'))

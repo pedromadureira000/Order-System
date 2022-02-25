@@ -112,3 +112,13 @@ class UserContracting:
 
     def __call__(self, serializer_field):
         return serializer_field.context['request'].user.contracting
+
+class ClientCompanyFromCurrentUser:
+    requires_context = True
+    def __call__(self, serializer_field):
+        return serializer_field.context['request'].user.client
+
+#  class ClientEstablishmentPriceTable:
+    #  requires_context = True
+    #  def __call__(self, serializer_field):
+        #  return serializer_field.context['request'].user.client

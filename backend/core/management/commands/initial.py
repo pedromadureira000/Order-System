@@ -1,4 +1,5 @@
 from django.core.management import BaseCommand
+from rolepermissions.roles import assign_role
 from core.models import Client, ClientEstablishment, ClientTable, Company, Contracting, Establishment, User
 
 
@@ -28,10 +29,21 @@ class Command(BaseCommand):
         comp.client_table = client_table
         comp.save()
         # --/ Create client
-        client = Client(client_compound_id="123#11#123", client_code="123", name="Client", client_table=client_table, status=1 )
+        client = Client(client_compound_id="123#11#123", client_code="123", name="Client", client_table=client_table, status=1)
         client.save()
         # --/ Create ClientEstablishment
         ClientEstablishment(establishment=estab, client=client).save()
+        # --/ Create client user
+        client_user = User.objects.create_user(
+            username="client",
+            first_name="Cli",
+            last_name="ent",
+            email="client@user.phsw",
+            contracting=contracting,
+            status=1,
+            password='asdf'
+        )
+        assign_role(client_user, 'client_user')
        #------------------------------------------
         contracting = Contracting(name="PHSW2", contracting_code='111', status=1, active_users_limit=5)
         contracting.save()
@@ -61,3 +73,14 @@ class Command(BaseCommand):
         client.save()
         # --/ Create ClientEstablishment
         ClientEstablishment(establishment=estab, client=client).save()
+        # --/ Create client user
+        client_user = User.objects.create_user(
+            username="client",
+            first_name="Cli",
+            last_name="ent",
+            email="client@user.phsw",
+            contracting=contracting,
+            status=1,
+            password='asdf'
+        )
+        assign_role(client_user, 'client_user')

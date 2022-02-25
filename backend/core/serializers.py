@@ -306,6 +306,7 @@ class AgentEstablishmentToUserSerializer(serializers.ModelSerializer):
 
 class OwnProfileSerializer(UserSerializer):
     agent_establishments = AgentEstablishmentToUserSerializer(many=True, read_only=True)
+    client = serializers.SlugRelatedField(slug_field='client_compound_id', queryset=Client.objects.all())
 
     class Meta(UserSerializer.Meta):
         fields = ['username', 'contracting', 'first_name', 'last_name', 'email', 'status', 'client',
@@ -410,7 +411,7 @@ class ClientUserSerializer(UserSerializer):
             # Check if client is from the same contracting as the request user
             if value.client_table.contracting != request_user.contracting:
                 raise serializers.ValidationError(_("Client table not found."))
-            # Check if request user is agent without all estabs and can assign this client for a user_client
+            # Check if request user is agent without all estabs and can assign this client for a client_user
             if req_user_is_agent_without_all_estabs(request_user) and not agent_has_access_to_this_client(request_user, value):
                 raise serializers.ValidationError(_("You have no permission to assign this client to this client user.")) 
         return value

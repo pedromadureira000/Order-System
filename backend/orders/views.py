@@ -4,8 +4,8 @@ from rest_framework import status, mixins, generics
 from rest_framework.response import Response
 from core.models import Client, ClientEstablishment, User
 from core.validators import agent_has_access_to_this_item_table, agent_has_access_to_this_price_table, req_user_is_agent_without_all_estabs
-from orders.facade import get_categories_by_agent, get_items_by_agent, get_price_tables_by_agent
-from orders.serializers import AssignPriceTableToClientEstablishment, ItemSerializer, CategorySerializer, ItemTableSerializer, OrderSerializer, PriceTableSerializer, SpecificPriceItemSerializer
+from orders.facade import get_categories_by_agent, get_items_by_agent, get_orders_by_agent, get_price_tables_by_agent
+from orders.serializers import AssignPriceTableToClientEstablishment, ItemSerializer, CategorySerializer, ItemTableSerializer, OrderPOSTSerializer,OrderPUTSerializer, PriceTableSerializer, SpecificPriceItemSerializer
 from orders.models import ItemTable, Order, Item, ItemCategory, PriceTable, PriceItem
 from rest_framework.views import APIView
 from rolepermissions.checkers import has_permission, has_role
@@ -260,7 +260,7 @@ class SpecificPriceTableView(APIView):
                 instance = PriceTable.objects.get(price_table_compound_id=price_table_compound_id)
             except PriceTable.DoesNotExist:
                 return not_found_response(object_name=_('The price table'))
-            serializer = PriceTableSerializer(instance, data=request.data, context={"request": request,
+            serializer = PriceTableSerializer(instance, data=request.data, partial=True, context={"request": request,
                 "req_user_is_agent_without_all_estabs":req_user_is_agent_without_all_estabs(request.user)})
             if serializer.is_valid():
                 try:
@@ -371,27 +371,91 @@ class SpecificPriceItemView(APIView):
         return unauthorized_response
 
 class OrderView(APIView):
+    @transaction.atomic
     def get(self, request):
-      if has_permission(request.user, 'create_item'):
-            if request.data.get('status'):
+        if has_permission(request.user, 'get_orders'):
+            if has_role(request.user, 'client_user'):
+                orders = Order.objects.filter(client=request.user.client).all()
+                return Response(OrderPOSTSerializer(orders, many=True).data)
+            if has_role(request.user, 'agent'):
+                orders = get_orders_by_agent(request.user)
+                return Response(OrderPOSTSerializer(orders, many=True).data)
+            orders = Order.objects.filter(company__contracting=request.user.contracting).all()
+            return Response(OrderPOSTSerializer(orders, many=True).data)
+        return unauthorized_response
+    @swagger_auto_schema(request_body=OrderPOSTSerializer) 
+    @transaction.atomic
+    def post(self, request):
+        if has_permission(request.user, 'make_order'): 
+            serializer = OrderPOSTSerializer(data=request.data, context={"request": request})
+            if serializer.is_valid():
                 try:
-                    orders = Order.objects.filter(status=request.data['status'])
-                except Order.DoesNotExist:
-                    return Response({"response": "Error"}, status=status.HTTP_404_NOT_FOUND)
-                serializer = OrderSerializer(orders, many=True)
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response({'response': "Parameter 'status' is missing."},
-                            status=status.HTTP_400_BAD_REQUEST)
-      return Response({"error": "You don't have permissions to access this resource."},
-                        status=status.HTTP_401_UNAUTHORIZED)
+                    serializer.save()
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                except Exception as error:
+                    transaction.rollback()
+                    print(error)
+                    return unknown_exception_response(action=_('create price table'))
+            return serializer_invalid_response(serializer.errors)
+        return unauthorized_response
 
 class SpecificOrderView(APIView):
     def get(self, request, code):
-        if has_permission(request.user, 'create_item'):
+        if has_permission(request.user, 'get_orders'):
             try:
                 order = Order.objects.get(id=code)
             except Order.DoesNotExist:
                 return Response(status=status.HTTP_404_NOT_FOUND)
-            serializer = OrderSerializer(order)
+            serializer = OrderPOSTSerializer(order)
             return Response(serializer.data)
-        return Response({"error": "You don't have permissions to access this resource."}, status=status.HTTP_401_UNAUTHORIZED)
+        return unauthorized_response
+    @transaction.atomic
+    @swagger_auto_schema(request_body=OrderPUTSerializer) 
+    def put(self, request, order_number):
+        if has_role(request.user, ['client_user', 'agent', 'admin_agent', 'erp']):
+            #  if user.status != 1:
+                #  return error_response(detail=_("Your account is disabled."), status=status.HTTP_401_UNAUTHORIZED)
+            #  if  user.client.status != 1 or user.contracting.status != 1:
+                #  return unauthorized_response
+            try:
+                order = Order.objects.get(order_number=order_number)
+            except Order.DoesNotExist:
+                return not_found_response(object_name=_('The order'))
+            if has_role(request.user, 'client_user'):
+                if order.client != request.user.client:
+                    return not_found_response(object_name=_('The order'))
+            if req_user_is_agent_without_all_estabs(request.user):
+                if order.establishment not in request.user.establishments.all():
+                    return not_found_response(object_name=_('The order'))
+            serializer = OrderPUTSerializer(order, data=request.data, context={"request": request})
+            if serializer.is_valid():
+                try:
+                    serializer.save()
+                    return Response(serializer.data)
+                except Exception as error:
+                    transaction.rollback()
+                    print(error)
+                    return unknown_exception_response(action=_('update order by client user'))
+            return serializer_invalid_response(serializer.errors)
+        return unauthorized_response
+    @transaction.atomic
+    def delete(self, request, price_table_compound_id):
+        if has_permission(request.user, 'delete_price_table'):
+            if price_table_compound_id.split("#")[0] != request.user.contracting.contracting_code:
+                return not_found_response(object_name=_('The price table'))
+            try:
+                instance = PriceTable.objects.get(price_table_compound_id=price_table_compound_id)
+            except PriceTable.DoesNotExist:
+                return not_found_response(object_name=_('The price table'))
+            if req_user_is_agent_without_all_estabs(request.user) and \
+                    not agent_has_access_to_this_price_table(request.user, instance):
+                return unauthorized_response
+            try:
+                instance.delete()
+                return success_response(detail=_("Price table deleted successfully"))
+            except ProtectedError:
+                return protected_error_response(object_name=_('price table'))
+            except Exception as error:
+                print(error)
+                return unknown_exception_response(action=_('delete price table'))
+        return unauthorized_response

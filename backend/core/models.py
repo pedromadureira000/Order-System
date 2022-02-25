@@ -139,7 +139,7 @@ class UserManager(BaseUserManager):
         # manager method can be used in migrations. This is fine because
         # managers are by definition working on the real model.
         username = GlobalUserModel.normalize_username(username)
-        user_code = username + "#" + contracting.contracting_code
+        user_code = contracting.contracting_code + "#" + username
         user = self.model(user_code=user_code,username=username, contracting=contracting, **extra_fields)
         user.password = make_password(password)
         user.save(using=self._db)

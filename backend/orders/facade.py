@@ -30,13 +30,6 @@ def get_orders(request):
     return Order.objects.order_by('-order_date').filter(user=request.user).select_related(
         'company')
 
-
-def get_order(request):
-    return OrderedItem.objects.filter(order_id=request.POST.get('id_order')).all()
-
-def make_order(request):
-    pass
-
 # ------------------------------/ Items /--------------------------------------
 def get_categories_by_agent(agent):
     if has_permission(agent, 'access_all_establishments'):
@@ -86,4 +79,9 @@ def get_all_items_by_category():
     items = Item.objects.all()
     return ItemCategory.objects.prefetch_related(
         Prefetch('item_set', queryset=items, to_attr='items')).all()
+
+def get_orders_by_agent(agent):
+    if has_permission(agent, 'access_all_establishments'):
+        return Order.objects.filter(company__contracting=request.user.contracting)
+    return Order.objects.filter(establishment__in=agent.establishments.all())
 

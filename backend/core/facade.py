@@ -87,8 +87,10 @@ def update_price_items_from_price_table(price_table, price_items):
     intersection = price_items_set.intersection(current_price_items_set)
     to_delete = current_price_items_set.difference(intersection)
     to_create = price_items_set.difference(intersection)
-    current_price_items.filter(item__item_compound_id__in=to_delete).delete()
+    to_delete_item_list = [price_item[0] for price_item in to_delete]
+    current_price_items.filter(item__item_compound_id__in=to_delete_item_list).delete()
     price_items_to_create = list(filter(lambda price_item: (price_item["item"].item_compound_id, price_item['unit_price']) in \
             to_create, price_items))
-    price_items_to_create = [PriceItem(item=obj[0], unit_price=obj[1], price_table=price_table) for obj in price_items_to_create]
-    price_table.price_items.bulk_create(price_items_to_create)
+    if price_items_to_create:
+        price_items_to_create = [PriceItem(item=obj['item'], unit_price=obj['unit_price'], price_table=price_table) for obj in  price_items_to_create]
+        price_table.price_items.bulk_create(price_items_to_create)

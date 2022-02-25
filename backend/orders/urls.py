@@ -34,7 +34,7 @@ urlpatterns = [
     path('item', ItemView.as_view()),
     path('item/<item_compound_id>', SpecificItemView.as_view()),
     path('pricetable', PriceTableView.as_view()),
-    path('pricetable/<pricetable_compound_id>', SpecificPriceTableView.as_view()),
+    path('pricetable/<price_table_compound_id>', SpecificPriceTableView.as_view()),
     path('assign_pricetable/<client_compound_id>/<establishment_compound_id>', AssignPriceTableView.as_view()),
     path('priceitem/<price_table_compound_id>/<item_compound_id>', SpecificPriceItemView.as_view()),
     path('order', OrderView.as_view()),
