@@ -12,7 +12,7 @@ from core.models import Client, ClientTable, Company, Contracting, Establishment
 from rolepermissions.checkers import has_permission, has_role
 from django.db import transaction
 from drf_yasg.utils import swagger_auto_schema
-from core.validators import agent_has_access_to_this_client, req_user_is_agent_without_all_estabs
+from core.validators import agent_has_access_to_this_client, agent_has_access_to_this_client_user, req_user_is_agent_without_all_estabs
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 
@@ -350,7 +350,12 @@ class SpecificClient(APIView):
                 client = Client.objects.get(client_compound_id=client_compound_id)
             except Client.DoesNotExist:
                 return not_found_response(object_name=_('The client'))
-            serializer = ClientSerializer(client, data=request.data, partial=True, context={"request":request})
+            # Check if agent without all estabs have access to this client
+            request_user_is_agent_without_all_estabs = req_user_is_agent_without_all_estabs(request.user)
+            if request_user_is_agent_without_all_estabs and not agent_has_access_to_this_client(request.user, client):
+                return not_found_response(object_name=_('The client'))
+            serializer = ClientSerializer(client, data=request.data, partial=True, context={"request":request, 
+                "request_user_is_agent_without_all_estabs": request_user_is_agent_without_all_estabs})
             if serializer.is_valid():
                 try:
                     serializer.save()
@@ -629,8 +634,11 @@ class SpecificClientUser(APIView):
                 user = User.objects.get(user_code=user_code, groups__name='client_user')
             except User.DoesNotExist:
                 return not_found_response(object_name=_('The client user'))
-            serializer = ClientUserSerializer(user, data=request.data, partial=True,
-                    context={"request": request})
+            request_user_is_agent_without_all_estabs = req_user_is_agent_without_all_estabs(request.user)
+            if request_user_is_agent_without_all_estabs and not agent_has_access_to_this_client_user(request.user, user):
+                return not_found_response(object_name=_('The client user'))
+            serializer = ClientUserSerializer(user, data=request.data, partial=True, context={"request": request,
+                "request_user_is_agent_without_all_estabs": request_user_is_agent_without_all_estabs})
             if serializer.is_valid():
                 try:
                     serializer.save()
@@ -658,7 +666,7 @@ class SpecificClientUser(APIView):
                 return unauthorized_response
             try:
                 client_user.delete()
-                return success_response(detail= "Client user deleted successfully")
+                return success_response(detail=_("Client user deleted successfully"))
             except ProtectedError as er:
                 return protected_error_response(object_name=_('client user'))
             except Exception as error:

@@ -119,7 +119,13 @@ class SpecificCategoryView(APIView):
                 item_category = ItemCategory.objects.get(category_compound_id=category_compound_id)
             except ItemCategory.DoesNotExist:
                 return not_found_response(object_name=_('The item category')) 
-            serializer = CategorySerializer(item_category, data=request.data, partial=True, context={"request":request})
+            # Check if agent without all estabs have access to this item category
+            request_user_is_agent_without_all_estabs = req_user_is_agent_without_all_estabs(request_user)
+            if request_user_is_agent_without_all_estabs and not \
+                    agent_has_access_to_this_item_table(request.user, item_category.item_table):
+                return not_found_response(object_name=_('The item category')) 
+            serializer = CategorySerializer(item_category, data=request.data, partial=True, context={"request":request,
+                "request_user_is_agent_without_all_estabs": request_user_is_agent_without_all_estabs})
             if serializer.is_valid():
                 try:
                     serializer.save()
@@ -189,7 +195,13 @@ class SpecificItemView(APIView):
                 item = Item.objects.get(item_compound_id=item_compound_id)
             except Item.DoesNotExist:
                 return not_found_response(object_name=_('The item'))
-            serializer = ItemSerializer(item, data=request.data)
+            request_user_is_agent_without_all_estabs = req_user_is_agent_without_all_estabs(request_user)
+            # Agent without access to all establishments can't access an item from item_table which he doesn't have access.
+            if request_user_is_agent_without_all_estabs and not \
+                    agent_has_access_to_this_item_table(request.user, item.item_table):
+                return not_found_response(object_name=_('The item'))
+            serializer = ItemSerializer(item, data=request.data, context={"request": request,
+                "request_user_is_agent_without_all_estabs": request_user_is_agent_without_all_estabs})
             if serializer.is_valid():
                 try:
                     serializer.save()
@@ -260,8 +272,12 @@ class SpecificPriceTableView(APIView):
                 instance = PriceTable.objects.get(price_table_compound_id=price_table_compound_id)
             except PriceTable.DoesNotExist:
                 return not_found_response(object_name=_('The price table'))
+            # Agent without access to all establishments should not access some price_tables
+            request_user_is_agent_without_all_estabs = req_user_is_agent_without_all_estabs(request.user)
+            if request_user_is_agent_without_all_estabs and not agent_has_access_to_this_price_table(request.user, instance):
+                return not_found_response(object_name=_('The price table'))
             serializer = PriceTableSerializer(instance, data=request.data, partial=True, context={"request": request,
-                "req_user_is_agent_without_all_estabs":req_user_is_agent_without_all_estabs(request.user)})
+                "req_user_is_agent_without_all_estabs": request_user_is_agent_without_all_estabs})
             if serializer.is_valid():
                 try:
                     serializer.save()
@@ -403,16 +419,19 @@ class SpecificOrderView(APIView):
     def get(self, request, establishment_compound_id, order_number):
         if has_permission(request.user, 'get_orders'):
             try:
-                order = Order.objects.get(id=code)
+                order = Order.objects.get(establishment__establishment_compound_id=establishment_compound_id, order_number=order_number)
             except Order.DoesNotExist:
-                return Response(status=status.HTTP_404_NOT_FOUND)
+                return not_found_response(object_name=_('The order'))
+            if req_user_is_agent_without_all_estabs(request.user):
+                if order.establishment not in request.user.establishments.all(): #TODO get_or_none. Avoid search for all
+                    return not_found_response(object_name=_('The order'))
             serializer = OrderPOSTSerializer(order)
             return Response(serializer.data)
         return unauthorized_response
     @transaction.atomic
     @swagger_auto_schema(request_body=OrderPUTSerializer) 
     def put(self, request, establishment_compound_id, order_number):
-        if has_role(request.user, ['client_user', 'agent', 'admin_agent', 'erp']):
+        if has_permission(request.user, 'update_order_status'):
             if establishment_compound_id.split("#")[0] != request.user.contracting.contracting_code:
                 return not_found_response(object_name=_('The order'))
             try:
@@ -423,7 +442,7 @@ class SpecificOrderView(APIView):
                 if order.client != request.user.client:
                     return not_found_response(object_name=_('The order'))
             if req_user_is_agent_without_all_estabs(request.user):
-                if order.establishment not in request.user.establishments.all():
+                if order.establishment not in request.user.establishments.all(): #TODO get_or_none. Avoid search for all
                     return not_found_response(object_name=_('The order'))
             serializer = OrderPUTSerializer(order, data=request.data, partial=True, context={"request": request})
             if serializer.is_valid():
@@ -437,23 +456,23 @@ class SpecificOrderView(APIView):
             return serializer_invalid_response(serializer.errors)
         return unauthorized_response
     @transaction.atomic
-    def delete(self, request, price_table_compound_id):
-        if has_permission(request.user, 'delete_price_table'):
-            if price_table_compound_id.split("#")[0] != request.user.contracting.contracting_code:
-                return not_found_response(object_name=_('The price table'))
+    def delete(self, request, establishment_compound_id, order_number):
+        if has_permission(request.user, 'delete_order'):
+            if establishment_compound_id.split("#")[0] != request.user.contracting.contracting_code:
+                return not_found_response(object_name=_('The order'))
             try:
-                instance = PriceTable.objects.get(price_table_compound_id=price_table_compound_id)
-            except PriceTable.DoesNotExist:
-                return not_found_response(object_name=_('The price table'))
-            if req_user_is_agent_without_all_estabs(request.user) and \
-                    not agent_has_access_to_this_price_table(request.user, instance):
-                return unauthorized_response
+                order = Order.objects.get(establishment__establishment_compound_id=establishment_compound_id, order_number=order_number)
+            except Order.DoesNotExist:
+                return not_found_response(object_name=_('The order'))
+            if order.status not in [0, 4, 5]:
+                return error_response(detail=_("You cannot delete an order with a status other than 'Canceled', 'Invoiced' or 'Delivered'"), 
+                    status=status.HTTP_400_BAD_REQUEST)
             try:
-                instance.delete()
-                return success_response(detail=_("Price table deleted successfully"))
+                order.delete()
+                return success_response(detail=_("Order deleted successfully"))
             except ProtectedError:
-                return protected_error_response(object_name=_('price table'))
+                return protected_error_response(object_name=_('order'))
             except Exception as error:
                 print(error)
-                return unknown_exception_response(action=_('delete price table'))
+                return unknown_exception_response(action=_('delete order'))
         return unauthorized_response

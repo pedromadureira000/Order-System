@@ -39,15 +39,6 @@ class CategorySerializer(serializers.ModelSerializer):
         validators = [UniqueTogetherValidator(queryset=ItemCategory.objects.all(), fields=['item_table', 'category_code'], 
             message="The field 'category_code' must be unique by 'item_table'.")]
 
-    def validate(self, attrs):
-        request_user = self.context['request'].user
-        if self.context['request'].method == 'PUT':
-            # Check if agent without all estabs have access to this item category
-            if req_user_is_agent_without_all_estabs(request_user) and not \
-                    agent_has_access_to_this_item_table(request_user, self.instance.item_table):
-                raise NotFound(detail={"detail": [_("Item category not found.")]})
-        return super().validate(attrs)
-
     def validate_item_table(self, value):
         request_user = self.context['request'].user
         if self.context['request'].method == 'POST':
@@ -56,7 +47,7 @@ class CategorySerializer(serializers.ModelSerializer):
             if value.contracting != request_user.contracting:
                 raise NotFound(detail={"detail": [_("Item table not found.")]})
             # Agent without access to all establishments can't access an category from an item_table which he doesn't have access.
-            if req_user_is_agent_without_all_estabs(request_user) and not \
+            if self.context['request_user_is_agent_without_all_estabs'] and not \
                     agent_has_access_to_this_item_table(request_user, value):
                 raise NotFound(detail={"detail": [_("Item table not found.")]})
         return value
@@ -96,14 +87,10 @@ class ItemSerializer(serializers.ModelSerializer):
             if category.item_table != item_table:
                 raise serializers.ValidationError(f"You cannot choose this category, because it is from another item table.")
             # Agent without access to all establishments can't access an item from item_table which he doesn't have access.
-            if req_user_is_agent_without_all_estabs(request_user) and not agent_has_access_to_this_item_table(request_user, item_table):
+            if self.context['request_user_is_agent_without_all_estabs'] and not agent_has_access_to_this_item_table(request_user, item_table):
                 raise NotFound(detail={"detail": [_("Item table not found.")]})
 
         if self.context['request'].method == 'PUT':
-            # Agent without access to all establishments can't access an item from item_table which he doesn't have access.
-            if req_user_is_agent_without_all_estabs(request_user) and not \
-                    agent_has_access_to_this_item_table(request_user, self.instance.item_table):
-                raise NotFound(detail={"detail": [_("Item not found.")]})
             # Verify if agent can assign this category.
             if attrs.get('category'):
                 # Category belongs to user contracting
@@ -155,7 +142,6 @@ class PriceTableSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         request_user = self.context['request'].user
         company = attrs.get('company')
-        request_user_is_agent_without_all_estabs = self.context['req_user_is_agent_without_all_estabs']
         price_items = attrs.get('price_items')
         check_for_duplicate_values = []
         if price_items or price_items == []:
@@ -178,13 +164,8 @@ class PriceTableSerializer(serializers.ModelSerializer):
             if company.contracting != request_user.contracting:
                 raise NotFound(detail={"detail": [_("Company not found.")]})
             # User is agent without all estabs and don't have access to this company
-            if request_user_is_agent_without_all_estabs and company not in get_agent_companies(request_user):
+            if self.context['req_user_is_agent_without_all_estabs'] and company not in get_agent_companies(request_user):
                 raise NotFound(detail={"detail": [_("Company not found.")]})
-        if self.context['request'].method == 'PUT':
-            # Agent without access to all establishments should not access some price_tables
-            if request_user_is_agent_without_all_estabs and not agent_has_access_to_this_price_table(request_user, self.instance):
-                raise NotFound(detail={"detail": [_("Price table not found.")]})
-        return super().validate(attrs)
 
     def create(self, validated_data):
         price_items = validated_data.pop('price_items')

@@ -31,6 +31,7 @@ class Erp(AbstractUserRole):
         "get_agents": True,
         "update_agent": True,
         "delete_agent": True,
+        "delete_order": True,
         # Agent
         "access_all_establishments": True,
         "create_client": True,
@@ -57,7 +58,7 @@ class Erp(AbstractUserRole):
         "update_price_table": True,
         "delete_price_table": True,
         "get_orders":True,
-        "update_orders_status": True,
+        "update_order_status": True,
     }
 
 class AdminAgent(AbstractUserRole):
@@ -70,6 +71,7 @@ class AdminAgent(AbstractUserRole):
         "get_agents": True,
         "update_agent": True,
         "delete_agent": True,
+        "delete_order": True,
         # Agent
         "access_all_establishments": True,
         "create_client": True,
@@ -93,7 +95,7 @@ class AdminAgent(AbstractUserRole):
         "update_price_table": True,
         "delete_price_table": True,
         "get_orders":True,
-        "update_orders_status": True
+        "update_order_status": True
     }
 
 class Agent(AbstractUserRole):
@@ -124,7 +126,7 @@ class Agent(AbstractUserRole):
         "update_price_table": False,
         "delete_price_table": False,
         "get_orders":False,
-        "update_orders_status": False
+        "update_order_status": False
     }
 
 class ClientUser(AbstractUserRole):

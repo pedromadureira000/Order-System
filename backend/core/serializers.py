@@ -143,7 +143,7 @@ class ClientSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         request_user = self.context["request"].user
         client_establishments = attrs.get('client_establishments')
-        request_user_is_agent_without_all_estabs = req_user_is_agent_without_all_estabs(request_user)
+        request_user_is_agent_without_all_estabs = self.context['request_user_is_agent_without_all_estabs']
         # ----------------/ Establishments
         if client_establishments or client_establishments == []:
             establishments_list = []
@@ -167,17 +167,14 @@ class ClientSerializer(serializers.ModelSerializer):
                     if not agent_has_permission_to_assign_this_establishment_to_client(request_user, client_establishment['establishment']):
                         raise serializers.ValidationError(_("You can't add this establishment to this client."))
         if self.context['request'].method == 'POST':
-            # ----------------/ Client Table
-            # Contracting ownership
+        # ----------------/ Client Table
+            # Client table Contracting ownership
             if attrs.get('client_table').contracting != request_user.contracting:
                 raise serializers.ValidationError(_("Client table not found."))
+            # Agent without all estabs has access to this client_table
             if request_user_is_agent_without_all_estabs:
                 if not agent_has_permission_to_assign_this_client_table_to_client(request_user, attrs.get('client_table')):
                     raise serializers.ValidationError(_("Can't access this client_table."))
-        if self.context['request'].method == 'PUT':
-            # Check if agent without all estabs have access to this client
-            if request_user_is_agent_without_all_estabs and not agent_has_access_to_this_client(request_user, self.instance):
-                raise serializers.ValidationError(_("You can't update this client."))
         return attrs
 
     def create(self, validated_data):
@@ -396,15 +393,6 @@ class ClientUserSerializer(UserSerializer):
         fields = ['username',  'contracting', 'client', 'roles', 'permissions', 'first_name',
                 'last_name', 'email', 'status', 'password', 'note']
 
-    def validate(self, attrs):
-        request_user = self.context["request"].user
-        if self.context['request'].method == 'PUT':
-            # Deny agent without all estabs to update access any user client
-            if req_user_is_agent_without_all_estabs(request_user) and not \
-                    agent_has_access_to_this_client_user(request_user, self.instance):
-                raise serializers.ValidationError(_("Client user not found."))
-        return super().validate(attrs)
-
     def validate_client(self, value):
         request_user = self.context["request"].user
         if self.context['request'].method == 'POST':
@@ -412,7 +400,7 @@ class ClientUserSerializer(UserSerializer):
             if value.client_table.contracting != request_user.contracting:
                 raise serializers.ValidationError(_("Client table not found."))
             # Check if request user is agent without all estabs and can assign this client for a client_user
-            if req_user_is_agent_without_all_estabs(request_user) and not agent_has_access_to_this_client(request_user, value):
+            if self.context['request_user_is_agent_without_all_estabs'] and not agent_has_access_to_this_client(request_user, value):
                 raise serializers.ValidationError(_("You have no permission to assign this client to this client user.")) 
         return value
 
