@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from core.models import Client, ClientEstablishment, User
 from core.validators import agent_has_access_to_this_item_table, agent_has_access_to_this_price_table, req_user_is_agent_without_all_estabs
 from orders.facade import get_categories_by_agent, get_items_by_agent, get_orders_by_agent, get_price_tables_by_agent
-from orders.serializers import AssignPriceTableToClientEstablishment, ItemSerializer, CategorySerializer, ItemTableSerializer, OrderPOSTSerializer,OrderPUTSerializer, PriceTableSerializer, SpecificPriceItemSerializer
+from orders.serializers import AssignPriceTableToClientEstablishment, ItemSerializer, CategorySerializer, ItemTableSerializer, OrderDetailsSerializer, OrderPOSTSerializer,OrderPUTSerializer, PriceTableSerializer, SpecificPriceItemSerializer
 from orders.models import ItemTable, Order, Item, ItemCategory, PriceTable, PriceItem
 from rest_framework.views import APIView
 from rolepermissions.checkers import has_permission, has_role
@@ -425,13 +425,12 @@ class SpecificOrderView(APIView):
             if req_user_is_agent_without_all_estabs(request.user):
                 if order.establishment not in request.user.establishments.all(): #TODO get_or_none. Avoid search for all
                     return not_found_response(object_name=_('The order'))
-            serializer = OrderPOSTSerializer(order)
-            return Response(serializer.data)
+            return Response(OrderDetailsSerializer(order).data)
         return unauthorized_response
     @transaction.atomic
     @swagger_auto_schema(request_body=OrderPUTSerializer) 
     def put(self, request, establishment_compound_id, order_number):
-        if has_permission(request.user, 'update_order_status'):
+        if has_permission(request.user, 'update_order_status') or has_role(request.user, 'client_user'):
             if establishment_compound_id.split("#")[0] != request.user.contracting.contracting_code:
                 return not_found_response(object_name=_('The order'))
             try:
@@ -468,6 +467,7 @@ class SpecificOrderView(APIView):
                 return error_response(detail=_("You cannot delete an order with a status other than 'Canceled', 'Invoiced' or 'Delivered'"), 
                     status=status.HTTP_400_BAD_REQUEST)
             try:
+                order._request_user = request.user
                 order.delete()
                 return success_response(detail=_("Order deleted successfully"))
             except ProtectedError:

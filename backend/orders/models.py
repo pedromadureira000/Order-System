@@ -121,6 +121,9 @@ class Order(models.Model):
     def __str__(self):
         return f'Order N. {self.order_number}'
 
+    def get_status_verbose_name(self, status):
+        return [value[1] for value in Order._meta.get_field("status").choices if value[0] == status][0]
+
 class OrderedItem(models.Model):
     class Meta:
         verbose_name = _('ordered Item')
@@ -140,13 +143,11 @@ class OrderHistory(models.Model):
     type_choices = (
         ('I', _('Inclusion')),
         ('A', _('Alteration')),
-        ('E', _('Exclusion')),
-        ('P', _('Printed')),
         ('N', _('Note')),
     )
+    order = models.ForeignKey('Order', on_delete=models.CASCADE, verbose_name=_('order'), related_name='order_history')
     user = models.ForeignKey('core.User', on_delete=models.PROTECT, verbose_name=_('user'))
-    date = models.DateTimeField(auto_now_add=True, verbose_name=_('date'))
-    order = models.ForeignKey('Order', on_delete=models.CASCADE, verbose_name=_('order'))
     history_type = models.CharField(choices=type_choices, max_length=2,verbose_name=_('history type'))
-    history_description = models.CharField(blank=True, verbose_name=_('history description'),max_length=800)
+    history_description = models.CharField(verbose_name=_('history description'),max_length=800)
     agent_note = models.CharField(blank=True, verbose_name=_('agent note'), max_length=800)
+    date = models.DateTimeField(auto_now_add=True, verbose_name=_('date'))

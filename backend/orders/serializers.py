@@ -5,11 +5,11 @@ from core.facade import get_agent_companies, get_agent_item_tables, update_price
 from core.models import ClientEstablishment, Company, Establishment
 from core.validators import ClientCompanyFromCurrentUser, UserContracting, agent_has_access_to_this_item_table, agent_has_access_to_this_price_table, req_user_is_agent_without_all_estabs
 from orders.facade import update_ordered_items
-from orders.models import ItemTable, Order, Item, ItemCategory, OrderedItem, PriceTable, PriceItem
+from orders.models import ItemTable, Order, Item, ItemCategory, OrderedItem, PriceTable, PriceItem, OrderHistory
 from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import NotFound, PermissionDenied
-
-from orders.validators import non_negative_number, positive_number
+from orders.validators import non_negative_number, order_has_changed, positive_number
+import copy
 
 class ItemTableSerializer(serializers.ModelSerializer):
     contracting=serializers.HiddenField(default=UserContracting())
@@ -328,13 +328,17 @@ class OrderPUTSerializer(serializers.ModelSerializer):
     client_user = serializers.SlugRelatedField(slug_field='user_code', read_only=True)
     price_table = serializers.SlugRelatedField(slug_field='price_table_compound_id', read_only=True)
     ordered_items = OrderedItemSerializer(many=True)
-    agent_note = serializers.CharField(max_length=800, allow_blank=True, write_only=True)
+    agent_note = serializers.CharField(max_length=800, required=False, write_only=True)
     class Meta:
         model = Order
         fields = ['order_number', 'company', 'establishment', 'client', 'client_user', 'price_table', 'ordered_items', 
                 'order_amount', 'status', 'order_date', 'billing_date', 'invoice_number', 'note', 'agent_note']
         read_only_fields = ['order_number', 'company', 'establishment', 'client', 'client_user', 'price_table', 
-                'order_date', 'note', 'order_amount']
+                'order_date', 'order_amount']
+    def validate_note(self, value):
+        if not has_role(self.context['request'].user, 'client_user'): 
+            raise serializers.ValidationError(_("You cannot update 'note' field."))
+        return value
 
     def validate_status(self, value):
         # Client user can only update status from 1 to 2 or from 1 to 0 (typing to transferred or typing to canceled)
@@ -378,9 +382,12 @@ class OrderPUTSerializer(serializers.ModelSerializer):
         request_user = self.context['request'].user
         client = self.instance.client
         establishment = self.instance.establishment
-        status = attrs["status"]
+        status = attrs.get("status")
         invoice_number = attrs.get("invoice_number")
         billing_date = attrs.get("billing_date")
+        ordered_items = attrs.get('ordered_items')
+        if not order_has_changed(self.instance, attrs):
+            raise serializers.ValidationError(_("You have not changed any fields."))
         #Check if the request_user is active
         if request_user.status != 1:
             raise PermissionDenied(detail={"detail": [_("Your account is disabled.")]})
@@ -409,32 +416,53 @@ class OrderPUTSerializer(serializers.ModelSerializer):
             if self.instance.status != 1:
                 raise serializers.ValidationError(_("You cannot update this order."))
             # client user cannot remove all items from the order.
-            if attrs['ordered_items'] == []:
+            if ordered_items == []:
                 raise serializers.ValidationError(_("You must add at least one item to the order."))
-            available_items = client_establishment.price_table.items.all()
-            for ordered_item in attrs['ordered_items']:
-                if ordered_item['item'] not in available_items:
-                    raise serializers.ValidationError(_("You cannot add this item to the order."))
-                # Deny duplicate values
-                if ordered_item in check_for_duplicate_values:
-                    raise serializers.ValidationError(_("There are duplicate items."))
-                check_for_duplicate_values.append(ordered_item)
-                # Add unit_price to ordered_item
-                ordered_item['unit_price'] = client_establishment.price_table.price_items.get(item=ordered_item['item']).unit_price 
-                #TODO N+1 query
-                order_amount += ordered_item['unit_price'] * ordered_item['quantity'] 
-            attrs['order_amount'] = order_amount
+            if ordered_items:
+                available_items = client_establishment.price_table.items.all()
+                for ordered_item in ordered_items:
+                    if ordered_item['item'] not in available_items:
+                        raise serializers.ValidationError(_("You cannot add this item to the order."))
+                    # Deny duplicate values
+                    if ordered_item in check_for_duplicate_values:
+                        raise serializers.ValidationError(_("There are duplicate items."))
+                    check_for_duplicate_values.append(ordered_item)
+                    # Add unit_price to ordered_item
+                    ordered_item['unit_price'] = client_establishment.price_table.price_items.get(item=ordered_item['item']).unit_price 
+                    #TODO N+1 query
+                    order_amount += ordered_item['unit_price'] * ordered_item['quantity'] 
+                attrs['order_amount'] = order_amount
         return super().validate(attrs)
 
     def update(self, instance, validated_data):
         ordered_items = validated_data.get('ordered_items')
-        if ordered_items or ordered_items == []:
+        if ordered_items:
             ordered_items = validated_data.pop('ordered_items')  
+        # This is for accessing instance fields before they are updated 
+        instance._old_instance = copy.copy(instance)
+        instance._request_user = self.context['request'].user
+        
         if has_role(self.context['request'].user, 'client_user') and ordered_items:
             update_ordered_items(instance, ordered_items)
         return super().update(instance, validated_data)
 
-class OrderHistory(serializers.ModelSerializer):
+class OrderHistorySerializer(serializers.ModelSerializer):
+    user = serializers.SlugRelatedField(slug_field='user_code', read_only=True)
+    class Meta:
+        model = OrderHistory
+        fields = ['history_type', 'history_description', 'user', 'agent_note', 'date']
+
+class OrderDetailsSerializer(serializers.ModelSerializer):
+    company = serializers.SlugRelatedField(slug_field='company_compound_id', read_only=True)
+    establishment = serializers.SlugRelatedField(slug_field='establishment_compound_id', read_only=True)
+    client = serializers.SlugRelatedField(slug_field='client_compound_id', read_only=True)
+    client_user = serializers.SlugRelatedField(slug_field='user_code', read_only=True)
+    price_table = serializers.SlugRelatedField(slug_field='price_table_compound_id', read_only=True)
+    ordered_items = OrderedItemSerializer(many=True)
+    order_history = OrderHistorySerializer(many=True)
     class Meta:
         model = Order
-        fields = []
+        fields = ['order_number', 'company', 'establishment', 'client', 'client_user', 'price_table', 'ordered_items', 'order_amount', 'status', 
+                'order_date', 'billing_date', 'invoice_number', 'note', 'order_history']
+        read_only_fields = fields
+
