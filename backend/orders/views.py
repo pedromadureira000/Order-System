@@ -454,25 +454,25 @@ class SpecificOrderView(APIView):
                     return unknown_exception_response(action=_('update order by client user'))
             return serializer_invalid_response(serializer.errors)
         return unauthorized_response
-    @transaction.atomic
-    def delete(self, request, establishment_compound_id, order_number):
-        if has_permission(request.user, 'delete_order'):
-            if establishment_compound_id.split("#")[0] != request.user.contracting.contracting_code:
-                return not_found_response(object_name=_('The order'))
-            try:
-                order = Order.objects.get(establishment__establishment_compound_id=establishment_compound_id, order_number=order_number)
-            except Order.DoesNotExist:
-                return not_found_response(object_name=_('The order'))
-            if order.status not in [0, 4, 5]:
-                return error_response(detail=_("You cannot delete an order with a status other than 'Canceled', 'Invoiced' or 'Delivered'"), 
-                    status=status.HTTP_400_BAD_REQUEST)
-            try:
-                order._request_user = request.user
-                order.delete()
-                return success_response(detail=_("Order deleted successfully"))
-            except ProtectedError:
-                return protected_error_response(object_name=_('order'))
-            except Exception as error:
-                print(error)
-                return unknown_exception_response(action=_('delete order'))
-        return unauthorized_response
+    #  @transaction.atomic
+    #  def delete(self, request, establishment_compound_id, order_number):
+        #  if has_permission(request.user, 'delete_order'):
+            #  if establishment_compound_id.split("#")[0] != request.user.contracting.contracting_code:
+                #  return not_found_response(object_name=_('The order'))
+            #  try:
+                #  order = Order.objects.get(establishment__establishment_compound_id=establishment_compound_id, order_number=order_number)
+            #  except Order.DoesNotExist:
+                #  return not_found_response(object_name=_('The order'))
+            #  if order.status not in [0, 4, 5]:
+                #  return error_response(detail=_("You cannot delete an order with a status other than 'Canceled', 'Invoiced' or 'Delivered'"), 
+                    #  status=status.HTTP_400_BAD_REQUEST)
+            #  try:
+                #  order._request_user = request.user
+                #  order.delete()
+                #  return success_response(detail=_("Order deleted successfully"))
+            #  except ProtectedError:
+                #  return protected_error_response(object_name=_('order'))
+            #  except Exception as error:
+                #  print(error)
+                #  return unknown_exception_response(action=_('delete order'))
+        #  return unauthorized_response

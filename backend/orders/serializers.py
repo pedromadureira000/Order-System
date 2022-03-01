@@ -386,8 +386,6 @@ class OrderPUTSerializer(serializers.ModelSerializer):
         invoice_number = attrs.get("invoice_number")
         billing_date = attrs.get("billing_date")
         ordered_items = attrs.get('ordered_items')
-        if not order_has_changed(self.instance, attrs):
-            raise serializers.ValidationError(_("You have not changed any fields."))
         #Check if the request_user is active
         if request_user.status != 1:
             raise PermissionDenied(detail={"detail": [_("Your account is disabled.")]})
@@ -432,6 +430,8 @@ class OrderPUTSerializer(serializers.ModelSerializer):
                     #TODO N+1 query
                     order_amount += ordered_item['unit_price'] * ordered_item['quantity'] 
                 attrs['order_amount'] = order_amount
+        if not order_has_changed(self.instance, attrs):
+            raise serializers.ValidationError(_("You have not changed any fields."))
         return super().validate(attrs)
 
     def update(self, instance, validated_data):

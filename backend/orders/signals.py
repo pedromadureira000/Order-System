@@ -1,3 +1,4 @@
+from decimal import ROUND_DOWN, Decimal
 from django.db.models.signals import post_save, pre_save, post_delete
 from django.dispatch import receiver
 from settings import settings
@@ -41,7 +42,8 @@ def order_post_save(sender, instance, created=False, **kwargs):
             # Client User update OrderedItems
             if old_instance.order_amount != instance.order_amount:
                 old_amount = old_instance.order_amount
-                new_amount = instance.order_amount
+                # This is for reduce decimal places for 2
+                new_amount = instance.order_amount.quantize(Decimal('.01'), rounding=ROUND_DOWN)
                 order_history.history_description += _("\n- Order amount changed from '{old_amount}' to '{new_amount}'.").format(old_amount=old_amount, new_amount=new_amount)
             # Client User update update note
             if old_instance.note != instance.note:

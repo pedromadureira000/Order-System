@@ -7,7 +7,7 @@ from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from core.facade import get_all_client_users_by_agent, get_clients_by_agent
-from core.serializers import AdminAgentSerializer, AgentSerializer, ClientSerializer, ClientTableSerializer, ClientUserSerializer, CompanySerializer, ContractingSerializer, EstablishmentSerializer, OwnProfileSerializer, UserSerializer, SwaggerLoginSerializer, SwaggerProfilePasswordSerializer
+from core.serializers import AdminAgentSerializer, AgentSerializer, ClientSerializer, ClientTableSerializer, ClientUserSerializer, CompanySerializer, ContractingSerializer, ERPUserSerializer, EstablishmentSerializer, OwnProfileSerializer, UserSerializer, SwaggerLoginSerializer, SwaggerProfilePasswordSerializer
 from core.models import Client, ClientTable, Company, Contracting, Establishment, User
 from rolepermissions.checkers import has_permission, has_role
 from django.db import transaction
@@ -406,7 +406,7 @@ class Login(APIView):
             return success_response(detail=_("User is already authenticated"))
         serializer = SwaggerLoginSerializer(data=request.data)
         if serializer.is_valid():
-            user_code = serializer.validated_data["username" ] + "#" + serializer.validated_data["contracting_code"]
+            user_code = serializer.validated_data["contracting_code"] + "#" + serializer.validated_data["username" ]
             user = authenticate(username=user_code, password=serializer.validated_data["password"], request=request)
             if user is not None:
                 if user.status != 1:
@@ -454,9 +454,72 @@ class OwnProfileView(APIView):
                 return unknown_exception_response(action=_('update request user profile'))
         return serializer_invalid_response(serializer.errors)
 
+class ERPUserView(APIView):
+    def get(self, request):
+        if request.user.is_superuser:
+            erp_users = User.objects.filter(Q(groups__name='erp'))
+            return Response(ERPUserSerializer(erp_users, many=True).data)
+        return unauthorized_response
+    @swagger_auto_schema(request_body=ERPUserSerializer) 
+    @transaction.atomic
+    def post(self, request):
+        if request.user.is_superuser:
+            serializer = ERPUserSerializer(data=request.data, context={"request":request})
+            if serializer.is_valid():
+                try:
+                    serializer.save()
+                    return Response(serializer.data)
+                except Exception as error:
+                    transaction.rollback()
+                    print(error)
+                    return unknown_exception_response(action=_('create erp user'))
+            return serializer_invalid_response(serializer.errors)
+        return unauthorized_response
+
+class SpecificERPUser(APIView):
+    @swagger_auto_schema(request_body=ERPUserSerializer) 
+    @transaction.atomic
+    def put(self, request, contracting_code, username):
+        if request.user.is_superuser:
+            user_code = contracting_code + "#" + username
+            try: 
+                user = User.objects.get(user_code=user_code, groups__name='erp')
+            except User.DoesNotExist:
+                return not_found_response(object_name='The erp user')
+            serializer = ERPUserSerializer(user, data=request.data, partial=True,
+                    context={"request": request})
+            if serializer.is_valid():
+                try:
+                    serializer.save()
+                    return Response(serializer.data)
+                except Exception as error:
+                    transaction.rollback()
+                    print(error)
+                    #  raise error
+                    return unknown_exception_response(action=_('update erp user'))
+            return serializer_invalid_response(serializer.errors)
+        return unauthorized_response
+    @transaction.atomic  
+    def delete(self, request, contracting_code, username):
+        if request.user.is_superuser:
+            user_code = contracting_code + "#" + username
+            try:
+                user = User.objects.get(user_code=user_code, groups__name='erp')
+            except User.DoesNotExist:
+                return not_found_response(object_name=_('The erp user'))
+            try:
+                user.delete()
+                return success_response(detail=_("ERP user deleted successfully."))
+            except ProtectedError as er:
+                return protected_error_response(object_name=_('erp user'))
+            except Exception as error:
+                transaction.rollback()
+                print(error)
+                return unknown_exception_response(action=_('delete erp user'))
+        return unauthorized_response
+
 class AdminAgentView(APIView):
     def get(self, request):
-        from rest_framework.settings import api_settings
         if has_permission(request.user, 'get_admin_agents'):
             user = request.user
             agents = User.objects.filter(Q(contracting=user.contracting), Q(groups__name='admin_agent'))
@@ -481,11 +544,11 @@ class AdminAgentView(APIView):
 class SpecificAdminAgent(APIView):
     @swagger_auto_schema(request_body=AdminAgentSerializer) 
     @transaction.atomic
-    def put(self, request, username, contracting_code):
+    def put(self, request, contracting_code, username):
         if has_permission(request.user, 'update_admin_agent'):
             if contracting_code != request.user.contracting.contracting_code:
                 return not_found_response(object_name='The client')
-            user_code = username + "#" + contracting_code
+            user_code = contracting_code + "#" + username
             try: 
                 user = User.objects.get(user_code=user_code, groups__name='admin_agent')
             except User.DoesNotExist:
@@ -504,12 +567,12 @@ class SpecificAdminAgent(APIView):
             return serializer_invalid_response(serializer.errors)
         return unauthorized_response
     @transaction.atomic  
-    def delete(self, request, username, contracting_code):
+    def delete(self, request, contracting_code, username):
         if has_permission(request.user, 'delete_admin_agent'):
             # Contracting Ownership
             if contracting_code != request.user.contracting.contracting_code:
                 return not_found_response(object_name=_('The admin agent'))
-            user_code = username + "#" + contracting_code
+            user_code = contracting_code + "#" + username
             try:
                 user = User.objects.get(user_code=user_code, groups__name='admin_agent')
             except User.DoesNotExist:
@@ -551,11 +614,11 @@ class AgentView(APIView):
 class SpecificAgent(APIView):
     @swagger_auto_schema(request_body=AgentSerializer) 
     @transaction.atomic
-    def put(self, request, username, contracting_code):
+    def put(self, request, contracting_code, username):
         if has_permission(request.user, 'update_agent'):
             if contracting_code != request.user.contracting.contracting_code:
                 return not_found_response(object_name=_('The agent'))
-            user_code = username + "#" + contracting_code
+            user_code = contracting_code + "#" + username
             try: 
                 user = User.objects.get(user_code=user_code, groups__name='agent')
             except User.DoesNotExist:
@@ -574,12 +637,12 @@ class SpecificAgent(APIView):
             return serializer_invalid_response(serializer.errors)
         return unauthorized_response
     @transaction.atomic  
-    def delete(self, request, username, contracting_code):
+    def delete(self, request, contracting_code, username):
         if has_permission(request.user, 'delete_agent'):
             # Contracting Ownership
             if contracting_code != request.user.contracting.contracting_code:
                 return not_found_response(object_name=_('The agent'))
-            user_code = username + "#" + contracting_code
+            user_code = contracting_code + "#" + username
             try:
                 user = User.objects.get(user_code=user_code, groups__name='agent')
             except User.DoesNotExist:
@@ -625,11 +688,11 @@ class ClientUserView(APIView):
 class SpecificClientUser(APIView):
     @swagger_auto_schema(request_body=ClientUserSerializer) 
     @transaction.atomic
-    def put(self, request, username, contracting_code):
+    def put(self, request, contracting_code, username):
         if has_permission(request.user, 'update_client_user'):
             if contracting_code != request.user.contracting.contracting_code:
                 return not_found_response(object_name=_('The client user'))
-            user_code = username + "#" + contracting_code
+            user_code = contracting_code + "#" + username
             try:
                 user = User.objects.get(user_code=user_code, groups__name='client_user')
             except User.DoesNotExist:
@@ -651,11 +714,11 @@ class SpecificClientUser(APIView):
             return serializer_invalid_response(serializer.errors)
         return unauthorized_response
     @transaction.atomic  
-    def delete(self, request, username, contracting_code):
+    def delete(self, request, contracting_code, username):
         if has_permission(request.user, 'delete_client_user'):
             if contracting_code != request.user.contracting.contracting_code:
                 return not_found_response(object_name=_('The client user'))
-            user_code = username + "#" + contracting_code
+            user_code = contracting_code + "#" + username
             try:
                 client_user = User.objects.get(user_code=user_code, groups__name='client_user')
             except User.DoesNotExist:

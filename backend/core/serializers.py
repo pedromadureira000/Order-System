@@ -310,6 +310,22 @@ class OwnProfileSerializer(UserSerializer):
                 'roles', 'agent_establishments', 'permissions']
         read_only_fields = ['roles', 'permissions', 'client', 'username', 'agent_establishments', 'status']
 
+class ERPUserSerializer(UserSerializer):
+    def create(self, validated_data):  
+        username = validated_data['username']
+        contracting = validated_data['contracting']
+        password=validated_data['password']
+        email = validated_data['email']
+        user = User.objects.create_user(username, contracting, password,\
+            first_name=validated_data.get('first_name', ''),
+            last_name=validated_data.get('last_name', '' ),
+            email=email,
+            note=validated_data.get('note', ''),
+            status=1
+            )
+        assign_role(user, 'erp')
+        return user
+
 class AdminAgentSerializer(UserSerializer):
     def create(self, validated_data):  
         username = validated_data['username']

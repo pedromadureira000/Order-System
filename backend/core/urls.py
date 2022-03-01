@@ -1,8 +1,8 @@
 from django.urls import path
 from django.urls.conf import include
-#  from rest_framework.authtoken.views import obtain_auth_token
+from rest_framework.authtoken.views import obtain_auth_token
 from core.views import (
-    AdminAgentView, AgentView, ClientTableView, ClientUserView, ClientView, ContractingView, EstablishmentView, OwnProfileView, SpecificAdminAgent, SpecificAgent, SpecificClient, SpecificClientTable, SpecificClientUser, SpecificContracting, SpecificEstablishment, UpdateUserPassword, CompanyView, SpecificCompany, Login, Logout, GetCSRFToken
+    AdminAgentView, AgentView, ClientTableView, ClientUserView, ClientView, ContractingView, ERPUserView, EstablishmentView, OwnProfileView, SpecificAdminAgent, SpecificAgent, SpecificClient, SpecificClientTable, SpecificClientUser, SpecificContracting, SpecificERPUser, SpecificEstablishment, UpdateUserPassword, CompanyView, SpecificCompany, Login, Logout, GetCSRFToken
 )
 
 urlpatterns = [
@@ -23,12 +23,14 @@ urlpatterns = [
     path('client/<client_compound_id>', SpecificClient.as_view()),
     #User
     path('own_profile', OwnProfileView.as_view()),
+    path('erp_user', ERPUserView.as_view()),
+    path('erp_user/<contracting_code>/<username>', SpecificERPUser.as_view()),
     path('admin_agent', AdminAgentView.as_view()),
-    path('admin_agent/<username>/<contracting_code>', SpecificAdminAgent.as_view()),
+    path('admin_agent/<contracting_code>/<username>', SpecificAdminAgent.as_view()),
     path('agent', AgentView.as_view()),
-    path('agent/<username>/<contracting_code>', SpecificAgent.as_view()),
+    path('agent/<contracting_code>/<username>', SpecificAgent.as_view()),
     path('client_user', ClientUserView.as_view()),
-    path('client_user/<username>/<contracting_code>', SpecificClientUser.as_view()),
+    path('client_user/<contracting_code>/<username>', SpecificClientUser.as_view()),
     path('update_user_password', UpdateUserPassword.as_view()),
-    #  path('gettoken', obtain_auth_token, name='gettoken'),
+    path('gettoken', obtain_auth_token, name='gettoken'),
 ]

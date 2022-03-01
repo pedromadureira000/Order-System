@@ -20,7 +20,6 @@ class Erp(AbstractUserRole):
         "update_client_table": True,
         "get_client_tables": True,
         "delete_client_table": True,
-        "get_transfered_orders": True, #TODO do it is not the same as filtred 'get_orders' ?
         "create_or_update_price_item": True,
         #AdminAgent
         "create_admin_agent": True,
@@ -37,9 +36,6 @@ class Erp(AbstractUserRole):
         "create_client": True,
         "get_clients": True,
         "update_client": True,
-            #  "add_establishment_to_client": True,
-            #  "remove_establishment_from_client": True,
-            #  "assign_pricetable_to_client": True,
         "delete_client": True,
         "create_client_user": True,
         "get_client_users": True,
@@ -104,10 +100,6 @@ class Agent(AbstractUserRole):
         "create_client": False,
         "get_clients": False,
         "update_client": False,
-            #  "add_establishment_to_client": False,
-            #  "get_client_establishments": False,
-            #  "remove_establishment_from_client": False,
-            #  "assign_pricetable_to_client": False,
         "delete_client": False,
         "create_client_user": False,
         "get_client_users": False,
