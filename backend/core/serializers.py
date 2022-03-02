@@ -117,17 +117,25 @@ class ClientTableSerializer(serializers.ModelSerializer):
 
 class ClientEstablishmentToClientSerializer(serializers.ModelSerializer):
     establishment = serializers.SlugRelatedField(slug_field='establishment_compound_id', queryset=Establishment.objects.all())
-    price_table = serializers.SlugRelatedField(slug_field='price_table_compound_id', read_only=True)
+    price_table = serializers.SlugRelatedField(slug_field='price_table_compound_id', queryset=PriceTable.objects.all())
     class Meta:
         model=ClientEstablishment
         fields = ['establishment', 'price_table']
-        read_only_fields = ['price_table']
 
     def validate_establishment(self, value):
         # Contracting ownership
         if value.company.contracting != self.context["request"].user.contracting:
             raise serializers.ValidationError(_("Establishment not found."))
         return value
+
+    def validate(self, attrs):
+        price_table = attrs.get('price_table')
+        establishment = attrs['establishment']
+        if price_table:
+            # validate if price_table belongs to the same company as the establishment
+            if price_table.company != establishment.company:
+                raise serializers.ValidationError(_("You can't add this price table to this 'client_establishment'."))
+        return super().validate(attrs)
 
 class ClientSerializer(serializers.ModelSerializer):
     client_establishments = ClientEstablishmentToClientSerializer(many=True)
@@ -193,7 +201,7 @@ class ClientSerializer(serializers.ModelSerializer):
         client_establishments_list = []
         for client_establishment in validated_data['client_establishments']:
             client_establishments_list.append(ClientEstablishment(establishment=client_establishment['establishment'], 
-                 client=client))
+                 client=client, price_table=client_establishment['price_table']))
         client.client_establishments.bulk_create(client_establishments_list)
         return client
 
@@ -311,6 +319,12 @@ class OwnProfileSerializer(UserSerializer):
         read_only_fields = ['roles', 'permissions', 'client', 'username', 'agent_establishments', 'status']
 
 class ERPUserSerializer(UserSerializer):
+    #overwrite UserSerializer contracting field
+    contracting = serializers.SlugRelatedField(slug_field='contracting_code', queryset=Contracting.objects.all())
+    #overwrite UserSerializer validation
+    def validate_contracting(self, value):
+        return value
+
     def create(self, validated_data):  
         username = validated_data['username']
         contracting = validated_data['contracting']
@@ -325,6 +339,11 @@ class ERPUserSerializer(UserSerializer):
             )
         assign_role(user, 'erp')
         return user
+
+    def update(self, instance, validated_data):
+        # prevent change of contracting
+        validated_data.pop('contracting') if validated_data.get('contracting') else None
+        return super().update(instance, validated_data)
 
 class AdminAgentSerializer(UserSerializer):
     def create(self, validated_data):  
@@ -418,6 +437,9 @@ class ClientUserSerializer(UserSerializer):
             # Check if request user is agent without all estabs and can assign this client for a client_user
             if self.context['request_user_is_agent_without_all_estabs'] and not agent_has_access_to_this_client(request_user, value):
                 raise serializers.ValidationError(_("You have no permission to assign this client to this client user.")) 
+            # Check if there is already an client user for this client
+            if value.user_set.exists():
+                raise serializers.ValidationError(_("You cannot create a client user for this client, because it already exists.")) 
         return value
 
     def create(self, validated_data):  

@@ -42,12 +42,10 @@ if settings.DEBUG:
        public=True, #if False, includes only endpoints the current user has access to
        permission_classes=(permissions.AllowAny,), 
     )
-    #Swagger
     urlpatterns += [
-       #  url(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-       #  url(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-       #  url(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-       #  path('swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-       path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-       path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+        #Swagger
+        path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+        path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+        # Debug Toolbar
+        path('__debug__/', include('debug_toolbar.urls')),
     ]

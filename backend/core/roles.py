@@ -20,7 +20,7 @@ class Erp(AbstractUserRole):
         "update_client_table": True,
         "get_client_tables": True,
         "delete_client_table": True,
-        "create_or_update_price_item": True,
+        "create_or_update_price_item": True, #only ERP have it
         #AdminAgent
         "create_admin_agent": True,
         "delete_admin_agent": True,
@@ -32,7 +32,7 @@ class Erp(AbstractUserRole):
         "delete_agent": True,
         "delete_order": True,
         # Agent
-        "access_all_establishments": True,
+        "access_all_establishments": True, #only agent use it
         "create_client": True,
         "get_clients": True,
         "update_client": True,
@@ -54,7 +54,7 @@ class Erp(AbstractUserRole):
         "update_price_table": True,
         "delete_price_table": True,
         "get_orders":True,
-        "update_order_status": True,
+        "update_order_status": True, #same as Update order?
     }
 
 class AdminAgent(AbstractUserRole):
@@ -123,9 +123,9 @@ class Agent(AbstractUserRole):
 
 class ClientUser(AbstractUserRole):
     available_permissions = {
-        "get_orders": True,
-        "make_order": True,
-        "edit_order_in_typing": True,
-        "save_order_as_template": True,
-        "transfer_order": True
+        "get_orders": True, #used
+        "make_order": True, #used, but useless
+        "edit_order_in_typing": True, #not used
+        "save_order_as_template": True, # not used
+        "transfer_order": True #not used
     }

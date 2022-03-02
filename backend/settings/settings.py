@@ -137,8 +137,18 @@ else:
                'MAILGUN_SENDER_DOMAIN': config('MAILGUN_SENDER_DOMAIN'),
                }
 
-# Sentry
+# Debug tool bar
+if DEBUG:
+    INSTALLED_APPS.append("debug_toolbar")
+    MIDDLEWARE.insert(1, "debug_toolbar.middleware.DebugToolbarMiddleware")
+    DEBUG_TOOLBAR_CONFIG = {
+        "SHOW_TOOLBAR_CALLBACK": lambda request: True,
+    }
+    import socket 
+    hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+    INTERNAL_IPS = [ip[:-1] + '1' for ip in ips] + ['127.0.0.1', '10.0.2.2']
 
+# Sentry
 SENTRY_DSN = config('SENTRY_DSN', default=None)
 if SENTRY_DSN:
     sentry_sdk.init(

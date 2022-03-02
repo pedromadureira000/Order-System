@@ -108,8 +108,7 @@ class ClientEstablishment(models.Model):
         constraints = [UniqueConstraint(fields=['client', 'establishment'], name='ClientEstablishment compound primary key')]
     establishment = models.ForeignKey('Establishment',on_delete=models.CASCADE, verbose_name=_('establishment')) 
     client = models.ForeignKey('Client',on_delete=models.CASCADE, related_name='client_establishments', verbose_name=_('client'))
-    price_table = models.ForeignKey('orders.PriceTable', blank=True, null=True, on_delete=models.SET_NULL, 
-            verbose_name=_('price table'))
+    price_table = models.ForeignKey('orders.PriceTable', null=True, on_delete=models.SET_NULL, verbose_name=_('price table'))
 
 class AgentEstablishment(models.Model):
     class Meta:

@@ -38,7 +38,6 @@ def unknown_exception_response(action):
     return Response({"error":[_("Something went wrong when trying to {action}.").format(action=action)]}, 
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
 #------------------------/ Organizations Views
 
 class ContractingView(APIView):
@@ -325,7 +324,9 @@ class ClientView(APIView):
     def post(self, request):
             user = request.user
             if has_permission(user, 'create_client'):
-                serializer = ClientSerializer(data=request.data, context={"request":request})
+                request_user_is_agent_without_all_estabs = req_user_is_agent_without_all_estabs(request.user)
+                serializer = ClientSerializer(data=request.data, context={"request":request,
+                    "request_user_is_agent_without_all_estabs": request_user_is_agent_without_all_estabs})
                 if serializer.is_valid():
                     try:
                         serializer.save()
@@ -354,7 +355,7 @@ class SpecificClient(APIView):
             request_user_is_agent_without_all_estabs = req_user_is_agent_without_all_estabs(request.user)
             if request_user_is_agent_without_all_estabs and not agent_has_access_to_this_client(request.user, client):
                 return not_found_response(object_name=_('The client'))
-            serializer = ClientSerializer(client, data=request.data, partial=True, context={"request":request, 
+            serializer = ClientSerializer(client, data=request.data, context={"request":request, 
                 "request_user_is_agent_without_all_estabs": request_user_is_agent_without_all_estabs})
             if serializer.is_valid():
                 try:
@@ -672,7 +673,9 @@ class ClientUserView(APIView):
     @transaction.atomic
     def post(self, request):
         if has_permission(request.user, 'create_client_user'):
-                serializer = ClientUserSerializer(data=request.data, context={"request":request})
+                request_user_is_agent_without_all_estabs = req_user_is_agent_without_all_estabs(request.user)
+                serializer = ClientUserSerializer(data=request.data, context={"request":request,
+                    "request_user_is_agent_without_all_estabs": request_user_is_agent_without_all_estabs})
                 #  if serializer.is_valid(raise_exception=True):
                 if serializer.is_valid():
                     try:

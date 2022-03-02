@@ -41,20 +41,22 @@ def get_clients_by_agent(user):
 
 #------------------------------------/Reverse Foreign key Batch Updates/---------------------------------------------------
 def update_client_establishments(client, client_establishments):
-    client_establishments_set = {client_estab['establishment'].establishment_compound_id for client_estab in client_establishments}
+    client_establishments_set = {(client_estab['establishment'].establishment_compound_id, client_estab['price_table'].price_table_compound_id if client_estab['price_table'] else None) for client_estab in client_establishments}
     current_client_establishments = ClientEstablishment.objects.filter(client=client)
-    current_client_establishments_set = set(current_client_establishments.values_list('establishment__establishment_compound_id', flat=True))
+    current_client_establishments_set = set(current_client_establishments.values_list('establishment__establishment_compound_id', 'price_table__price_table_compound_id'))
     intersection = client_establishments_set.intersection(current_client_establishments_set)
-    to_delete = current_client_establishments_set.difference(intersection)
     to_create = client_establishments_set.difference(intersection)
-    # Delete
-    delete_it = current_client_establishments.filter(establishment__establishment_compound_id__in=to_delete)
-    delete_it.delete()
-    # Create 
-    establishments_to_create = list(filter(lambda estab: estab["establishment"].establishment_compound_id in to_create, client_establishments))
-    client_establishments_to_create = [ClientEstablishment(establishment=obj['establishment'], client=client) for \
-            obj in establishments_to_create]
-    client.client_establishments.bulk_create(client_establishments_to_create)
+    to_delete = current_client_establishments_set.difference(intersection)
+    to_delete_establishment_list = [cli_estab[0] for cli_estab in to_delete]
+    # Delete client estabs
+    current_client_establishments.filter(establishment__establishment_compound_id__in=to_delete_establishment_list).delete()
+    # List the ClientEstablishments to be created from the serialized 'client_establishments'. 
+    client_establishments_to_create = list(filter(lambda cli_estab: (cli_estab['establishment'].establishment_compound_id, cli_estab['price_table'].price_table_compound_id if cli_estab['price_table'] else None) in to_create, client_establishments))
+    # Create client estabs
+    if client_establishments_to_create:
+        client_establishments_to_create = [ClientEstablishment(client=client, establishment=item['establishment'], 
+            price_table=item['price_table']) for item in client_establishments_to_create]
+        client.client_establishments.bulk_create(client_establishments_to_create)
 
 def update_agent_permissions(agent, agent_permissions):
     agent_permissions = set(agent_permissions)

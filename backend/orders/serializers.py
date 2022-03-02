@@ -128,7 +128,15 @@ class ForTablePriceItemSerializer(serializers.ModelSerializer):
             raise NotFound(detail={"detail": [_("Item with id '{item_id}' was not found.").format(item_id=item_id)]})
         return value
 
-class PriceTableSerializer(serializers.ModelSerializer):
+class PriceTableGetSerializer(serializers.ModelSerializer):
+    company = serializers.SlugRelatedField(slug_field='company_compound_id', read_only=True)
+
+    class Meta:
+        model = PriceTable
+        fields = ['price_table_compound_id', 'company', 'table_code', 'description', 'note']
+        read_only_fields = fields
+
+class PriceTablePOSTSerializer(serializers.ModelSerializer):
     price_items = ForTablePriceItemSerializer(many=True)
     company = serializers.SlugRelatedField(slug_field='company_compound_id', queryset=Company.objects.all())
 
@@ -147,25 +155,21 @@ class PriceTableSerializer(serializers.ModelSerializer):
         if price_items or price_items == []:
             for price_item in price_items:
                 # Check if the item belongs to the company's item table
-                if self.context['request'].method == 'POST':
-                    if price_item['item'].item_table != company.item_table:
-                        raise NotFound(detail={"detail": [_("The item must belong to the company that owns the price table.")]})
-                if self.context['request'].method == 'PUT':
-                    if price_item['item'].item_table != self.instance.company.item_table:
-                        raise NotFound(detail={"detail": [_("The item must belong to the company that owns the price table.")]})
+                if price_item['item'].item_table != company.item_table:
+                    raise NotFound(detail={"detail": [_("The item must belong to the company that owns the price table.")]})
                 # Deny duplicate values
                 if price_item in check_for_duplicate_values:
                     raise serializers.ValidationError(_("There are duplicate price items."))
                 check_for_duplicate_values.append(price_item)
 
         #---------------------------/ Company
-        if self.context['request'].method == 'POST':
-            # Company is from the same contracting that request_user
-            if company.contracting != request_user.contracting:
-                raise NotFound(detail={"detail": [_("Company not found.")]})
-            # User is agent without all estabs and don't have access to this company
-            if self.context['req_user_is_agent_without_all_estabs'] and company not in get_agent_companies(request_user):
-                raise NotFound(detail={"detail": [_("Company not found.")]})
+        # Company is from the same contracting that request_user
+        if company.contracting != request_user.contracting:
+            raise NotFound(detail={"detail": [_("Company not found.")]})
+        # User is agent without all estabs and don't have access to this company
+        if self.context['req_user_is_agent_without_all_estabs'] and company not in get_agent_companies(request_user):
+            raise NotFound(detail={"detail": [_("Company not found.")]})
+        return super().validate(attrs)
 
     def create(self, validated_data):
         price_items = validated_data.pop('price_items')
@@ -178,6 +182,29 @@ class PriceTableSerializer(serializers.ModelSerializer):
             price_items_list.append(PriceItem(item=price_item['item'], unit_price=price_item['unit_price'], price_table=price_table))
         price_table.price_items.bulk_create(price_items_list)
         return price_table
+
+class SpecificPriceTablePUTSerializer(serializers.ModelSerializer):
+    price_items = ForTablePriceItemSerializer(many=True)
+    company = serializers.SlugRelatedField(slug_field='company_compound_id', read_only=True)
+
+    class Meta:
+        model = PriceTable
+        fields = ['price_table_compound_id', 'company', 'price_items', 'table_code', 'description', 'note']
+        read_only_fields = ['price_table_compound_id', 'company', 'table_code']
+
+    def validate(self, attrs):
+        price_items = attrs.get('price_items')
+        check_for_duplicate_values = []
+        if price_items or price_items == []:
+            for price_item in price_items:
+                # Check if the item belongs to the company's item table
+                if price_item['item'].item_table != self.instance.company.item_table:
+                    raise NotFound(detail={"detail": [_("The item must belong to the company that owns the price table.")]})
+                # Deny duplicate values
+                if price_item in check_for_duplicate_values:
+                    raise serializers.ValidationError(_("There are duplicate price items."))
+                check_for_duplicate_values.append(price_item)
+        return super().validate(attrs)
 
     def update(self, instance, validated_data):
         if validated_data.get('table_code'): validated_data.pop('table_code')
@@ -285,7 +312,7 @@ class OrderPOSTSerializer(serializers.ModelSerializer):
             raise PermissionDenied(detail={"detail": [_("The establishment is disabled.")]})
         attrs['price_table'] = client_establishment.price_table
         # Check if item is available for this client by price table
-        available_items = client_establishment.price_table.items.all()
+        available_items = client_establishment.price_table.items.filter(status=1)
         check_for_duplicate_values = []
         order_amount = 0
         if not attrs['ordered_items']:
@@ -417,7 +444,7 @@ class OrderPUTSerializer(serializers.ModelSerializer):
             if ordered_items == []:
                 raise serializers.ValidationError(_("You must add at least one item to the order."))
             if ordered_items:
-                available_items = client_establishment.price_table.items.all()
+                available_items = client_establishment.price_table.items.filter(status=1)
                 for ordered_item in ordered_items:
                     if ordered_item['item'] not in available_items:
                         raise serializers.ValidationError(_("You cannot add this item to the order."))

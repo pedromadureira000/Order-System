@@ -1,9 +1,10 @@
 from django.urls import path
 from orders.views import (
     # Item
-    AssignPriceTableView,
     ItemTableView,
     ItemView,
+    PriceItemForAgentsView,
+    PriceItemView,
     SpecificItemTable,
     SpecificItemView,
 
@@ -35,7 +36,8 @@ urlpatterns = [
     path('item/<item_compound_id>', SpecificItemView.as_view()),
     path('pricetable', PriceTableView.as_view()),
     path('pricetable/<price_table_compound_id>', SpecificPriceTableView.as_view()),
-    path('assign_pricetable/<client_compound_id>/<establishment_compound_id>', AssignPriceTableView.as_view()),
+    path('get_price_items/<establishment_compound_id>', PriceItemView.as_view()),
+    path('get_price_items_for_agents/<price_table_compound_id>', PriceItemForAgentsView.as_view()),
     path('priceitem/<price_table_compound_id>/<item_compound_id>', SpecificPriceItemView.as_view()),
     path('order', OrderView.as_view()),
     path('order/<establishment_compound_id>/<order_number>', SpecificOrderView.as_view()),

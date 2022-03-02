@@ -30,6 +30,7 @@ django-extensions = "*"
 ipython = "*"
 neovim = "*"
 faker = "*"
+django-debug-toolbar = "*"
 
 [requires]
 python_version = "3.9"

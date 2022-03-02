@@ -145,8 +145,8 @@ class OrderHistory(models.Model):
         ('A', _('Alteration')),
         ('N', _('Note')),
     )
-    order = models.ForeignKey('Order', on_delete=models.CASCADE, verbose_name=_('order'), related_name='order_history')
-    user = models.ForeignKey('core.User', on_delete=models.PROTECT, verbose_name=_('user'))
+    order = models.ForeignKey('Order', on_delete=models.DO_NOTHING, verbose_name=_('order'), related_name='order_history')
+    user = models.ForeignKey('core.User', on_delete=models.DO_NOTHING, verbose_name=_('user'))
     history_type = models.CharField(choices=type_choices, max_length=2,verbose_name=_('history type'))
     history_description = models.CharField(verbose_name=_('history description'),max_length=800)
     agent_note = models.CharField(blank=True, verbose_name=_('agent note'), max_length=800)
