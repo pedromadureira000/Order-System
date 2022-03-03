@@ -1,14 +1,14 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from rolepermissions.checkers import has_role
-from core.facade import get_agent_companies, get_agent_item_tables, update_price_items_from_price_table
+from core.facade import get_agent_companies, update_price_items_from_price_table
 from core.models import ClientEstablishment, Company, Establishment
-from core.validators import ClientCompanyFromCurrentUser, UserContracting, agent_has_access_to_this_item_table, agent_has_access_to_this_price_table, req_user_is_agent_without_all_estabs
+from core.validators import UserContracting, agent_has_access_to_this_item_table
 from orders.facade import update_ordered_items
 from orders.models import ItemTable, Order, Item, ItemCategory, OrderedItem, PriceTable, PriceItem, OrderHistory
 from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import NotFound, PermissionDenied
-from orders.validators import non_negative_number, order_has_changed, positive_number
+from orders.validators import order_has_changed, positive_number
 import copy
 
 class ItemTableSerializer(serializers.ModelSerializer):
@@ -115,6 +115,7 @@ class ItemSerializer(serializers.ModelSerializer):
 
 class ForTablePriceItemSerializer(serializers.ModelSerializer):
     item = serializers.SlugRelatedField(slug_field='item_compound_id', queryset=Item.objects.all())
+    unit_price = serializers.DecimalField(max_digits=11, decimal_places=2,required=True, validators=[positive_number])
 
     class Meta:
         model = PriceItem
@@ -215,34 +216,10 @@ class SpecificPriceTablePUTSerializer(serializers.ModelSerializer):
             update_price_items_from_price_table(instance, price_items)
         return super().update(instance, validated_data)
 
-class AssignPriceTableToClientEstablishment(serializers.ModelSerializer):
-    establishment = serializers.SlugRelatedField(slug_field='establishment_compound_id', read_only=True)
-    client = serializers.SlugRelatedField(slug_field='client_compound_id', read_only=True)
-    price_table = serializers.SlugRelatedField(slug_field='price_table_compound_id', queryset=PriceTable.objects.all(), 
-            allow_null=True)
-    class Meta:
-        model=ClientEstablishment
-        fields = ['establishment', 'price_table', 'client']
-        validators = [UniqueTogetherValidator(queryset=ClientEstablishment.objects.all(), fields=['client', 'establishment'], 
-            message="The field 'establishment' must be unique per client.")]
-
-    #OBS: if the agent without all estabs can't access to an establishment this goes for the 'price_table' too.
-    def validate(self, attrs):
-        price_table = attrs.get('price_table')
-        establishment = self.instance.establishment
-        if price_table:
-            # validate if price_table belongs to the same company as the establishment
-            if price_table.company != establishment.company:
-                raise serializers.ValidationError(_("You can't add this price table to this 'client_establishment'."))
-        return super().validate(attrs)
-
-    def update(self, instance, validated_data):
-        return super().update(instance, validated_data)
-
 class SpecificPriceItemSerializer(serializers.ModelSerializer):
     item = serializers.SlugRelatedField(slug_field='item_compound_id', read_only=True)
     price_table = serializers.SlugRelatedField(slug_field='price_table_compound_id', read_only=True)
-    unit_price = serializers.DecimalField(max_digits=11, decimal_places=2,required=True, validators=[non_negative_number])
+    unit_price = serializers.DecimalField(max_digits=11, decimal_places=2,required=True, validators=[positive_number])
     class Meta:
         model = PriceItem
         fields = ['item', 'price_table', 'unit_price', 'last_modified', 'creation_date']
@@ -266,9 +243,9 @@ class OrderPOSTSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ['order_number', 'company', 'establishment', 'client', 'client_user', 'price_table', 'ordered_items', 'order_amount', 'status', 
-                'order_date', 'billing_date', 'invoice_number', 'note']
+                'order_date', 'invoicing_date', 'invoice_number', 'note']
         read_only_fields = ['order_number', 'company', 'client', 'client_user', 'price_table', 'order_date',
-               'order_amount', 'invoice_number', 'billing_date']
+               'order_amount', 'invoice_number', 'invoicing_date']
 
     def validate_status(self, value):
         # An order can be created with 'typing' or 'transferred' status
@@ -359,7 +336,7 @@ class OrderPUTSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ['order_number', 'company', 'establishment', 'client', 'client_user', 'price_table', 'ordered_items', 
-                'order_amount', 'status', 'order_date', 'billing_date', 'invoice_number', 'note', 'agent_note']
+                'order_amount', 'status', 'order_date', 'invoicing_date', 'invoice_number', 'note', 'agent_note']
         read_only_fields = ['order_number', 'company', 'establishment', 'client', 'client_user', 'price_table', 
                 'order_date', 'order_amount']
     def validate_note(self, value):
@@ -400,9 +377,9 @@ class OrderPUTSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(_("You cannot send the 'invoice number' field."))
         return value
 
-    def validate_billing_date(self, value):
+    def validate_invoicing_date(self, value):
         if not has_role(self.context['request'].user, 'erp'):
-            raise serializers.ValidationError(_("You cannot send the 'billing date' field."))
+            raise serializers.ValidationError(_("You cannot send the 'invoicing date' field."))
         return value
 
     def validate(self, attrs):
@@ -411,7 +388,7 @@ class OrderPUTSerializer(serializers.ModelSerializer):
         establishment = self.instance.establishment
         status = attrs.get("status")
         invoice_number = attrs.get("invoice_number")
-        billing_date = attrs.get("billing_date")
+        invoicing_date = attrs.get("invoicing_date")
         ordered_items = attrs.get('ordered_items')
         #Check if the request_user is active
         if request_user.status != 1:
@@ -421,16 +398,16 @@ class OrderPUTSerializer(serializers.ModelSerializer):
             raise PermissionDenied(detail={"detail": [_("Your contracting is disabled.")]})
         # Deny setting wrong invoice_number
         if (invoice_number and status != 4) or (invoice_number and status == 4 and self.instance.status != 3):
-            raise serializers.ValidationError(_("You can only add invoice number when order status has changed from 'Registered' to 'Billed'."))
-        # Deny setting wrong billing_date
-        if (billing_date and status != 4) or (billing_date and status == 4 and self.instance.status != 3):
-            raise serializers.ValidationError(_("You can only add billing date when order status has changed from 'Registered 'to 'Billed'."))
-        # Force setting invoice_number when status changes from 'Registered' to 'Billed'.
+            raise serializers.ValidationError(_("You can only add invoice number when order status has changed from 'Registered' to 'Invoiced'."))
+        # Deny setting wrong invoicing_date
+        if (invoicing_date and status != 4) or (invoicing_date and status == 4 and self.instance.status != 3):
+            raise serializers.ValidationError(_("You can only add invoicing date when order status has changed from 'Registered 'to 'Invoiced'."))
+        # Force setting invoice_number when status changes from 'Registered' to 'Invoiced'.
         if status == 4 and self.instance.status == 3 and not invoice_number:
-            raise serializers.ValidationError(_("You need send invoice number when order status has changed from 'Registered' to 'Billed'."))
-        # Force setting billing_date when status changes from 'Registered' to 'Billed'.
-        if status == 4 and self.instance.status == 3 and not billing_date:
-            raise serializers.ValidationError(_("You need send billing date when order status has changed from 'Registered 'to 'Billed'."))
+            raise serializers.ValidationError(_("You need send invoice number when order status has changed from 'Registered' to 'Invoiced'."))
+        # Force setting invoicing_date when status changes from 'Registered' to 'Invoiced'.
+        if status == 4 and self.instance.status == 3 and not invoicing_date:
+            raise serializers.ValidationError(_("You need send invoicing date when order status has changed from 'Registered 'to 'Invoiced'."))
         if has_role(request_user, 'client_user'):
             try:
                 client_establishment = ClientEstablishment.objects.get(client=client, establishment=establishment)
@@ -490,6 +467,6 @@ class OrderDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ['order_number', 'company', 'establishment', 'client', 'client_user', 'price_table', 'ordered_items', 'order_amount', 'status', 
-                'order_date', 'billing_date', 'invoice_number', 'note', 'order_history']
+                'order_date', 'invoicing_date', 'invoice_number', 'note', 'order_history']
         read_only_fields = fields
 

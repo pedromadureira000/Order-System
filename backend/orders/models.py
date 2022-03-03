@@ -94,7 +94,7 @@ class Order(models.Model):
         (1, _('Typing')),
         (2, _('Transferred')),
         (3, _('Registered')),
-        (4, _('Billed')),
+        (4, _('Invoiced')),
         (5, _('Delivered')),
         (0, _('Canceled'))
     )
@@ -113,7 +113,7 @@ class Order(models.Model):
     items = models.ManyToManyField(Item, through='OrderedItem', verbose_name=_('items'))
     status = models.IntegerField(choices=status_choices)
     order_date = models.DateTimeField(auto_now_add=True, verbose_name=_('order date'))
-    billing_date = models.DateTimeField(blank=True, null=True, verbose_name=_('billing date'))
+    invoicing_date = models.DateTimeField(blank=True, null=True, verbose_name=_('invoicing date'))
     invoice_number = models.CharField(max_length=9, blank=True, verbose_name=_('invoice number'))
     order_amount = models.DecimalField(max_digits=11, decimal_places=2, verbose_name=_('order amount'))
     note = models.CharField(blank=True, verbose_name=_('note'), max_length=800)

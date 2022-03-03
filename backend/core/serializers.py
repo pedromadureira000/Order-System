@@ -6,7 +6,7 @@ from core.facade import update_agent_establishments, update_agent_permissions, u
 from core.models import User
 from rolepermissions.roles import get_user_roles
 from rolepermissions.permissions import available_perm_status
-from core.validators import UserContracting, agent_has_access_to_this_client_user, agent_has_permission_to_assign_this_client_table_to_client, agent_has_permission_to_assign_this_establishment_to_client, agent_permissions_exist_and_does_not_have_duplicates, contracting_can_create_user, agent_has_access_to_this_client, req_user_is_agent_without_all_estabs
+from core.validators import UserContracting, agent_has_permission_to_assign_this_client_table_to_client, agent_has_permission_to_assign_this_establishment_to_client, agent_permissions_exist_and_does_not_have_duplicates, contracting_can_create_user, agent_has_access_to_this_client 
 from orders.models import ItemTable, PriceTable
 from .models import Client, ClientEstablishment, ClientTable, Company, Contracting, AgentEstablishment, Establishment
 from rolepermissions.roles import assign_role
@@ -61,8 +61,7 @@ class CompanySerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         # Not allow to update this fields
-        validated_data['company_code'] = instance.company_code
-        validated_data['contracting'] = instance.contracting
+        if validated_data.get('company_code'): validated_data.pop('company_code')
         return super().update(instance, validated_data)
 
 class EstablishmentSerializer(serializers.ModelSerializer):

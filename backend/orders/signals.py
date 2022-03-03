@@ -9,9 +9,9 @@ from orders.models import Order, OrderHistory
 def order_pre_save(sender, instance, **kwargs):
     if instance.id:
         old_instance = getattr(instance, '_old_instance', None)
-        # Clear invoice_number and billing_date if status is coming back from 'Registered 'to 'Billed'.
+        # Clear invoice_number and invoicing_date if status is coming back from 'Registered 'to 'Invoiced'.
         if instance.status == 4 and old_instance.status == 3:
-            instance.billing_date = None
+            instance.invoicing_date = None
             instance.invoice_number = ''
 
 

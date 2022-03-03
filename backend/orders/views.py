@@ -309,8 +309,7 @@ class SpecificPriceTableView(APIView):
                 return unknown_exception_response(action=_('delete price table'))
         return unauthorized_response
 
-class PriceItemView(APIView):
-    #Get Client user items for his client_establishment 
+class GetPriceItemByClientUserView(APIView):
     def get(self, request, establishment_compound_id):
         if has_role(request.user, 'client_user'):
             try:
@@ -335,6 +334,10 @@ class PriceItemForAgentsView(APIView):
                 price_items = PriceItem.objects.filter(price_table=price_table)
             except PriceItem.DoesNotExist:
                 return not_found_response(object_name=_('The price items'))
+            if req_user_is_agent_without_all_estabs(request.user):
+                agent_price_tables = get_price_tables_by_agent(request.user)
+                if not price_table in agent_price_tables:
+                    return not_found_response(object_name=_('The price table'))
             return Response(ForTablePriceItemSerializer(price_items, many=True).data)
         return unauthorized_response
 
@@ -380,12 +383,33 @@ class SpecificPriceItemView(APIView):
             if serializer.is_valid():
                 try:
                     serializer.save()
-                    return Response(serializer.data)
+                    return Response(_('Price item updated successfully.'))
                 except Exception as error:
                     transaction.rollback()
                     print(error)
                     return unknown_exception_response(action=_('create or update price item'))
             return serializer_invalid_response(serializer.errors)
+        return unauthorized_response
+    @transaction.atomic
+    def delete(self, request, price_table_compound_id, item_compound_id):
+        if has_permission(request.user, 'create_or_update_price_item'):
+            if price_table_compound_id.split("#")[0] != request.user.contracting.contracting_code:
+                return not_found_response(object_name=_('The price table'))
+            if item_compound_id.split("#")[0] != request.user.contracting.contracting_code:
+                return not_found_response(object_name=_('The item'))
+            try:
+                instance = PriceItem.objects.get(price_table__price_table_compound_id=price_table_compound_id,
+                        item__item_compound_id=item_compound_id)
+            except PriceItem.DoesNotExist:
+                return not_found_response(object_name=_('The price item'))
+            try:
+                instance.delete()
+                return success_response(detail=_("Price item deleted successfully"))
+            except ProtectedError:
+                return protected_error_response(object_name=_('price item'))
+            except Exception as error:
+                print(error)
+                return unknown_exception_response(action=_('delete price item'))
         return unauthorized_response
 
 class OrderView(APIView):
