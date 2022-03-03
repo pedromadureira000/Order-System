@@ -18,7 +18,7 @@ class ItemTableSerializer(serializers.ModelSerializer):
         fields =  ['item_table_compound_id' ,'item_table_code', 'contracting', 'description', 'note']
         read_only_fields =  ['item_table_compound_id']
         validators = [UniqueTogetherValidator(queryset=ItemTable.objects.all(), fields=['item_table_code', 'contracting'], 
-            message="The field 'item_table_code' must be unique.")]
+            message=_("The 'item_table_code' field must be unique."))]
 
     def create(self, validated_data):
         # Create item_table_compound_id
@@ -37,7 +37,7 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ['item_table', 'category_compound_id', 'category_code', 'description', 'note']
         read_only_fields =  ['category_compound_id']
         validators = [UniqueTogetherValidator(queryset=ItemCategory.objects.all(), fields=['item_table', 'category_code'], 
-            message="The field 'category_code' must be unique by 'item_table'.")]
+            message=_("The 'category_code' field must be unique by 'item_table'."))]
 
     def validate_item_table(self, value):
         request_user = self.context['request'].user
@@ -73,7 +73,7 @@ class ItemSerializer(serializers.ModelSerializer):
         fields = ['item_compound_id', 'item_table', 'item_code', 'category', 'description', 'unit', 'barcode', 'status', 'image', 'technical_description'] 
         read_only_fields =  ['item_compound_id']
         validators = [UniqueTogetherValidator(queryset=Item.objects.all(), fields=['item_table', 'item_code'], 
-            message="The field 'item_code' must be unique by 'item_table'.")]
+            message=_("The 'item_code' field  must be unique by 'item_table'."))]
 
     def validate(self, attrs):
         request_user = self.context['request'].user
@@ -85,7 +85,7 @@ class ItemSerializer(serializers.ModelSerializer):
                 raise NotFound(detail={"detail": [_("Item table not found.")]})
             # Category must have the same item_table that the item item_table
             if category.item_table != item_table:
-                raise serializers.ValidationError(f"You cannot choose this category, because it is from another item table.")
+                raise serializers.ValidationError(_("You cannot choose this category because it is from another item table."))
             # Agent without access to all establishments can't access an item from item_table which he doesn't have access.
             if self.context['request_user_is_agent_without_all_estabs'] and not agent_has_access_to_this_item_table(request_user, item_table):
                 raise NotFound(detail={"detail": [_("Item table not found.")]})
@@ -98,7 +98,7 @@ class ItemSerializer(serializers.ModelSerializer):
                     raise NotFound(detail={"detail": [_("Item category not found.")]})
                 # Category must have the same item_table that the item item_table
                 if category.item_table != self.instance.item_table:
-                    raise serializers.ValidationError(f"You cannot choose this category, because it is from another item table.")
+                    raise serializers.ValidationError(_("You cannot choose this category because it is from another item table."))
         return super().validate(attrs)
 
     def create(self, validated_data):
@@ -146,7 +146,7 @@ class PriceTablePOSTSerializer(serializers.ModelSerializer):
         fields = ['price_table_compound_id', 'company', 'price_items', 'table_code', 'description', 'note']
         read_only_fields = ['price_table_compound_id']
         validators = [UniqueTogetherValidator(queryset=PriceTable.objects.all(), fields=['company', 'table_code'], 
-            message="The field 'table_code' must be unique by 'company'.")]
+            message=_("The 'table_code' field must be unique by 'company'."))]
 
     def validate(self, attrs):
         request_user = self.context['request'].user

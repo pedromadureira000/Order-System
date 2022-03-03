@@ -1,7 +1,6 @@
 from decimal import ROUND_DOWN, Decimal
-from django.db.models.signals import post_save, pre_save, post_delete
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
-from settings import settings
 from django.utils.translation import gettext_lazy as _
 from orders.models import Order, OrderHistory
 
@@ -34,8 +33,7 @@ def order_post_save(sender, instance, created=False, **kwargs):
         if old_instance.status != instance.status:
             old_status = instance.get_status_verbose_name(old_instance.status)
             new_status = instance.get_status_verbose_name(instance.status)
-            order_history.history_description = _("- Order status changed from '{old_status}' to '{new_status}'.").format(old_status=old_status, 
-                    new_status=new_status)
+            order_history.history_description = _("- Order status changed from '{old_status}' to '{new_status}'.").format(old_status=old_status, new_status=new_status)
         # If request_user is ClientUser
         if instance.client_user == request_user:
             order_history.user = instance.client_user

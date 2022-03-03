@@ -36,7 +36,7 @@ class CompanySerializer(serializers.ModelSerializer):
         fields = ['company_compound_id', 'company_code', 'contracting', 'item_table', 'client_table', 'name',
                 'cnpj','status', 'note']
         validators = [UniqueTogetherValidator(queryset=Company.objects.all(), fields=['company_code', 'contracting'], 
-            message=_("The field 'company_code' must be unique."))]
+            message=_("The 'company_code' field must be unique."))]
 
     def validate_client_table(self, value):
         if value:
@@ -71,7 +71,7 @@ class EstablishmentSerializer(serializers.ModelSerializer):
         model = Establishment
         fields = ['establishment_compound_id', 'establishment_code', 'company', 'name', 'cnpj', 'status', 'note']
         validators = [UniqueTogetherValidator(queryset=Establishment.objects.all(), fields=['establishment_code', 'company'],
-            message=_("The field 'establishment_code' must be unique by company."))]
+            message=_("The 'establishment_code' field must be unique by company."))]
 
     def validate_company(self, value):
         if value:
@@ -100,7 +100,7 @@ class ClientTableSerializer(serializers.ModelSerializer):
         fields =  ['client_table_compound_id' ,'client_table_code', 'contracting', 'description', 'note']
         read_only_fields =  ['client_table_compound_id']
         validators = [UniqueTogetherValidator(queryset=ClientTable.objects.all(), fields=['client_table_code', 'contracting'], 
-            message=_("The field 'client_table_code' must be unique."))]
+            message=_("The 'client_table_code' field must be unique."))]
 
     def create(self, validated_data):
         # Create client_table_compound_id
@@ -116,7 +116,7 @@ class ClientTableSerializer(serializers.ModelSerializer):
 
 class ClientEstablishmentToClientSerializer(serializers.ModelSerializer):
     establishment = serializers.SlugRelatedField(slug_field='establishment_compound_id', queryset=Establishment.objects.all())
-    price_table = serializers.SlugRelatedField(slug_field='price_table_compound_id', queryset=PriceTable.objects.all())
+    price_table = serializers.SlugRelatedField(slug_field='price_table_compound_id', queryset=PriceTable.objects.all(), allow_null=True)
     class Meta:
         model=ClientEstablishment
         fields = ['establishment', 'price_table']
@@ -145,7 +145,7 @@ class ClientSerializer(serializers.ModelSerializer):
                 'vendor_code', 'name', 'cnpj', 'status', 'note']
         read_only_fields =  ['client_compound_id']
         validators = [UniqueTogetherValidator(queryset=Client.objects.all(), fields=['client_code', 'client_table'],
-            message=_("The field 'client_code' must be unique by client table."))]
+            message=_("The 'client_code' field must be unique by client table."))]
 
     def validate(self, attrs):
         request_user = self.context["request"].user
@@ -162,13 +162,13 @@ class ClientSerializer(serializers.ModelSerializer):
                 # Check if establishment.company.client_table belongs to Client client_table on POST request
                 if self.context['request'].method == 'POST':
                     if client_establishment['establishment'].company.client_table != attrs.get("client_table"):
-                        raise serializers.ValidationError(_("The 'client_table' field must correspond to the company client_table "\
-                                "associated with the added establishments."))
+                        estab = client_establishment['establishment'].establishment_compound_id
+                        raise serializers.ValidationError(_("The 'client_table' field from the company which owns the establishment {estab} does not correspond with the 'client_table' to which this client belongs.").format(estab=estab))
                 # Check if establishment.company.client_table belongs to Client client_table on PUT request
                 if self.context['request'].method == 'PUT':
                     if client_establishment['establishment'].company.client_table != self.instance.client_table:
-                        raise serializers.ValidationError(_("The 'client_table' field must correspond to the company client_table "\
-                                "associated with the added establishments."))
+                        estab = client_establishment['establishment'].establishment_compound_id
+                        raise serializers.ValidationError(_("The 'client_table' field from the company which owns the establishment {estab} does not correspond with the 'client_table' to which this client belongs.").format(estab=estab))
                 if request_user_is_agent_without_all_estabs:
                     # Check if agent can access establishment
                     if not agent_has_permission_to_assign_this_establishment_to_client(request_user, client_establishment['establishment']):
@@ -241,7 +241,7 @@ class UserSerializer(serializers.ModelSerializer):
             'password': {'write_only': True},
         }
         validators = [UniqueTogetherValidator(queryset=User.objects.all(), fields=['username', 'contracting'],
-            message=_("The field 'username' must be unique."))]
+            message=_("The 'username' field must be unique."))]
 
     def validate(self, attrs):
         if self.context['request'].method == 'PUT':

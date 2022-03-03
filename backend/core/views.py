@@ -548,12 +548,12 @@ class SpecificAdminAgent(APIView):
     def put(self, request, contracting_code, username):
         if has_permission(request.user, 'update_admin_agent'):
             if contracting_code != request.user.contracting.contracting_code:
-                return not_found_response(object_name='The client')
+                return not_found_response(object_name=_('The admin agent'))
             user_code = contracting_code + "#" + username
             try: 
                 user = User.objects.get(user_code=user_code, groups__name='admin_agent')
             except User.DoesNotExist:
-                return not_found_response(object_name='The admin agent')
+                return not_found_response(object_name=_('The admin agent'))
             serializer = AdminAgentSerializer(user, data=request.data, partial=True,
                     context={"request": request})
             if serializer.is_valid():
@@ -580,7 +580,7 @@ class SpecificAdminAgent(APIView):
                 return not_found_response(object_name=_('The admin agent'))
             try:
                 user.delete()
-                return success_response(detail=_("Admin agent deleted successfully."))
+                return success_response(detail=_("Admin agent deleted successfully"))
             except ProtectedError as er:
                 return protected_error_response(object_name=_('admin agent'))
             except Exception as error:
