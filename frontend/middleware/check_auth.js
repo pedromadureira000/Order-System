@@ -23,7 +23,6 @@ export default async (ctx) => {
 		}
 		try {
 			let data = await api.checkAuthenticated()	
-			console.log(data)
 			ctx.store.commit('auth/SET_USER', data )	
 		}
 		catch (error) {

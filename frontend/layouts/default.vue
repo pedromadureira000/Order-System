@@ -1,10 +1,11 @@
 <template>
   <v-app>
 		<v-navigation-drawer v-model="drawer" app> 
+      <!-- Test Button -->
       <v-card class="pa-3" color="blue-grey darken-4" tile>
 				<v-btn @click.prevent="$store.dispatch('auth/checkAuthenticated')">test</v-btn>
       </v-card>
-
+      <!-- MenuItems composition -->
       <v-list nav dense>
         <v-list-item
           v-for="item in currentMenuItems"
@@ -15,19 +16,19 @@
           <v-list-item-icon>
             <v-icon>{{ item.icon }}</v-icon>
           </v-list-item-icon>
-
           <v-list-item-content>
             <v-list-item-title>{{ item.title }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
+    <!-- App bar -->
     <v-app-bar color="blue-grey darken-4" dark app>
       <v-app-bar-nav-icon
         @click="drawer = !drawer"
       ></v-app-bar-nav-icon>
 
-      <v-toolbar-title>Title</v-toolbar-title>
+      <v-toolbar-title>Order System</v-toolbar-title>
 
       <v-spacer></v-spacer>
 
@@ -98,14 +99,15 @@
 import footer from '~/components/Footer.vue';
 import loginDialog from '~/components/login-dialog.vue'
 import sessionErrorDialog from '~/components/session-error-dialog.vue'
-import {adminAgent, admin, companySubMenuPermissions, agent, item, category, priceTable, order} from '~/helpers/permissions'
-let usersMenuPermissions = adminAgent.concat(admin).concat(companySubMenuPermissions).concat(agent)
-let itemsMenuPermissions = item.concat(category).concat(priceTable)
-let orderPermissions = order
+import {CRUDerpUserPermissions, CRUDadminAgentPermissions, CRUDagentPermissions, CRUDclientUserPermissions, CRUDcontractingPermissions, CRUDcompanyPermissions, CRUDestablishmentPermissions, CRUDclientTablePermissions, CRUDclientPermissions,CRUDitemTablePerms,CRUDitemPermissions, CRUDitemCategoryPerms, CRUDpriceTablePerms, client_user} from '~/helpers/permissions'
+let usersMenuPermissions = CRUDerpUserPermissions.concat(CRUDadminAgentPermissions).concat(CRUDagentPermissions).concat(CRUDclientUserPermissions)
+let organizationPermissions = CRUDcontractingPermissions.concat(CRUDcompanyPermissions).concat(CRUDestablishmentPermissions).concat(CRUDclientTablePermissions).concat(CRUDclientPermissions)
+let itemsMenuPermissions = CRUDitemTablePerms.concat(CRUDitemPermissions).concat(CRUDitemCategoryPerms).concat(CRUDpriceTablePerms)
+let orderPermissions = client_user
 
 export default {
 	name: "default",
-	middleware: ['fwdcookies', 'auth'],
+	middleware: ['fwdcookies', 'check_auth'],
   components: {
     loginDialog,
 		sessionErrorDialog,
@@ -119,13 +121,15 @@ export default {
 			{ title: "About", icon: "mdi-help-box", to: "/about" },
 		],
 		allMenuItems: [
-			{"permissions": usersMenuPermissions , "title": "Users", "icon":"mdi-account-group", "to": "/admin/user"},
-			{"permissions": itemsMenuPermissions, "title": "Items", "icon":"mdi-cart-variant", "to": "/admin/item"},
-      {"permissions": orderPermissions, "title": "Orders", "icon":"mdi-clipboard-check-multiple", "to": "/client/orders"},
+      {permissions: organizationPermissions, title: "Organizations", icon: "mdi-clipboard-check-multiple", to: "/admin/organization"},
+			{permissions: usersMenuPermissions , title: "Users", icon: "mdi-account-group", to: "/admin/user"},
+			{permissions: itemsMenuPermissions, title: "Items", icon: "mdi-cart-variant", to: "/admin/item"},
+      {permissions: orderPermissions, title: "Orders", icon: "mdi-clipboard-check-multiple", to: "/client/orders"},
 		],
 	}),
 
   methods: {
+    /** TODO Remember who it works */
     open_login_dialog(evt) {
       this.$refs.login_dialog.open()
       evt.stopPropagation()
@@ -139,17 +143,17 @@ export default {
 		logged_user(){
 			return this.$store.state.auth.currentUser
 		},
+    /** Calculates which Menus the CurrentUser has access and return it concatenated with defaultMenuItems (between Home and About page). */
 		currentMenuItems() {
 			let user = this.$store.state.auth.currentUser;
 			if (user) {
+        console.log(">>>>>>> ", user)
 				return this.defaultMenuItems
 					.slice(0, 1)
           .concat(this.allMenuItems.filter(MenuItem => {
-            let addItem = false
-            MenuItem.permissions.forEach(permission => {
-              if (this.$store.state.auth.currentUser.permissions.includes(permission)){addItem = true; return;}
+            return MenuItem.permissions.some(permission => {
+              return this.$store.state.auth.currentUser.permissions.includes(permission)
             })
-            return addItem
           }))
 					.concat(this.defaultMenuItems.slice(1, 2));
 			} else {

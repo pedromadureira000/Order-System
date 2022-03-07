@@ -1,5 +1,5 @@
 <template>
-  <p v-if="$fetchState.pending">Fetching mountains...</p>
+  <p v-if="$fetchState.pending">Fetching data ...</p>
   <p v-else-if="$fetchState.error">An error occurred :(</p>
   <div v-else>
     <div class="ma-3">
@@ -60,9 +60,9 @@
 /** import { validationMixin } from "vuelidate"; */
 
 export default {
-  middleware: ["authenticated", "admin"],
+  middleware: ["authenticated"],
   components: {
-    "pricetable-edit-menu": require("@/components/admin/pricetable-edit-menu.vue").default,
+    "pricetable-edit-menu": require("@/components/admin/item/pricetable-edit-menu.vue").default,
   },
   /** mixins: [validationMixin], */
 

@@ -11,17 +11,15 @@
 </template>
 
 <script>
-  import {item, priceTable, category } from '~/helpers/permissions'
+  import {CRUDitemPermissions, CRUDpriceTablePerms, CRUDitemCategoryPerms } from '~/helpers/permissions'
   export default {
-    middleware: ["authenticated", "admin"],
+    middleware: ["authenticated"],
     data: () => ({ 
-      value: 'user',
+      value: 'Item',
       allMenuItems: [
-        {"permissions": item, "title": "Item", "icon":"mdi-cart-variant", "to": "/admin/item"},
-        {"permissions": category, "title": "Item Category", "icon":"mdi-format-list-bulleted-type", "to": "/admin/item/item_category"},
-        {"permissions": priceTable, "title": "Price table", "icon":"mdi-table-large", "to": "/admin/item/price_table"},
-        /** {"permissions": orderPermissions, "title": "Orders", "icon":"mdi-clipboard-check-multiple", "to": "/client/orders"}, */
-        /** {"permission": "client", "title": "Reports", "icon":"mdi-clipboard-list-outline", "to": "/reports"}, */
+        {"permissions": CRUDitemPermissions, title: "Item", icon:"mdi-cart-variant", to: "/admin/item"},
+        {"permissions": CRUDitemCategoryPerms, title: "Item Category", icon:"mdi-format-list-bulleted-type", to: "/admin/item/item_category"},
+        {"permissions": CRUDpriceTablePerms, title: "Price table", icon:"mdi-table-large", to: "/admin/item/price_table"},
       ],
     }),
 
@@ -29,11 +27,7 @@
       currentMenuItems() {
         let user = this.$store.state.auth.currentUser;
         return this.allMenuItems.filter(MenuItem => {
-          let addItem = false
-          MenuItem.permissions.forEach(permission => {
-            if (user.permissions.includes(permission)){addItem = true; return;}
-          })
-          return addItem
+          return MenuItem.permissions.some(permission => user.permissions.includes(permission))
         })
       },
     },

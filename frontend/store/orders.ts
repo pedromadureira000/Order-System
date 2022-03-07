@@ -14,6 +14,18 @@ import {RootState} from "@/store/index"
 import api from "~api"
 
 export const actions: ActionTree<OrdersState, RootState> = {
+
+	async fetchItemTables({dispatch}: {dispatch: Dispatch,}){
+    try {
+		let item_tables = await api.fetchItemTables()
+		return item_tables
+    }
+		catch(e){
+      dispatch("setAlert", {message: "Something went wrong when trying to fetch client tables.", alertType: "error"}, { root: true })
+		}
+	},
+
+
   async createItem({dispatch}: {dispatch: Dispatch,}, payload: any){
     try {
       let data = await api.createItem(payload)

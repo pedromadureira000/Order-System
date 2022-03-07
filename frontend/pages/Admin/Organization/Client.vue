@@ -1,10 +1,10 @@
 <template>
-  <p v-if="$fetchState.pending">Fetching mountains...</p>
+  <p v-if="$fetchState.pending">Fetching data ...</p>
   <p v-else-if="$fetchState.error">An error occurred :(</p>
   <div v-else>
     <div class="ma-3">
-      <h3>Create Company</h3>
-      <form @submit.prevent="createCompany">
+      <h3>Create Client</h3>
+      <form @submit.prevent="createClient">
         <div class="mb-3">
           <v-text-field
             label="Name"
@@ -23,11 +23,11 @@
         </div>
         <div class="mb-3">
           <v-text-field
-            label="Company code"
-            v-model="company_code"
-            :error-messages="companyCodeErrors"
+            label="Client code"
+            v-model="client_code"
+            :error-messages="clientCodeErrors"
             required
-            @blur="$v.company_code.$touch()"
+            @blur="$v.client_code.$touch()"
           />
         </div>
         <div class="mb-3">
@@ -66,7 +66,7 @@
           ></v-radio>
         </v-radio-group>
         <h5>Tipo de empresa</h5>
-        <v-radio-group v-model="company_type" style="width: 25%;">
+        <v-radio-group v-model="client_type" style="width: 25%;">
           <v-radio
             v-if="isAdmin()"
             label="Contratante"
@@ -97,15 +97,15 @@
         >
       </form>
 
-      <h3 class="mt-6">Edit Company</h3>
+      <h3 class="mt-6">Edit Client</h3>
       <v-data-table
         :headers="headers"
-        :items="companies"
+        :items="clients"
         :items-per-page="10"
         class="elevation-1"
       >
         <template v-slot:item.actions="{ item }">
-          <company-edit-menu :company="item" @company-deleted="deleteComapany(item)" />
+          <client-edit-menu :client="item" @client-deleted="deleteClient(item)" />
         </template>
       </v-data-table>
     </div>
@@ -122,9 +122,9 @@ import {
 import { validationMixin } from "vuelidate";
 
 export default {
-  middleware: ["authenticated", "admin"],
+  middleware: ["authenticated"],
   components: {
-    "company-edit-menu": require("@/components/admin/company-edit-menu.vue").default,
+    "client-edit-menu": require("@/components/admin/organization/client-edit-menu.vue").default,
   },
   mixins: [validationMixin],
 
@@ -132,22 +132,22 @@ export default {
     return {
       name: null,
       cnpj: null,
-      company_code: null,
-      status: null,
-      company_type: null,
       client_code: null,
+      status: null,
+      client_type: null,
+      company_code: null,
       vendor_code: null,
       note: null,
       loading: false,
-      companies: [],
+      clients: [],
       headers: [
         { text: 'Name', value: 'name' },
         { text: 'CNPJ', value: 'cnpj' },
-        { text: 'Company code', value: 'company_code' },
-        { text: 'Status', value: 'status' },
-        { text: 'Company type', value: 'company_type' },
-        { text: 'Price Table', value: 'price_table' },
         { text: 'Client code', value: 'client_code' },
+        { text: 'Status', value: 'status' },
+        { text: 'Client type', value: 'client_type' },
+        { text: 'Price Table', value: 'price_table' },
+        { text: 'Company code', value: 'company_code' },
         { text: 'Vendor code', value: 'vendor_code' },
         { text: 'Note', value: 'note' },
         { text: 'Actions', value: 'actions' },
@@ -156,13 +156,13 @@ export default {
   },
 
   async fetch() {
-    let companies = await this.$store.dispatch("auth/fetchCompanies");
-    for (const company_index in companies){
-      let company = companies[company_index]
-      /** this.companies.push({name: company.name, cnpj: company.cnpj, company_code: company.company_code, */
-        /** status: company.status, company_type: company.company_type, price_table: company.price_table}) */
+    let clients = await this.$store.dispatch("auth/fetchClients");
+    for (const client_index in clients){
+      let client = clients[client_index]
+      /** this.clients.push({name: client.name, cnpj: client.cnpj, client_code: client.client_code, */
+        /** status: client.status, client_type: client.client_type, price_table: client.price_table}) */
     /** } */
-      this.companies.push(company)
+      this.clients.push(client)
     }
   },
 
@@ -172,45 +172,77 @@ export default {
       alphaNum, 
       maxLength: maxLength(12)
     },
-    company_code: {
+    client_code: {
       required, 
       integer
     },
-    companyInfoGroup: [
+    clientInfoGroup: [
       "name",
       /** "cnpj", */
-      "company_code",
+      "client_code",
       /** "status", */
-      /** "company_type", */
-      /** "company_code", */
+      /** "client_type", */
+      /** "client_code", */
     ],
   },
 
+  computed: {
+    nameErrors() {
+      const errors = [];
+      if (!this.$v.name.$dirty) return errors;
+      !this.$v.name.alphaNum && errors.push("Must have only alphanumeric characters.");
+      !this.$v.name.required && errors.push("Name is required");
+      !this.$v.name.maxLength && errors.push("This field must have up to 12 characters.");
+      return errors;
+    },
+    clientCodeErrors() {
+      const errors = [];
+      if (!this.$v.client_code.$dirty) return errors;
+      !this.$v.name.alphaNum && errors.push("Must have only alphanumeric characters.");
+      !this.$v.client_code.required && errors.push("Client code required");
+      return errors;
+    },
+    companyCodeErrors() {
+      const errors = [];
+      if (!this.$v.client_code.$dirty) return errors;
+      !this.$v.name.alphaNum && errors.push("Must have only alphanumeric characters.");
+      !this.$v.client_code.required && errors.push("Client code required");
+      return errors;
+    },
+    /** cpfErrors() {  */
+      /** const errors = []; */
+      /** if (!this.$v.cpf.$dirty) return errors; */
+      /** !this.$v.cpf.required && errors.push("CPF is required."); */
+      /** !this.$v.cpf.maxLength && errors.push("This field must have up to 14 characters."); */
+      /** return errors; */
+    /** }, */
+  },
+
   methods: {
-    async createCompany() {
-      this.$v.companyInfoGroup.$touch();
-      if (this.$v.companyInfoGroup.$invalid) {
+    async createClient() {
+      this.$v.clientInfoGroup.$touch();
+      if (this.$v.clientInfoGroup.$invalid) {
         this.$store.dispatch("setAlert", { message: "Please fill the form correctly.", alertType: "error" }, { root: true })
       } else {
         this.loading = true;
-        let data = await this.$store.dispatch("auth/createCompany", {
+        let data = await this.$store.dispatch("auth/createClient", {
           name: this.name, 
           cnpj: this.cnpj,
-          company_code: this.company_code,
+          client_code: this.client_code,
           status: this.status,
-          company_type: this.company_type,
+          client_type: this.client_type,
           client_code: this.client_code,
           vendor_code: this.vendor_code,
           note: this.note
         });
         if (data) {
-          this.companies.push(data);
+          this.clients.push(data);
         }
         this.loading = false;
       }
     },
-    deleteComapany(companyToDelete) {
-      this.companies = this.companies.filter((company) => company.company_code != companyToDelete.company_code);
+    deleteClient(clientToDelete) {
+      this.clients = this.clients.filter((client) => client.client_code != clientToDelete.client_code);
     },
     haveCreateClientPermissions(){
 			let user = this.$store.state.auth.currentUser;
@@ -224,31 +256,6 @@ export default {
 			let user = this.$store.state.auth.currentUser;
       if (user.roles.includes("admin_agent")) {return true}
     }
-  },
-
-  computed: {
-    nameErrors() {
-      const errors = [];
-      if (!this.$v.name.$dirty) return errors;
-      !this.$v.name.alphaNum && errors.push("Must have only alphanumeric characters.");
-      !this.$v.name.required && errors.push("Name is required");
-      !this.$v.name.maxLength && errors.push("This field must have up to 12 characters.");
-      return errors;
-    },
-    companyCodeErrors() {
-      const errors = [];
-      if (!this.$v.company_code.$dirty) return errors;
-      !this.$v.company_code.integer && errors.push("Must be a integer");
-      !this.$v.company_code.required && errors.push("Company code required");
-      return errors;
-    },
-    /** cpfErrors() {  */
-      /** const errors = []; */
-      /** if (!this.$v.cpf.$dirty) return errors; */
-      /** !this.$v.cpf.required && errors.push("CPF is required."); */
-      /** !this.$v.cpf.maxLength && errors.push("This field must have up to 14 characters."); */
-      /** return errors; */
-    /** }, */
   },
 };
 </script>

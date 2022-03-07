@@ -11,15 +11,16 @@
 </template>
 
 <script>
-  import {admin, adminAgent, agent, companySubMenuPermissions} from '~/helpers/permissions'
-  let usersSubMenuPermissions = adminAgent.concat(admin).concat(agent)
+  import {CRUDerpUserPermissions, CRUDadminAgentPermissions, CRUDagentPermissions, CRUDclientUserPermissions} from '~/helpers/permissions'
   export default {
-    middleware: ["authenticated", "admin"],
+    middleware: ["authenticated"],
     data: () => ({ 
-      value: 'User',
+      value: '',
       allMenuItems: [
-        {"permissions": usersSubMenuPermissions, "title": "User", "icon":"mdi-account", "to": "/admin/user"},
-        {"permissions": companySubMenuPermissions, "title": "Company", "icon":"mdi-office-building", "to": "/admin/user/company"},
+        {permissions: CRUDerpUserPermissions, title: "ERP User", icon: "mdi-account", to: "/admin/user/erp_user"},
+        {permissions: CRUDadminAgentPermissions, title: "Admin Agent", icon: "mdi-account", to: "/admin/user/admin_agent"},
+        {permissions: CRUDagentPermissions, title: "Agent", icon: "mdi-account", to: "/admin/user/agent"},
+        {permissions: CRUDclientUserPermissions, title: "Client User", icon: "mdi-account", to: "/admin/user/client_user"},
       ],
     }),
 
@@ -27,11 +28,7 @@
       currentMenuItems() {
         let user = this.$store.state.auth.currentUser;
         return this.allMenuItems.filter(MenuItem => {
-          let addItem = false
-          MenuItem.permissions.forEach(permission => {
-            if (user.permissions.includes(permission)){addItem = true; return;}
-          })
-          return addItem
+          return MenuItem.permissions.some(permission => user.permissions.includes(permission))
         })
       },
     },

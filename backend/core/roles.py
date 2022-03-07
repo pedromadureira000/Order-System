@@ -1,5 +1,17 @@
 from rolepermissions.roles import AbstractUserRole
 
+class SuperUser(AbstractUserRole):
+    available_permissions = {
+        "create_contracting": True,
+        "get_contracting": True,
+        "update_contracting": True,
+        "delete_contracting": True,
+        "create_erp_user": True,
+        "get_erp_user": True,
+        "update_erp_user": True,
+        "delete_erp_user": True,
+    }
+
 class Erp(AbstractUserRole):
     available_permissions = {
         #ERP
@@ -122,9 +134,5 @@ class Agent(AbstractUserRole):
 
 class ClientUser(AbstractUserRole):
     available_permissions = {
-        "get_orders": True, #used
-        "make_order": True, #used, but useless
-        "edit_order_in_typing": True, #not used
-        "save_order_as_template": True, # not used
-        "transfer_order": True #not used
+        "get_orders": True,
     }

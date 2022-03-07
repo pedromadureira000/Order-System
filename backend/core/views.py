@@ -42,8 +42,7 @@ def unknown_exception_response(action):
 
 class ContractingView(APIView):
     def get(self, request):
-        user = request.user
-        if user.is_superuser:
+        if has_permission(request.user, 'get_contracting'):
             contractings = Contracting.objects.all()
             data = ContractingSerializer(contractings, many=True).data
             return Response(data)
@@ -51,8 +50,7 @@ class ContractingView(APIView):
     @swagger_auto_schema(request_body=ContractingSerializer) 
     @transaction.atomic
     def post(self, request):
-            user = request.user
-            if user.is_superuser:
+            if has_permission(request.user, 'create_contracting'):
                 data = request.data
                 serializer = ContractingSerializer(data=data)
                 if serializer.is_valid():
@@ -70,7 +68,7 @@ class SpecificContracting(APIView):
     @swagger_auto_schema(request_body=ContractingSerializer) 
     @transaction.atomic
     def put(self, request, contracting_code):
-        if request.user.is_superuser:
+        if has_permission(request.user, 'update_contracting'):
             try:
                 contracting = Contracting.objects.get(contracting_code=contracting_code)
             except Contracting.DoesNotExist:
@@ -90,10 +88,10 @@ class SpecificContracting(APIView):
         return unauthorized_response
     @transaction.atomic
     def delete(self, request, contracting_code):
-        if request.user.is_superuser:
+        if has_permission(request.user, 'delete_contracting'):
             try:
                 contracting = Contracting.objects.get(contracting_code=contracting_code)
-            except Company.DoesNotExist:
+            except Contracting.DoesNotExist:
                 return not_found_response(object_name=_('The contracting'))
             try:
                 contracting.delete()
@@ -135,8 +133,9 @@ class SpecificCompany(APIView):
     @transaction.atomic
     @swagger_auto_schema(request_body=CompanySerializer) 
     def put(self, request, company_compound_id):
+        print('========================> : ',company_compound_id )
         if has_permission(request.user, 'update_company'):
-            if company_compound_id.split("#")[0] != request.user.contracting.contracting_code:
+            if company_compound_id.split("&")[0] != request.user.contracting.contracting_code:
                 return not_found_response(object_name=_('The company'))
             try:
                 company = Company.objects.get(company_compound_id=company_compound_id)
@@ -156,7 +155,7 @@ class SpecificCompany(APIView):
     @transaction.atomic
     def delete(self, request, company_compound_id):
         if has_permission(request.user, 'delete_company'):
-            if company_compound_id.split("#")[0] != request.user.contracting.contracting_code:
+            if company_compound_id.split("&")[0] != request.user.contracting.contracting_code:
                 return not_found_response(object_name=_('The company'))
             try:
                 company = Company.objects.get(company_compound_id=company_compound_id)
@@ -203,7 +202,7 @@ class SpecificEstablishment(APIView):
     @transaction.atomic
     def put(self, request, establishment_compound_id):
         if has_permission(request.user, 'update_establishment'):
-            if establishment_compound_id.split("#")[0] != request.user.contracting.contracting_code:
+            if establishment_compound_id.split("&")[0] != request.user.contracting.contracting_code:
                 return not_found_response(object_name=_('The establishment'))
             try:
                 establishment = Establishment.objects.get(establishment_compound_id=establishment_compound_id)
@@ -223,7 +222,7 @@ class SpecificEstablishment(APIView):
     @transaction.atomic
     def delete(self, request, establishment_compound_id):
         if has_permission(request.user, 'delete_establishment'):
-            if establishment_compound_id.split("#")[0] != request.user.contracting.contracting_code:
+            if establishment_compound_id.split("&")[0] != request.user.contracting.contracting_code:
                 return not_found_response(object_name=_('The establishment'))
             try:
                 establishment = Establishment.objects.get(establishment_compound_id=establishment_compound_id)
@@ -270,7 +269,7 @@ class SpecificClientTable(APIView):
     @swagger_auto_schema(request_body=ClientTableSerializer) 
     def put(self, request, client_table_compound_id):
         if has_permission(request.user, 'update_client_table'):
-            if client_table_compound_id.split("#")[0] != request.user.contracting.contracting_code:
+            if client_table_compound_id.split("&")[0] != request.user.contracting.contracting_code:
                 return not_found_response(object_name=_('The client table'))
             try:
                 client_table = ClientTable.objects.get(client_table_compound_id=client_table_compound_id)
@@ -290,7 +289,7 @@ class SpecificClientTable(APIView):
     @transaction.atomic
     def delete(self, request, client_table_compound_id):
         if has_permission(request.user, 'delete_client_table'):
-            if client_table_compound_id.split("#")[0] != request.user.contracting.contracting_code:
+            if client_table_compound_id.split("&")[0] != request.user.contracting.contracting_code:
                 return not_found_response(object_name=_('The client table'))
             try:
                 client_table = ClientTable.objects.get(client_table_compound_id=client_table_compound_id)
@@ -345,7 +344,7 @@ class SpecificClient(APIView):
         user = request.user
         if has_permission(user, 'update_client'):
             # Is from the same Contracting
-            if client_compound_id.split("#")[0] != user.contracting.contracting_code:
+            if client_compound_id.split("&")[0] != user.contracting.contracting_code:
                 return not_found_response(object_name=_('The client'))
             try:
                 client = Client.objects.get(client_compound_id=client_compound_id)
@@ -371,7 +370,7 @@ class SpecificClient(APIView):
     def delete(self, request, client_compound_id):
         if has_permission(request.user, 'delete_client'):
             # Is from the same Contracting
-            if client_compound_id.split("#")[0] != request.user.contracting.contracting_code:
+            if client_compound_id.split("&")[0] != request.user.contracting.contracting_code:
                 return not_found_response(object_name=_('The client'))
             try:
                 client = Client.objects.get(client_compound_id=client_compound_id)
@@ -407,7 +406,7 @@ class Login(APIView):
             return success_response(detail=_("User is already authenticated"))
         serializer = SwaggerLoginSerializer(data=request.data)
         if serializer.is_valid():
-            user_code = serializer.validated_data["contracting_code"] + "#" + serializer.validated_data["username" ]
+            user_code = serializer.validated_data["contracting_code"] + "&" + serializer.validated_data["username" ]
             user = authenticate(username=user_code, password=serializer.validated_data["password"], request=request)
             if user is not None:
                 if user.status != 1:
@@ -457,14 +456,14 @@ class OwnProfileView(APIView):
 
 class ERPUserView(APIView):
     def get(self, request):
-        if request.user.is_superuser:
+        if has_permission(request.user, 'get_erp_user'):
             erp_users = User.objects.filter(Q(groups__name='erp'))
             return Response(ERPUserSerializer(erp_users, many=True).data)
         return unauthorized_response
     @swagger_auto_schema(request_body=ERPUserSerializer) 
     @transaction.atomic
     def post(self, request):
-        if request.user.is_superuser:
+        if has_permission(request.user, 'create_erp_user'):
             serializer = ERPUserSerializer(data=request.data, context={"request":request})
             if serializer.is_valid():
                 try:
@@ -481,8 +480,8 @@ class SpecificERPUser(APIView):
     @swagger_auto_schema(request_body=ERPUserSerializer) 
     @transaction.atomic
     def put(self, request, contracting_code, username):
-        if request.user.is_superuser:
-            user_code = contracting_code + "#" + username
+        if has_permission(request.user, 'update_erp_user'):
+            user_code = contracting_code + "&" + username
             try: 
                 user = User.objects.get(user_code=user_code, groups__name='erp')
             except User.DoesNotExist:
@@ -502,8 +501,8 @@ class SpecificERPUser(APIView):
         return unauthorized_response
     @transaction.atomic  
     def delete(self, request, contracting_code, username):
-        if request.user.is_superuser:
-            user_code = contracting_code + "#" + username
+        if has_permission(request.user, 'delete_erp_user'):
+            user_code = contracting_code + "&" + username
             try:
                 user = User.objects.get(user_code=user_code, groups__name='erp')
             except User.DoesNotExist:
@@ -549,7 +548,7 @@ class SpecificAdminAgent(APIView):
         if has_permission(request.user, 'update_admin_agent'):
             if contracting_code != request.user.contracting.contracting_code:
                 return not_found_response(object_name=_('The admin agent'))
-            user_code = contracting_code + "#" + username
+            user_code = contracting_code + "&" + username
             try: 
                 user = User.objects.get(user_code=user_code, groups__name='admin_agent')
             except User.DoesNotExist:
@@ -573,7 +572,7 @@ class SpecificAdminAgent(APIView):
             # Contracting Ownership
             if contracting_code != request.user.contracting.contracting_code:
                 return not_found_response(object_name=_('The admin agent'))
-            user_code = contracting_code + "#" + username
+            user_code = contracting_code + "&" + username
             try:
                 user = User.objects.get(user_code=user_code, groups__name='admin_agent')
             except User.DoesNotExist:
@@ -619,7 +618,7 @@ class SpecificAgent(APIView):
         if has_permission(request.user, 'update_agent'):
             if contracting_code != request.user.contracting.contracting_code:
                 return not_found_response(object_name=_('The agent'))
-            user_code = contracting_code + "#" + username
+            user_code = contracting_code + "&" + username
             try: 
                 user = User.objects.get(user_code=user_code, groups__name='agent')
             except User.DoesNotExist:
@@ -643,7 +642,7 @@ class SpecificAgent(APIView):
             # Contracting Ownership
             if contracting_code != request.user.contracting.contracting_code:
                 return not_found_response(object_name=_('The agent'))
-            user_code = contracting_code + "#" + username
+            user_code = contracting_code + "&" + username
             try:
                 user = User.objects.get(user_code=user_code, groups__name='agent')
             except User.DoesNotExist:
@@ -695,7 +694,7 @@ class SpecificClientUser(APIView):
         if has_permission(request.user, 'update_client_user'):
             if contracting_code != request.user.contracting.contracting_code:
                 return not_found_response(object_name=_('The client user'))
-            user_code = contracting_code + "#" + username
+            user_code = contracting_code + "&" + username
             try:
                 user = User.objects.get(user_code=user_code, groups__name='client_user')
             except User.DoesNotExist:
@@ -721,7 +720,7 @@ class SpecificClientUser(APIView):
         if has_permission(request.user, 'delete_client_user'):
             if contracting_code != request.user.contracting.contracting_code:
                 return not_found_response(object_name=_('The client user'))
-            user_code = contracting_code + "#" + username
+            user_code = contracting_code + "&" + username
             try:
                 client_user = User.objects.get(user_code=user_code, groups__name='client_user')
             except User.DoesNotExist:

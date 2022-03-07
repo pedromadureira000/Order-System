@@ -12,11 +12,11 @@
 						@blur="$v.username.$touch()"
 					></v-text-field>
 					<v-text-field
-						v-model="company_code"
-						:error-messages="company_codeErrors"
-						label="Company"
+						v-model="contracting_code"
+						:error-messages="contracting_codeErrors"
+						label="Contracting"
 						required
-						@blur="$v.company_code.$touch()"
+						@blur="$v.contracting_code.$touch()"
 					></v-text-field>
 					<v-text-field
 						v-model="password"
@@ -27,15 +27,6 @@
 						type="password"
 						@keyup.enter="login"
 					></v-text-field>
-
-					<!-- <router-link -->
-						<!-- to="/passwordreset"  -->
-						<!-- tabindex="-1" -->
-						<!-- @click="visible = false" -->
-					<!-- > -->
-						<!-- <div @click="visible = false">I forgot my password</div> -->
-					<!-- </router-link><br /> -->
-
         </v-container>
       </v-card-text>
       <v-card-actions>
@@ -50,16 +41,17 @@
 
 <script>
 import { validationMixin } from "vuelidate";
-import { required, alphaNum, integer} from "vuelidate/lib/validators";
+import { required, helpers} from "vuelidate/lib/validators";
+import {slugFieldValidator} from "~/helpers/validators"
 
 export default {
   mixins: [validationMixin],
 
   validations: {
-    username: { required, alphaNum},
-    company_code: {required, integer},
+    username: { required, slugFieldValidator},
+    contracting_code: {required, slugFieldValidator},
     password: { required },
-    login_group:["username", "company_code", "password"]
+    login_group:["username", "contracting_code", "password"]
   },
 
   data () {
@@ -67,7 +59,7 @@ export default {
       visible: false,
       loading: false,
       username: '',
-      company_code: null,
+      contracting_code: null,
       password: '',
     }
   },
@@ -85,7 +77,7 @@ export default {
         this.$store.dispatch("setAlert", { message: "Please fill the form correctly.", alertType: "error" }, { root: true })
       } else {
         this.loading = true
-        await this.$store.dispatch('auth/login', {username: this.username, company_code: this.company_code, password: this.password} )
+        await this.$store.dispatch('auth/login', {username: this.username, contracting_code: this.contracting_code, password: this.password} )
         if (this.$store.state.auth.currentUser){
           this.visible = false
         }      
@@ -98,15 +90,15 @@ export default {
     usernameErrors() {
       const errors = [];
       if (!this.$v.username.$dirty) return errors;
-      !this.$v.username.alphaNum && errors.push("Must have only alphanumeric characters.");
+      !this.$v.username.slugFieldValidator && errors.push("It must containing only letters, numbers, underscores or hyphens.");
       !this.$v.username.required && errors.push("Username is required");
       return errors;
     },
-    company_codeErrors() {
+    contracting_codeErrors() {
       const errors = [];
-      if (!this.$v.company_code.$dirty) return errors;
-      !this.$v.company_code.integer && errors.push("Must be a integer");
-      !this.$v.company_code.required && errors.push("Company required");
+      if (!this.$v.contracting_code.$dirty) return errors;
+      !this.$v.contracting_code.slugFieldValidator && errors.push("It must containing only letters, numbers, underscores or hyphens.");
+      !this.$v.contracting_code.required && errors.push("Contracting code required");
       return errors;
     },
     passwordErrors() {

@@ -45,7 +45,7 @@ class Company(models.Model):
     item_table = models.ForeignKey('orders.ItemTable', blank=True, null=True, on_delete=models.PROTECT, verbose_name=_('item table'))
     client_table = models.ForeignKey('ClientTable', blank=True, null=True,on_delete=models.PROTECT, verbose_name=_('client table'))
     name = models.CharField(max_length=60, verbose_name=_('name'))
-    cnpj = models.CharField(max_length=10, verbose_name=_('CNPJ root'))
+    cnpj_root = models.CharField(max_length=10, verbose_name=_('CNPJ root'))
     status = models.IntegerField(choices=status_choices, default=1)
     note = models.CharField(blank=True, verbose_name=_('note'), max_length=800)
     def __str__(self):
@@ -138,12 +138,12 @@ class UserManager(BaseUserManager):
         # manager method can be used in migrations. This is fine because
         # managers are by definition working on the real model.
         username = GlobalUserModel.normalize_username(username)
-        user_code = contracting.contracting_code + "#" + username
+        user_code = contracting.contracting_code + "&" + username
         user = self.model(user_code=user_code,username=username, contracting=contracting, **extra_fields)
         user.password = make_password(password)
         user.save(using=self._db)
         if user.is_superuser:
-            assign_role(user, 'erp')
+            assign_role(user, 'super_user')
         return user
     def create_user(self, username=None, contracting=None, password=None, **extra_fields):
         extra_fields.setdefault('is_superuser', False)

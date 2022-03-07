@@ -1,5 +1,5 @@
 <template>
-  <p v-if="$fetchState.pending">Fetching mountains...</p>
+  <p v-if="$fetchState.pending">Fetching data ...</p>
   <p v-else-if="$fetchState.error">An error occurred :(</p>
   <div v-else>
     <div class="ma-3">
@@ -78,7 +78,7 @@
         class="elevation-1"
       >
         <template v-slot:item.actions="{ item }">
-          <!-- <user-edit-menu :user="item" @user-deleted="deleteUser(item)" /> -->
+          <user-edit-menu :user="item" @user-deleted="deleteUser(item)" />
         </template>
       </v-data-table>
     </div>
@@ -95,9 +95,9 @@
 /** import { validationMixin } from "vuelidate"; */
 
 export default {
-  middleware: ["authenticated", "admin"],
+  middleware: ["authenticated"],
   components: {
-    "user-edit-menu": require("@/components/admin/user-edit-menu.vue").default,
+    "user-edit-menu": require("@/components/admin/user/user-edit-menu.vue").default,
   },
   /** mixins: [validationMixin], */
 

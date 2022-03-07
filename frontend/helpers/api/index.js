@@ -1,8 +1,10 @@
 import axios from '~/plugins/axios'
 
 export default {
+
+  // --------------------------------------/ Auth APIs /----------------------------------------
 	async checkAuthenticated(){
-		return await axios.get("/api/user/checkauth").then((data)=> {return data.data})
+		return await axios.get("/api/user/own_profile").then((data)=> {return data.data})
 	},
 
 	async getCsrf(){
@@ -13,7 +15,7 @@ export default {
 		return await axios({
 			method: "post",
 			url: "/api/user/login",
-			data: { username: payload.username, company_code: payload.company_code, password: payload.password },
+			data: { username: payload.username, contracting_code: payload.contracting_code, password: payload.password },
 			headers: { "X-CSRFToken": payload.csrftoken },
 		})
 			.then((response) => {
@@ -29,10 +31,153 @@ export default {
 				.then(() => {})
 		},
 
+	async updateCurrentUserProfile(payload){
+		return await axios({ 
+		method: "put",
+		url: "/api/user/user",
+		data:{
+			first_name: payload.first_name,
+			last_name: payload.last_name,
+			email: payload.email,
+			cpf: payload.cpf,
+		}
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async updatePassword(payload){
+		return await axios({ 
+		method: "put",
+		url: "/api/user/update_user_password",
+		data:{
+			current_password: payload.current_password,
+			password: payload.password,
+		}
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+  // --------------------------------------/ CRUD Organization APIs /----------------------------------------
+  
+	async createContracting(payload){
+    let data_body = {
+      name: payload.name,
+      contracting_code: payload.contracting_code,
+      active_users_limit: payload.active_users_limit,
+      status: payload.status,
+      note: payload.note,
+		}
+		return await axios({ 
+		method: "post",
+		url: "/api/user/contracting",
+		data: data_body}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async fetchContractingCompanies(){
+		return await axios({ 
+		method: "get",
+		url: "/api/user/contracting",
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async updateContracting(payload){
+		return await axios({ 
+		method: "put",
+		url: `/api/user/contracting/${payload.contracting_code}`,
+		data:{
+      name: payload.name,
+      active_users_limit: payload.active_users_limit,
+      status: payload.status,
+      note: payload.note,
+		}
+			}).then((request) => {
+					return request.data 
+				})
+	},
+  
+	async deleteContracting(payload){
+		return await axios({ 
+		method: "delete",
+		url: `/api/user/contracting/${payload.contracting_code}`,
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async createCompany(payload){
+    let data_body = {
+      name: payload.name,
+      company_code: payload.company_code,
+      cnpj_root: payload.cnpj_root,
+      client_table: payload.client_table,
+      item_table: payload.item_table,
+      status: payload.status,
+      note: payload.note,
+		}
+		return await axios({ 
+		method: "post",
+		url: "/api/user/company",
+		data: data_body}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async fetchCompanies(){
+		return await axios({ 
+		method: "get",
+		url: "/api/user/company",
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async updateCompany(payload){
+		return await axios({ 
+		method: "put",
+    url: `/api/user/company/${payload.company_compound_id}`,
+		data:{
+      name: payload.name,
+      cnpj_root: payload.cnpj_root,
+      client_table: payload.client_table,
+      item_table: payload.item_table,
+      status: payload.status,
+      note: payload.note,
+		}
+			}).then((request) => {
+					return request.data 
+				})
+	},
+  
+	async deleteCompany(payload){
+		return await axios({ 
+		method: "delete",
+		url: `/api/user/company/${payload.company_compound_id}`,
+			}).then((request) => {
+					return request.data 
+				})
+	}, 
+
+	async fetchClientTables(){
+		return await axios({ 
+		method: "get",
+		url: "/api/user/client_table",
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+  // --------------------------------------/ CRUD User APIs /----------------------------------------
+  
 	async createUser(payload){
     let data_body = {
       username: payload.username,
-      company_code: payload.company_code,
+      contracting: payload.contracting_code,
 			first_name: payload.first_name,
 			last_name: payload.last_name,
 			email: payload.email,
@@ -71,116 +216,23 @@ export default {
 	async deleteUserByAdmin(payload){
 		return await axios({ 
 		method: "delete",
-		// url: `/api/user/${payload.username}&${payload.company_code}`,
-		url: `/api/user/user/${payload.username}/${payload.company_code}`,
+		// url: `/api/user/${payload.username}&${payload.contracting_code}`,
+		url: `/api/user/user/${payload.contracting_code}/${payload.username}`,
 			}).then((request) => {
 					return request.data 
 				})
 	},
 
-	async updateCurrentUserProfile(payload){
-		return await axios({ 
-		method: "put",
-		url: "/api/user/user",
-		data:{
-			first_name: payload.first_name,
-			last_name: payload.last_name,
-			email: payload.email,
-			cpf: payload.cpf,
-		}
-			}).then((request) => {
-					return request.data 
-				})
-	},
-
-	async updatePassword(payload){
-		return await axios({ 
-		method: "put",
-		url: "/api/user/update_user_password",
-		data:{
-			current_password: payload.current_password,
-			password: payload.password,
-		}
-			}).then((request) => {
-					return request.data 
-				})
-	},
-
-	// async passwordReset(email){
-      // return await axios({
-        // method: "post",
-        // url: "/api/user/passwordreset/users/reset_password/",
-        // data: { email: email},
-      // })
-        // .then(() => {})
-	// },
-
-	// async passwordResetConfirm(payload){
-      // return await axios({
-        // method: "post",
-        // url: "/api/user/passwordreset/users/reset_password_confirm/",
-        // data: { new_password: payload.new_password, token: payload.token, uid: payload.uid},
-      // })
-        // .then(() => {})
-				// .catch((error) => {return {error: 'error', message: Object.values(error.response.data)[0][0]}})
-	// },
-
-
-	async createCompany(payload){
-    let data_body = {
-      name: payload.name,
-      cnpj: payload.cnpj,
-      company_code: payload.company_code,
-      status: payload.status,
-      company_type: payload.company_type,
-      client_code: payload.client_code,
-      vendor_code: payload.vendor_code,
-      note: payload.note,
-		}
-		return await axios({ 
-		method: "post",
-		url: "/api/user/company",
-		data: data_body}).then((request) => {
-					return request.data 
-				})
-	},
-
-	async updateCompany(payload){
-		return await axios({ 
-		method: "put",
-		url: `/api/user/company/${payload.company_code}`,
-		data:{
-      // name: payload.name,
-      // cnpj: payload.cnpj,
-      company_code: payload.company_code,
-      // status: payload.status,
-      // company_type: payload.company_type
-      price_table: payload.price_table
-		}
-			}).then((request) => {
-					return request.data 
-				})
-	},
+  //------------------------------------------------------/ CRUD Item APIs /---------------------------------------------------
   
-	async fetchCompanies(){
+	async fetchItemTables(){
 		return await axios({ 
 		method: "get",
-		url: "/api/user/company",
+		url: "/api/orders/item_table",
 			}).then((request) => {
 					return request.data 
 				})
 	},
-
-	async deleteComapany(payload){
-		return await axios({ 
-		method: "delete",
-		url: `/api/user/company/${payload.company_code}`,
-			}).then((request) => {
-					return request.data 
-				})
-	},
-
-  //------------------------------------------------------/ Orders /---------------------------------------------------
   
 	async createItem(payload){
     let data_body = {
@@ -282,3 +334,5 @@ export default {
 				})
 	},
 }
+
+  //------------------------------------------------------/ Order APIs /---------------------------------------------------

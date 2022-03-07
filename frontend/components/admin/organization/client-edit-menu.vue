@@ -1,5 +1,5 @@
 <template>
-  <p v-if="$fetchState.pending">Fetching mountains...</p>
+  <p v-if="$fetchState.pending">Fetching data ...</p>
   <p v-else-if="$fetchState.error">An error occurred :(</p>
   <div v-else>
     <div>
@@ -99,7 +99,7 @@ export default {
           icon: 'mdi-delete',
           async click(){
             let data = await this.$store.dispatch(
-              'auth/deleteComapany', 
+              'auth/deleteCompany', 
               {company_code: this.company.company_code}
             )
 						if (data === "ok"){

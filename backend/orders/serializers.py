@@ -23,7 +23,7 @@ class ItemTableSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # Create item_table_compound_id
         validated_data['item_table_compound_id'] = validated_data['contracting'].contracting_code + \
-                "#" + validated_data['item_table_code']
+                "&" + validated_data['item_table_code']
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
@@ -54,7 +54,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data['category_compound_id'] =  self.context['request'].user.contracting.contracting_code + \
-                "#" + validated_data['item_table'].item_table_code + "#" + validated_data["category_code"]
+                "&" + validated_data['item_table'].item_table_code + "&" + validated_data["category_code"]
         item_category = ItemCategory.objects.create(**validated_data)
         item_category.save()
         return item_category
@@ -103,7 +103,7 @@ class ItemSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data['item_compound_id'] = self.context['request'].user.contracting.contracting_code + \
-                "#" + validated_data['item_table'].item_table_code + "#" + validated_data["item_code"]
+                "&" + validated_data['item_table'].item_table_code + "&" + validated_data["item_code"]
         item = Item.objects.create(**validated_data)
         return item
 
@@ -175,7 +175,7 @@ class PriceTablePOSTSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         price_items = validated_data.pop('price_items')
         validated_data['price_table_compound_id'] = self.context['request'].user.contracting.contracting_code + \
-                "#" + validated_data['company'].company_compound_id + "#" + validated_data["table_code"]
+                "&" + validated_data['company'].company_compound_id + "&" + validated_data["table_code"]
         price_table = PriceTable.objects.create(**validated_data)
         price_table.save()
         price_items_list = []
@@ -255,7 +255,7 @@ class OrderPOSTSerializer(serializers.ModelSerializer):
 
     def validate_establishment(self, value):
         # Contracting ownership
-        if value.establishment_compound_id.split("#")[0] != self.context['request'].user.contracting.contracting_code:
+        if value.establishment_compound_id.split("&")[0] != self.context['request'].user.contracting.contracting_code:
             raise serializers.ValidationError(_("Establishment not found."))
         return value
 

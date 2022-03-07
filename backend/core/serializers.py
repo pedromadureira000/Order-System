@@ -17,6 +17,7 @@ from django.utils.translation import gettext_lazy as _
 #-----------------------------------------------/Organizations Serializers
 
 class ContractingSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(min_length=3, max_length=60)
     class Meta:
         model = Contracting
         fields = ['contracting_code', 'name', 'status', 'active_users_limit', 'note']
@@ -34,7 +35,7 @@ class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
         fields = ['company_compound_id', 'company_code', 'contracting', 'item_table', 'client_table', 'name',
-                'cnpj','status', 'note']
+                'cnpj_root','status', 'note']
         validators = [UniqueTogetherValidator(queryset=Company.objects.all(), fields=['company_code', 'contracting'], 
             message=_("The 'company_code' field must be unique."))]
 
@@ -56,7 +57,7 @@ class CompanySerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data['company_compound_id'] = validated_data['contracting'].contracting_code + \
-                "#" + validated_data['company_code']
+                "&" + validated_data['company_code']
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
@@ -82,8 +83,8 @@ class EstablishmentSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         # Create establishment_compound_id
-        validated_data['establishment_compound_id'] = validated_data['company'].contracting.contracting_code + "#" + \
-                validated_data['company'].company_code + "#" + validated_data['establishment_code']
+        validated_data['establishment_compound_id'] = validated_data['company'].contracting.contracting_code + "&" + \
+                validated_data['company'].company_code + "&" + validated_data['establishment_code']
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
@@ -105,7 +106,7 @@ class ClientTableSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # Create client_table_compound_id
         validated_data['client_table_compound_id'] = validated_data['contracting'].contracting_code + \
-                "#" + validated_data['client_table_code']
+                "&" + validated_data['client_table_code']
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
@@ -187,8 +188,8 @@ class ClientSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # Create client_compound_id
         client = Client.objects.create(
-            client_compound_id = validated_data['client_table'].contracting.contracting_code + "#" + \
-                    validated_data['client_table'].client_table_code + "#" + validated_data['client_code'],
+            client_compound_id = validated_data['client_table'].contracting.contracting_code + "&" + \
+                    validated_data['client_table'].client_table_code + "&" + validated_data['client_code'],
             client_table=validated_data['client_table'],
             client_code=validated_data['client_code'],
             vendor_code=validated_data.get('vendor_code', ''), #Optional field

@@ -21,7 +21,7 @@ export const state = (): UserState => ({
 	sessionError: false
 })  
 
-// ------------------------------------------/actions/-------------------------------------------
+// ------------------------------------------/ACTIONS/-------------------------------------------
 
 import {ActionTree, Commit, Dispatch} from "vuex"
 import {RootState} from "@/store/index"
@@ -30,7 +30,7 @@ import api from "~api"
 
 export const actions: ActionTree<UserState, RootState> = {
 
-// -------------------------------/ user api
+// -------------------------------/ Auth API
 	
 	async checkAuthenticated({commit, state}: {commit: Commit, state: UserState}) {
 		try {
@@ -142,21 +142,61 @@ export const actions: ActionTree<UserState, RootState> = {
 		// }
 	// },
 
-	// -------------------------------------/ admin api 
+	// -------------------------------------/ Admin API 
+	// -----------/ CRUD Organization API 
 
-	async createUser({dispatch}: {dispatch: Dispatch,}, payload: any){
+	async createContracting({dispatch}: {dispatch: Dispatch,}, payload: any){
 		try {
-			let data = await api.createUser(payload)
+			let data = await api.createContracting(payload)
 			console.log(">>>",data)
-			dispatch("setAlert", {message: "User created", alertType: "success"}, { root: true })
+			dispatch("setAlert", {message: "Contracting created", alertType: "success"}, { root: true })
 			return data
 		}
 		catch(e){
-			// dispatch("setAlert", {message: "Something went wrong when trying to create user.", alertType: "error"}, { root: true })
-			// let errorMessage: string = Object.values(e.response.data)[0][0] <<< why i got this ts error? "Object is of type "unknown""
 			let error: string[] = Object.values(e.response.data)
 			let errorMessage = error[0][0]
 			dispatch("setAlert", {message: errorMessage , alertType: "error"}, { root: true })
+		}
+	},
+
+	async fetchContractingCompanies({dispatch}: {dispatch: Dispatch,}){
+    try{
+      let users = await api.fetchContractingCompanies()
+      return users
+    }
+		catch(e){
+      dispatch("setAlert", {message: "Something went wrong when trying to fetch contracting companies.", alertType: "error"}, { root: true })
+		}
+	},
+
+  async updateContracting({commit, dispatch}: {commit: Commit, dispatch: Dispatch,}, payload: any){
+    try {
+    let data = await api.updateContracting(payload)
+    console.log(">>",data)
+    dispatch("setAlert", {message: "Contracting has been updated.", alertType: "success"}, { root: true })
+    return data
+    }
+    catch(e){
+      handleError(e.response, commit)
+			let error: string[] = Object.values(e.response.data)
+			let errorMessage = error[0][0]
+			dispatch("setAlert", {message: errorMessage , alertType: "error"}, { root: true })
+      // dispatch("setAlert", {message: "Something went wrong when trying to update price table.", alertType: "error"}, { root: true })
+    }
+  },
+
+	async deleteContracting({commit, dispatch}: {commit: Commit, dispatch: Dispatch,}, payload: any){
+		try {
+			let data = await api.deleteContracting(payload)
+			console.log(">>>",data)
+			dispatch("setAlert", {message: "Contracting deleted", alertType: "success"}, { root: true })
+			return "ok"
+		}
+		catch(e){
+			// dispatch("setAlert", {message: "Something went wrong when trying to delete user.", alertType: "error"}, { root: true })
+			let error: string[] = Object.values(e.response.data)
+			let errorMessage = error[0]
+			dispatch("setAlert", {message: errorMessage, alertType: "error"}, { root: true })
 		}
 	},
 
@@ -171,6 +211,17 @@ export const actions: ActionTree<UserState, RootState> = {
 			let error: string[] = Object.values(e.response.data)
 			let errorMessage = error[0][0]
 			dispatch("setAlert", {message: errorMessage , alertType: "error"}, { root: true })
+		}
+	},
+
+	async fetchCompanies({dispatch}: {dispatch: Dispatch,}){
+    try {
+      let companies = await api.fetchCompanies()
+      return companies
+
+    }
+		catch(e){
+      dispatch("setAlert", {message: "Something went wrong when trying to fetch companies.", alertType: "error"}, { root: true })
 		}
 	},
 
@@ -190,9 +241,9 @@ export const actions: ActionTree<UserState, RootState> = {
     }
   },
 
-	async deleteComapany({commit, dispatch}: {commit: Commit, dispatch: Dispatch,}, payload: any){
+	async deleteCompany({commit, dispatch}: {commit: Commit, dispatch: Dispatch,}, payload: any){
 		try {
-			let data = await api.deleteComapany(payload)
+			let data = await api.deleteCompany(payload)
 			console.log(">>>",data)
 			dispatch("setAlert", {message: "Company deleted", alertType: "success"}, { root: true })
 			return "ok"
@@ -205,14 +256,32 @@ export const actions: ActionTree<UserState, RootState> = {
 		}
 	},
 
+	async fetchClientTables({dispatch}: {dispatch: Dispatch,}){
+		let client_tables = await api.fetchClientTables()
+		return client_tables
+	},
+
+	// -----------/ CRUD User API 
+  
+	async createUser({dispatch}: {dispatch: Dispatch,}, payload: any){
+		try {
+			let data = await api.createUser(payload)
+			console.log(">>>",data)
+			dispatch("setAlert", {message: "User created", alertType: "success"}, { root: true })
+			return data
+		}
+		catch(e){
+			// dispatch("setAlert", {message: "Something went wrong when trying to create user.", alertType: "error"}, { root: true })
+			// let errorMessage: string = Object.values(e.response.data)[0][0] <<< why i got this ts error? "Object is of type "unknown""
+			let error: string[] = Object.values(e.response.data)
+			let errorMessage = error[0][0]
+			dispatch("setAlert", {message: errorMessage , alertType: "error"}, { root: true })
+		}
+	},
+
 	async fetchUsersByAdmin({dispatch}: {dispatch: Dispatch,}){
 		let users = await api.fetchUsersByAdmin()
 		return users
-	},
-
-	async fetchCompanies({dispatch}: {dispatch: Dispatch,}){
-		let companies = await api.fetchCompanies()
-		return companies
 	},
 
 	async deleteUserByAdmin({commit, dispatch}: {commit: Commit, dispatch: Dispatch,}, payload: any){
@@ -232,7 +301,7 @@ export const actions: ActionTree<UserState, RootState> = {
 
 }
 
-// --------------------------------------------/mutations/---------------------------------------------
+// --------------------------------------------/MUTATIONS/---------------------------------------------
 
 import {MutationTree} from "vuex"
 import {handleError} from "~/helpers/functions";

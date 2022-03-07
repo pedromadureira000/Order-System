@@ -14,7 +14,7 @@
   import {admin, adminAgent, agent} from '~/helpers/permissions'
   /** let usersSubMenuPermissions = adminAgent.concat(admin).concat(agent) */
   export default {
-    middleware: ["authenticated", "admin"],
+    middleware: ["authenticated"],
     data: () => ({ 
       value: 'User',
       /** allMenuItems: [ */
@@ -27,11 +27,7 @@
       currentMenuItems() {
         let user = this.$store.state.auth.currentUser;
         return this.allMenuItems.filter(MenuItem => {
-          let addItem = false
-          MenuItem.permissions.forEach(permission => {
-            if (user.permissions.includes(permission)){addItem = true; return;}
-          })
-          return addItem
+          return MenuItem.permissions.some(permission => user.permissions.includes(permission))
         })
       },
     },

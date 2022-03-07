@@ -56,9 +56,9 @@
 /** import { validationMixin } from "vuelidate"; */
 
 export default {
-  middleware: ["authenticated", "admin"],
+  middleware: ["authenticated"],
   components: {
-    "user-edit-menu": require("@/components/admin/user-edit-menu.vue").default,
+    /** "user-edit-menu": require("@/components/admin/item/user-edit-menu.vue").default, */
   },
   /** mixins: [validationMixin], */
 

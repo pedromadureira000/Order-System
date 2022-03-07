@@ -1,23 +1,14 @@
 from django.contrib.auth.models import Permission
 from django.db.models.query_utils import Q
-from rolepermissions.checkers import has_permission, has_role
-from rolepermissions.permissions import available_perm_status, grant_permission, revoke_permission
+from rolepermissions.checkers import has_permission
+from rolepermissions.permissions import available_perm_status
 from core.models import AgentEstablishment, Client, ClientEstablishment, ClientTable, Company, User
-from orders.models import ItemTable, PriceItem, PriceTable
-from .roles import Agent
-
-
+from orders.models import ItemTable, PriceItem
 
 def company_has_active_users(company):
     if type(company.user_set.filter(is_active=True).all().first()) == User:
         return True
     return False
-
-def get_all_users_by_erp(user):
-    return User.objects.filter(is_superuser=False, contracting=user.contracting)
-
-def get_all_users_by_admin_agent(user):
-    return User.objects.filter(Q(is_superuser=False), Q(contracting=user.contracting), ~Q(groups__name='erp'))
 
 def get_all_client_users_by_agent(agent):
     if has_permission(agent, 'access_all_establishments'):
