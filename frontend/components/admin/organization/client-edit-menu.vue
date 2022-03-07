@@ -99,7 +99,7 @@ export default {
           icon: 'mdi-delete',
           async click(){
             let data = await this.$store.dispatch(
-              'auth/deleteCompany', 
+              'organization/deleteCompany', 
               {company_code: this.company.company_code}
             )
 						if (data === "ok"){
@@ -110,7 +110,7 @@ export default {
       ]
     }),
   async fetch(){
-    let pricetables = await this.$store.dispatch("orders/fetchPriceTables");
+    let pricetables = await this.$store.dispatch("item/fetchPriceTables");
     for ( let key in pricetables){ 
       this.pricetables.push(pricetables[key])
     }
@@ -122,7 +122,7 @@ export default {
         this.menu_items[index].click.call(this) // will call the function but the function will use the vue instance 'this' context.
       },
       async updateCompany(){
-        let data = await this.$store.dispatch("auth/updateCompany", {
+        let data = await this.$store.dispatch("organization/updateCompany", {
           company_code: this.company.company_code,
           price_table: this.companyPriceTable
         })

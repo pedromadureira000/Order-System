@@ -92,7 +92,7 @@ export default {
         icon: 'mdi-delete',
         async click(){
           let data = await this.$store.dispatch(
-            'auth/deleteContracting', 
+            'organization/deleteContracting', 
             {contracting_code: this.contracting.contracting_code}
           )
           if (data === "ok"){
@@ -160,7 +160,7 @@ export default {
     async updateContracting(){
       // If update is successful, I update in the contracting prop
       try{
-        let data = await this.$store.dispatch("auth/updateContracting", {
+        let data = await this.$store.dispatch("organization/updateContracting", {
           contracting_code: this.contracting.contracting_code,
           name: this.name,
           active_users_limit: this.active_users_limit,

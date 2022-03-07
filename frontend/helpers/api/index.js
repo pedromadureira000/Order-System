@@ -2,6 +2,119 @@ import axios from '~/plugins/axios'
 
 export default {
 
+  // --------------------------------------/ CRUD Organization APIs /----------------------------------------
+  
+	async createContracting(payload){
+    let data_body = {
+      name: payload.name,
+      contracting_code: payload.contracting_code,
+      active_users_limit: payload.active_users_limit,
+      status: payload.status,
+      note: payload.note,
+		}
+		return await axios({ 
+		method: "post",
+		url: "/api/organization/contracting",
+		data: data_body}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async fetchContractingCompanies(){
+		return await axios({ 
+		method: "get",
+		url: "/api/organization/contracting",
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async updateContracting(payload){
+		return await axios({ 
+		method: "put",
+		url: `/api/organization/contracting/${payload.contracting_code}`,
+		data:{
+      name: payload.name,
+      active_users_limit: payload.active_users_limit,
+      status: payload.status,
+      note: payload.note,
+		}
+			}).then((request) => {
+					return request.data 
+				})
+	},
+  
+	async deleteContracting(payload){
+		return await axios({ 
+		method: "delete",
+		url: `/api/organization/contracting/${payload.contracting_code}`,
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async createCompany(payload){
+    let data_body = {
+      name: payload.name,
+      company_code: payload.company_code,
+      cnpj_root: payload.cnpj_root,
+      client_table: payload.client_table,
+      item_table: payload.item_table,
+      status: payload.status,
+      note: payload.note,
+		}
+		return await axios({ 
+		method: "post",
+		url: "/api/organization/company",
+		data: data_body}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async fetchCompanies(){
+		return await axios({ 
+		method: "get",
+		url: "/api/organization/company",
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async updateCompany(payload){
+		return await axios({ 
+		method: "put",
+    url: `/api/organization/company/${payload.company_compound_id}`,
+		data:{
+      name: payload.name,
+      cnpj_root: payload.cnpj_root,
+      client_table: payload.client_table,
+      item_table: payload.item_table,
+      status: payload.status,
+      note: payload.note,
+		}
+			}).then((request) => {
+					return request.data 
+				})
+	},
+  
+	async deleteCompany(payload){
+		return await axios({ 
+		method: "delete",
+		url: `/api/organization/company/${payload.company_compound_id}`,
+			}).then((request) => {
+					return request.data 
+				})
+	}, 
+
+	async fetchClientTables(){
+		return await axios({ 
+		method: "get",
+		url: "/api/organization/client_table",
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
   // --------------------------------------/ Auth APIs /----------------------------------------
 	async checkAuthenticated(){
 		return await axios.get("/api/user/own_profile").then((data)=> {return data.data})
@@ -59,118 +172,6 @@ export default {
 				})
 	},
 
-  // --------------------------------------/ CRUD Organization APIs /----------------------------------------
-  
-	async createContracting(payload){
-    let data_body = {
-      name: payload.name,
-      contracting_code: payload.contracting_code,
-      active_users_limit: payload.active_users_limit,
-      status: payload.status,
-      note: payload.note,
-		}
-		return await axios({ 
-		method: "post",
-		url: "/api/user/contracting",
-		data: data_body}).then((request) => {
-					return request.data 
-				})
-	},
-
-	async fetchContractingCompanies(){
-		return await axios({ 
-		method: "get",
-		url: "/api/user/contracting",
-			}).then((request) => {
-					return request.data 
-				})
-	},
-
-	async updateContracting(payload){
-		return await axios({ 
-		method: "put",
-		url: `/api/user/contracting/${payload.contracting_code}`,
-		data:{
-      name: payload.name,
-      active_users_limit: payload.active_users_limit,
-      status: payload.status,
-      note: payload.note,
-		}
-			}).then((request) => {
-					return request.data 
-				})
-	},
-  
-	async deleteContracting(payload){
-		return await axios({ 
-		method: "delete",
-		url: `/api/user/contracting/${payload.contracting_code}`,
-			}).then((request) => {
-					return request.data 
-				})
-	},
-
-	async createCompany(payload){
-    let data_body = {
-      name: payload.name,
-      company_code: payload.company_code,
-      cnpj_root: payload.cnpj_root,
-      client_table: payload.client_table,
-      item_table: payload.item_table,
-      status: payload.status,
-      note: payload.note,
-		}
-		return await axios({ 
-		method: "post",
-		url: "/api/user/company",
-		data: data_body}).then((request) => {
-					return request.data 
-				})
-	},
-
-	async fetchCompanies(){
-		return await axios({ 
-		method: "get",
-		url: "/api/user/company",
-			}).then((request) => {
-					return request.data 
-				})
-	},
-
-	async updateCompany(payload){
-		return await axios({ 
-		method: "put",
-    url: `/api/user/company/${payload.company_compound_id}`,
-		data:{
-      name: payload.name,
-      cnpj_root: payload.cnpj_root,
-      client_table: payload.client_table,
-      item_table: payload.item_table,
-      status: payload.status,
-      note: payload.note,
-		}
-			}).then((request) => {
-					return request.data 
-				})
-	},
-  
-	async deleteCompany(payload){
-		return await axios({ 
-		method: "delete",
-		url: `/api/user/company/${payload.company_compound_id}`,
-			}).then((request) => {
-					return request.data 
-				})
-	}, 
-
-	async fetchClientTables(){
-		return await axios({ 
-		method: "get",
-		url: "/api/user/client_table",
-			}).then((request) => {
-					return request.data 
-				})
-	},
 
   // --------------------------------------/ CRUD User APIs /----------------------------------------
   
@@ -228,7 +229,7 @@ export default {
 	async fetchItemTables(){
 		return await axios({ 
 		method: "get",
-		url: "/api/orders/item_table",
+		url: "/api/item/item_table",
 			}).then((request) => {
 					return request.data 
 				})
@@ -247,7 +248,7 @@ export default {
     //TODO Image
 		return await axios({ 
 		method: "post",
-		url: "/api/orders/item",
+		url: "/api/item/item",
 		data: data_body}).then((request) => {
 					return request.data 
 				})
@@ -256,7 +257,7 @@ export default {
 	async fetchItems(){
 		return await axios({ 
 		method: "get",
-		url: "/api/orders/item",
+		url: "/api/item/item",
 			}).then((request) => {
 					return request.data 
 				})
@@ -270,7 +271,7 @@ export default {
 		}
 		return await axios({ 
 		method: "post",
-		url: "/api/orders/category",
+		url: "/api/item/category",
 		data: data_body}).then((request) => {
 					return request.data 
 				})
@@ -279,7 +280,7 @@ export default {
 	async fetchCategories(){
 		return await axios({ 
 		method: "get",
-		url: "/api/orders/category",
+		url: "/api/item/category",
 			}).then((request) => {
 					return request.data 
 				})
@@ -294,7 +295,7 @@ export default {
 		}
 		return await axios({ 
 		method: "post",
-		url: "/api/orders/pricetable",
+		url: "/api/item/pricetable",
 		data: data_body}).then((request) => {
 					return request.data 
 				})
@@ -304,7 +305,7 @@ export default {
 	async updatePriceTable(payload){
 		return await axios({ 
 		method: "put",
-		url: `/api/orders/pricetable/${payload.table_code}`,
+		url: `/api/item/pricetable/${payload.table_code}`,
 		data:{
       name: payload.name, 
       table_code: payload.table_code,
@@ -319,7 +320,7 @@ export default {
 	async fetchPriceTables(){
 		return await axios({ 
 		method: "get",
-		url: "/api/orders/pricetable",
+		url: "/api/item/pricetable",
 			}).then((request) => {
 					return request.data 
 				})
@@ -328,7 +329,7 @@ export default {
 	async deletePriceTable(payload){
 		return await axios({ 
 		method: "delete",
-		url: `/api/orders/pricetable/${payload.table_code}`
+		url: `/api/item/pricetable/${payload.table_code}`
 			}).then((request) => {
 					return request.data 
 				})

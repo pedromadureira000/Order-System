@@ -120,7 +120,7 @@ export default {
           icon: 'mdi-delete',
           async click(){
             let data = await this.$store.dispatch(
-              'orders/deletePriceTable', 
+              'item/deletePriceTable', 
               {table_code: this.pricetable.table_code}
             )
 						if (data === "ok"){
@@ -147,7 +147,7 @@ export default {
         return item.name
       },
       updatePriceTable(){
-        this.$store.dispatch("orders/updatePriceTable", this.pricetable)
+        this.$store.dispatch("item/updatePriceTable", this.pricetable)
       }
   },
 

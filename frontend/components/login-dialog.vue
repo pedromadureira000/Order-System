@@ -77,8 +77,8 @@ export default {
         this.$store.dispatch("setAlert", { message: "Please fill the form correctly.", alertType: "error" }, { root: true })
       } else {
         this.loading = true
-        await this.$store.dispatch('auth/login', {username: this.username, contracting_code: this.contracting_code, password: this.password} )
-        if (this.$store.state.auth.currentUser){
+        await this.$store.dispatch('user/login', {username: this.username, contracting_code: this.contracting_code, password: this.password} )
+        if (this.$store.state.user.currentUser){
           this.visible = false
         }      
         this.loading = false
@@ -111,8 +111,8 @@ export default {
 
 	watch: {
 		visible(newvalue, oldvalue) {
-			if (newvalue === true && !this.$store.state.auth.csrftoken){
-				this.$store.dispatch('auth/getCsrf')		
+			if (newvalue === true && !this.$store.state.user.csrftoken){
+				this.$store.dispatch('user/getCsrf')		
 			}
 		}
 	},

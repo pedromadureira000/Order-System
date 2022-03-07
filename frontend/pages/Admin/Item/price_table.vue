@@ -85,13 +85,13 @@ export default {
   },
 
   async fetch() {
-    let pricetables = await this.$store.dispatch("orders/fetchPriceTables");
+    let pricetables = await this.$store.dispatch("item/fetchPriceTables");
     for (const item_index in pricetables){
       let pricetable = pricetables[item_index]
       this.pricetables.push(pricetable)
     }
     /** console.log(">>>>>>>>>>", this.pricetables[0]) */
-    let items = await this.$store.dispatch("orders/fetchItems");
+    let items = await this.$store.dispatch("item/fetchItems");
     items.forEach((item)=> item["price_unit"] = null)  //Gambiarra: i don't fugure out a way to receve input value without use v-model
     this.items =  items
 /** items[key]['price_unit'] */
@@ -120,7 +120,7 @@ export default {
         /** this.$store.dispatch("setAlert", { message: "Please fill the form correctly.", alertType: "error" }, { root: true }) */
       /** } else { */
         this.loading = true;
-        let data = await this.$store.dispatch("orders/createPriceTable", {
+        let data = await this.$store.dispatch("item/createPriceTable", {
           name: this.name, 
           table_code: this.table_code,
           description: this.description,

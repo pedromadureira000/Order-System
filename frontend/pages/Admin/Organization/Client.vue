@@ -156,7 +156,7 @@ export default {
   },
 
   async fetch() {
-    let clients = await this.$store.dispatch("auth/fetchClients");
+    let clients = await this.$store.dispatch("organization/fetchClients");
     for (const client_index in clients){
       let client = clients[client_index]
       /** this.clients.push({name: client.name, cnpj: client.cnpj, client_code: client.client_code, */
@@ -225,7 +225,7 @@ export default {
         this.$store.dispatch("setAlert", { message: "Please fill the form correctly.", alertType: "error" }, { root: true })
       } else {
         this.loading = true;
-        let data = await this.$store.dispatch("auth/createClient", {
+        let data = await this.$store.dispatch("organization/createClient", {
           name: this.name, 
           cnpj: this.cnpj,
           client_code: this.client_code,
@@ -245,15 +245,15 @@ export default {
       this.clients = this.clients.filter((client) => client.client_code != clientToDelete.client_code);
     },
     haveCreateClientPermissions(){
-			let user = this.$store.state.auth.currentUser;
+			let user = this.$store.state.user.currentUser;
       if (user.permissions.includes("create_client" )){return true}
     },
     isAdmin(){
-			let user = this.$store.state.auth.currentUser;
+			let user = this.$store.state.user.currentUser;
       if (user.roles.includes("admin")) {return true}
     },
     isAdminAgent(){
-			let user = this.$store.state.auth.currentUser;
+			let user = this.$store.state.user.currentUser;
       if (user.roles.includes("admin_agent")) {return true}
     }
   },

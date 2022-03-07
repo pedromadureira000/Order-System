@@ -36,9 +36,9 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
 ADMIN_ENABLED = DEBUG
 
 # Auth User model
-AUTH_USER_MODEL = 'core.User'
+AUTH_USER_MODEL = 'user.User'
 
-ROLEPERMISSIONS_MODULE = 'core.roles'
+ROLEPERMISSIONS_MODULE = 'user.roles'
 
 ROLEPERMISSIONS_SUPERUSER_SUPERPOWERS = False
 
@@ -46,8 +46,10 @@ CSRF_TRUSTED_ORIGINS = ['http://localhost:3000']
 # Application definition
 
 INSTALLED_APPS = [
-    'core',
-    'orders',
+    'user',
+    'organization',
+    'item',
+    'order',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -71,7 +73,7 @@ MIDDLEWARE = [
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'core.middleware.OneSessionPerUserMiddleware',
+    'user.middleware.OneSessionPerUserMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     #  'axes.middleware.AxesMiddleware',

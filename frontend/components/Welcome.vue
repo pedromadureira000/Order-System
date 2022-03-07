@@ -9,7 +9,7 @@ export default {
 		}),
 		computed: {
 			user() {
-				return this.$store.state.auth.currentUser
+				return this.$store.state.user.currentUser
 			},
 		},
 		watch: {
@@ -23,8 +23,8 @@ export default {
 			}	
 		},
 		created() {
-			if (this.$store.state.auth.currentUser){
-				this.message = `Welcome ${this.$store.state.auth.currentUser.first_name}!`
+			if (this.$store.state.user.currentUser){
+				this.message = `Welcome ${this.$store.state.user.currentUser.first_name}!`
 			} else {
 				this.message = "Please login to access modules." 
 			}

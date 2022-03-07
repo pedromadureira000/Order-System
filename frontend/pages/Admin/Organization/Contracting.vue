@@ -120,7 +120,7 @@ export default {
   },
 
   async fetch() {
-    let contracting_companies = await this.$store.dispatch("auth/fetchContractingCompanies");
+    let contracting_companies = await this.$store.dispatch("organization/fetchContractingCompanies");
     for (const contracting_index in contracting_companies){
       let contracting = contracting_companies[contracting_index]
       this.contracting_companies.push(contracting)
@@ -197,7 +197,7 @@ export default {
         this.$store.dispatch("setAlert", { message: "Please fill the form correctly.", alertType: "error" }, { root: true })
       } else {
         this.loading = true;
-        let data = await this.$store.dispatch("auth/createContracting", {
+        let data = await this.$store.dispatch("organization/createContracting", {
           name: this.name, 
           contracting_code: this.contracting_code,
           status: this.status,

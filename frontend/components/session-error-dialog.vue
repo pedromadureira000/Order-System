@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="$store.state.auth.sessionError" max-width="500px">
+  <v-dialog v-model="$store.state.user.sessionError" max-width="500px">
     <v-card>
       <v-card-title>Log in</v-card-title>
       <v-card-text>
@@ -28,9 +28,9 @@ export default {
   methods: {
     async userHere() {
       this.loading = true
-			await this.$store.dispatch('auth/checkAuthenticated')
-			if (this.$store.state.auth.currentUser){
-				this.$store.commit('auth/toggleSessionError')	
+			await this.$store.dispatch('user/checkAuthenticated')
+			if (this.$store.state.user.currentUser){
+				this.$store.commit('user/toggleSessionError')	
 			}      
 			this.loading = false
     },
@@ -51,7 +51,7 @@ export default {
 	watch: {
 		checkSession(newvalue, oldvalue) {
 			if (newvalue === true){
-				/** this.$store.dispatch('auth/')		 */
+				/** this.$store.dispatch('user/')		 */
 				console.log('>> api get >checkSessionDelay')
 				this.checkSession = false
 				this.checkSessionDelay()

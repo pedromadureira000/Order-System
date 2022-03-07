@@ -112,7 +112,7 @@ export default {
           icon: 'mdi-delete',
           async click(){
             let data = await this.$store.dispatch(
-              'auth/deleteUserByAdmin', 
+              'user/deleteUserByAdmin', 
               {username: this.user.username, company_code: this.user.company_code}
             )
 						if (data === "ok"){
@@ -128,7 +128,7 @@ export default {
         this.menu_items[index].click.call(this) // will call the function but the function will use the vue instance 'this' context.
       },
       updateUser(){
-        this.$store.dispatch("orders/updateUser", this.user)
+        this.$store.dispatch("user/updateUser", this.user)
       }
   },
 }

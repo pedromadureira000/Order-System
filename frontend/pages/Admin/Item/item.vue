@@ -129,7 +129,7 @@ export default {
   },
 
   async fetch() {
-    let items = await this.$store.dispatch("orders/fetchItems");
+    let items = await this.$store.dispatch("item/fetchItems");
     /** for (const item_index in items){ */
       /** let item = items[item_index] */
       /** this.items.push({name: item.name, item_code: item.item_code, description: item.description, */
@@ -139,7 +139,7 @@ export default {
       let item = items[item_index]
       this.items.push(item)
     }
-    this.categories = await this.$store.dispatch("orders/fetchCategories"); 
+    this.categories = await this.$store.dispatch("item/fetchCategories"); 
     if (this.categories.length > 0){
       this.category = this.categories[0]["category_code"]
     }
@@ -168,7 +168,7 @@ export default {
         /** this.$store.dispatch("setAlert", { message: "Please fill the form correctly.", alertType: "error" }, { root: true }) */
       /** } else { */
         this.loading = true;
-        let data = await this.$store.dispatch("orders/createItem", {
+        let data = await this.$store.dispatch("item/createItem", {
           name: this.name, 
           item_code: this.item_code,
           description: this.description,

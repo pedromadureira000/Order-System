@@ -3,7 +3,7 @@
 		<v-navigation-drawer v-model="drawer" app> 
       <!-- Test Button -->
       <v-card class="pa-3" color="blue-grey darken-4" tile>
-				<v-btn @click.prevent="$store.dispatch('auth/checkAuthenticated')">test</v-btn>
+				<v-btn @click.prevent="$store.dispatch('user/checkAuthenticated')">test</v-btn>
       </v-card>
       <!-- MenuItems composition -->
       <v-list nav dense>
@@ -124,7 +124,7 @@ export default {
       {permissions: organizationPermissions, title: "Organizations", icon: "mdi-clipboard-check-multiple", to: "/admin/organization"},
 			{permissions: usersMenuPermissions , title: "Users", icon: "mdi-account-group", to: "/admin/user"},
 			{permissions: itemsMenuPermissions, title: "Items", icon: "mdi-cart-variant", to: "/admin/item"},
-      {permissions: orderPermissions, title: "Orders", icon: "mdi-clipboard-check-multiple", to: "/client/orders"},
+      {permissions: orderPermissions, title: "Orders", icon: "mdi-clipboard-check-multiple", to: "/client/order"},
 		],
 	}),
 
@@ -135,24 +135,24 @@ export default {
       evt.stopPropagation()
     },
     logout() {
-			this.$store.dispatch('auth/logout')
+			this.$store.dispatch('user/logout')
     },
   },
 
   computed: {
 		logged_user(){
-			return this.$store.state.auth.currentUser
+			return this.$store.state.user.currentUser
 		},
     /** Calculates which Menus the CurrentUser has access and return it concatenated with defaultMenuItems (between Home and About page). */
 		currentMenuItems() {
-			let user = this.$store.state.auth.currentUser;
+			let user = this.$store.state.user.currentUser;
 			if (user) {
         console.log(">>>>>>> ", user)
 				return this.defaultMenuItems
 					.slice(0, 1)
           .concat(this.allMenuItems.filter(MenuItem => {
             return MenuItem.permissions.some(permission => {
-              return this.$store.state.auth.currentUser.permissions.includes(permission)
+              return this.$store.state.user.currentUser.permissions.includes(permission)
             })
           }))
 					.concat(this.defaultMenuItems.slice(1, 2));

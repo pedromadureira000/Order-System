@@ -26,7 +26,7 @@
 
     computed: {
       currentMenuItems() {
-        let user = this.$store.state.auth.currentUser;
+        let user = this.$store.state.user.currentUser;
         return this.allMenuItems.filter(MenuItem => {
           return MenuItem.permissions.some(permission => user.permissions.includes(permission))
         })

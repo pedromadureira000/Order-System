@@ -217,14 +217,14 @@ export default {
   },
 
   async fetch() {
-    let users = await this.$store.dispatch("auth/fetchUsersByAdmin");
+    let users = await this.$store.dispatch("user/fetchUsersByAdmin");
     for (const user_index in users){
       let user = users[user_index]
       console.log(">>>>>>> ", user)
       this.users.push({username: user.username, complete_name: `${user.first_name} ${user.last_name}`, 
         email: user.email, cpf: user.cpf, company: user.company.name, role:user.roles[0],company_code: user.company.company_code})
     }
-    let companies = await this.$store.dispatch("auth/fetchCompanies");
+    let companies = await this.$store.dispatch("organization/fetchCompanies");
     for (const company_index in companies){
       let company = companies[company_index]
       /** this.companies.push({name: company.name, cnpj: company.cnpj, company_code: company.company_code, */
@@ -287,7 +287,7 @@ export default {
         this.$store.dispatch("setAlert", { message: "Please fill the form correctly.", alertType: "error" }, { root: true })
       } else {
         this.loading = true;
-        let data = await this.$store.dispatch("auth/createUser", {
+        let data = await this.$store.dispatch("user/createUser", {
           username: this.username, 
           company_code: this.company_code,
           first_name: this.first_name,
@@ -310,15 +310,15 @@ export default {
         userToDelete.username + "#" + userToDelete.company_code);
     },
     haveCreateClientPermissions(){
-			let user = this.$store.state.auth.currentUser;
+			let user = this.$store.state.user.currentUser;
       if (user.permissions.includes("create_client" )){return true}
     },
     isAdmin(){
-			let user = this.$store.state.auth.currentUser;
+			let user = this.$store.state.user.currentUser;
       if (user.roles.includes("admin")) {return true}
     },
     isAdminAgent(){
-			let user = this.$store.state.auth.currentUser;
+			let user = this.$store.state.user.currentUser;
       if (user.roles.includes("admin_agent")) {return true}
     }
   },
@@ -394,7 +394,7 @@ export default {
   watch: {
     userRole: function(userRole){
       if (userRole === "agent" && !this.isAdmin()){
-        this.company_code = this.$store.state.auth.currentUser.company.company_code
+        this.company_code = this.$store.state.user.currentUser.company.company_code
         /** console.log(">>>>>>> watcher userRole passed") */
       }
     }

@@ -111,10 +111,10 @@ export default {
 
   data() {
     return {
-			first_name: this.$store.state.auth.currentUser.first_name,
-			last_name: this.$store.state.auth.currentUser.last_name,
-			email: this.$store.state.auth.currentUser.email,
-			cpf: this.$store.state.auth.currentUser.cpf,
+			first_name: this.$store.state.user.currentUser.first_name,
+			last_name: this.$store.state.user.currentUser.last_name,
+			email: this.$store.state.user.currentUser.email,
+			cpf: this.$store.state.user.currentUser.cpf,
       current_password: "",
       password: "",
       password_confirm: "",
@@ -164,14 +164,14 @@ export default {
         this.$store.dispatch("setAlert", { message: "Please fill the form correctly.", alertType: "error" }, { root: true })
       } else {
         if (
-          this.first_name === this.$store.state.auth.currentUser.first_name &&
-          this.last_name === this.$store.state.auth.currentUser.last_name &&
-          this.email === this.$store.state.auth.currentUser.email &&
-          this.cpf === this.$store.state.auth.currentUser.cpf
+          this.first_name === this.$store.state.user.currentUser.first_name &&
+          this.last_name === this.$store.state.user.currentUser.last_name &&
+          this.email === this.$store.state.user.currentUser.email &&
+          this.cpf === this.$store.state.user.currentUser.cpf
         ){ this.$store.dispatch('setAlert', {message: "You must change some field to update profile.", alertType: 'warning'}, { root: true }) }
         else {
           this.loading_profile = true;
-          await this.$store.dispatch('auth/updateCurrentUserProfile', {
+          await this.$store.dispatch('user/updateCurrentUserProfile', {
             first_name: this.first_name,
             last_name: this.last_name,
             email: this.email,
@@ -187,7 +187,7 @@ export default {
         this.$store.dispatch("setAlert", { message: "Please fill the form correctly.", alertType: "error" }, { root: true })
       } else {
         this.loading_password = true;
-        await this.$store.dispatch('auth/updatePassword', {password: this.password, current_password: this.current_password})
+        await this.$store.dispatch('user/updatePassword', {password: this.password, current_password: this.current_password})
         this.loading_password = false;
       }
     },

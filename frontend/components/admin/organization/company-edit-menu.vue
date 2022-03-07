@@ -35,7 +35,7 @@
               ></v-radio>
               <v-radio
                 label="None"
-                value=null
+                value=""
               ></v-radio>
             </v-radio-group>
             <!-- Item table -->
@@ -48,7 +48,7 @@
               ></v-radio>
               <v-radio
                 label="None"
-                value=null
+                value=""
               ></v-radio>
             </v-radio-group>
             <!-- Company Status -->
@@ -120,7 +120,7 @@ export default {
         icon: 'mdi-delete',
         async click(){
           let data = await this.$store.dispatch(
-            'auth/deleteCompany', 
+            'organization/deleteCompany', 
             {company_compound_id: this.company.company_compound_id}
           )
           if (data === "ok"){
@@ -182,7 +182,7 @@ export default {
       },
       async updateCompany(){
         try {
-          let data = await this.$store.dispatch("auth/updateCompany", {
+          let data = await this.$store.dispatch("organization/updateCompany", {
             company_compound_id: this.company.company_compound_id,
             name: this.name,
             cnpj_root: this.cnpj_root,
@@ -207,7 +207,6 @@ export default {
   mounted() {
     this.name = this.company.name
     this.cnpj_root = this.company.cnpj_root
-    console.log(">>>>>>> cnpj:", this.cnpj_root )
     this.client_table = this.company.client_table
     this.item_table = this.company.item_table
     this.status = String(this.company.status)

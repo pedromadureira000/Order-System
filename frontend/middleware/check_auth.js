@@ -13,7 +13,7 @@ export default async (ctx) => {
 			return;
 		}
 		const token = csrftoken.split("=")[1];
-		ctx.store.commit('auth/setCsrfOnServer', token) 
+		ctx.store.commit('user/setCsrfOnServer', token) 
 
 		const sessionid = ctx.req.headers.cookie
 			.split(";")
@@ -23,7 +23,7 @@ export default async (ctx) => {
 		}
 		try {
 			let data = await api.checkAuthenticated()	
-			ctx.store.commit('auth/SET_USER', data )	
+			ctx.store.commit('user/SET_USER', data )	
 		}
 		catch (error) {
 			console.log('>>>> error: ', error)
