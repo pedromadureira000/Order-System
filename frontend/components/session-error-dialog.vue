@@ -43,8 +43,8 @@ export default {
 
 	created(){
 		if (process.browser){
-			this.checkSessionDelay()
-			console.log('>> checkSessionDelay()')
+      /** this.checkSessionDelay() */
+			/** console.log('>> checkSessionDelay()') */
 		}
 	},
 

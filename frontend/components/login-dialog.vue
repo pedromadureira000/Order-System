@@ -1,27 +1,27 @@
 <template>
   <v-dialog v-model="visible" max-width="500px">
     <v-card>
-      <v-card-title>Log in</v-card-title>
+      <v-card-title>Login</v-card-title>
       <v-card-text>
         <v-container fluid>
 					<v-text-field
 						v-model="username"
 						:error-messages="usernameErrors"
-						label="Username"
+						:label="$t('Username')"
 						required
 						@blur="$v.username.$touch()"
 					></v-text-field>
 					<v-text-field
 						v-model="contracting_code"
 						:error-messages="contracting_codeErrors"
-						label="Contracting"
+						:label="$t('Contracting_code')"
 						required
 						@blur="$v.contracting_code.$touch()"
 					></v-text-field>
 					<v-text-field
 						v-model="password"
 						:error-messages="passwordErrors"
-						label="Password"
+						:label="$t('Password')"
 						required
 						@blur="$v.password.$touch()"
 						type="password"
@@ -32,7 +32,7 @@
       <v-card-actions>
         <v-spacer />
 				<!--<v-btn class="mr-4 mt-3" @click="login()"> submit </v-btn> -->
-				<v-btn class="blue--text darken-1" text @click="close()">Cancel</v-btn>
+        <v-btn class="blue--text darken-1" text @click="close()">{{$t('Cancel')}}</v-btn>
         <v-btn class="blue--text darken-1" text @click="login()" :loading="loading" :disabled="loading">Login</v-btn>
       </v-card-actions>
     </v-card>
@@ -41,7 +41,7 @@
 
 <script>
 import { validationMixin } from "vuelidate";
-import { required, helpers} from "vuelidate/lib/validators";
+import { required } from "vuelidate/lib/validators";
 import {slugFieldValidator} from "~/helpers/validators"
 
 export default {
@@ -74,7 +74,7 @@ export default {
     async login() {
       this.$v.login_group.$touch();
       if (this.$v.login_group.$invalid) {
-        this.$store.dispatch("setAlert", { message: "Please fill the form correctly.", alertType: "error" }, { root: true })
+        this.$store.dispatch("setAlert", { message: this.$t("Please_fill_the_form_correctly"), alertType: "error" }, { root: true })
       } else {
         this.loading = true
         await this.$store.dispatch('user/login', {username: this.username, contracting_code: this.contracting_code, password: this.password} )
@@ -90,27 +90,27 @@ export default {
     usernameErrors() {
       const errors = [];
       if (!this.$v.username.$dirty) return errors;
-      !this.$v.username.slugFieldValidator && errors.push("It must containing only letters, numbers, underscores or hyphens.");
-      !this.$v.username.required && errors.push("Username is required");
+      !this.$v.username.slugFieldValidator && errors.push(this.$t('SlugFieldErrorMessage'));
+      !this.$v.username.required && errors.push(this.$t("This_field_is_required"));
       return errors;
     },
     contracting_codeErrors() {
       const errors = [];
       if (!this.$v.contracting_code.$dirty) return errors;
-      !this.$v.contracting_code.slugFieldValidator && errors.push("It must containing only letters, numbers, underscores or hyphens.");
-      !this.$v.contracting_code.required && errors.push("Contracting code required");
+      !this.$v.contracting_code.slugFieldValidator && errors.push(this.$t('SlugFieldErrorMessage'));
+      !this.$v.contracting_code.required && errors.push(this.$t("This_field_is_required"));
       return errors;
     },
     passwordErrors() {
       const errors = [];
       if (!this.$v.password.$dirty) return errors;
-      !this.$v.password.required && errors.push("Password is required.");
+      !this.$v.password.required && errors.push(this.$t("This_field_is_required"));
       return errors;
     },
   },
 
 	watch: {
-		visible(newvalue, oldvalue) {
+		visible(newvalue) {
 			if (newvalue === true && !this.$store.state.user.csrftoken){
 				this.$store.dispatch('user/getCsrf')		
 			}

@@ -3,21 +3,23 @@
 		<v-navigation-drawer v-model="drawer" app> 
       <!-- Test Button -->
       <v-card class="pa-3" color="blue-grey darken-4" tile>
-				<v-btn @click.prevent="$store.dispatch('user/checkAuthenticated')">test</v-btn>
+        <nuxt-link :to="switchLocalePath('en')">English</nuxt-link>
+        <nuxt-link :to="switchLocalePath('pt-BR')">Português</nuxt-link>
+        <nuxt-link :to="localePath('admin-organization-company')">TEST</nuxt-link>
       </v-card>
       <!-- MenuItems composition -->
       <v-list nav dense>
         <v-list-item
           v-for="item in currentMenuItems"
-          :key="item.title"
-          :to="item.to"
+          :key="item.to"
+          :to="localePath(item.to)"
           link
         >
           <v-list-item-icon>
             <v-icon>{{ item.icon }}</v-icon>
           </v-list-item-icon>
           <v-list-item-content>
-            <v-list-item-title>{{ item.title }}</v-list-item-title>
+            <v-list-item-title>{{ $t(item.title) }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -28,7 +30,7 @@
         @click="drawer = !drawer"
       ></v-app-bar-nav-icon>
 
-      <v-toolbar-title>Order System</v-toolbar-title>
+      <v-toolbar-title>{{$t('Order_System')}}</v-toolbar-title>
 
       <v-spacer></v-spacer>
 
@@ -68,11 +70,11 @@
 					<v-divider />
 					
 					<v-list>
-            <v-list-item to="/myaccount">
-              <v-list-item-title>My Account</v-list-item-title>
+            <v-list-item :to="localePath('myaccount')">
+              <v-list-item-title>{{$t('My_Account')}}</v-list-item-title>
             </v-list-item>
             <v-list-item @click="logout">
-              <v-list-item-title>Logout</v-list-item-title>
+              <v-list-item-title>{{$t('Logout')}}</v-list-item-title>
             </v-list-item>
 					</v-list>
 				</v-card>
@@ -114,20 +116,21 @@ export default {
     leFooter: footer
   },
 
-	data: () => ({
-    drawer: null,
-		defaultMenuItems: [
-			{ title: "Home", icon: "mdi-home", to: "/" },
-			{ title: "About", icon: "mdi-help-box", to: "/about" },
-		],
-		allMenuItems: [
-      {permissions: organizationPermissions, title: "Organizations", icon: "mdi-clipboard-check-multiple", to: "/admin/organization"},
-			{permissions: usersMenuPermissions , title: "Users", icon: "mdi-account-group", to: "/admin/user"},
-			{permissions: itemsMenuPermissions, title: "Items", icon: "mdi-cart-variant", to: "/admin/item"},
-      {permissions: orderPermissions, title: "Orders", icon: "mdi-clipboard-check-multiple", to: "/client/order"},
-		],
-	}),
-
+  data() {
+    return {
+      drawer: null,
+      defaultMenuItems: [
+        { title: "Home", icon: "mdi-home", to: "index" },
+        { title: "About", icon: "mdi-help-box", to: "about" },
+      ],
+      allMenuItems: [
+        {permissions: organizationPermissions, title: "Organizations", icon: "mdi-clipboard-check-multiple", to: "admin-organization"},
+        {permissions: usersMenuPermissions , title: "Users", icon: "mdi-account-group", to: "admin-user"},
+        {permissions: itemsMenuPermissions, title: "Items", icon: "mdi-cart-variant", to: "admin-item"},
+        {permissions: orderPermissions, title: "Orders", icon: "mdi-clipboard-check-multiple", to: "client-order"},
+      ],
+    }
+  },
   methods: {
     /** TODO Remember who it works */
     open_login_dialog(evt) {
@@ -161,6 +164,11 @@ export default {
 			}
 		},
   },
+  /** mounted() { */
+    /** console.log('>>>>>>>>>>>>>>>>>>', this.localeRoute('/about')) */
+    /** console.log('>>>>>>>>>>>>>>>>>>', this.getRouteBaseName('')) */
+  /** } */
+
 };
 </script>
 

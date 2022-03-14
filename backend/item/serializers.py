@@ -174,7 +174,7 @@ class PriceTablePOSTSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         price_items = validated_data.pop('price_items')
         validated_data['price_table_compound_id'] = self.context['request'].user.contracting.contracting_code + \
-                "&" + validated_data['company'].company_compound_id + "&" + validated_data["table_code"]
+                "&" + validated_data['company'].company_code + "&" + validated_data["table_code"]
         price_table = PriceTable.objects.create(**validated_data)
         price_table.save()
         price_items_list = []

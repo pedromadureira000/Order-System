@@ -4,12 +4,12 @@
 
     <v-dialog v-model="show_edit_dialog" max-width="500px">
       <v-card>
-        <v-card-title>Edit</v-card-title>
+        <v-card-title>{{$t('Edit')}}</v-card-title>
         <v-card-text>
           <v-container fluid>
             <!-- Name -->
             <v-text-field
-              label="Name"
+              :label="$t('Name')"
               v-model="name"
               :error-messages="nameErrors"
               required
@@ -18,7 +18,7 @@
             />
             <!-- Active Users -->
             <v-text-field
-              label="Active users limit"
+              :label="$t('Active_users_limit')"
               v-model="active_users_limit"
               :error-messages="activeUsersLimitErrors"
               required
@@ -26,19 +26,19 @@
               class="mb-3"
             />
             <!-- Status -->
-            <v-radio-group v-model="status" style="width: 25%;" label="Contracting Company Status" class="mb-3">
+            <v-radio-group v-model="status" style="width: 25%;" :label="$t('Contracting_Company_Status')" class="mb-3">
               <v-radio
-                label="Active"
+                :label="$t('Active')"
                 value=1
               ></v-radio>
               <v-radio
-                label="Disabled"
+                :label="$t('Disabled')"
                 value=0
               ></v-radio>
             </v-radio-group>
             <!-- Note -->
             <v-text-field
-              label="Note"
+              :label="$t('Note')"
               v-model="note"
               :error-messages="noteErrors"
               @blur="$v.note.$touch()"
@@ -49,8 +49,8 @@
         <v-divider></v-divider>
         <v-card-actions>
           <v-spacer />
-          <v-btn class="blue--text darken-1" text @click="show_edit_dialog = false">Cancel</v-btn>
-          <v-btn class="blue--text darken-1" text @click="updateContracting()">Save</v-btn>
+          <v-btn class="blue--text darken-1" text @click="show_edit_dialog = false">{{$t('Cancel')}}</v-btn>
+          <v-btn class="blue--text darken-1" text @click="updateContracting()">{{$t('Save')}}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -73,35 +73,37 @@ export default {
   },
   props: ['contracting'],
   mixins: [validationMixin],
-  data: () => ({
-    name: null,
-    active_users_limit: null,
-    status: null,
-    note: null,
-    show_edit_dialog: false,
-    menu_items: [
-      { 
-        title: 'Edit',
-        icon: 'mdi-pencil',
-        async click(){
-          this.show_edit_dialog = true
-        }
-      },
-      { 
-        title: 'Delete',
-        icon: 'mdi-delete',
-        async click(){
-          let data = await this.$store.dispatch(
-            'organization/deleteContracting', 
-            {contracting_code: this.contracting.contracting_code}
-          )
-          if (data === "ok"){
-            this.$emit('contracting-deleted')
+  data() { 
+    return {
+      name: null,
+      active_users_limit: null,
+      status: null,
+      note: null,
+      show_edit_dialog: false,
+      menu_items: [
+        { 
+          title: this.$t('Edit'),
+          icon: 'mdi-pencil',
+          async click(){
+            this.show_edit_dialog = true
           }
-        }
-      },
-    ]
-  }),
+        },
+        { 
+          title: this.$t('Delete'),
+          icon: 'mdi-delete',
+          async click(){
+            let data = await this.$store.dispatch(
+              'organization/deleteContracting', 
+              {contracting_code: this.contracting.contracting_code}
+            )
+            if (data === "ok"){
+              this.$emit('contracting-deleted')
+            }
+          }
+        },
+      ]
+    }
+  },
 
   validations: {
     name: { 
@@ -130,24 +132,24 @@ export default {
     nameErrors() {
       const errors = [];
       if (!this.$v.name.$dirty) return errors;
-      !this.$v.name.required && errors.push("Name is required.");
-      !this.$v.name.minLength && errors.push("This field must have at least 3 characters.");
-      !this.$v.name.maxLength && errors.push("This field must have up to 60 characters.");
+      !this.$v.name.required && errors.push(this.$t("This_field_is_required"));
+      !this.$v.name.minLength && errors.push(this.$formatStr(this.$t("This_field_must_have_at_least_X_characters"), 3));
+      !this.$v.name.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 60));
       return errors;
     },
     activeUsersLimitErrors() {
       const errors = [];
       if (!this.$v.active_users_limit.$dirty) return errors;
-      !this.$v.active_users_limit.required && errors.push("This field is required.");
-      !this.$v.active_users_limit.integer && errors.push("This value must be a integer.");
-      !this.$v.active_users_limit.minValue && errors.push("This field cannot be less then 4.");
-      !this.$v.active_users_limit.maxValue && errors.push("Make sure this value is less than or equal to 2147483647");
+      !this.$v.active_users_limit.required && errors.push(this.$t("This_field_is_required"));
+      !this.$v.active_users_limit.integer && errors.push(this.$t("This_value_must_be_a_integer"));
+      !this.$v.active_users_limit.minValue && errors.push(this.$formatStr(this.$t("This_value_must_be_greater_than_X"), 3 ));
+      !this.$v.active_users_limit.maxValue && errors.push(this.$formatStr(this.$t("This_value_must_be_less_than_X"), 2147483648));
       return errors;
     },
     noteErrors() {
       const errors = [];
       if (!this.$v.note.$dirty) return errors;
-      !this.$v.note.maxLength && errors.push("This field must have up to 800 characters.");
+      !this.$v.note.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 800));
       return errors;
     },
   },

@@ -106,6 +106,15 @@ export default {
 				})
 	}, 
 
+  	async fetchEstablishments(){
+		return await axios({ 
+		method: "get",
+		url: "/api/organization/establishment",
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
 	async fetchClientTables(){
 		return await axios({ 
 		method: "get",
@@ -114,6 +123,53 @@ export default {
 					return request.data 
 				})
 	},
+
+	async fetchCompaniesToCreateClient(){
+		return await axios({ 
+		method: "get",
+		url: "/api/organization/companies_to_create_client",
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async fetchEstablishmentsToCreateClient(client_table_compound_id){
+		return await axios({ 
+		method: "get",
+		url: `/api/organization/establishments_to_create_client/${client_table_compound_id}`,
+			}).then((request) => {
+					return request.data 
+				})
+	},
+  
+	async createClient(payload){
+    let data_body = {
+      client_table: payload.client_table,
+      client_establishments: payload.client_establishments,
+      client_code: payload.client_code,
+      vendor_code: payload.vendor_code,
+      name: payload.name,
+      status: payload.status,
+      cnpj: payload.cnpj,
+      note: payload.note,
+		}
+		return await axios({ 
+		method: "post",
+		url: "/api/organization/client",
+		data: data_body}).then((request) => {
+					return request.data 
+				})
+	},
+
+  	async fetchClients(){
+		return await axios({ 
+		method: "get",
+		url: "/api/organization/client",
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
 
   // --------------------------------------/ Auth APIs /----------------------------------------
 	async checkAuthenticated(){
@@ -147,12 +203,12 @@ export default {
 	async updateCurrentUserProfile(payload){
 		return await axios({ 
 		method: "put",
-		url: "/api/user/user",
+		url: "/api/user/own_profile",
 		data:{
 			first_name: payload.first_name,
 			last_name: payload.last_name,
 			email: payload.email,
-			cpf: payload.cpf,
+			// cpf: payload.cpf,
 		}
 			}).then((request) => {
 					return request.data 
@@ -300,7 +356,6 @@ export default {
 					return request.data 
 				})
 	},
-
 
 	async updatePriceTable(payload){
 		return await axios({ 

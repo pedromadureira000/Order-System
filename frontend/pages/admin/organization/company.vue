@@ -1,13 +1,13 @@
 <template>
-  <p v-if="$fetchState.pending">Fetching data ...</p>
-  <p v-else-if="$fetchState.error">An error occurred :(</p>
+  <p v-if="$fetchState.pending">{{$t('Fetching_data')}}</p>
+  <p v-else-if="$fetchState.error">{{$t('Error_fetching_data')}}</p>
   <div v-else>
     <div class="ma-3">
-      <h3>Create Company</h3>
+      <h3>{{$t('Create_Company')}}</h3>
       <form @submit.prevent="createCompany">
         <!-- Name -->
         <v-text-field
-          label="Name"
+          :label="$t('Name')"
           v-model="name"
           :error-messages="nameErrors"
           required
@@ -16,7 +16,7 @@
         />
         <!-- Company Code -->
         <v-text-field
-          label="Company code"
+          :label="$t('Company_code')"
           v-model="company_code"
           :error-messages="companyCodeErrors"
           required
@@ -25,7 +25,7 @@
         />
         <!-- Root of CNPJ -->
         <v-text-field
-          label="Root of CNPJ"
+          :label="$t('Root_of_CNPJ')"
           v-model="cnpj_root"
           required
           :error-messages="cnpjRootErrors"
@@ -33,7 +33,7 @@
           class="mb-3"
         />
         <!-- Client table -->
-        <v-radio-group v-model="client_table" style="width: 25%;" label="Client table" class="mb-3">
+        <v-radio-group v-model="client_table" style="width: 25%;" :label="$t('Client_Table')" class="mb-3">
           <v-radio
             v-for="(client_table, key) in client_tables"
             :key="key"
@@ -41,12 +41,12 @@
             :value="client_table.client_table_compound_id"
           ></v-radio>
           <v-radio
-            label="None"
+            :label="$t('None')"
             value=""
           ></v-radio>
         </v-radio-group>
         <!-- Item table -->
-        <v-radio-group v-model="item_table" style="width: 25%;" label="Item table" class="mb-3">
+        <v-radio-group v-model="item_table" style="width: 25%;" :label="$t('Item_Table')" class="mb-3">
           <v-radio
             v-for="(item_table, key) in item_tables"
             :key="key"
@@ -54,24 +54,24 @@
             :value="item_table.item_table_compound_id"
           ></v-radio>
           <v-radio
-            label="None"
+            :label="$t('None')"
             value=""
           ></v-radio>
         </v-radio-group>
         <!-- Company Status -->
-        <v-radio-group v-model="status" style="width: 25%;" label="Company Company Status" class="mb-3">
+        <v-radio-group v-model="status" style="width: 25%;" :label="$t('Company_Status')" class="mb-3">
           <v-radio
-            label="Active"
+            :label="$t('Active')"
             value=1
           ></v-radio>
           <v-radio
-            label="Disabled"
+            :label="$t('Disabled')"
             value=0
           ></v-radio>
         </v-radio-group>
         <!-- Note -->
         <v-text-field
-          label="Note"
+          :label="$t('Note')"
           v-model="note"
           :error-messages="noteErrors"
           @blur="$v.note.$touch()"
@@ -82,11 +82,11 @@
           type="submit"
           :loading="loading"
           :disabled="loading"
-          >Submit</v-btn
+          >{{$t('Submit')}}</v-btn
         >
       </form>
 
-      <h3 class="mt-6">Edit Company</h3>
+      <h3 class="mt-6">{{$t('Edit_Company')}}</h3>
       <v-data-table
         :headers="headers"
         :items="companies"
@@ -125,20 +125,20 @@ export default {
       client_table: null,
       item_table: null,
       status: "1",
-      note: null,
+      note: "",
       loading: false,
       companies: [],
       client_tables: [],
       item_tables: [],
       headers: [
-        { text: 'Name', value: 'name' },
-        { text: 'Company code', value: 'company_code' },
-        { text: 'Raiz do CNPJ', value: 'cnpj_root' },
-        { text: 'Client table', value: 'client_table' },
-        { text: 'Item Table', value: 'item_table' },
+        { text: this.$t('Name'), value: 'name' },
+        { text: this.$t('Company_code'), value: 'company_code' },
+        { text: this.$t('CNPJ_Root'), value: 'cnpj_root' },
+        { text: this.$t('Client_table'), value: 'client_table' },
+        { text: this.$t('Item_Table'), value: 'item_table' },
         { text: 'Status', value: 'status' },
-        { text: 'Note', value: 'note' },
-        { text: 'Actions', value: 'actions' },
+        { text: this.$t('Note'), value: 'note' },
+        { text: this.$t('Actions'), value: 'actions' },
       ]
     };
   },
@@ -194,30 +194,30 @@ export default {
     nameErrors() {
       const errors = [];
       if (!this.$v.name.$dirty) return errors;
-      !this.$v.name.required && errors.push("Name is required.");
-      !this.$v.name.minLength && errors.push("This field must have at least 3 characters.");
-      !this.$v.name.maxLength && errors.push("This field must have up to 60 characters.");
+      !this.$v.name.required && errors.push(this.$t("This_field_is_required"));
+      !this.$v.name.minLength && errors.push(this.$formatStr(this.$t("This_field_must_have_at_least_X_characters"), 3));
+      !this.$v.name.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 60));
       return errors;
     },
     companyCodeErrors() {
       const errors = [];
       if (!this.$v.company_code.$dirty) return errors;
-      !this.$v.company_code.required && errors.push("Company code required.");
-      !this.$v.company_code.slugFieldValidator && errors.push("It must containing only letters, numbers, underscores or hyphens.");
-      !this.$v.company_code.maxLength && errors.push("This field must have up to 3 characters.");
+      !this.$v.company_code.required && errors.push(this.$t("This_field_is_required"));
+      !this.$v.company_code.slugFieldValidator && errors.push(this.$t('SlugFieldErrorMessage'));
+      !this.$v.company_code.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 3));
       return errors;
     },
     cnpjRootErrors() { 
       const errors = [];
       if (!this.$v.cnpj_root.$dirty) return errors;
-      !this.$v.cnpj_root.required && errors.push("Root of CNPJ is required.");
-      !this.$v.cnpj_root.raizcnpjFieldValidator && errors.push("This field must be in the format '99.999.999'");
+      !this.$v.cnpj_root.required && errors.push(this.$t("This_field_is_required"));
+      !this.$v.cnpj_root.raizcnpjFieldValidator && errors.push(this.$t("cnpjRootValidationError"));
       return errors;
     },
     noteErrors() {
       const errors = [];
       if (!this.$v.note.$dirty) return errors;
-      !this.$v.note.maxLength && errors.push("This field must have up to 800 characters.");
+      !this.$v.note.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 800));
       return errors;
     },
   },

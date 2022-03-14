@@ -97,31 +97,33 @@
 <script>
 export default {
 		props: ['user'],
-    data: () => ({
-      show_edit_dialog: false,
-      menu_items: [
-        /** {  */
-          /** title: 'Edit', */
-          /** icon: 'mdi-pencil', */
-          /** async click(){ */
-            /** this.show_edit_dialog = true */
-          /** } */
-        /** }, */
-        { 
-          title: 'Delete',
-          icon: 'mdi-delete',
-          async click(){
-            let data = await this.$store.dispatch(
-              'user/deleteUserByAdmin', 
-              {username: this.user.username, company_code: this.user.company_code}
-            )
-						if (data === "ok"){
-							this.$emit('user-deleted')
-						}
-          }
-        },
-      ]
-    }),
+    data(){
+      return {
+        show_edit_dialog: false,
+        menu_items: [
+          /** {  */
+            /** title: 'Edit', */
+            /** icon: 'mdi-pencil', */
+            /** async click(){ */
+              /** this.show_edit_dialog = true */
+            /** } */
+          /** }, */
+          { 
+            title: 'Delete',
+            icon: 'mdi-delete',
+            async click(){
+              let data = await this.$store.dispatch(
+                'user/deleteUserByAdmin', 
+                {username: this.user.username, company_code: this.user.company_code}
+              )
+              if (data === "ok"){
+                this.$emit('user-deleted')
+              }
+            }
+          },
+        ]
+      }
+    },
     methods: {
       handleClick(index){
         //this.menu_items[id].click()  #will get erros, because of function click will no can access propertie with it's own 'this'

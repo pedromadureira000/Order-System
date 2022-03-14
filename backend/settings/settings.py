@@ -42,7 +42,9 @@ ROLEPERMISSIONS_MODULE = 'user.roles'
 
 ROLEPERMISSIONS_SUPERUSER_SUPERPOWERS = False
 
-CSRF_TRUSTED_ORIGINS = ['http://localhost:3000'] 
+if DEBUG:
+    CSRF_TRUSTED_ORIGINS = ['http://localhost:3000'] 
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -197,7 +199,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-#  LANGUAGE_CODE = 'en'
+# If the locale middleware isn’t in use, it decides which translation is served to all users.
+# If the locale middleware is active, it provides a fallback language in case the user’s preferred language can’t be determined or is not supported by the website. It also provides the fallback translation when a translation for a given literal doesn’t exist for the user’s preferred language.
 LANGUAGE_CODE = 'pt-BR'
 
 TIME_ZONE = 'America/Sao_Paulo'

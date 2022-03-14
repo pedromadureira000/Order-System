@@ -4,29 +4,29 @@
 
     <v-dialog v-model="show_edit_dialog" max-width="500px">
       <v-card>
-        <v-card-title>Edit</v-card-title>
+        <v-card-title>{{$t('Edit')}}</v-card-title>
         <v-card-text>
           <v-container fluid>
             <!-- Name -->
-              <v-text-field
-                label="Name"
-                v-model="name"
-                :error-messages="nameErrors"
-                required
-                @blur="$v.name.$touch()"
-                class="mb-3"
-              />
+            <v-text-field
+              :label="$t('Name')"
+              v-model="name"
+              :error-messages="nameErrors"
+              required
+              @blur="$v.name.$touch()"
+              class="mb-3"
+            />
             <!-- Root of CNPJ -->
-              <v-text-field
-                label="Root of CNPJ"
-                v-model="cnpj_root"
-                required
-                :error-messages="cnpjRootErrors"
-                @blur="$v.cnpj_root.$touch()"
-                class="mb-3"
-              />
+            <v-text-field
+              :label="$t('Root_of_CNPJ')"
+              v-model="cnpj_root"
+              required
+              :error-messages="cnpjRootErrors"
+              @blur="$v.cnpj_root.$touch()"
+              class="mb-3"
+            />
             <!-- Client table -->
-            <v-radio-group v-model="client_table" style="width: 25%;" label="Client table" class="mb-3">
+            <v-radio-group v-model="client_table" style="width: 25%;" :label="$t('Client_Table')" class="mb-3">
               <v-radio
                 v-for="(client_table, key) in client_tables"
                 :key="key"
@@ -34,12 +34,12 @@
                 :value="client_table.client_table_compound_id"
               ></v-radio>
               <v-radio
-                label="None"
+                :label="$t('None')"
                 value=""
               ></v-radio>
             </v-radio-group>
             <!-- Item table -->
-            <v-radio-group v-model="item_table" style="width: 25%;" label="Item table" class="mb-3">
+            <v-radio-group v-model="item_table" style="width: 25%;" :label="$t('Item_Table')" class="mb-3">
               <v-radio
                 v-for="(item_table, key) in item_tables"
                 :key="key"
@@ -47,37 +47,36 @@
                 :value="item_table.item_table_compound_id"
               ></v-radio>
               <v-radio
-                label="None"
+                :label="$t('None')"
                 value=""
               ></v-radio>
             </v-radio-group>
             <!-- Company Status -->
-            <v-radio-group v-model="status" style="width: 25%;" label="Company Company Status" class="mb-3">
+            <v-radio-group v-model="status" style="width: 25%;" :label="$t('Company_Status')" class="mb-3">
               <v-radio
-                label="Active"
+                :label="$t('Active')"
                 value=1
               ></v-radio>
               <v-radio
-                label="Disabled"
+                :label="$t('Disabled')"
                 value=0
               ></v-radio>
             </v-radio-group>
             <!-- Note -->
-              <v-text-field
-                label="Note"
-                v-model="note"
-                :error-messages="noteErrors"
-                @blur="$v.note.$touch()"
-                class="mb-3"
-              />
+            <v-text-field
+              :label="$t('Note')"
+              :error-messages="noteErrors"
+              @blur="$v.note.$touch()"
+              class="mb-3"
+            />
           </v-container>
         </v-card-text>
         <v-divider></v-divider>
         <!-- Submit Button -->
         <v-card-actions>
           <v-spacer />
-          <v-btn class="blue--text darken-1" text @click="show_edit_dialog = false">Cancel</v-btn>
-          <v-btn class="blue--text darken-1" text @click="updateCompany()">Save</v-btn>
+          <v-btn class="blue--text darken-1" text @click="show_edit_dialog = false">{{$t('Cancel')}}</v-btn>
+          <v-btn class="blue--text darken-1" text @click="updateCompany()">{{$t('Save')}}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -98,38 +97,40 @@ export default {
     "dots-menu-update-delete": require("@/components/dots-menu-update-delete.vue").default,
   },
   props: ['company', 'client_tables', 'item_tables'],
-  data: () => ({
-    show_edit_dialog: false,
-    name: null,
-    cnpj_root: null,
-    client_table: null,
-    item_table: null,
-    status: null,
-    note: null,
-    loading: false,
-    menu_items: [
-      { 
-        title: 'Edit',
-        icon: 'mdi-pencil',
-        async click(){
-          this.show_edit_dialog = true
-        }
-      },
-      { 
-        title: 'Delete',
-        icon: 'mdi-delete',
-        async click(){
-          let data = await this.$store.dispatch(
-            'organization/deleteCompany', 
-            {company_compound_id: this.company.company_compound_id}
-          )
-          if (data === "ok"){
-            this.$emit('company-deleted')
+  data() {
+    return {
+      show_edit_dialog: false,
+      name: null,
+      cnpj_root: null,
+      client_table: null,
+      item_table: null,
+      status: null,
+      note: null,
+      loading: false,
+      menu_items: [
+        { 
+          title: this.$t('Edit'),
+          icon: 'mdi-pencil',
+          async click(){
+            this.show_edit_dialog = true
           }
-        }
-      },
-    ]
-  }),
+        },
+        { 
+          title: this.$t('Delete'),
+          icon: 'mdi-delete',
+          async click(){
+            let data = await this.$store.dispatch(
+              'organization/deleteCompany', 
+              {company_compound_id: this.company.company_compound_id}
+            )
+            if (data === "ok"){
+              this.$emit('company-deleted')
+            }
+          }
+        },
+      ]
+    }
+  },
 
   validations: {
     name: { 
@@ -155,22 +156,22 @@ export default {
     nameErrors() {
       const errors = [];
       if (!this.$v.name.$dirty) return errors;
-      !this.$v.name.required && errors.push("Name is required.");
-      !this.$v.name.minLength && errors.push("This field must have at least 3 characters.");
-      !this.$v.name.maxLength && errors.push("This field must have up to 60 characters.");
+      !this.$v.name.required && errors.push(this.$t("This_field_is_required"));
+      !this.$v.name.minLength && errors.push(this.$formatStr(this.$t("This_field_must_have_at_least_X_characters"), 3));
+      !this.$v.name.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 60));
       return errors;
     },
     cnpjRootErrors() { 
       const errors = [];
       if (!this.$v.cnpj_root.$dirty) return errors;
-      !this.$v.cnpj_root.required && errors.push("Root of CNPJ is required.");
-      !this.$v.cnpj_root.raizcnpjFieldValidator && errors.push("This field must be in the format '99.999.999'");
+      !this.$v.cnpj_root.required && errors.push(this.$t("This_field_is_required"));
+      !this.$v.cnpj_root.raizcnpjFieldValidator && errors.push(this.$t("cnpjRootValidationError"));
       return errors;
     },
     noteErrors() {
       const errors = [];
       if (!this.$v.note.$dirty) return errors;
-      !this.$v.note.maxLength && errors.push("This field must have up to 800 characters.");
+      !this.$v.note.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 800));
       return errors;
     },
   },

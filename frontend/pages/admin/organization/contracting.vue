@@ -1,13 +1,13 @@
 <template>
-  <p v-if="$fetchState.pending">Fetching contracting companies ...</p>
-  <p v-else-if="$fetchState.error">An error occurred :(</p>
+  <p v-if="$fetchState.pending">{{$t('Fetching_contracting_companies')}}</p>
+  <p v-else-if="$fetchState.error">{{$t('Fetching_contracting_companies_ERROR')}}</p>
   <div v-else>
     <div class="ma-3">
-      <h3>Create Contracting</h3>
+      <h3>{{$t('Create_Contracting')}}</h3>
       <form @submit.prevent="createContracting">
         <!-- NAME -->
         <v-text-field
-          label="Name"
+          :label="$t('Name')"
           v-model.trim="name"
           :error-messages="nameErrors"
           @blur="$v.name.$touch()"
@@ -16,7 +16,7 @@
         />
         <!-- Contracting Code -->
         <v-text-field
-          label="Contracting code"
+          :label="$t('Contracting_code')"
           v-model="contracting_code"
           :error-messages="contractingCodeErrors"
           required
@@ -25,7 +25,7 @@
         />
         <!-- Active Users limit -->
         <v-text-field
-          label="Active users limit"
+          :label="$t('Active_users_limit')"
           v-model="active_users_limit"
           :error-messages="activeUsersLimitErrors"
           required
@@ -33,19 +33,19 @@
           class="mb-3"
         />
         <!-- Contracting Status -->
-        <v-radio-group v-model="status" style="width: 25%;" label="Contracting Company Status" class="mb-3">
+        <v-radio-group v-model="status" style="width: 25%;" :label="$t('Contracting_Company_Status')" class="mb-3">
           <v-radio
-            label="Active"
+            :label="$t('Active')"
             value=1
           ></v-radio>
           <v-radio
-            label="Disabled"
+            :label="$t('Disabled')"
             value=0
           ></v-radio>
         </v-radio-group>
         <!-- Note -->
         <v-text-field
-          label="Note"
+          :label="$t('Note')"
           v-model="note"
           :error-messages="noteErrors"
           @blur="$v.note.$touch()"
@@ -57,11 +57,11 @@
           type="submit"
           :loading="loading"
           :disabled="loading"
-          >Submit</v-btn
+          >{{$t('Submit')}}</v-btn
         >
       </form>
 
-      <h3 class="mt-6">Edit Contracting</h3>
+      <h3 class="mt-6">{{$t('Edit_Contracting')}}</h3>
       <v-data-table
         :headers="headers"
         :items="contracting_companies"
@@ -105,16 +105,16 @@ export default {
       // If it wasn't a string, the radio button will not be marked
       status: "1",
       active_users_limit: 5,
-      note: null,
+      note: "",
       loading: false,
       contracting_companies: [],
       headers: [
-        { text: 'Name', value: 'name' },
-        { text: 'Contracting code', value: 'contracting_code' },
+        { text: this.$t('Name'), value: 'name' },
+        { text: this.$t('Contracting_code'), value: 'contracting_code' },
         { text: 'Status', value: 'status' },
-        { text: 'Active users limit', value: 'active_users_limit' },
-        { text: 'Note', value: 'note' },
-        { text: 'Actions', value: 'actions' },
+        { text: this.$t('Active_users_limit'), value: 'active_users_limit' },
+        { text: this.$t('Note'), value: 'note' },
+        { text: this.$t('Actions'), value: 'actions' },
       ]
     };
   },
@@ -159,33 +159,32 @@ export default {
     nameErrors() {
       const errors = [];
       if (!this.$v.name.$dirty) return errors;
-      !this.$v.name.required && errors.push("Name is required.");
-      !this.$v.name.minLength && errors.push("This field must have at least 3 characters.");
-      !this.$v.name.maxLength && errors.push("This field must have up to 60 characters.");
+      !this.$v.name.required && errors.push(this.$t("This_field_is_required"));
+      !this.$v.name.minLength && errors.push(this.$formatStr(this.$t("This_field_must_have_at_least_X_characters"), 3));
+      !this.$v.name.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 60));
       return errors;
     },
     contractingCodeErrors() {
       const errors = [];
       if (!this.$v.contracting_code.$dirty) return errors;
-      !this.$v.contracting_code.required && errors.push("Contracting code required.");
-      !this.$v.contracting_code.slugFieldValidator && errors.push("It must containing only letters, numbers, underscores or hyphens.");
-      !this.$v.contracting_code.maxLength && errors.push("This field must have up to 3 characters.");
+      !this.$v.contracting_code.required && errors.push(this.$t("This_field_is_required"));
+      !this.$v.contracting_code.slugFieldValidator && errors.push(this.$t("It_must_containing_only_letters_numbers_underscores_or_hyphens"));
+      !this.$v.contracting_code.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 3));
       return errors;
     },
     activeUsersLimitErrors() {
       const errors = [];
       if (!this.$v.active_users_limit.$dirty) return errors;
-      !this.$v.active_users_limit.required && errors.push("This field is required.");
-      !this.$v.active_users_limit.integer && errors.push("This value must be a integer.");
-      !this.$v.active_users_limit.minValue && errors.push("This field cannot be less then 4.");
-      !this.$v.active_users_limit.maxValue && errors.push("Make sure this value is less than or equal to 2147483647");
-      /** Certifique-se de que este valor seja inferior ou igual a 2147483647. */
+      !this.$v.active_users_limit.required && errors.push(this.$t("This_field_is_required"));
+      !this.$v.active_users_limit.integer && errors.push(this.$t("This_value_must_be_a_integer"));
+      !this.$v.active_users_limit.minValue && errors.push(this.$formatStr(this.$t("This_value_must_be_greater_than_X"), 3 ));
+      !this.$v.active_users_limit.maxValue && errors.push(this.$formatStr(this.$t("This_value_must_be_less_than_X"), 2147483648));
       return errors;
     },
     noteErrors() {
       const errors = [];
       if (!this.$v.note.$dirty) return errors;
-      !this.$v.note.maxLength && errors.push("This field must have up to 800 characters.");
+      !this.$v.note.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 800));
       return errors;
     },
   },
@@ -194,7 +193,7 @@ export default {
     async createContracting() {
       this.$v.contractingInfoGroup.$touch();
       if (this.$v.contractingInfoGroup.$invalid) {
-        this.$store.dispatch("setAlert", { message: "Please fill the form correctly.", alertType: "error" }, { root: true })
+        this.$store.dispatch("setAlert", { message: this.$t("Please_fill_the_form_correctly"), alertType: "error" }, { root: true })
       } else {
         this.loading = true;
         let data = await this.$store.dispatch("organization/createContracting", {
@@ -214,6 +213,8 @@ export default {
       this.contracting_companies = this.contracting_companies.filter((contracting) => contracting.contracting_code != contractingToDelete.contracting_code);
     },
   },
+  /** mounted() { */
+  /** }     */
 };
 </script>
 <style scoped>

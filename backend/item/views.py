@@ -172,7 +172,8 @@ class ItemView(APIView):
     @swagger_auto_schema(request_body=ItemSerializer) 
     def post(self, request):
         if has_permission(request.user, 'create_item'):
-            serializer = ItemSerializer(data=request.data, context={"request": request})
+            serializer = ItemSerializer(data=request.data, context={"request": request, 
+                "request_user_is_agent_without_all_estabs": req_user_is_agent_without_all_estabs(request.user)})
             if serializer.is_valid():
                 try:
                     serializer.save()
@@ -195,7 +196,7 @@ class SpecificItemView(APIView):
                 item = Item.objects.get(item_compound_id=item_compound_id)
             except Item.DoesNotExist:
                 return not_found_response(object_name=_('The item'))
-            request_user_is_agent_without_all_estabs = req_user_is_agent_without_all_estabs(request_user)
+            request_user_is_agent_without_all_estabs = req_user_is_agent_without_all_estabs(request.user)
             # Agent without access to all establishments can't access an item from item_table which he doesn't have access.
             if request_user_is_agent_without_all_estabs and not \
                     agent_has_access_to_this_item_table(request.user, item.item_table):

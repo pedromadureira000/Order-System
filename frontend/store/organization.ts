@@ -64,6 +64,8 @@ export const actions: ActionTree<UserState, RootState> = {
 		}
 	},
 
+  //----------------/ Company APIs
+ 
 	async createCompany({dispatch}: {dispatch: Dispatch,}, payload: any){
 		try {
 			let data = await api.createCompany(payload)
@@ -120,8 +122,68 @@ export const actions: ActionTree<UserState, RootState> = {
 		}
 	},
 
+  //----------------/ Establishment APIs
+
+	async fetchEstablishments({dispatch}: {dispatch: Dispatch,}){
+    try {
+      let establishments = await api.fetchEstablishments()
+      return establishments
+    }
+		catch(e){
+      dispatch("setAlert", {message: "Something went wrong when trying to fetch establishments.", alertType: "error"}, { root: true })
+		}
+	},
+
+  //----------------/ Client Table APIs
+  
 	async fetchClientTables(){
 		let client_tables = await api.fetchClientTables()
 		return client_tables
 	},
+
+  //----------------/ Client APIs
+	async fetchEstablishmentsToCreateClient({dispatch}: {dispatch: Dispatch,}, client_table_compound_id: string){
+    try {
+      let establishments = await api.fetchEstablishmentsToCreateClient(client_table_compound_id)
+      return establishments
+    }
+		catch(e){
+      dispatch("setAlert", {message: "Something went wrong when trying to fetch establishments.", alertType: "error"}, { root: true })
+		}
+	},
+
+	async fetchCompaniesToCreateClient({dispatch}: {dispatch: Dispatch,}){
+    try {
+      let companies = await api.fetchCompaniesToCreateClient()
+      return companies
+    }
+		catch(e){
+      dispatch("setAlert", {message: "Something went wrong when trying to fetch companies.", alertType: "error"}, { root: true })
+		}
+	},
+
+	async createClient({dispatch}: {dispatch: Dispatch,}, payload: any){
+		try {
+			let data = await api.createClient(payload)
+			console.log(">>>",data)
+			dispatch("setAlert", {message: "Client created", alertType: "success"}, { root: true })
+			return data
+		}
+		catch(e){
+			let error: string[] = Object.values(e.response.data)
+			let errorMessage = error[0][0]
+			dispatch("setAlert", {message: errorMessage , alertType: "error"}, { root: true })
+		}
+	},
+  
+	async fetchClients({dispatch}: {dispatch: Dispatch,}){
+    try {
+      let clients = await api.fetchClients()
+      return clients
+    }
+		catch(e){
+      dispatch("setAlert", {message: "Something went wrong when trying to fetch clients.", alertType: "error"}, { root: true })
+		}
+	},
+
 }

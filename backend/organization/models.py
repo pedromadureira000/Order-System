@@ -82,7 +82,7 @@ class Client(models.Model):
     client_code = models.SlugField(max_length=9, verbose_name=_('client code'))
     vendor_code = models.CharField(blank=True, max_length=9, verbose_name=_('vendor code'))
     name = models.CharField(max_length=60, verbose_name=_('name'))
-    cnpj = models.CharField(max_length=10, verbose_name='CNPJ')
+    cnpj = CNPJField(masked=True, verbose_name="CNPJ")
     status = models.IntegerField(choices=status_choices, default=1)
     establishments = models.ManyToManyField(Establishment, through='ClientEstablishment', verbose_name=_('establishments'))
     note = models.CharField(blank=True, verbose_name=_('note'), max_length=800)

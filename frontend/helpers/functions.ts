@@ -1,4 +1,4 @@
-import {Commit, Dispatch} from "vuex"
+import {Commit} from "vuex"
 
 export const doesHttpOnlyCookieExist = (cookiename: string): boolean => {
 	var d = new Date();

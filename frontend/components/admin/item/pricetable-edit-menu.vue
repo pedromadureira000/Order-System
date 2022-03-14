@@ -104,32 +104,34 @@
 <script>
 export default {
 		props: ['pricetable', 'items'],
-    data: () => ({
-      show_edit_dialog: false,
-      loading: false,
-      menu_items: [
-        { 
-          title: 'Edit',
-          icon: 'mdi-pencil',
-          async click(){
-            this.show_edit_dialog = true
-          }
-        },
-        { 
-          title: 'Delete',
-          icon: 'mdi-delete',
-          async click(){
-            let data = await this.$store.dispatch(
-              'item/deletePriceTable', 
-              {table_code: this.pricetable.table_code}
-            )
-						if (data === "ok"){
-							this.$emit('pricetable-deleted')
-						}
-          }
-        },
-      ]
-    }),
+    data(){
+      return {
+        show_edit_dialog: false,
+        loading: false,
+        menu_items: [
+          { 
+            title: 'Edit',
+            icon: 'mdi-pencil',
+            async click(){
+              this.show_edit_dialog = true
+            }
+          },
+          { 
+            title: 'Delete',
+            icon: 'mdi-delete',
+            async click(){
+              let data = await this.$store.dispatch(
+                'item/deletePriceTable', 
+                {table_code: this.pricetable.table_code}
+              )
+              if (data === "ok"){
+                this.$emit('pricetable-deleted')
+              }
+            }
+          },
+        ]
+      }
+    },
     methods: {
       handleClick(index){
         //this.menu_items[item_code].click()  #will get erros, because of function click will no can access propertie with it's own 'this'

@@ -1,7 +1,8 @@
 from django.db.models.deletion import ProtectedError
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from organization.facade import get_clients_by_agent
+from organization.facade import get_clients_by_agent, get_companies_to_create_client, get_establishments_to_create_client
 from organization.serializers import  ClientSerializer, ClientTableSerializer, CompanySerializer, ContractingSerializer, EstablishmentSerializer
 from organization.models import Client, ClientTable, Company, Contracting, Establishment
 from rolepermissions.checkers import has_permission, has_role
@@ -10,7 +11,7 @@ from drf_yasg.utils import swagger_auto_schema
 from organization.validators import agent_has_access_to_this_client
 from user.validators import req_user_is_agent_without_all_estabs
 from django.utils.translation import gettext_lazy as _
-from settings.response_templates import success_response, not_found_response, serializer_invalid_response, protected_error_response, unknown_exception_response, unauthorized_response
+from settings.response_templates import error_response, success_response, not_found_response, serializer_invalid_response, protected_error_response, unknown_exception_response, unauthorized_response
 
 class ContractingView(APIView):
     def get(self, request):
@@ -277,6 +278,22 @@ class SpecificClientTable(APIView):
                 print(error)
                 return unknown_exception_response(action=_('delete client table'))
         return unauthorized_response
+
+class GetEstablishmentsToCreateClient(APIView):
+    def get(self, request, client_table_compound_id):
+        if has_permission(request.user, 'create_client'):
+            if client_table_compound_id.split("&")[0] != request.user.contracting.contracting_code:
+                return error_response(detail="You cannot access this 'client_table'", status=status.HTTP_403_FORBIDDEN) #TODO translate
+            request_user_is_agent_without_all_estabs = req_user_is_agent_without_all_estabs(request.user)
+            establishments = get_establishments_to_create_client(request.user, client_table_compound_id,request_user_is_agent_without_all_estabs)
+            return Response(EstablishmentSerializer(establishments, many=True).data)
+
+class GetCompaniesToCreateClient(APIView):
+    def get(self, request):
+        if has_permission(request.user, 'create_client'):
+            request_user_is_agent_without_all_estabs = req_user_is_agent_without_all_estabs(request.user)
+            companies = get_companies_to_create_client(request.user, request_user_is_agent_without_all_estabs)
+            return Response(CompanySerializer(companies, many=True).data)
 
 class ClientView(APIView):
     def get(self, request):
