@@ -2,8 +2,9 @@ from django.db.models.deletion import ProtectedError
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from organization.facade import get_clients_by_agent, get_companies_to_create_client, get_establishments_to_create_client
-from organization.serializers import  ClientSerializer, ClientTableSerializer, CompanySerializer, ContractingSerializer, EstablishmentSerializer
+from item.serializers import PriceTableGetSerializer
+from organization.facade import get_clients_by_agent, get_companies_to_create_client, get_establishments_to_create_client, get_price_tables_to_create_client
+from organization.serializers import  ClientSerializerPOST, ClientSerializerPUT, ClientTableSerializer, CompanySerializer, ContractingSerializer, EstablishmentSerializer
 from organization.models import Client, ClientTable, Company, Contracting, Establishment
 from rolepermissions.checkers import has_permission, has_role
 from django.db import transaction
@@ -278,6 +279,16 @@ class SpecificClientTable(APIView):
                 print(error)
                 return unknown_exception_response(action=_('delete client table'))
         return unauthorized_response
+    
+class GetPriceTablesToCreateClient(APIView):
+    def get(self, request, company_compound_id):
+        if has_permission(request.user, 'create_client'):
+            if company_compound_id.split("&")[0] != request.user.contracting.contracting_code:
+                return error_response(detail="You cannot access this 'company'", status=status.HTTP_403_FORBIDDEN) #TODO translate
+            request_user_is_agent_without_all_estabs = req_user_is_agent_without_all_estabs(request.user)
+            price_tables = get_price_tables_to_create_client(request.user, company_compound_id, request_user_is_agent_without_all_estabs)
+            return Response(PriceTableGetSerializer(price_tables, many=True).data)
+
 
 class GetEstablishmentsToCreateClient(APIView):
     def get(self, request, client_table_compound_id):
@@ -301,19 +312,19 @@ class ClientView(APIView):
         if has_permission(user, 'get_clients'):
             if has_role(user, 'agent'):
                 clients = get_clients_by_agent(user)
-                data = ClientSerializer(clients, many=True).data
+                data = ClientSerializerPOST(clients, many=True).data
                 return Response(data)
             clients = Client.objects.filter(client_table__contracting=user.contracting)
-            data = ClientSerializer(clients, many=True).data
+            data = ClientSerializerPOST(clients, many=True).data
             return Response(data)
         return unauthorized_response
-    @swagger_auto_schema(request_body=ClientSerializer) 
+    @swagger_auto_schema(request_body=ClientSerializerPOST) 
     @transaction.atomic
     def post(self, request):
             user = request.user
             if has_permission(user, 'create_client'):
                 request_user_is_agent_without_all_estabs = req_user_is_agent_without_all_estabs(request.user)
-                serializer = ClientSerializer(data=request.data, context={"request":request,
+                serializer = ClientSerializerPOST(data=request.data, context={"request":request,
                     "request_user_is_agent_without_all_estabs": request_user_is_agent_without_all_estabs})
                 if serializer.is_valid():
                     try:
@@ -327,7 +338,7 @@ class ClientView(APIView):
             return unauthorized_response
 
 class SpecificClient(APIView):
-    @swagger_auto_schema(request_body=ClientSerializer) 
+    @swagger_auto_schema(request_body=ClientSerializerPUT) 
     @transaction.atomic
     def put(self, request, client_compound_id):
         user = request.user
@@ -343,7 +354,7 @@ class SpecificClient(APIView):
             request_user_is_agent_without_all_estabs = req_user_is_agent_without_all_estabs(request.user)
             if request_user_is_agent_without_all_estabs and not agent_has_access_to_this_client(request.user, client):
                 return not_found_response(object_name=_('The client'))
-            serializer = ClientSerializer(client, data=request.data, context={"request":request, 
+            serializer = ClientSerializerPUT(client, data=request.data, context={"request":request, 
                 "request_user_is_agent_without_all_estabs": request_user_is_agent_without_all_estabs})
             if serializer.is_valid():
                 try:

@@ -2,7 +2,7 @@
   <div>
     <dots-menu-update-delete :menu_items="menu_items" :handleClick="handleClick"/>
 
-    <v-dialog v-model="show_edit_dialog" max-width="500px">
+    <v-dialog v-model="show_edit_dialog" max-width="50%">
       <v-card>
         <v-card-title>{{$t('Edit')}}</v-card-title>
         <v-card-text>
@@ -73,11 +73,22 @@
         </v-card-text>
         <v-divider></v-divider>
         <!-- Submit Button -->
-        <v-card-actions>
-          <v-spacer />
+        <v-card-actions class="d-flex justify-space-around" style="width:100%;">
           <v-btn class="blue--text darken-1" text @click="show_edit_dialog = false">{{$t('Cancel')}}</v-btn>
           <v-btn class="blue--text darken-1" text @click="updateCompany()">{{$t('Save')}}</v-btn>
         </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <!-- Delete Confirmation Dialog -->
+    <v-dialog v-model="show_delete_confirmation_dialog" max-width="30%">
+      <v-card>
+        <v-card-title>{{$t('Are_you_sure_you_want_to_delete')}}</v-card-title>
+        <v-card-text>
+          <v-card-actions class="d-flex justify-space-around" style="width:100%;">
+            <v-btn class="black--text darken-1" text @click="show_delete_confirmation_dialog = false">{{$t('Cancel')}}</v-btn>
+            <v-btn class="red--text darken-1" text @click="deleteCompany()">{{$t('Delete')}}</v-btn>
+          </v-card-actions>
+        </v-card-text>
       </v-card>
     </v-dialog>
   </div>
@@ -100,6 +111,7 @@ export default {
   data() {
     return {
       show_edit_dialog: false,
+      show_delete_confirmation_dialog: false,
       name: null,
       cnpj_root: null,
       client_table: null,
@@ -119,13 +131,7 @@ export default {
           title: this.$t('Delete'),
           icon: 'mdi-delete',
           async click(){
-            let data = await this.$store.dispatch(
-              'organization/deleteCompany', 
-              {company_compound_id: this.company.company_compound_id}
-            )
-            if (data === "ok"){
-              this.$emit('company-deleted')
-            }
+            this.show_delete_confirmation_dialog = true
           }
         },
       ]
@@ -201,6 +207,15 @@ export default {
           this.company.note = data.note
         } catch(e){
         // error is being handled inside action
+        }
+      },
+      async deleteCompany(){
+        let data = await this.$store.dispatch(
+          'organization/deleteCompany', 
+          {company_compound_id: this.company.company_compound_id}
+        )
+        if (data === "ok"){
+          this.$emit('company-deleted')
         }
       }
   },

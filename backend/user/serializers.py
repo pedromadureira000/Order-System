@@ -111,11 +111,12 @@ class AgentEstablishmentToUserSerializer(serializers.ModelSerializer):
 class OwnProfileSerializer(UserSerializer):
     agent_establishments = AgentEstablishmentToUserSerializer(many=True, read_only=True)
     client = serializers.SlugRelatedField(slug_field='client_compound_id', queryset=Client.objects.all())
+    contracting = serializers.SlugRelatedField(slug_field='contracting_code', queryset=Contracting.objects.all())
 
     class Meta(UserSerializer.Meta):
         fields = ['username', 'contracting', 'first_name', 'last_name', 'email', 'status', 'client',
-                'roles', 'agent_establishments', 'permissions']
-        read_only_fields = ['roles', 'permissions', 'client', 'username', 'agent_establishments', 'status']
+                'roles', 'agent_establishments', 'permissions', 'contracting']
+        read_only_fields = ['roles', 'permissions', 'client', 'username', 'agent_establishments', 'status', 'contracting']
 
 class ERPUserSerializer(UserSerializer):
     #overwrite UserSerializer contracting field

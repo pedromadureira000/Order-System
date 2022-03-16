@@ -33,6 +33,7 @@
       <v-toolbar-title>{{$t('Order_System')}}</v-toolbar-title>
 
       <v-spacer></v-spacer>
+      <h5 v-if="logged_user">{{logged_user.first_name}} - {{logged_user.contracting}}</h5>
 
 			<v-btn 
 				v-if="!logged_user"

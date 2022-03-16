@@ -3,69 +3,79 @@
   <p v-else-if="$fetchState.error">{{$t('Fetching_contracting_companies_ERROR')}}</p>
   <div v-else>
     <div class="ma-3">
-      <h3>{{$t('Create_Contracting')}}</h3>
-      <form @submit.prevent="createContracting">
-        <!-- NAME -->
-        <v-text-field
-          :label="$t('Name')"
-          v-model.trim="name"
-          :error-messages="nameErrors"
-          @blur="$v.name.$touch()"
-          required
-          class="mb-3"
-        />
-        <!-- Contracting Code -->
-        <v-text-field
-          :label="$t('Contracting_code')"
-          v-model="contracting_code"
-          :error-messages="contractingCodeErrors"
-          required
-          @blur="$v.contracting_code.$touch()"
-          class="mb-3"
-        />
-        <!-- Active Users limit -->
-        <v-text-field
-          :label="$t('Active_users_limit')"
-          v-model="active_users_limit"
-          :error-messages="activeUsersLimitErrors"
-          required
-          @blur="$v.active_users_limit.$touch()"
-          class="mb-3"
-        />
-        <!-- Contracting Status -->
-        <v-radio-group v-model="status" style="width: 25%;" :label="$t('Contracting_Company_Status')" class="mb-3">
-          <v-radio
-            :label="$t('Active')"
-            value=1
-          ></v-radio>
-          <v-radio
-            :label="$t('Disabled')"
-            value=0
-          ></v-radio>
-        </v-radio-group>
-        <!-- Note -->
-        <v-text-field
-          :label="$t('Note')"
-          v-model="note"
-          :error-messages="noteErrors"
-          @blur="$v.note.$touch()"
-          class="mb-3"
-        />
-        <!-- Submit Button -->
-        <v-btn
-          color="primary"
-          type="submit"
-          :loading="loading"
-          :disabled="loading"
-          >{{$t('Submit')}}</v-btn
-        >
-      </form>
+      <v-expansion-panels>
+        <v-expansion-panel>
+          <v-expansion-panel-header>
+            <h3>{{$t('Create_Contracting')}}</h3>
+          </v-expansion-panel-header>
+          <v-expansion-panel-content>
+            <form @submit.prevent="createContracting">
+              <!-- NAME -->
+              <v-text-field
+                :label="$t('Name')"
+                v-model.trim="name"
+                :error-messages="nameErrors"
+                @blur="$v.name.$touch()"
+                required
+                class="mb-3"
+              />
+              <!-- Contracting Code -->
+              <v-text-field
+                :label="$t('Contracting_code')"
+                v-model="contracting_code"
+                :error-messages="contractingCodeErrors"
+                required
+                @blur="$v.contracting_code.$touch()"
+                class="mb-3"
+              />
+              <!-- Active Users limit -->
+              <v-text-field
+                :label="$t('Active_users_limit')"
+                v-model="active_users_limit"
+                :error-messages="activeUsersLimitErrors"
+                required
+                @blur="$v.active_users_limit.$touch()"
+                class="mb-3"
+              />
+              <!-- Contracting Status -->
+              <v-radio-group v-model="status" style="width: 25%;" :label="$t('Contracting_Company_Status')" class="mb-3">
+                <v-radio
+                  :label="$t('Active')"
+                  value=1
+                ></v-radio>
+                <v-radio
+                  :label="$t('Disabled')"
+                  value=0
+                ></v-radio>
+              </v-radio-group>
+              <!-- Note -->
+              <v-text-field
+                :label="$t('Note')"
+                v-model="note"
+                :error-messages="noteErrors"
+                @blur="$v.note.$touch()"
+                class="mb-3"
+              />
+              <!-- Submit Button -->
+              <v-btn
+                color="primary"
+                type="submit"
+                :loading="loading"
+                :disabled="loading"
+                >{{$t('Submit')}}</v-btn
+              >
+            </form>
+
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+      </v-expansion-panels>
 
       <h3 class="mt-6">{{$t('Edit_Contracting')}}</h3>
       <v-data-table
         :headers="headers"
         :items="contracting_companies"
         :items-per-page="10"
+        item-key="contracting_compound_id"
         class="elevation-1"
       >
         <template v-slot:item.actions="{ item }">

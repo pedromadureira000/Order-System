@@ -129,7 +129,7 @@ class ClientEstablishmentToClientSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(_("You can't add this price table to this 'client_establishment'."))
         return super().validate(attrs)
 
-class ClientSerializer(serializers.ModelSerializer):
+class ClientSerializerPOST(serializers.ModelSerializer):
     client_establishments = ClientEstablishmentToClientSerializer(many=True)
     client_table = serializers.SlugRelatedField(slug_field='client_table_compound_id', queryset=ClientTable.objects.all())
     class Meta:
@@ -153,28 +153,21 @@ class ClientSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError(_("There is a duplicate establishment in 'client_establishments'"))
                 establishments_list.append(client_establishment['establishment'])
                 # Check if establishment.company.client_table belongs to Client client_table on POST request
-                if self.context['request'].method == 'POST':
-                    if client_establishment['establishment'].company.client_table != attrs.get("client_table"):
-                        estab = client_establishment['establishment'].establishment_compound_id
-                        raise serializers.ValidationError(_("The 'client_table' field from the company which owns the establishment {estab} does not correspond with the 'client_table' to which this client belongs.").format(estab=estab))
-                # Check if establishment.company.client_table belongs to Client client_table on PUT request
-                if self.context['request'].method == 'PUT':
-                    if client_establishment['establishment'].company.client_table != self.instance.client_table:
-                        estab = client_establishment['establishment'].establishment_compound_id
-                        raise serializers.ValidationError(_("The 'client_table' field from the company which owns the establishment {estab} does not correspond with the 'client_table' to which this client belongs.").format(estab=estab))
+                if client_establishment['establishment'].company.client_table != attrs.get("client_table"):
+                    estab = client_establishment['establishment'].establishment_compound_id
+                    raise serializers.ValidationError(_("The 'client_table' field from the company which owns the establishment {estab} does not correspond with the 'client_table' to which this client belongs.").format(estab=estab))
                 if request_user_is_agent_without_all_estabs:
                     # Check if agent can access establishment
                     if not agent_has_permission_to_assign_this_establishment_to_client(request_user, client_establishment['establishment']):
                         raise serializers.ValidationError(_("You can't add this establishment to this client."))
-        if self.context['request'].method == 'POST':
         # ----------------/ Client Table
-            # Client table Contracting ownership
-            if attrs.get('client_table').contracting != request_user.contracting:
-                raise serializers.ValidationError(_("Client table not found."))
-            # Agent without all estabs has access to this client_table
-            if request_user_is_agent_without_all_estabs:
-                if not agent_has_permission_to_assign_this_client_table_to_client(request_user, attrs.get('client_table')):
-                    raise serializers.ValidationError(_("Can't access this client_table."))
+        # Client table Contracting ownership
+        if attrs.get('client_table').contracting != request_user.contracting:
+            raise serializers.ValidationError(_("Client table not found."))
+        # Agent without all estabs has access to this client_table
+        if request_user_is_agent_without_all_estabs:
+            if not agent_has_permission_to_assign_this_client_table_to_client(request_user, attrs.get('client_table')):
+                raise serializers.ValidationError(_("Can't access this client_table."))
         return attrs
 
     def create(self, validated_data):
@@ -196,10 +189,38 @@ class ClientSerializer(serializers.ModelSerializer):
                  client=client, price_table=client_establishment['price_table']))
         client.client_establishments.bulk_create(client_establishments_list)
         return client
+    
+class ClientSerializerPUT(serializers.ModelSerializer):
+    client_establishments = ClientEstablishmentToClientSerializer(many=True)
+    class Meta:
+        model = Client
+        fields =  ['client_compound_id', 'client_table', 'client_code', 'client_establishments',
+                'vendor_code', 'name', 'cnpj', 'status', 'note']
+        read_only_fields =  ['client_compound_id', 'client_table', 'client_code']
+
+    def validate(self, attrs):
+        request_user = self.context["request"].user
+        client_establishments = attrs.get('client_establishments')
+        request_user_is_agent_without_all_estabs = self.context['request_user_is_agent_without_all_estabs']
+        # ----------------/ Establishments
+        if client_establishments or client_establishments == []:
+            establishments_list = []
+            for client_establishment in client_establishments:
+                # Deny duplicate establishments
+                if client_establishment['establishment'] in establishments_list:
+                    raise serializers.ValidationError(_("There is a duplicate establishment in 'client_establishments'"))
+                establishments_list.append(client_establishment['establishment'])
+                # Check if establishment.company.client_table belongs to Client client_table
+                if client_establishment['establishment'].company.client_table != self.instance.client_table:
+                    estab = client_establishment['establishment'].establishment_compound_id
+                    raise serializers.ValidationError(_("The 'client_table' field from the company which owns the establishment {estab} does not correspond with the 'client_table' to which this client belongs.").format(estab=estab))
+                if request_user_is_agent_without_all_estabs:
+                    # Check if agent can access establishment
+                    if not agent_has_permission_to_assign_this_establishment_to_client(request_user, client_establishment['establishment']):
+                        raise serializers.ValidationError(_("You can't add this establishment to this client."))
+        return attrs
 
     def update(self, instance, validated_data):
-        if validated_data.get('client_code'): validated_data.pop('client_code')
-        if validated_data.get('client_table'): validated_data.pop('client_table')
         # When using 'return super().update ...' i can't return validated_data with nested related values to update
         client_establishments = validated_data.get('client_establishments')
         if client_establishments or client_establishments == []:

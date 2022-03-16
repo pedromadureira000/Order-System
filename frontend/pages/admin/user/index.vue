@@ -141,6 +141,7 @@
         :headers="headers"
         :items="users"
         :items-per-page="10"
+        item-key="username"
         class="elevation-1"
       >
         <template v-slot:top>

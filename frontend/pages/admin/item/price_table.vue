@@ -40,6 +40,7 @@
         :headers="headers"
         :items="pricetables"
         :items-per-page="10"
+        item-key="price_table_compound_id"
         class="elevation-1"
       >
         <template v-slot:item.actions="{ item }">

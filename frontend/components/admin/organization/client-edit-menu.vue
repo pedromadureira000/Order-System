@@ -2,7 +2,7 @@
   <div>
     <dots-menu-update-delete :menu_items="menu_items" :handleClick="handleClick"/>
 
-    <v-dialog v-model="show_edit_dialog" max-width="500px">
+    <v-dialog v-model="show_edit_dialog" max-width="50%">
       <v-card>
         <v-card-title>{{$t('Edit')}}</v-card-title>
         <v-card-text>
@@ -52,15 +52,64 @@
               @blur="$v.note.$touch()"
               class="mb-3"
             />
+
+            <!-- Client Establishments -->
+            <v-expansion-panels class="mb-5">
+              <v-expansion-panel>
+                <v-expansion-panel-header>{{$t('Client_Establishments')}}</v-expansion-panel-header>
+                  <v-expansion-panel-content v-if="establishments.length > 0">
+                    <v-container
+                      v-for="establishment in establishments"
+                      :key="establishment.establishment_compound_id"
+                      class="grey lighten-5 mb-6"
+                    >
+                      <v-row align="center" class="ml-1 mt-0">
+                        <v-col>
+                          <!-- 'value' is a variable because 'value' is passed by reference. If a literal -->
+                          <!-- was used, it will not be possible to update cli_estab.price_table -->
+                          <v-checkbox
+                            :label="establishment.establishment_code + ' - ' + establishment.name + ' (' + $t('Company') + ': ' + establishment.company + ')'"
+                            v-model="client_establishments"
+                            :value="establishment['AUX_cli_estab_' + client.client_compound_id]"
+                            hide-details
+                            class="shrink mr-2 mt-0"
+                          ></v-checkbox>
+                        </v-col>
+                        <v-col>
+                          <price-table-v-select 
+                            :client_establishments='client_establishments' 
+                            :establishment='establishment' 
+                            :price_table_groups='price_table_groups'
+                            :aux_cli_estab="establishment['AUX_cli_estab_' + client.client_compound_id]"
+                            @update-price-table='updatePriceTable'
+                            @update-price-table-groups='updatePriceTableGroups'
+                          />
+                        </v-col>
+                      </v-row>
+                      </v-container>
+                  </v-expansion-panel-content>
+              </v-expansion-panel>
+            </v-expansion-panels>
           </v-container>
         </v-card-text>
         <v-divider></v-divider>
         <!-- Submit Button -->
-        <v-card-actions>
-          <v-spacer />
+        <v-card-actions class="d-flex justify-space-around" style="width:100%;">
           <v-btn class="blue--text darken-1" text @click="show_edit_dialog = false">{{$t('Cancel')}}</v-btn>
-          <v-btn class="blue--text darken-1" text @click="updateCompany()">{{$t('Save')}}</v-btn>
+          <v-btn class="blue--text darken-1" text @click="updateClient()">{{$t('Save')}}</v-btn>
         </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <!-- Delete Confirmation Dialog -->
+    <v-dialog v-model="show_delete_confirmation_dialog" max-width="30%">
+      <v-card>
+        <v-card-title>{{$t('Are_you_sure_you_want_to_delete')}}</v-card-title>
+        <v-card-text class="d-flex justify-center">
+          <v-card-actions class="d-flex justify-space-around" style="width:100%;">
+            <v-btn class="black--text darken-1" text @click="show_delete_confirmation_dialog = false">{{$t('Cancel')}}</v-btn>
+            <v-btn class="red--text darken-1" text @click="deleteClient()">{{$t('Delete')}}</v-btn>
+          </v-card-actions>
+        </v-card-text>
       </v-card>
     </v-dialog>
   </div>
@@ -73,26 +122,26 @@ import {
   maxLength,
 } from "vuelidate/lib/validators";
 import { validationMixin } from "vuelidate";
-import {raizcnpjFieldValidator} from "~/helpers/validators"
+import {cnpjFieldValidator} from "~/helpers/validators"
 export default {
   mixins: [validationMixin],
   components: {
     "dots-menu-update-delete": require("@/components/dots-menu-update-delete.vue").default,
+    "price-table-v-select": require("@/components/admin/organization/price-table-v-select.vue").default,
   },
-  props: ['client'],
+  props: ['client', 'establishment_groups', 'price_table_groups'],
   data() {
     return {
       show_edit_dialog: false,
+      show_delete_confirmation_dialog: false,
       client_establishments: [],
-          /** establishments: [], */
-              /** price_tables: [], */
+      establishments: [],
       name: null,
       cnpj: null,
       status: null,
       vendor_code: null,
       note: null,
       loading: false,
-      enabled: false,
       menu_items: [
         { 
           title: this.$t('Edit'),
@@ -105,13 +154,7 @@ export default {
           title: this.$t('Delete'),
           icon: 'mdi-delete',
           async click(){
-            let data = await this.$store.dispatch(
-              'organization/deleteCompany', 
-              {company_compound_id: this.company.company_compound_id}
-            )
-            if (data === "ok"){
-              this.$emit('company-deleted')
-            }
+            this.show_delete_confirmation_dialog = true
           }
         },
       ]
@@ -124,16 +167,20 @@ export default {
       minLength: minLength(3),
       maxLength: maxLength(60)
     },
-    cnpj_root: {
+    cnpj: {
       required, 
-      raizcnpjFieldValidator,
+      cnpjFieldValidator,
+    },
+    vendor_code: {
+      maxLength: maxLength(9)
     },
     note: {
       maxLength: maxLength(800)
     },
-    companyInfoGroup: [
+    clientInfoGroup: [
       "name",
-      "cnpj_root",
+      "cnpj",
+      "vendor_code",
       "note",
     ],
   },
@@ -168,42 +215,104 @@ export default {
     },
   },
 
-    methods: {
-      handleClick(index){
-        //this.menu_items[id].click()  #will get erros, because of function click will no can access propertie with it's own 'this'
-        this.menu_items[index].click.call(this) // will call the function but the function will use the vue instance 'this' context.
-      },
-      async updateCompany(){
-        try {
-          let data = await this.$store.dispatch("organization/updateCompany", {
-            company_compound_id: this.company.company_compound_id,
-            name: this.name,
-            cnpj_root: this.cnpj_root,
-            client_table: this.client_table,
-            item_table: this.item_table,
-            status: this.status,
-            note: this.note,
-          })
-          // Reactivity for Company list inside Company.vue 
-          this.company.name = data.name
-          this.company.cnpj_root = data.cnpj_root
-          this.company.client_table = data.client_table
-          this.company.item_table = data.item_table
-          this.company.status = data.status
-          this.company.note = data.note
-        } catch(e){
-        // error is being handled inside action
+  methods: {
+    handleClick(index){
+      //this.menu_items[id].click()  #will get erros, because of function click will no can access propertie with it's own 'this'
+      this.menu_items[index].click.call(this) // will call the function but the function will use the vue instance 'this' context.
+    },
+
+    async fetchEstablishmentsToCreateClient(){
+      // Check if establishment_group already exists. If it exist use it, otherwise, fetch establishments and add them to the establishment_group
+      let establishment_group = this.establishment_groups.find(el=>el.group_id==this.client.client_table)
+      if (establishment_group){
+        var establishments = establishment_group.establishments
+      }else{
+        var establishments = await this.$store.dispatch("organization/fetchEstablishmentsToCreateClient", this.client.client_table);
+        this.establishment_groups.push({group_id: this.client.client_table, establishments: [...establishments]})
+      }
+      for (const establishment_index in establishments){
+        let establishment = establishments[establishment_index]
+        // This will be necessary for update clie_estab.price_table(added from a checkbox) from a v-select.
+        // The client_establishments objects from this.client_establishments must be same objects as the AUX variables
+        let cli_estab = this.client.client_establishments.find(el=>el.establishment == establishment.establishment_compound_id)
+        if (cli_estab){
+          establishment['AUX_cli_estab_' + this.client.client_compound_id] = cli_estab
+          this.client_establishments.push(cli_estab)
+          // If cli_estab exists for this client, fetch price_tables for this estab.company 
+          let price_table_already_fetched = this.price_table_groups.find(el=>el.group_id === establishment.company)
+          if (!price_table_already_fetched){
+            let price_tables = await this.$store.dispatch("organization/fetchPriceTablesToCreateClient", establishment.company);
+            this.updatePriceTableGroups({group_id: establishment.company, price_tables: [{price_table_compound_id: null, 
+              description: 'default_null_value', table_code: 'default_null_value'}, ...price_tables]}) 
+          }
+        }else{
+          establishment['AUX_cli_estab_' + this.client.client_compound_id] = {establishment: establishment.establishment_compound_id,
+            price_table: null}
         }
       }
+      this.establishments.push(...establishments)
+    },
+
+    async updateClient(){
+      try {
+        let data = await this.$store.dispatch("organization/updateClient", {
+          client_compound_id: this.client.client_compound_id,
+          name: this.name,
+          cnpj: this.cnpj,
+          status: this.status,
+          client_establishments: this.client_establishments,
+          vendor_code: this.vendor_code,
+          note: this.note,
+        })
+        // Reactivity for Client list inside Client.vue 
+        this.client.name = data.name
+        this.client.cnpj = data.cnpj
+        this.client.status = data.status
+        this.client.client_establishments = data.client_establishments
+        this.client.vendor_code = data.vendor_code
+        this.client.note = data.note
+      } catch(e){
+      // error is being handled inside action
+      }
+    },
+    updatePriceTable(estab, value){
+      /** console.log(">>>>>>> VALUE:", value) */
+      let cli_estab = this.client_establishments.find(el => el.establishment === estab.establishment_compound_id)
+      cli_estab.price_table = value.price_table_compound_id
+    },
+
+    updatePriceTableGroups(payload){
+      this.price_table_groups.push(payload)
+    },
+
+    async deleteClient(){
+      let data = await this.$store.dispatch(
+        'organization/deleteClient', 
+        {client_compound_id: this.client.client_compound_id}
+      )
+      if (data === "ok"){
+        this.$emit('client-deleted')
+      }
+
+    }
+  },
+
+  watch: {
+    show_edit_dialog(newValue, oldValue){
+      if (newValue === true) {
+        if (this.establishments.length == 0){
+          this.fetchEstablishmentsToCreateClient()
+        }
+      }
+    }	
   },
 
   mounted() {
-    this.name = this.company.name
-    this.cnpj_root = this.company.cnpj_root
-    this.client_table = this.company.client_table
-    this.item_table = this.company.item_table
-    this.status = String(this.company.status)
-    this.note = this.company.note
+    this.name = this.client.name
+    this.cnpj = this.client.cnpj
+    this.status = String(this.client.status)
+    this.vendor_code = this.client.vendor_code
+    this.note = this.client.note
   }
 }
 </script>

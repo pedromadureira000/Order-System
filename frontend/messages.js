@@ -83,7 +83,12 @@ export const messages = {
     // -------------------------------/admin/organizations/establishment
     // -------------------------------/admin/organizations/client
     cnpjValidationError: "This field must be in the format '99.999.999/9999-99'",
-
+    Create_Client: "Create Client",
+    Client_code: "Client code",
+    Client_Status: "Client Status",
+    Edit_Client: "Edit Client",
+    Vendor_Code: "Vendor Code",
+    Client_Establishments: "Client Establishments",
     // -------------------------------/admin/user
     ERP_User: 'ERP User',
     Admin_Agent: 'Admin Agent',
@@ -102,6 +107,9 @@ export const messages = {
     Cancel: 'Cancel',
     Delete: 'Delete',
     Save: 'Save',
+    Are_you_sure_you_want_to_delete: 'Are you sure you want to delete this item?',
+    //-------------------------------/admin/organization/price-table-v-select
+    Empty: 'Empty',
   },
 
 //====================================================================================
@@ -189,6 +197,12 @@ export const messages = {
     // -------------------------------/admin/organizations/establishment
     // -------------------------------/admin/organizations/client
     cnpjValidationError: "Esse campo deve estar no formato '99.999.999/9999-99'",
+    Create_Client: "Criar Cliente",
+    Client_code: "Código do cliente",
+    Client_Status: "Status do Cliente",
+    Edit_Client: "Editar Cliente",
+    Vendor_Code: "Código do Vendedor",
+    Client_Establishments: "Estabelecimentos do Cliente",
     // -------------------------------/admin/user
     ERP_User: 'Usuário ERP',
     Admin_Agent: 'Agente Admin',
@@ -207,5 +221,8 @@ export const messages = {
     Cancel: 'Cancelar',
     Delete: 'Excluir',
     Save: 'Salvar',
+    Are_you_sure_you_want_to_delete: 'Tem certeza que quer deletar esse item?',
+    //-------------------------------/admin/organization/price-table-v-select
+    Empty: 'Vazio',
   },
 }

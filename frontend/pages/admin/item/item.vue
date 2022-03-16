@@ -75,6 +75,7 @@
         :headers="headers"
         :items="items"
         :items-per-page="10"
+        item-key="item_compound_id"
         class="elevation-1"
       >
         <template v-slot:item.actions="{ item }">

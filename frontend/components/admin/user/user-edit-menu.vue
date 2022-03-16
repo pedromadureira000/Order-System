@@ -30,7 +30,7 @@
       </v-list>
     </v-menu>
 
-    <v-dialog v-model="show_edit_dialog" max-width="500px">
+    <v-dialog v-model="show_edit_dialog" max-width="50%">
       <v-card>
         <v-card-title>Edit</v-card-title>
         <v-card-text>

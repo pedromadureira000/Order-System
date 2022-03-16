@@ -55,7 +55,7 @@ export default {
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
     '@nuxtjs/i18n',
-    _isdev ? '@nuxtjs/proxy' : ""
+    '@nuxtjs/proxy',
     // TODO Is it working?
   ],
 

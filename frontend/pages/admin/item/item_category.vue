@@ -37,6 +37,7 @@
       :headers="headers"
       :items="categories"
       :items-per-page="10"
+      item-key="category_compound_id"
       class="elevation-1"
     >
       <template v-slot:item.actions="{ item }">

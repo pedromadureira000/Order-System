@@ -3,94 +3,103 @@
   <p v-else-if="$fetchState.error">{{$t('Error_fetching_data')}}</p>
   <div v-else>
     <div class="ma-3">
-      <h3>{{$t('Create_Company')}}</h3>
-      <form @submit.prevent="createCompany">
-        <!-- Name -->
-        <v-text-field
-          :label="$t('Name')"
-          v-model="name"
-          :error-messages="nameErrors"
-          required
-          @blur="$v.name.$touch()"
-          class="mb-3"
-        />
-        <!-- Company Code -->
-        <v-text-field
-          :label="$t('Company_code')"
-          v-model="company_code"
-          :error-messages="companyCodeErrors"
-          required
-          @blur="$v.company_code.$touch()"
-          class="mb-3"
-        />
-        <!-- Root of CNPJ -->
-        <v-text-field
-          :label="$t('Root_of_CNPJ')"
-          v-model="cnpj_root"
-          required
-          :error-messages="cnpjRootErrors"
-          @blur="$v.cnpj_root.$touch()"
-          class="mb-3"
-        />
-        <!-- Client table -->
-        <v-radio-group v-model="client_table" style="width: 25%;" :label="$t('Client_Table')" class="mb-3">
-          <v-radio
-            v-for="(client_table, key) in client_tables"
-            :key="key"
-            :label="client_table.description"
-            :value="client_table.client_table_compound_id"
-          ></v-radio>
-          <v-radio
-            :label="$t('None')"
-            value=""
-          ></v-radio>
-        </v-radio-group>
-        <!-- Item table -->
-        <v-radio-group v-model="item_table" style="width: 25%;" :label="$t('Item_Table')" class="mb-3">
-          <v-radio
-            v-for="(item_table, key) in item_tables"
-            :key="key"
-            :label="item_table.description"
-            :value="item_table.item_table_compound_id"
-          ></v-radio>
-          <v-radio
-            :label="$t('None')"
-            value=""
-          ></v-radio>
-        </v-radio-group>
-        <!-- Company Status -->
-        <v-radio-group v-model="status" style="width: 25%;" :label="$t('Company_Status')" class="mb-3">
-          <v-radio
-            :label="$t('Active')"
-            value=1
-          ></v-radio>
-          <v-radio
-            :label="$t('Disabled')"
-            value=0
-          ></v-radio>
-        </v-radio-group>
-        <!-- Note -->
-        <v-text-field
-          :label="$t('Note')"
-          v-model="note"
-          :error-messages="noteErrors"
-          @blur="$v.note.$touch()"
-          class="mb-3"
-        />
-        <v-btn
-          color="primary"
-          type="submit"
-          :loading="loading"
-          :disabled="loading"
-          >{{$t('Submit')}}</v-btn
-        >
-      </form>
+      <v-expansion-panels>
+        <v-expansion-panel>
+          <v-expansion-panel-header>
+            <h3>{{$t('Create_Company')}}</h3>
+          </v-expansion-panel-header>
+          <v-expansion-panel-content>
+            <form @submit.prevent="createCompany">
+              <!-- Name -->
+              <v-text-field
+                :label="$t('Name')"
+                v-model="name"
+                :error-messages="nameErrors"
+                required
+                @blur="$v.name.$touch()"
+                class="mb-3"
+              />
+              <!-- Company Code -->
+              <v-text-field
+                :label="$t('Company_code')"
+                v-model="company_code"
+                :error-messages="companyCodeErrors"
+                required
+                @blur="$v.company_code.$touch()"
+                class="mb-3"
+              />
+              <!-- Root of CNPJ -->
+              <v-text-field
+                :label="$t('Root_of_CNPJ')"
+                v-model="cnpj_root"
+                v-mask="'##.###.###'"
+                required
+                :error-messages="cnpjRootErrors"
+                @blur="$v.cnpj_root.$touch()"
+                class="mb-3"
+              />
+              <!-- Client table -->
+              <v-radio-group v-model="client_table" style="width: 25%;" :label="$t('Client_Table')" class="mb-3">
+                <v-radio
+                  v-for="(client_table, key) in client_tables"
+                  :key="key"
+                  :label="client_table.description"
+                  :value="client_table.client_table_compound_id"
+                ></v-radio>
+                <v-radio
+                  :label="$t('None')"
+                  value=""
+                ></v-radio>
+              </v-radio-group>
+              <!-- Item table -->
+              <v-radio-group v-model="item_table" style="width: 25%;" :label="$t('Item_Table')" class="mb-3">
+                <v-radio
+                  v-for="(item_table, key) in item_tables"
+                  :key="key"
+                  :label="item_table.description"
+                  :value="item_table.item_table_compound_id"
+                ></v-radio>
+                <v-radio
+                  :label="$t('None')"
+                  value=""
+                ></v-radio>
+              </v-radio-group>
+              <!-- Company Status -->
+              <v-radio-group v-model="status" style="width: 25%;" :label="$t('Company_Status')" class="mb-3">
+                <v-radio
+                  :label="$t('Active')"
+                  value=1
+                ></v-radio>
+                <v-radio
+                  :label="$t('Disabled')"
+                  value=0
+                ></v-radio>
+              </v-radio-group>
+              <!-- Note -->
+              <v-text-field
+                :label="$t('Note')"
+                v-model="note"
+                :error-messages="noteErrors"
+                @blur="$v.note.$touch()"
+                class="mb-3"
+              />
+              <v-btn
+                color="primary"
+                type="submit"
+                :loading="loading"
+                :disabled="loading"
+                >{{$t('Submit')}}</v-btn>
+            </form>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+      </v-expansion-panels>
 
       <h3 class="mt-6">{{$t('Edit_Company')}}</h3>
       <v-data-table
         :headers="headers"
         :items="companies"
         :items-per-page="10"
+        item-key="company_compound_id"
         class="elevation-1"
       >
         <template v-slot:item.actions="{ item }">
@@ -109,6 +118,7 @@ import {
 } from "vuelidate/lib/validators";
 import { validationMixin } from "vuelidate";
 import {slugFieldValidator, raizcnpjFieldValidator} from "~/helpers/validators"
+import {mask} from 'vue-the-mask'
 
 export default {
   components: {
@@ -116,6 +126,7 @@ export default {
   },
   middleware: ["authenticated"],
   mixins: [validationMixin],
+  directives: {mask},
 
   data() {
     return {

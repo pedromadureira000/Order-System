@@ -142,6 +142,17 @@ export const actions: ActionTree<UserState, RootState> = {
 	},
 
   //----------------/ Client APIs
+  
+	async fetchPriceTablesToCreateClient({dispatch}: {dispatch: Dispatch,}, company_compound_id: string){
+    try {
+      let price_tables = await api.fetchPriceTablesToCreateClient(company_compound_id)
+      return price_tables
+    }
+		catch(e){
+      dispatch("setAlert", {message: "Something went wrong when trying to fetch price tables.", alertType: "error"}, { root: true })
+		}
+	},
+
 	async fetchEstablishmentsToCreateClient({dispatch}: {dispatch: Dispatch,}, client_table_compound_id: string){
     try {
       let establishments = await api.fetchEstablishmentsToCreateClient(client_table_compound_id)
@@ -175,7 +186,7 @@ export const actions: ActionTree<UserState, RootState> = {
 			dispatch("setAlert", {message: errorMessage , alertType: "error"}, { root: true })
 		}
 	},
-  
+
 	async fetchClients({dispatch}: {dispatch: Dispatch,}){
     try {
       let clients = await api.fetchClients()
@@ -183,6 +194,36 @@ export const actions: ActionTree<UserState, RootState> = {
     }
 		catch(e){
       dispatch("setAlert", {message: "Something went wrong when trying to fetch clients.", alertType: "error"}, { root: true })
+		}
+	},
+ 
+  async updateClient({commit, dispatch}: {commit: Commit, dispatch: Dispatch,}, payload: any){
+    try {
+    let data = await api.updateClient(payload)
+    console.log(">>",data)
+    dispatch("setAlert", {message: "Client has been updated.", alertType: "success"}, { root: true })
+    return data
+    }
+    catch(e){
+      handleError(e.response, commit)
+			let error: string[] = Object.values(e.response.data)
+			let errorMessage = error[0][0]
+			dispatch("setAlert", {message: errorMessage , alertType: "error"}, { root: true })
+      // dispatch("setAlert", {message: "Something went wrong when trying to update price table.", alertType: "error"}, { root: true })
+    }
+  },
+
+	async deleteClient({dispatch}: {dispatch: Dispatch,}, payload: any){
+		try {
+			let data = await api.deleteClient(payload)
+			dispatch("setAlert", {message: "Client deleted", alertType: "success"}, { root: true })
+			return "ok"
+		}
+		catch(e){
+			// dispatch("setAlert", {message: "Something went wrong when trying to delete client.", alertType: "error"}, { root: true })
+			let error: string[] = Object.values(e.response.data)
+			let errorMessage = error[0]
+			dispatch("setAlert", {message: errorMessage, alertType: "error"}, { root: true })
 		}
 	},
 

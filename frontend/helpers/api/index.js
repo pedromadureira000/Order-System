@@ -124,6 +124,17 @@ export default {
 				})
 	},
 
+  //------------------------- Client API
+  
+	async fetchPriceTablesToCreateClient(company_compound_id){
+		return await axios({ 
+		method: "get",
+		url: `/api/organization/price_tables_to_create_client/${company_compound_id}`,
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
 	async fetchCompaniesToCreateClient(){
 		return await axios({ 
 		method: "get",
@@ -170,6 +181,31 @@ export default {
 				})
 	},
 
+	async updateClient(payload){
+		return await axios({ 
+		method: "put",
+    url: `/api/organization/client/${payload.client_compound_id}`,
+		data:{
+      name: payload.name,
+      cnpj: payload.cnpj,
+      status: payload.status,
+      client_establishments: payload.client_establishments,
+      vendor_code: payload.vendor_code,
+      note: payload.note,
+		}
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async deleteClient(payload){
+		return await axios({ 
+		method: "delete",
+		url: `/api/organization/client/${payload.client_compound_id}`,
+			}).then((request) => {
+					return request.data 
+				})
+	}, 
 
   // --------------------------------------/ Auth APIs /----------------------------------------
 	async checkAuthenticated(){

@@ -1,3 +1,5 @@
+from item.facade import get_price_tables_by_agent
+from item.models import PriceTable
 from organization.models import Client, ClientEstablishment, ClientTable, Company, Establishment
 from user.models import User
 
@@ -26,6 +28,11 @@ def get_establishments_to_create_client(request_user, client_table_compound_id, 
     if req_user_is_agent_without_all_estabs:
         return request_user.establishments.filter(company__client_table__client_table_compound_id=client_table_compound_id)
     return Establishment.objects.filter(company__client_table__client_table_compound_id=client_table_compound_id)
+
+def get_price_tables_to_create_client(request_user, company_compound_id, req_user_is_agent_without_all_estabs):
+    if req_user_is_agent_without_all_estabs:
+        return get_price_tables_by_agent(request_user).filter(company__company_compound_id=company_compound_id)
+    return PriceTable.objects.filter(company__company_compound_id=company_compound_id)
 
 #  def get_items_by_category():
     #  itens_actives = Item.objects.filter(active=True)
