@@ -32,11 +32,12 @@ class UserSerializer(serializers.ModelSerializer):
     roles = serializers.SerializerMethodField()
     permissions = serializers.SerializerMethodField() 
     status = serializers.ChoiceField(choices=[x[0] for x in status_choices], required=False)
+    contracting_code = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = ['username', 'contracting', 'first_name', 'last_name', 'email', 'status',
-                'password', 'note', 'roles', 'permissions']
+                'password', 'note', 'roles', 'permissions', 'contracting_code']
         extra_kwargs = {
             'password': {'write_only': True},
         }
@@ -97,6 +98,9 @@ class UserSerializer(serializers.ModelSerializer):
                 permissions_list.append(key) 
         return permissions_list 
 
+    def get_contracting_code(self, user):
+        return user.contracting.contracting_code
+
 class AgentEstablishmentToUserSerializer(serializers.ModelSerializer):
     establishment = serializers.SlugRelatedField(slug_field='establishment_compound_id', queryset=Establishment.objects.all())
     class Meta:
@@ -111,12 +115,15 @@ class AgentEstablishmentToUserSerializer(serializers.ModelSerializer):
 class OwnProfileSerializer(UserSerializer):
     agent_establishments = AgentEstablishmentToUserSerializer(many=True, read_only=True)
     client = serializers.SlugRelatedField(slug_field='client_compound_id', queryset=Client.objects.all())
-    contracting = serializers.SlugRelatedField(slug_field='contracting_code', queryset=Contracting.objects.all())
+    contracting_code = serializers.SerializerMethodField()
 
     class Meta(UserSerializer.Meta):
         fields = ['username', 'contracting', 'first_name', 'last_name', 'email', 'status', 'client',
-                'roles', 'agent_establishments', 'permissions', 'contracting']
-        read_only_fields = ['roles', 'permissions', 'client', 'username', 'agent_establishments', 'status', 'contracting']
+                'roles', 'agent_establishments', 'permissions', 'contracting_code']
+        read_only_fields = ['roles', 'permissions', 'client', 'username', 'agent_establishments', 'status', 'contracting_code']
+
+    def get_contracting_code(self, user):
+        return user.contracting.contracting_code
 
 class ERPUserSerializer(UserSerializer):
     #overwrite UserSerializer contracting field

@@ -35,7 +35,10 @@ export const eraseCookie = (name: string) => {
 
 export const handleError = (response: any, commit: Commit) => {
 	console.log('>>>>>>>>>> handlerror: ', response)
-	if (response.data ===  "Session already open."){
+	if (response.data ===  "Session already open." || response.data === "A Sessão já esta aberta."){
 		commit("toggleSessionError")
 	}
+
+  // # This will occur when an user attempt to access an API with a old valid session after he has being logged out.
+  // "Invalid session. Try to login again."
 }

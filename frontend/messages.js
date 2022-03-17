@@ -102,6 +102,9 @@ export const messages = {
     Username: 'Username',
     Password: 'Password',
     SlugFieldErrorMessage: 'It must containing only letters, numbers, underscores or hyphens.',
+    // -------------------------------/Session Error dialog
+    SessionErrorText: 'A aplicação já está aberta em outra janela. Clique em "Usar aqui" para usar a aplicação nessa janela.',
+    Use_Here: 'Usar aqui',
     // -------------------------------/admin/organization/contracting_edit_menu
     Edit: 'Edit',
     Cancel: 'Cancel',
@@ -216,6 +219,9 @@ export const messages = {
     Username: 'Username',
     Password: 'Senha',
     SlugFieldErrorMessage: 'Esse campo deve conter apenas, números, underscores ou hifens.',
+    // -------------------------------/Session Error dialog
+    SessionErrorText: 'The application is open in another window. Click "Use Here" to use the application in this window.',
+    Use_Here: 'Use here',
     // -------------------------------/admin/organization/contracting_edit_menu
     Edit: 'Editar',
     Cancel: 'Cancelar',

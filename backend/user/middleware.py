@@ -1,4 +1,4 @@
-from django.http import HttpResponseForbidden
+from django.http.response import JsonResponse
 from .models import LoggedInUser
 from django.contrib.auth import logout
 from django.utils.translation import gettext_lazy as _
@@ -17,13 +17,13 @@ class OneSessionPerUserMiddleware:
             except LoggedInUser.DoesNotExist:
                 # This will occur when an user attempt to access an API with a old valid session after he has being logged out.
                 logout(request)
-                return HttpResponseForbidden(_("Invalid session. Try to login again."))
+                return JsonResponse({"detail": [_("Invalid session. Try to login again.")]}, status=403)
             if path == '/api/user/own_profile' and request.method == 'GET':
                 request.user.logged_in_user.session_key = request.session.session_key
                 request.user.logged_in_user.save()
                 response = self.get_response(request)
                 return response
             if  stored_session_key != request.session.session_key:
-                return HttpResponseForbidden(_("Session already open.")) #TODO change this for drf forbidden response
+                return JsonResponse({"detail":[_("Session already open.")]}, status=403)
         response = self.get_response(request)
         return response

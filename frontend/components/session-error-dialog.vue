@@ -1,15 +1,13 @@
 <template>
-  <v-dialog v-model="$store.state.user.sessionError" max-width="500px">
+  <v-dialog :value="session_error" max-width="500px" persistent>
     <v-card>
-      <v-card-title>Log in</v-card-title>
       <v-card-text>
         <v-container fluid>
-					<p>The application is open in another window. Click "Use Here" to use whatsapp in this window.</p>
+          <h4>{{$t('SessionErrorText')}}</h4>
         </v-container>
       </v-card-text>
-      <v-card-actions>
-        <v-spacer />
-        <v-btn class="blue--text darken-1" text @click="userHere()" :loading="loading" :disabled="loading">Use Here</v-btn>
+      <v-card-actions class="d-flex justify-center">
+        <v-btn class="blue--text darken-1" text @click="userHere()" :loading="loading" :disabled="loading">{{$t('Use_Here')}}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -21,7 +19,6 @@ export default {
   data () {
     return {
       loading: false,
-			checkSession: false 
 		}
   },
 
@@ -34,29 +31,12 @@ export default {
 			}      
 			this.loading = false
     },
-		async checkSessionDelay(){ 
-			setTimeout(() => {
-				this.checkSession = true
-			}, 10000);
-		}
   },
 
-	created(){
-		if (process.browser){
-      /** this.checkSessionDelay() */
-			/** console.log('>> checkSessionDelay()') */
-		}
-	},
-
-	watch: {
-		checkSession(newvalue, oldvalue) {
-			if (newvalue === true){
-				/** this.$store.dispatch('user/')		 */
-				console.log('>> api get >checkSessionDelay')
-				this.checkSession = false
-				this.checkSessionDelay()
-			}
-		}
-	},
+  computed: {
+    session_error(){
+      return this.$store.state.user.sessionError
+    }
+  }
 }
 </script>

@@ -7,6 +7,7 @@ class User {
   company!: string;
 	roles!: string[];
 	permissions!: string[];
+  contracting_code!: string
 }
 
 export interface UserState {
@@ -82,10 +83,10 @@ export const actions: ActionTree<UserState, RootState> = {
 
 	async updateCurrentUserProfile({commit, dispatch}: {commit: Commit, dispatch: Dispatch,}, payload: any){
 		try {
-		let data = await api.updateCurrentUserProfile(payload)
-		console.log(">>",data)
-		commit("SET_USER", data )
-		dispatch("setAlert", {message: "Your profile has been updated.", alertType: "success"}, { root: true })
+      let data = await api.updateCurrentUserProfile(payload)
+      console.log(">>",data)
+      commit("SET_USER", data )
+      dispatch("setAlert", {message: "Your profile has been updated.", alertType: "success"}, { root: true })
 		}
 		catch(e){
 			handleError(e.response, commit)
