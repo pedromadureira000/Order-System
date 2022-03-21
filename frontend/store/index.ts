@@ -61,7 +61,9 @@ export const actions: ActionTree<RootState, RootState> = {
       let current_alert = state.alert.alertID
       setTimeout(() => {
         if (state.alert.alertID == current_alert) {
-          commit("removeAlert")
+          if (state.alert.alertType !== "error"){
+            commit("removeAlert")
+          }
         }
       }, payload.timeout);
     }, timeout);

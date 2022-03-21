@@ -92,7 +92,12 @@
     <session-error-dialog/>
     <problem-connecting-error-dialog/>
 
-		<v-alert v-if='$store.state.alert.showAlert' :type='$store.state.alert.alertType' style="width: 50%;" class="alert_message">
+		<v-alert 
+      v-if='$store.state.alert.showAlert' 
+      :type='$store.state.alert.alertType' 
+      style="width: 50%;" 
+      class="alert_message" 
+      dismissible>
 		{{$store.state.alert.alertMessage}}
 		</v-alert>
 
@@ -112,8 +117,8 @@ let organizationPermissions = CRUDcontractingPermissions.concat(CRUDcompanyPermi
 let itemsMenuPermissions = CRUDitemTablePerms.concat(CRUDitemPermissions).concat(CRUDitemCategoryPerms).concat(CRUDpriceTablePerms)
 let orderPermissions = client_user
 
-import {handleError} from '~/helpers/functions' //TODO REmove it 
-import axios from '~/plugins/axios'
+/** import {handleError} from '~/helpers/functions' //TODO REmove it  */
+/** import axios from '~/plugins/axios' */
 
 export default {
 	name: "default",
@@ -151,7 +156,10 @@ export default {
     },
 
     async testF(){
-      this.$store.dispatch("switchConnectionError")
+      /** this.$store.dispatch("setAlert", {message: "User deleted", alertType: "success"}, { root: true }) */
+
+      /** this.$store.dispatch("switchConnectionError") */
+
         /** return await axios({  */
         /** method: "post", */
         /** data: { */
