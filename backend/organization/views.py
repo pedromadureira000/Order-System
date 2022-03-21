@@ -146,6 +146,13 @@ class SpecificCompany(APIView):
                 return unknown_exception_response(action=_('delete company'))
         return unauthorized_response
 
+# Only companies from the same contracting company of the user, and which is active.
+class GetCompaniesToCreateEstablishment(APIView):
+    def get(self, request):
+        if has_permission(request.user, 'create_establishment'):
+            companies = Company.objects.filter(contracting=request.user.contracting, status=1)
+            return Response(CompanySerializer(companies, many=True).data)
+
 class EstablishmentView(APIView):
     def get(self, request):
         user = request.user

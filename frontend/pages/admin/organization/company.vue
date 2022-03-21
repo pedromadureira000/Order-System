@@ -228,7 +228,7 @@ export default {
     async createCompany() {
       this.$v.companyInfoGroup.$touch();
       if (this.$v.companyInfoGroup.$invalid) {
-        this.$store.dispatch("setAlert", { message: "Please fill the form correctly.", alertType: "error" }, { root: true })
+        this.$store.dispatch("setAlert", { message: this.$t("Please_fill_the_form_correctly"), alertType: "error" }, { root: true })
       } else {
         this.loading = true;
         let data = await this.$store.dispatch("organization/createCompany", {

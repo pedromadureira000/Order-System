@@ -1,5 +1,5 @@
 import {Commit, Dispatch} from "vuex"
-let field_list = ['client_code', 'client_table', 'vendor_code', 'name', 'cnpj', 'status', 'note', 'establishment', 'price_table']
+let field_list = ['contracting_code', 'active_users_limit', 'company', 'company_code','item_table', 'client_table','cnpj_root' ,'establishment_code','client_code', 'client_table', 'vendor_code', 'name', 'cnpj', 'status', 'note', 'establishment', 'price_table' ]
 let nested_field_list = ['client_establishments']
 
 export const doesHttpOnlyCookieExist = (cookiename: string): boolean => {

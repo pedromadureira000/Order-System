@@ -14,9 +14,12 @@ export const messages = {
     createCompany_success_msg: "Company created.",
     updateCompany_success_msg: "Company updated.",
     deleteCompany_success_msg: "Company deleted.",
-    createClient_success_msg: "Client created",
+    createClient_success_msg: "Client created.",
     updateClient_success_msg: "Client updated.",
-    deleteClient_success_msg: "Client deleted",
+    deleteClient_success_msg: "Client deleted.",
+    createEstablishment_success_msg: "Establishment created.",
+    updateEstablishment_success_msg: "Establishment updated.",
+    deleteEstablishment_success_msg: "Establishment deleted.",
     //--------------------------------------------------------------------/Store APIs Error Messages (default_error_msg parameter)
     //user
     checkAuthenticated_error_msg: "Something went wrong when trying to get the user profile.",
@@ -26,23 +29,27 @@ export const messages = {
     updateCurrentUserProfile_error_msg: "Something went wrong when trying to update the user's profile.",
     updatePassword_error_msg: "Something went wrong when trying to update the user's password.",
     //organizations.js
-    createContracting_error_msg: "Something went wrong when trying to create contracting company.",
+    createContracting_error_msg: "Something went wrong when trying to create a contracting company.",
     fetchContractingCompanies_error_msg: "Something went wrong when trying to fetch contracting companies.",
     updateContracting_error_msg: "Something went wrong when trying to update the contracting company.",
     deleteContracting_error_msg: "Something went wrong when trying to delete the contracting company.",
-    createCompany_error_msg: "Something went wrong when trying to create company.",
+    createCompany_error_msg: "Something went wrong when trying to create a company.",
     fetchCompanies_error_msg: "Something went wrong when trying to fetch companies.",
-    updateCompany_error_msg: "Something went wrong when trying to update company.",
-    deleteCompany_error_msg: "Something went wrong when trying to delete company.",
+    updateCompany_error_msg: "Something went wrong when trying to update the company.",
+    deleteCompany_error_msg: "Something went wrong when trying to delete the company.",
     fetchEstablishments_error_msg: "Something went wrong when trying to fetch establishments.",
     fetchClientTables_error_msg: "Something went wrong when trying to fetch client tables.",
-    fetchPriceTablesToCreateClient_error_msg: "Something went wrong when trying to fetch price tables to create client.",
-    fetchEstablishmentsToCreateClient_error_msg: "Something went wrong when trying to fetch establishments to create client.",
-    fetchCompaniesToCreateClient_error_msg: "Something went wrong when trying to fetch companies to create client.",
-    createClient_error_msg: "Something went wrong when trying to create client.",
+    fetchPriceTablesToCreateClient_error_msg: "Something went wrong when trying to fetch price tables to create a client.",
+    fetchEstablishmentsToCreateClient_error_msg: "Something went wrong when trying to fetch establishments to create a client.",
+    fetchCompaniesToCreateClient_error_msg: "Something went wrong when trying to fetch companies to create a client.",
+    createClient_error_msg: "Something went wrong when trying to create a client.",
     fetchClients_error_msg: "Something went wrong when trying to fetch clients.",
-    updateClient_error_msg: "Something went wrong when trying to update client.",
-    deleteClient_error_msg: "Something went wrong when trying to delete client.",
+    updateClient_error_msg: "Something went wrong when trying to update the client.",
+    deleteClient_error_msg: "Something went wrong when trying to delete the client.",
+    fetchCompaniesToCreateEstablishment_error_msg: "Something went wrong when trying to fetch companies to create an establishment.",
+    createEstablishment_error_msg: "Something went wrong when trying to create an establishment.",
+    updateEstablishment_error_msg: "Something went wrong when trying to update the establishment.",
+    deleteEstablishment_error_msg: "Something went wrong when trying to update the establishment.",
 
     // -------------------------------------------------------------------/ Error Handler
     // Fields
@@ -160,6 +167,9 @@ export const messages = {
     CNPJ_Root: 'CNPJ Root',
     Client_table: 'Client table',
     // -------------------------------/admin/organizations/establishment
+    Create_Establishment: "Create Establishment",
+    Establishment_Status: "Establishment Status",
+    Edit_Establishment: "Edit Establishment",
     // -------------------------------/admin/organizations/client
     cnpjValidationError: "This field must be in the format '99.999.999/9999-99'",
     Create_Client: "Create Client",
@@ -217,6 +227,9 @@ export const messages = {
     createClient_success_msg: "Cliente criado.",
     updateClient_success_msg: "Cliente atualizado.",
     deleteClient_success_msg: "Cliente excluído",
+    createEstablishment_success_msg: "Estabelecimento criado.",
+    updateEstablishment_success_msg: "Estabelecimento atualizado.",
+    deleteEstablishment_success_msg: "Estabelecimento excluído.",
     //--------------------------------------------------------------------/Store APIs Error Messages (default_error_msg parameter)
     //user
     checkAuthenticated_error_msg: "Algo deu errado ao tentar obter o perfil do usuário.",
@@ -234,15 +247,19 @@ export const messages = {
     fetchCompanies_error_msg: "Algo deu errado ao tentar buscar empresas.",
     updateCompany_error_msg: "Algo deu errado ao tentar atualizar a empresa.",
     deleteCompany_error_msg: "Algo deu errado ao tentar excluir a empresa.",
-    fetchEstablishments_error_msg: "Algo deu errado ao tentar carregar estabelecimentos.",
-    fetchClientTables_error_msg: "Algo deu errado ao tentar carregar tabelas de clientes.",
-    fetchPriceTablesToCreateClient_error_msg: "Algo deu errado ao tentar carregar tabelas de preço na pagina de criação de cliente.",
-    fetchEstablishmentsToCreateClient_error_msg: "Algo deu errado ao tentar carregar estabelecimentos na pagina de criação de cliente.",
-    fetchCompaniesToCreateClient_error_msg: "Algo deu errado ao tentar carregar empresas na pagina de criação de cliente.",
+    fetchEstablishments_error_msg: "Algo deu errado ao tentar buscar estabelecimentos.",
+    fetchClientTables_error_msg: "Algo deu errado ao tentar buscar tabelas de clientes.",
+    fetchPriceTablesToCreateClient_error_msg: "Algo deu errado ao tentar buscar tabelas de preço na pagina de criação de cliente.",
+    fetchEstablishmentsToCreateClient_error_msg: "Algo deu errado ao tentar buscar estabelecimentos na pagina de criação de cliente.",
+    fetchCompaniesToCreateClient_error_msg: "Algo deu errado ao tentar buscar empresas na pagina de criação de cliente.",
     createClient_error_msg: "Algo deu errado ao tentar criar cliente",
     fetchClients_error_msg: "Algo deu errado ao tentar buscar clientes",
     updateClient_error_msg: "Algo deu errado ao tentar atualizar o cliente.",
     deleteClient_error_msg: "Algo deu errado ao tentar excluir o cliente.",
+    fetchCompaniesToCreateEstablishment_error_msg: "Algo deu errado ao tentar buscar empresas na pagina de criação de estabelecimento.",
+    createEstablishment_error_msg: "Algo deu errado ao tentar criar um estabelecimento.",
+    updateEstablishment_error_msg: "Algo deu errado ao tentar atualizar o estabelecimento.",
+    deleteEstablishment_error_msg:  "Algo deu errado ao tentar excluir o estabelecimento.",
 
     // -------------------------------------------------------------------/ Error Handler
     // Fields
@@ -322,7 +339,7 @@ export const messages = {
     Client: 'Cliente',
     // -------------------------------/admin/organizations/contracting
     Fetching_contracting_companies: 'Buscando empresas contratantes...',
-    Fetching_contracting_companies_ERROR: 'Erro ao carregar empresas contratantes.',
+    Fetching_contracting_companies_ERROR: 'Erro ao buscar empresas contratantes.',
     // Fields
     Name: 'Nome',
     Contracting_code: 'Código da contratante',
@@ -360,6 +377,10 @@ export const messages = {
     CNPJ_Root: 'Raiz CNPJ',
     Client_table: 'Tabela de clientes',
     // -------------------------------/admin/organizations/establishment
+    Create_Establishment: "Criar Estabelecimento",
+    Establishment_Status: "Status do Estabelecimento",
+    Edit_Establishment: "Editar Estabelecimento",
+
     // -------------------------------/admin/organizations/client
     cnpjValidationError: "Esse campo deve estar no formato '99.999.999/9999-99'",
     Create_Client: "Criar Cliente",

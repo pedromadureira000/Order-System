@@ -43,7 +43,7 @@ export const actions: ActionTree<UserState, RootState> = {
 
 	async deleteContracting({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
 		try {
-			let data = await api.deleteContracting(payload)
+			await api.deleteContracting(payload)
 			dispatch("setAlert", {message: this.app.i18n.t('deleteContracting_success_msg'), alertType: "success"}, { root: true })
 			return "ok"
 		}
@@ -98,6 +98,27 @@ export const actions: ActionTree<UserState, RootState> = {
 	},
 
   //----------------/ Establishment APIs
+  
+	async fetchCompaniesToCreateEstablishment({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
+    try {
+      let companies = await api.fetchCompaniesToCreateEstablishment()
+      return companies
+    }
+    catch(error){
+      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchCompaniesToCreateEstablishment_error_msg'))
+		}
+	},
+
+	async createEstablishment({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
+		try {
+			let data = await api.createEstablishment(payload)
+			dispatch("setAlert", {message: this.app.i18n.t('createEstablishment_success_msg'), alertType: "success"}, { root: true })
+			return data
+		}
+    catch(error){
+      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('createEstablishment_error_msg'))
+		}
+	},
 
 	async fetchEstablishments({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
     try {
@@ -108,6 +129,28 @@ export const actions: ActionTree<UserState, RootState> = {
       handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchEstablishments_error_msg'))
 		}
 	},
+
+  async updateEstablishment({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
+    try {
+      let data = await api.updateEstablishment(payload)
+      dispatch("setAlert", {message: this.app.i18n.t('updateEstablishment_success_msg'), alertType: "success"}, { root: true })
+      return data
+    }
+    catch(error){
+      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('updateEstablishment_error_msg'))
+    }
+  },
+
+  async deleteEstablishment({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
+    try {
+      await api.deleteEstablishment(payload)
+      dispatch("setAlert", {message: this.app.i18n.t('deleteEstablishment_success_msg'), alertType: "success"}, { root: true })
+      return "ok"
+    }
+    catch(error){
+      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('deleteEstablishment_error_msg'))
+    }
+  },
 
   //----------------/ Client Table APIs
   

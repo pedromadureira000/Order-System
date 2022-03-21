@@ -207,6 +207,60 @@ export default {
 				})
 	}, 
 
+  //------------- Establishment
+  //
+	async fetchCompaniesToCreateEstablishment(){
+		return await axios({ 
+		method: "get",
+		url: "/api/organization/companies_to_create_establishment",
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async createEstablishment(payload){
+    let data_body = {
+      name: payload.name,
+      establishment_code: payload.establishment_code,
+      company: payload.company,
+      cnpj: payload.cnpj,
+      status: payload.status,
+      note: payload.note
+		}
+		return await axios({ 
+		method: "post",
+		url: "/api/organization/establishment",
+		data: data_body}).then((request) => {
+					return request.data 
+				})
+	},
+
+  
+	async updateEstablishment(payload){
+		return await axios({ 
+		method: "put",
+    url: `/api/organization/establishment/${payload.establishment_compound_id}`,
+		data:{
+      name: payload.name,
+      cnpj: payload.cnpj,
+      status: payload.status,
+      note: payload.note
+		}
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async deleteEstablishment(payload){
+		return await axios({ 
+		method: "delete",
+		url: `/api/organization/establishment/${payload.establishment_compound_id}`,
+			}).then((request) => {
+					return request.data 
+				})
+	}, 
+
+
   // --------------------------------------/ Auth APIs /----------------------------------------
 	async checkAuthenticated(){
     return await axios.get("/api/user/own_profile").then((data)=> {return data.data})

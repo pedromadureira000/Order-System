@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import (
-    ClientTableView, ClientView, ContractingView, EstablishmentView, GetCompaniesToCreateClient, GetEstablishmentsToCreateClient, GetPriceTablesToCreateClient, SpecificClient, SpecificClientTable, SpecificContracting, SpecificEstablishment, CompanyView, SpecificCompany
+    ClientTableView, ClientView, ContractingView, EstablishmentView, GetCompaniesToCreateClient, GetCompaniesToCreateEstablishment, GetEstablishmentsToCreateClient, GetPriceTablesToCreateClient, SpecificClient, SpecificClientTable, SpecificContracting, SpecificEstablishment, CompanyView, SpecificCompany
 )
 
 urlpatterns = [
@@ -21,4 +21,6 @@ urlpatterns = [
     path('price_tables_to_create_client/<company_compound_id>', GetPriceTablesToCreateClient.as_view()),
     path('client', ClientView.as_view()),
     path('client/<client_compound_id>', SpecificClient.as_view()),
+    path('companies_to_create_establishment', GetCompaniesToCreateEstablishment.as_view()),
+
 ]
