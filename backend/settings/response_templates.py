@@ -4,9 +4,6 @@ from django.utils.translation import gettext_lazy as _
 
 unauthorized_response = Response({'error': [_( "You don't have permission to access this resource.")]},status=status.HTTP_401_UNAUTHORIZED)
 
-def success_response(detail, status=status.HTTP_200_OK):
-    return Response(data={"success": [detail]}, status=status)
-
 #This is to format error responses in drf format to have a pattern for error responses.
 def error_response(detail, status):
     return Response(data={"error": [detail]}, status=status)

@@ -12,7 +12,7 @@ from drf_yasg.utils import swagger_auto_schema
 from organization.validators import agent_has_access_to_this_client
 from user.validators import req_user_is_agent_without_all_estabs
 from django.utils.translation import gettext_lazy as _
-from settings.response_templates import error_response, success_response, not_found_response, serializer_invalid_response, protected_error_response, unknown_exception_response, unauthorized_response
+from settings.response_templates import error_response, not_found_response, serializer_invalid_response, protected_error_response, unknown_exception_response, unauthorized_response
 
 class ContractingView(APIView):
     def get(self, request):
@@ -69,7 +69,7 @@ class SpecificContracting(APIView):
                 return not_found_response(object_name=_('The contracting'))
             try:
                 contracting.delete()
-                return success_response(detail=_("Contracting deleted."))
+                return Response("Contracting deleted.")
             except ProtectedError:
                 return protected_error_response(object_name=_('contracting'))
             except Exception as error:
@@ -137,7 +137,7 @@ class SpecificCompany(APIView):
                 return not_found_response(object_name=_('The company'))
             try:
                 company.delete()
-                return success_response(detail=_("Company deleted"))
+                return Response("Company deleted")
             except ProtectedError:
                 return protected_error_response(object_name=_('company'))
             except Exception as error:
@@ -204,7 +204,7 @@ class SpecificEstablishment(APIView):
                 return not_found_response(object_name=_('The establishment'))
             try:
                 establishment.delete()
-                return success_response(detail=_("Establishment deleted"))
+                return Response("Establishment deleted")
             except ProtectedError:
                 return protected_error_response(object_name=_('establishment'))
             except Exception as error:
@@ -271,7 +271,7 @@ class SpecificClientTable(APIView):
                 return not_found_response(object_name=_('The client table'))
             try:
                 client_table.delete()
-                return success_response(detail=_("Client table deleted"))
+                return Response("Client table deleted")
             except ProtectedError:
                 return protected_error_response(object_name=_('client table'))
             except Exception as error:
@@ -381,7 +381,7 @@ class SpecificClient(APIView):
                 return unauthorized_response
             try:
                 client.delete()
-                return success_response(detail=_("Client deleted"))
+                return Response("Client deleted")
             except ProtectedError as er:
                 return protected_error_response(object_name=_('client'))
             except Exception as error:

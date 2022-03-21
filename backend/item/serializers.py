@@ -44,11 +44,11 @@ class CategorySerializer(serializers.ModelSerializer):
             # If the request is for update the instance, some related fields may not be sent since 'parcial=True' is being used
             # item_table belongs to user contracting
             if value.contracting != request_user.contracting:
-                raise NotFound(detail={"detail": [_("Item table not found.")]})
+                raise NotFound(detail={"error": [_("Item table not found.")]})
             # Agent without access to all establishments can't access an category from an item_table which he doesn't have access.
             if self.context['request_user_is_agent_without_all_estabs'] and not \
                     agent_has_access_to_this_item_table(request_user, value):
-                raise NotFound(detail={"detail": [_("Item table not found.")]})
+                raise NotFound(detail={"error": [_("Item table not found.")]})
         return value
 
     def create(self, validated_data):
@@ -81,20 +81,20 @@ class ItemSerializer(serializers.ModelSerializer):
         if self.context['request'].method == 'POST':
             # item_table belongs to user contracting
             if item_table.contracting != request_user.contracting:
-                raise NotFound(detail={"detail": [_("Item table not found.")]})
+                raise NotFound(detail={"error": [_("Item table not found.")]})
             # Category must have the same item_table that the item item_table
             if category.item_table != item_table:
                 raise serializers.ValidationError(_("You cannot choose this category because it is from another item table."))
             # Agent without access to all establishments can't access an item from item_table which he doesn't have access.
             if self.context['request_user_is_agent_without_all_estabs'] and not agent_has_access_to_this_item_table(request_user, item_table):
-                raise NotFound(detail={"detail": [_("Item table not found.")]})
+                raise NotFound(detail={"error": [_("Item table not found.")]})
 
         if self.context['request'].method == 'PUT':
             # Verify if agent can assign this category.
             if attrs.get('category'):
                 # Category belongs to user contracting
                 if category.item_table.contracting != request_user.contracting:
-                    raise NotFound(detail={"detail": [_("Item category not found.")]})
+                    raise NotFound(detail={"error": [_("Item category not found.")]})
                 # Category must have the same item_table that the item item_table
                 if category.item_table != self.instance.item_table:
                     raise serializers.ValidationError(_("You cannot choose this category because it is from another item table."))
@@ -125,7 +125,7 @@ class ForTablePriceItemSerializer(serializers.ModelSerializer):
         request_user = self.context['request'].user
         item_id =  value.item_compound_id
         if request_user_is_agent_without_all_estabs and not agent_has_access_to_this_item_table(request_user,value.item_table):
-            raise NotFound(detail={"detail": [_("Item with id '{item_id}' was not found.").format(item_id=item_id)]})
+            raise NotFound(detail={"error": [_("Item with id '{item_id}' was not found.").format(item_id=item_id)]})
         return value
 
 class PriceTableGetSerializer(serializers.ModelSerializer):
@@ -156,7 +156,7 @@ class PriceTablePOSTSerializer(serializers.ModelSerializer):
             for price_item in price_items:
                 # Check if the item belongs to the company's item table
                 if price_item['item'].item_table != company.item_table:
-                    raise NotFound(detail={"detail": [_("The item must belong to the company that owns the price table.")]})
+                    raise NotFound(detail={"error": [_("The item must belong to the company that owns the price table.")]})
                 # Deny duplicate values
                 if price_item in check_for_duplicate_values:
                     raise serializers.ValidationError(_("There are duplicate price items."))
@@ -165,10 +165,10 @@ class PriceTablePOSTSerializer(serializers.ModelSerializer):
         #---------------------------/ Company
         # Company is from the same contracting that request_user
         if company.contracting != request_user.contracting:
-            raise NotFound(detail={"detail": [_("Company not found.")]})
+            raise NotFound(detail={"error": [_("Company not found.")]})
         # User is agent without all estabs and don't have access to this company
         if self.context['req_user_is_agent_without_all_estabs'] and company not in get_agent_companies(request_user):
-            raise NotFound(detail={"detail": [_("Company not found.")]})
+            raise NotFound(detail={"error": [_("Company not found.")]})
         return super().validate(attrs)
 
     def create(self, validated_data):
@@ -199,7 +199,7 @@ class SpecificPriceTablePUTSerializer(serializers.ModelSerializer):
             for price_item in price_items:
                 # Check if the item belongs to the company's item table
                 if price_item['item'].item_table != self.instance.company.item_table:
-                    raise NotFound(detail={"detail": [_("The item must belong to the company that owns the price table.")]})
+                    raise NotFound(detail={"error": [_("The item must belong to the company that owns the price table.")]})
                 # Deny duplicate values
                 if price_item in check_for_duplicate_values:
                     raise serializers.ValidationError(_("There are duplicate price items."))

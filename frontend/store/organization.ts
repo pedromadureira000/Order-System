@@ -9,221 +9,190 @@ import {UserState} from "~/store/user"
 
 export const actions: ActionTree<UserState, RootState> = {
 
-	async createContracting({dispatch}: {dispatch: Dispatch,}, payload: any){
+	async createContracting({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
 		try {
 			let data = await api.createContracting(payload)
-			console.log(">>>",data)
-			dispatch("setAlert", {message: "Contracting created", alertType: "success"}, { root: true })
+			dispatch("setAlert", {message: this.app.i18n.t('createContracting_success_msg'), alertType: "success"}, { root: true })
 			return data
 		}
-		catch(e){
-			let error: string[] = Object.values(e.response.data)
-			let errorMessage = error[0][0]
-			dispatch("setAlert", {message: errorMessage , alertType: "error"}, { root: true })
+		catch(error){
+      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t("createContracting_error_msg"))
 		}
 	},
 
-	async fetchContractingCompanies({dispatch}: {dispatch: Dispatch,}){
+	async fetchContractingCompanies({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
     try{
       let users = await api.fetchContractingCompanies()
       return users
     }
-		catch(e){
-      dispatch("setAlert", {message: "Something went wrong when trying to fetch contracting companies.", alertType: "error"}, { root: true })
+		catch(error){
+      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t("fetchContractingCompanies_error_msg"))
 		}
 	},
 
-  async updateContracting({commit, dispatch}: {commit: Commit, dispatch: Dispatch,}, payload: any){
+  async updateContracting({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
     try {
     let data = await api.updateContracting(payload)
-    console.log(">>",data)
-    dispatch("setAlert", {message: "Contracting has been updated.", alertType: "success"}, { root: true })
+    dispatch("setAlert", {message: this.app.i18n.t('updateContracting_success_msg') , alertType: "success"}, { root: true })
     return data
     }
-    catch(e){
-      handleError(e.response, commit)
-			let error: string[] = Object.values(e.response.data)
-			let errorMessage = error[0][0]
-			dispatch("setAlert", {message: errorMessage , alertType: "error"}, { root: true })
-      // dispatch("setAlert", {message: "Something went wrong when trying to update price table.", alertType: "error"}, { root: true })
-    }
+    catch(error){
+      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('updateContracting_error_msg'))
+		}
   },
 
-	async deleteContracting({dispatch}: {dispatch: Dispatch,}, payload: any){
+	async deleteContracting({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
 		try {
 			let data = await api.deleteContracting(payload)
-			console.log(">>>",data)
-			dispatch("setAlert", {message: "Contracting deleted", alertType: "success"}, { root: true })
+			dispatch("setAlert", {message: this.app.i18n.t('deleteContracting_success_msg'), alertType: "success"}, { root: true })
 			return "ok"
 		}
-		catch(e){
-			// dispatch("setAlert", {message: "Something went wrong when trying to delete user.", alertType: "error"}, { root: true })
-			let error: string[] = Object.values(e.response.data)
-			let errorMessage = error[0]
-			dispatch("setAlert", {message: errorMessage, alertType: "error"}, { root: true })
+    catch(error){
+      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('deleteContracting_error_msg'))
 		}
 	},
 
   //----------------/ Company APIs
  
-	async createCompany({dispatch}: {dispatch: Dispatch,}, payload: any){
+	async createCompany({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
 		try {
 			let data = await api.createCompany(payload)
-			console.log(">>>",data)
-			dispatch("setAlert", {message: "Company created", alertType: "success"}, { root: true })
+			dispatch("setAlert", {message: this.app.i18n.t('createCompany_success_msg'), alertType: "success"}, { root: true })
 			return data
 		}
-		catch(e){
-			let error: string[] = Object.values(e.response.data)
-			let errorMessage = error[0][0]
-			dispatch("setAlert", {message: errorMessage , alertType: "error"}, { root: true })
+    catch(error){
+      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('createCompany_error_msg'))
 		}
 	},
 
-	async fetchCompanies({dispatch}: {dispatch: Dispatch,}){
+	async fetchCompanies({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
     try {
       let companies = await api.fetchCompanies()
       return companies
-
     }
-		catch(e){
-      dispatch("setAlert", {message: "Something went wrong when trying to fetch companies.", alertType: "error"}, { root: true })
+    catch(error){
+      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchCompanies_error_msg'))
 		}
 	},
 
-  async updateCompany({commit, dispatch}: {commit: Commit, dispatch: Dispatch,}, payload: any){
+  async updateCompany({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
     try {
-    let data = await api.updateCompany(payload)
-    console.log(">>",data)
-    dispatch("setAlert", {message: "Price table has been updated.", alertType: "success"}, { root: true })
-    return data
+      let data = await api.updateCompany(payload)
+			dispatch("setAlert", {message: this.app.i18n.t('updateCompany_success_msg'), alertType: "success"}, { root: true })
+      return data
     }
-    catch(e){
-      handleError(e.response, commit)
-			let error: string[] = Object.values(e.response.data)
-			let errorMessage = error[0][0]
-			dispatch("setAlert", {message: errorMessage , alertType: "error"}, { root: true })
-      // dispatch("setAlert", {message: "Something went wrong when trying to update price table.", alertType: "error"}, { root: true })
-    }
+    catch(error){
+      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('updateCompany_error_msg'))
+		}
   },
 
-	async deleteCompany({dispatch}: {dispatch: Dispatch,}, payload: any){
+	async deleteCompany({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
 		try {
-			let data = await api.deleteCompany(payload)
-			console.log(">>>",data)
-			dispatch("setAlert", {message: "Company deleted", alertType: "success"}, { root: true })
+			await api.deleteCompany(payload)
+			dispatch("setAlert", {message: this.app.i18n.t('deleteCompany_success_msg'), alertType: "success"}, { root: true })
 			return "ok"
 		}
-		catch(e){
-			// dispatch("setAlert", {message: "Something went wrong when trying to delete user.", alertType: "error"}, { root: true })
-			let error: string[] = Object.values(e.response.data)
-			let errorMessage = error[0]
-			dispatch("setAlert", {message: errorMessage, alertType: "error"}, { root: true })
+    catch(error){
+      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('deleteCompany_error_msg'))
 		}
 	},
 
   //----------------/ Establishment APIs
 
-	async fetchEstablishments({dispatch}: {dispatch: Dispatch,}){
+	async fetchEstablishments({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
     try {
       let establishments = await api.fetchEstablishments()
       return establishments
     }
-		catch(e){
-      dispatch("setAlert", {message: "Something went wrong when trying to fetch establishments.", alertType: "error"}, { root: true })
+    catch(error){
+      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchEstablishments_error_msg'))
 		}
 	},
 
   //----------------/ Client Table APIs
   
-	async fetchClientTables(){
-		let client_tables = await api.fetchClientTables()
-		return client_tables
+	async fetchClientTables({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
+    try{
+      let client_tables = await api.fetchClientTables()
+      return client_tables
+    }
+    catch(error){
+      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchClientTables_error_msg'))
+		}
 	},
 
   //----------------/ Client APIs
   
-	async fetchPriceTablesToCreateClient({dispatch}: {dispatch: Dispatch,}, company_compound_id: string){
+	async fetchPriceTablesToCreateClient({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, company_compound_id: string){
     try {
       let price_tables = await api.fetchPriceTablesToCreateClient(company_compound_id)
       return price_tables
     }
-		catch(e){
-      dispatch("setAlert", {message: "Something went wrong when trying to fetch price tables.", alertType: "error"}, { root: true })
+    catch(error){
+      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchPriceTablesToCreateClient_error_msg'))
 		}
 	},
 
-	async fetchEstablishmentsToCreateClient({dispatch}: {dispatch: Dispatch,}, client_table_compound_id: string){
+	async fetchEstablishmentsToCreateClient({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, client_table_compound_id: string){
     try {
       let establishments = await api.fetchEstablishmentsToCreateClient(client_table_compound_id)
       return establishments
     }
-		catch(e){
-      dispatch("setAlert", {message: "Something went wrong when trying to fetch establishments.", alertType: "error"}, { root: true })
+    catch(error){
+      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchEstablishmentsToCreateClient_error_msg'))
 		}
 	},
 
-	async fetchCompaniesToCreateClient({dispatch}: {dispatch: Dispatch,}){
+	async fetchCompaniesToCreateClient({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
     try {
       let companies = await api.fetchCompaniesToCreateClient()
       return companies
     }
-		catch(e){
-      dispatch("setAlert", {message: "Something went wrong when trying to fetch companies.", alertType: "error"}, { root: true })
+    catch(error){
+      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchCompaniesToCreateClient_error_msg'))
 		}
 	},
 
-	async createClient({dispatch}: {dispatch: Dispatch,}, payload: any){
+	async createClient({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
 		try {
 			let data = await api.createClient(payload)
-			console.log(">>>",data)
-			dispatch("setAlert", {message: "Client created", alertType: "success"}, { root: true })
+			dispatch("setAlert", {message: this.app.i18n.t('createClient_success_msg'), alertType: "success"}, { root: true })
 			return data
 		}
-		catch(e){
-			let error: string[] = Object.values(e.response.data)
-			let errorMessage = error[0][0]
-			dispatch("setAlert", {message: errorMessage , alertType: "error"}, { root: true })
+    catch(error){
+      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('createClient_error_msg'))
 		}
 	},
 
-	async fetchClients({dispatch}: {dispatch: Dispatch,}){
+	async fetchClients({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
     try {
       let clients = await api.fetchClients()
       return clients
     }
-		catch(e){
-      dispatch("setAlert", {message: "Something went wrong when trying to fetch clients.", alertType: "error"}, { root: true })
+    catch(error){
+      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchClients_error_msg'))
 		}
 	},
  
-  async updateClient({commit, dispatch}: {commit: Commit, dispatch: Dispatch,}, payload: any){
+  async updateClient({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
     try {
-    let data = await api.updateClient(payload)
-    console.log(">>",data)
-    dispatch("setAlert", {message: "Client has been updated.", alertType: "success"}, { root: true })
-    return data
+      let data = await api.updateClient(payload)
+      dispatch("setAlert", {message: this.app.i18n.t('updateClient_success_msg'), alertType: "success"}, { root: true })
+      return data
     }
-    catch(e){
-      handleError(e.response, commit)
-			let error: string[] = Object.values(e.response.data)
-			let errorMessage = error[0][0]
-			dispatch("setAlert", {message: errorMessage , alertType: "error"}, { root: true })
-      // dispatch("setAlert", {message: "Something went wrong when trying to update price table.", alertType: "error"}, { root: true })
-    }
+    catch(error){
+      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('updateClient_error_msg'))
+		}
   },
 
-	async deleteClient({dispatch}: {dispatch: Dispatch,}, payload: any){
+	async deleteClient({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
 		try {
-			let data = await api.deleteClient(payload)
-			dispatch("setAlert", {message: "Client deleted", alertType: "success"}, { root: true })
+			await api.deleteClient(payload)
+      dispatch("setAlert", {message: this.app.i18n.t('deleteClient_success_msg'), alertType: "success"}, { root: true })
 			return "ok"
 		}
-		catch(e){
-			// dispatch("setAlert", {message: "Something went wrong when trying to delete client.", alertType: "error"}, { root: true })
-			let error: string[] = Object.values(e.response.data)
-			let errorMessage = error[0]
-			dispatch("setAlert", {message: errorMessage, alertType: "error"}, { root: true })
+    catch(error){
+      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('deleteClient_error_msg'))
 		}
 	},
 

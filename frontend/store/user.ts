@@ -33,23 +33,21 @@ export const actions: ActionTree<UserState, RootState> = {
 
 // -----------------------------------------/ Auth API
 	
-	async checkAuthenticated({commit}: {commit: Commit}) {
+	async checkAuthenticated({commit, dispatch}: {commit: Commit, dispatch: Dispatch}) {
 		try {
 			let data: any = await api.checkAuthenticated()
 			commit("SET_USER", data);
 		} catch (error) {
-			console.log(error);
+      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t("checkAuthenticated_error_msg"))
 		}	
 	},
 
-	getCsrf({commit}: {commit: Commit}) {
+	getCsrf({commit, dispatch}: {commit: Commit, dispatch: Dispatch}) {
 		try {
 			api.getCsrf() 
-			console.log("Csrftoken recived");
 			commit("setCsrf");
-			
 		} catch (error) {
-			console.log(error)	
+      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t("getCsrf_error_msg"))
 		}
 	},
 
@@ -57,97 +55,82 @@ export const actions: ActionTree<UserState, RootState> = {
 		payload["csrftoken"] = state.csrftoken
 		try {
 			let data = await api.login(payload)
-			console.log(data)
 			commit("SET_USER", data);
 			commit("setCsrf");
-			dispatch("setAlert", {message: "Logged in with success.", alertType: "success"}, { root: true })
-		} catch(e){
-			console.log("error when trying to login: ", e)
-			dispatch("setAlert", {message: "Login Failed", alertType: "error"}, { root: true })
-			// return "not ok"
+			dispatch("setAlert", {message: this.app.i18n.t('login_success_msg'), alertType: "success"}, { root: true })
+		} catch(error){
+        handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t("login_error_msg"))
 		}
 	},
 	
 	async logout({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
 		try {
 		let data = await api.logout()
-		console.log(data)
 		commit("deleteUser");
-		dispatch("setAlert", {message: "Logged out in with success.", alertType: "success"}, { root: true })
+		dispatch("setAlert", {message: this.app.i18n.t('logout_success_msg'), alertType: "success"}, { root: true })
 		this.$router.push("/")
 		} catch (error) {
-			console.log("error when trying to log out: ", error )
-			//>>>>>>>>>>>>>>>>>>>>>>TODO<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t("logout_error_msg"))
 		}
 	},
 
-	async updateCurrentUserProfile({commit, dispatch}: {commit: Commit, dispatch: Dispatch,}, payload: any){
+	async updateCurrentUserProfile({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
 		try {
       let data = await api.updateCurrentUserProfile(payload)
-      console.log(">>",data)
       commit("SET_USER", data )
-      dispatch("setAlert", {message: "Your profile has been updated.", alertType: "success"}, { root: true })
+      dispatch("setAlert", {message: this.app.i18n.t('updateCurrentUserProfile_succes_msg'), alertType: "success"}, { root: true })
 		}
-		catch(e){
-			handleError(e.response, commit)
-			let error: string[] = Object.values(e.response.data)
-			let errorMessage = error[0][0]
-			dispatch("setAlert", {message: errorMessage , alertType: "error"}, { root: true })
-			// dispatch("setAlert", {message: "Something went wrong when trying to update profile.", alertType: "error"}, { root: true })
+		catch(error){
+        handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t("updateCurrentUserProfile_error_msg"))
 		}
 	},
 
-	async updatePassword({commit, dispatch}: {commit: Commit, dispatch: Dispatch,}, payload: any){
+	async updatePassword({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
 		try {
-			let data = await api.updatePassword(payload)
-			console.log(">>>>>>>>>>", data)
+			await api.updatePassword(payload)
 			commit("deleteUser")
-			dispatch("setAlert", {message: "Your password has been updated.", alertType: "success"}, { root: true })
+			dispatch("setAlert", {message: this.app.i18n.t('updatePassword_success_msg'), alertType: "success"}, { root: true })
 			setTimeout(() => {
 				this.$router.push("/")
 			}, 600);
 		}
-		catch(e){
-			console.log("error in updatePassword action: ", e);
-			dispatch("setAlert", {message: "Something went wrong when trying to update password.", alertType: "error"}, { root: true })
+		catch(error){
+      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t("updatePassword_error_msg"))
 		}
 	},
 
 	// ----------------------------------------/ User API
   
-	async createUser({dispatch}: {dispatch: Dispatch,}, payload: any){
+	async createUser({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
 		try {
 			let data = await api.createUser(payload)
-			console.log(">>>",data)
-			dispatch("setAlert", {message: "User created", alertType: "success"}, { root: true })
+			dispatch("setAlert", {message: this.app.i.t('createUser_success_msg') , alertType: "success"}, { root: true })
 			return data
 		}
-		catch(e){
-			// dispatch("setAlert", {message: "Something went wrong when trying to create user.", alertType: "error"}, { root: true })
-			// let errorMessage: string = Object.values(e.response.data)[0][0] <<< why i got this ts error? "Object is of type "unknown""
-			let error: string[] = Object.values(e.response.data)
-			let errorMessage = error[0][0]
-			dispatch("setAlert", {message: errorMessage , alertType: "error"}, { root: true })
+		catch(error){
+      // handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('...'))
 		}
 	},
 
-	async fetchUsersByAdmin(){
-		let users = await api.fetchUsersByAdmin()
-		return users
+	async fetchUsersByAdmin({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
+    try{
+      let users = await api.fetchUsersByAdmin()
+      return users
+    }
+    catch(error){
+      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t("error..."))
+    }
 	},
 
-	async deleteUserByAdmin({dispatch}: {dispatch: Dispatch,}, payload: any){
+	async deleteUserByAdmin({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
 		try {
 			let data = await api.deleteUserByAdmin(payload)
 			console.log(">>>",data)
 			dispatch("setAlert", {message: "User deleted", alertType: "success"}, { root: true })
 			return "ok"
 		}
-		catch(e){
-			// dispatch("setAlert", {message: "Something went wrong when trying to delete user.", alertType: "error"}, { root: true })
-			let error: string[] = Object.values(e.response.data)
-			let errorMessage = error[0]
-			dispatch("setAlert", {message: errorMessage, alertType: "error"}, { root: true })
+		catch(error){
+      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t("error..."))
 		}
 	},
 

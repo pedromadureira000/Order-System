@@ -10,7 +10,7 @@ from .models import ItemTable, Item, ItemCategory, PriceTable, PriceItem
 from rest_framework.views import APIView
 from rolepermissions.checkers import has_permission, has_role
 from drf_yasg.utils import swagger_auto_schema
-from settings.response_templates import error_response, not_found_response, protected_error_response, serializer_invalid_response, success_response, unauthorized_response, unknown_exception_response
+from settings.response_templates import error_response, not_found_response, protected_error_response, serializer_invalid_response,  unauthorized_response, unknown_exception_response
 from django.utils.translation import gettext_lazy as _
 from decimal import Decimal
 
@@ -72,7 +72,7 @@ class SpecificItemTable(APIView):
                 return not_found_response(object_name=_('Item table'))
             try:
                 item_table.delete()
-                return success_response(detail=_("Item table deleted"))
+                return Response("Item table deleted")
             except ProtectedError:
                 return protected_error_response(object_name=_('item table'))
             except Exception as error:
@@ -150,7 +150,7 @@ class SpecificCategoryView(APIView):
                 return unauthorized_response
             try:
                 item_category.delete()
-                return success_response(detail=_("Item category deleted"))
+                return Response("Item category deleted")
             except ProtectedError as er:
                 return protected_error_response(object_name=_('item category'))
             except Exception as error:
@@ -227,7 +227,7 @@ class SpecificItemView(APIView):
                 return unauthorized_response
             try:
                 item.delete()
-                return success_response(detail=_("Item deleted"))
+                return Response("Item deleted")
             except ProtectedError:
                 return protected_error_response(object_name=_('item'))
             except Exception as error:
@@ -303,7 +303,7 @@ class SpecificPriceTableView(APIView):
                 return unauthorized_response
             try:
                 instance.delete()
-                return success_response(detail=_("Price table deleted successfully"))
+                return Response("Price table deleted successfully")
             except ProtectedError:
                 return protected_error_response(object_name=_('price table'))
             except Exception as error:
@@ -406,7 +406,7 @@ class SpecificPriceItemView(APIView):
                 return not_found_response(object_name=_('The price item'))
             try:
                 instance.delete()
-                return success_response(detail=_("Price item deleted successfully"))
+                return Response("Price item deleted successfully")
             except ProtectedError:
                 return protected_error_response(object_name=_('price item'))
             except Exception as error:

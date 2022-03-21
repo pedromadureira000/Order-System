@@ -157,6 +157,7 @@ export default {
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
 	axios: {
 		// credentials: true,
+    // timeout: 1000, TODO this is not working
 	},
 
   // Vuetify module configuration: https://go.nuxtjs.dev/config-vuetify

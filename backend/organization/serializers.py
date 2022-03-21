@@ -35,7 +35,7 @@ class CompanySerializer(serializers.ModelSerializer):
         if value:
             # Contracting Ownership
             if value.contracting != self.context["request"].user.contracting:
-                raise NotFound(detail={"detail": [_("Client table not found.")]})
+                raise NotFound(detail={"error": [_("Client table not found.")]})
             return value
         return value
 
@@ -43,7 +43,7 @@ class CompanySerializer(serializers.ModelSerializer):
         if value:
             # Contracting Ownership
             if value.contracting != self.context["request"].user.contracting:
-                raise NotFound(detail={"detail": [_("Item table not found.")]})
+                raise NotFound(detail={"error": [_("Item table not found.")]})
             return value
         return value
 

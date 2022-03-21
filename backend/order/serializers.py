@@ -51,27 +51,27 @@ class OrderPOSTSerializer(serializers.ModelSerializer):
         company = establishment.company
         #Check if the request_user is active
         if request_user.status != 1:
-            raise PermissionDenied(detail={"detail": [_("Your account is disabled.")]})
+            raise PermissionDenied(detail={"error": [_("Your account is disabled.")]})
         #Check if the contracting is active
         if request_user.contracting.status != 1:
-            raise PermissionDenied(detail={"detail": [_("Your contracting is disabled.")]})
+            raise PermissionDenied(detail={"error": [_("Your contracting is disabled.")]})
         # Check if client have access to this establishment 
         try:
             client_establishment = ClientEstablishment.objects.get(client=client, establishment=establishment)
         except ClientEstablishment.DoesNotExist:
-            raise PermissionDenied(detail={"detail": [_("Establishment not found.")]})
+            raise PermissionDenied(detail={"error": [_("Establishment not found.")]})
         # Check if ClientEstablishment has a price_table
         if not client_establishment.price_table:
-            raise PermissionDenied(detail={"detail": [_("You cannot buy from this establishment.")]})
+            raise PermissionDenied(detail={"error": [_("You cannot buy from this establishment.")]})
         #Check if the client is active
         if client.status != 1:
-            raise PermissionDenied(detail={"detail": [_("The client company is disabled.")]})
+            raise PermissionDenied(detail={"error": [_("The client company is disabled.")]})
         #Check if the company is active
         if company.status != 1:
-            raise PermissionDenied(detail={"detail": [_("The company is disabled.")]})
+            raise PermissionDenied(detail={"error": [_("The company is disabled.")]})
         #Check if the establishment is active
         if establishment.status != 1:
-            raise PermissionDenied(detail={"detail": [_("The establishment is disabled.")]})
+            raise PermissionDenied(detail={"error": [_("The establishment is disabled.")]})
         attrs['price_table'] = client_establishment.price_table
         # Check if item is available for this client by price table
         available_items = client_establishment.price_table.items.filter(status=1)
@@ -177,10 +177,10 @@ class OrderPUTSerializer(serializers.ModelSerializer):
         ordered_items = attrs.get('ordered_items')
         #Check if the request_user is active
         if request_user.status != 1:
-            raise PermissionDenied(detail={"detail": [_("Your account is disabled.")]})
+            raise PermissionDenied(detail={"error": [_("Your account is disabled.")]})
         #Check if the contracting is active
         if request_user.contracting.status != 1:
-            raise PermissionDenied(detail={"detail": [_("Your contracting is disabled.")]})
+            raise PermissionDenied(detail={"error": [_("Your contracting is disabled.")]})
         # Deny setting wrong invoice_number
         if (invoice_number and status != 4) or (invoice_number and status == 4 and self.instance.status != 3):
             raise serializers.ValidationError(_("You can only add invoice number when order status has changed from 'Registered' to 'Invoiced'."))
@@ -197,7 +197,7 @@ class OrderPUTSerializer(serializers.ModelSerializer):
             try:
                 client_establishment = ClientEstablishment.objects.get(client=client, establishment=establishment)
             except ClientEstablishment.DoesNotExist:
-                raise PermissionDenied(detail={"detail": [_("Establishment not found.")]})
+                raise PermissionDenied(detail={"error": [_("Establishment not found.")]})
             check_for_duplicate_values = []
             order_amount = 0
             if self.instance.status != 1:

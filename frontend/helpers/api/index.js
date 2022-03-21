@@ -209,7 +209,7 @@ export default {
 
   // --------------------------------------/ Auth APIs /----------------------------------------
 	async checkAuthenticated(){
-		return await axios.get("/api/user/own_profile").then((data)=> {return data.data})
+    return await axios.get("/api/user/own_profile").then((data)=> {return data.data})
 	},
 
 	async getCsrf(){

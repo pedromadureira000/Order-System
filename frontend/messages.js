@@ -1,5 +1,84 @@
 export const messages = {
   en: {
+    //--------------------------------------------------------------------/Store APIs Success Messages (dispatch success dialog)
+    // user
+    login_success_msg: "Logged in with success.",
+    logout_success_msg: "Logged out in with success.",
+    updateCurrentUserProfile_succes_msg: "Your profile has been updated.",
+    updatePassword_success_msg: "Your password has been updated.",
+    createUser_success_msg: "User created",
+    //organizations
+    createContracting_success_msg: "Contracting company created",
+    updateContracting_success_msg: "The Contracting company has been updated.",
+    deleteContracting_success_msg: "Contracting deleted",
+    createCompany_success_msg: "Company created.",
+    updateCompany_success_msg: "Company updated.",
+    deleteCompany_success_msg: "Company deleted.",
+    createClient_success_msg: "Client created",
+    updateClient_success_msg: "Client updated.",
+    deleteClient_success_msg: "Client deleted",
+    //--------------------------------------------------------------------/Store APIs Error Messages (default_error_msg parameter)
+    //user
+    checkAuthenticated_error_msg: "Something went wrong when trying to get the user profile.",
+    getCsrf_error_msg: "Something went wrong when trying to get CSRF Token.",
+    login_error_msg: "Something went wrong when trying to log in the user.",
+    logout_error_msg: "Something went wrong when trying to log out the user.",
+    updateCurrentUserProfile_error_msg: "Something went wrong when trying to update the user's profile.",
+    updatePassword_error_msg: "Something went wrong when trying to update the user's password.",
+    //organizations.js
+    createContracting_error_msg: "Something went wrong when trying to create contracting company.",
+    fetchContractingCompanies_error_msg: "Something went wrong when trying to fetch contracting companies.",
+    updateContracting_error_msg: "Something went wrong when trying to update the contracting company.",
+    deleteContracting_error_msg: "Something went wrong when trying to delete the contracting company.",
+    createCompany_error_msg: "Something went wrong when trying to create company.",
+    fetchCompanies_error_msg: "Something went wrong when trying to fetch companies.",
+    updateCompany_error_msg: "Something went wrong when trying to update company.",
+    deleteCompany_error_msg: "Something went wrong when trying to delete company.",
+    fetchEstablishments_error_msg: "Something went wrong when trying to fetch establishments.",
+    fetchClientTables_error_msg: "Something went wrong when trying to fetch client tables.",
+    fetchPriceTablesToCreateClient_error_msg: "Something went wrong when trying to fetch price tables to create client.",
+    fetchEstablishmentsToCreateClient_error_msg: "Something went wrong when trying to fetch establishments to create client.",
+    fetchCompaniesToCreateClient_error_msg: "Something went wrong when trying to fetch companies to create client.",
+    createClient_error_msg: "Something went wrong when trying to create client.",
+    fetchClients_error_msg: "Something went wrong when trying to fetch clients.",
+    updateClient_error_msg: "Something went wrong when trying to update client.",
+    deleteClient_error_msg: "Something went wrong when trying to delete client.",
+
+    // -------------------------------------------------------------------/ Error Handler
+    // Fields
+    Client_establishments: "Client establishments",
+    Vendor_code: "Vendor code",
+    Cnpj: "CNPJ",
+    Price_table: "Price table",
+    Client_table_code: "Client table code",
+    Description: "Description",
+    Item_table: "Item table",
+    Cnpj_root: "cnpj_root",
+    Establishment_code: "Establishment_code",
+    First_name: "First_name",
+    Last_name: "Last_name",
+    Agent_establishments: "Agent establishments",
+    Agent_permissions: "Agent permissions",
+    Ordered_items: "Ordered items",
+    Quantity: "Quantity",
+    Invoicing_date: "Invoicing date",
+    Invoice_number: "Invoice number",
+    Agent_note: "Agent note",
+    Category_code: "Category code",
+    Item_code: "Item_code",
+    Unit: "Unit",
+    Category: "Category",
+    Barcode: "Barcode",
+    Technical_description: "Technical description",
+    Item_table_code: "Item table code",
+    Unit_price: "Unit price",
+    Price_items: "Price items",
+    Table_code: "Table code",
+    // Error messages
+    Request_Time_out: "The request timed out.",
+    Connection_error: "Connection error",
+    Something_went_wrong: "Something went wrong.",
+    Server_error: "Server error.",
     // -------------------------------------------------------------------/ Layouts
     // -------------------------------/ default
     // Menu Itens
@@ -98,13 +177,16 @@ export const messages = {
     Price_Table: 'Price Table',
     Item_Category: 'Item Category',
     // -------------------------------------------------------------------/ Components
+    // -------------------------------/Problem Connecting Error dialog
+    ProblemConnectingTitle: "Problema de conexão",
+    Check_your_internet_connection: "Verifique sua conexão de internet e tente novamente.",
+    // -------------------------------/Session Error dialog
+    SessionErrorText: 'A aplicação já está aberta em outra janela. Clique em "Usar aqui" para usar a aplicação nessa janela.',
+    Use_Here: 'Usar aqui',
     // -------------------------------/Login dialog
     Username: 'Username',
     Password: 'Password',
     SlugFieldErrorMessage: 'It must containing only letters, numbers, underscores or hyphens.',
-    // -------------------------------/Session Error dialog
-    SessionErrorText: 'A aplicação já está aberta em outra janela. Clique em "Usar aqui" para usar a aplicação nessa janela.',
-    Use_Here: 'Usar aqui',
     // -------------------------------/admin/organization/contracting_edit_menu
     Edit: 'Edit',
     Cancel: 'Cancel',
@@ -118,6 +200,86 @@ export const messages = {
 //====================================================================================
   
   'pt-BR': {
+    //--------------------------------------------------------------------/Store APIs Success Messages (dispatch success dialog)
+    // user
+    login_success_msg: "Usuário logado.",
+    logout_success_msg: "Usuário deslogado.",
+    updateCurrentUserProfile_succes_msg: "Seu perfil foi atualizado.",
+    updatePassword_success_msg: "Sua senha foi atualizada.",
+    createUser_success_msg: "Usuário criado.",
+    //organizations
+    createContracting_success_msg: "Contratante criada.",
+    updateContracting_success_msg: "Contratante atualizada.",
+    deleteContracting_success_msg: "Contratante excluída.",
+    createCompany_success_msg: "Empresa criada.",
+    updateCompany_success_msg: "Empresa atualizada.",
+    deleteCompany_success_msg: "Empresa excluída.",
+    createClient_success_msg: "Cliente criado.",
+    updateClient_success_msg: "Cliente atualizado.",
+    deleteClient_success_msg: "Cliente excluído",
+    //--------------------------------------------------------------------/Store APIs Error Messages (default_error_msg parameter)
+    //user
+    checkAuthenticated_error_msg: "Algo deu errado ao tentar obter o perfil do usuário.",
+    getCsrf_error_msg: "Algo deu errado ao tentar obter o Token CSRF.",
+    login_error_msg: "Algo deu errado ao tentar logar o usuário.",
+    logout_error_msg: "Algo deu errado ao tentar desconectar o usuário.",
+    updateCurrentUserProfile_error_msg: "Algo deu errado ao tentar atualizar o perfil do usuário.",
+    updatePassword_error_msg: "Algo deu errado ao tentar atualizar a senha do usuário.",
+    //organizations.js
+    createContracting_error_msg: "Algo deu errado ao tentar criar empresa contratante.",
+    fetchContractingCompanies_error_msg: "Algo deu errado ao tentar buscar contratantes.",
+    updateContracting_error_msg: "Algo deu errado ao tentar atualizar contratante.",
+    deleteContracting_error_msg: "Algo deu errado ao tentar deletar a contratante.",
+    createCompany_error_msg: "Algo deu errado ao tentar criar uma empresa.",
+    fetchCompanies_error_msg: "Algo deu errado ao tentar buscar empresas.",
+    updateCompany_error_msg: "Algo deu errado ao tentar atualizar a empresa.",
+    deleteCompany_error_msg: "Algo deu errado ao tentar excluir a empresa.",
+    fetchEstablishments_error_msg: "Algo deu errado ao tentar carregar estabelecimentos.",
+    fetchClientTables_error_msg: "Algo deu errado ao tentar carregar tabelas de clientes.",
+    fetchPriceTablesToCreateClient_error_msg: "Algo deu errado ao tentar carregar tabelas de preço na pagina de criação de cliente.",
+    fetchEstablishmentsToCreateClient_error_msg: "Algo deu errado ao tentar carregar estabelecimentos na pagina de criação de cliente.",
+    fetchCompaniesToCreateClient_error_msg: "Algo deu errado ao tentar carregar empresas na pagina de criação de cliente.",
+    createClient_error_msg: "Algo deu errado ao tentar criar cliente",
+    fetchClients_error_msg: "Algo deu errado ao tentar buscar clientes",
+    updateClient_error_msg: "Algo deu errado ao tentar atualizar o cliente.",
+    deleteClient_error_msg: "Algo deu errado ao tentar excluir o cliente.",
+
+    // -------------------------------------------------------------------/ Error Handler
+    // Fields
+    Client_establishments: "Estabelecimentos do cliente",
+    Vendor_code: "Código do vendedor",
+    Cnpj: "CNPJ",
+    Price_table: "Tabela de preço",
+    Client_table_code: "Código da tabela de clientes",
+    Description: "Descrição",
+    Item_table: "Tabela de itens",
+    Cnpj_root: "Raiz do CNPJ",
+    Establishment_code: "Código do estabelecimento",
+    First_name: "Nome",
+    Last_name: "Sobrenome",
+    Agent_establishments: "Estabelecimentos do agente",
+    Agent_permissions: "Permissões do agente",
+    Ordered_items: "Itens pedidos",
+    Quantity: "Quantidade",
+    Invoicing_date: "Data do faturamento",
+    Invoice_number: "Número da nota",
+    Agent_note: "Observação do agente",
+    Category_code: "Código da categoria",
+    Item_code: "Código do item",
+    Unit: "Unidade",
+    Category: "Categoria",
+    Barcode: "Código de barras",
+    Technical_description: "Descrição técnica",
+    Item_table_code: "Código da tabela de itens",
+    Unit_price: "Preço unitário",
+    Price_items: "Itens preço",
+    Table_code: "Código da tabela",
+    // Error messages(from store actions(default_error_msg parameter) and handleError function)
+    Request_Time_out: "A requisição excedeu o tempo limite.",
+    Connection_error: "Erro de conexão",
+    Something_went_wrong: "Algo deu errado.",
+    Server_error: "Error no servidor.",
+
     // -------------------------------------------------------------------/ Layouts
     // -------------------------------/ default
     // Menu Itens
@@ -215,13 +377,17 @@ export const messages = {
     Price_Table: 'Tabela de Preço',
     Item_Category: 'Categoria de Itens',
     // -------------------------------------------------------------------/ Components
+    // -------------------------------/Problem Connecting Error dialog
+    ProblemConnectingTitle: "Problem connecting",
+    Check_your_internet_connection: "Check your internet connection and try again.",
+
+    // -------------------------------/Session Error dialog
+    SessionErrorText: 'The application is open in another window. Click "Use Here" to use the application in this window.',
+    Use_Here: 'Use here',
     // -------------------------------/Login dialog
     Username: 'Username',
     Password: 'Senha',
     SlugFieldErrorMessage: 'Esse campo deve conter apenas, números, underscores ou hifens.',
-    // -------------------------------/Session Error dialog
-    SessionErrorText: 'The application is open in another window. Click "Use Here" to use the application in this window.',
-    Use_Here: 'Use here',
     // -------------------------------/admin/organization/contracting_edit_menu
     Edit: 'Editar',
     Cancel: 'Cancelar',

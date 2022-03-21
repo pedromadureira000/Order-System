@@ -22,11 +22,14 @@ export default async (ctx) => {
 			return;
 		}
 		try {
-			let data = await api.checkAuthenticated()	
-			ctx.store.commit('user/SET_USER', data )	
+			// await ctx.store.dispatch('user/checkAuthenticated')	
+      let data = await api.checkAuthenticated()	
+			ctx.store.commit('user/SET_USER', data )
 		}
-		catch (error) {
-			console.log('>>>> error: ', error)
+		catch (error) { 
+      // if ( error.message == 'timeout of 15000ms exceeded') { //TODO fix
+      // }
+      console.log('>>>> error middleware "check_auth": ', error)
 		}
 	}
 }

@@ -94,7 +94,7 @@ class SpecificOrderView(APIView):
             #  try:
                 #  order._request_user = request.user
                 #  order.delete()
-                #  return success_response(detail=_("Order deleted successfully"))
+                #  return Response("Order deleted successfully")
             #  except ProtectedError:
                 #  return protected_error_response(object_name=_('order'))
             #  except Exception as error:

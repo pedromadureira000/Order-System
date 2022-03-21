@@ -6,6 +6,7 @@
         <nuxt-link :to="switchLocalePath('en')">English</nuxt-link>
         <nuxt-link :to="switchLocalePath('pt-BR')">Português</nuxt-link>
         <nuxt-link :to="localePath('admin-organization-company')">TEST</nuxt-link>
+        <v-btn label="testF" @click="testF"/>
       </v-card>
       <!-- MenuItems composition -->
       <v-list nav dense>
@@ -89,6 +90,7 @@
     <login-dialog ref="login_dialog"/>
 
     <session-error-dialog/>
+    <problem-connecting-error-dialog/>
 
 		<v-alert v-if='$store.state.alert.showAlert' :type='$store.state.alert.alertType' style="width: 50%;" class="alert_message">
 		{{$store.state.alert.alertMessage}}
@@ -102,11 +104,16 @@
 import footer from '~/components/Footer.vue';
 import loginDialog from '~/components/login-dialog.vue'
 import sessionErrorDialog from '~/components/session-error-dialog.vue'
+import problemConnectingErrorDialog from '~/components/problem-connecting-dialog.vue'
 import {CRUDerpUserPermissions, CRUDadminAgentPermissions, CRUDagentPermissions, CRUDclientUserPermissions, CRUDcontractingPermissions, CRUDcompanyPermissions, CRUDestablishmentPermissions, CRUDclientTablePermissions, CRUDclientPermissions,CRUDitemTablePerms,CRUDitemPermissions, CRUDitemCategoryPerms, CRUDpriceTablePerms, client_user} from '~/helpers/permissions'
+
 let usersMenuPermissions = CRUDerpUserPermissions.concat(CRUDadminAgentPermissions).concat(CRUDagentPermissions).concat(CRUDclientUserPermissions)
 let organizationPermissions = CRUDcontractingPermissions.concat(CRUDcompanyPermissions).concat(CRUDestablishmentPermissions).concat(CRUDclientTablePermissions).concat(CRUDclientPermissions)
 let itemsMenuPermissions = CRUDitemTablePerms.concat(CRUDitemPermissions).concat(CRUDitemCategoryPerms).concat(CRUDpriceTablePerms)
 let orderPermissions = client_user
+
+import {handleError} from '~/helpers/functions' //TODO REmove it 
+import axios from '~/plugins/axios'
 
 export default {
 	name: "default",
@@ -114,6 +121,7 @@ export default {
   components: {
     loginDialog,
 		sessionErrorDialog,
+    problemConnectingErrorDialog,
     leFooter: footer
   },
 
@@ -141,6 +149,28 @@ export default {
     logout() {
 			this.$store.dispatch('user/logout')
     },
+
+    async testF(){
+      this.$store.dispatch("switchConnectionError")
+        /** return await axios({  */
+        /** method: "post", */
+        /** data: { */
+          /** "client_table": "123&11", */
+          /** "client_code": "689", */
+          /** "vendor_code": "string", */
+          /** "name": "string", */
+          /** "cnpj": "40.229.893/0001-66", */
+          /** "status": 1, */
+          /** "note": "string" */
+        /** }, */
+        /** url: `/api/organization/client`, */
+          /** }).then((response) => { */
+              /** console.log(">>>>>>> It worked", response) */
+          /** }).catch(error => { */
+            /** console.log(">>>>>>> ***********************", error.message) */
+            /** handleError(error, this.$store.commit, this.$store.dispatch, this.$i18n, 'Error on the test' ) */
+          /** }) */
+    }
   },
 
   computed: {

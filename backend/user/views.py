@@ -16,7 +16,7 @@ from .validators import agent_has_access_to_this_client_user, req_user_is_agent_
 from organization.validators import agent_has_access_to_this_client
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
-from settings.response_templates import success_response, error_response, not_found_response, serializer_invalid_response, protected_error_response, unknown_exception_response, unauthorized_response
+from settings.response_templates import error_response, not_found_response, serializer_invalid_response, protected_error_response, unknown_exception_response, unauthorized_response
 
 
 #------------------------/ Auth Views
@@ -25,14 +25,14 @@ from settings.response_templates import success_response, error_response, not_fo
 class GetCSRFToken(APIView):
     permission_classes = (permissions.AllowAny,)
     def get(self, request):
-        return success_response(detail=_( "csrf cookie set"))
+        return Response("csrf cookie set")
 # If the user has status != 1, it will be considered disabled and the user can't log in.
 class Login(APIView):
     permission_classes = (permissions.AllowAny,)
     @swagger_auto_schema(request_body=SwaggerLoginSerializer) 
     def post(self, request):
         if request.user.is_authenticated:
-            return success_response(detail=_("User is already authenticated"))
+            return Response("User is already authenticated")
         serializer = SwaggerLoginSerializer(data=request.data)
         if serializer.is_valid():
             user_code = serializer.validated_data["contracting_code"] + "&" + serializer.validated_data["username" ]
@@ -54,13 +54,12 @@ class Logout(APIView):
     def post(self, request):
         try:
             logout(request)
-            return success_response(detail=_( 'Logged out'))
+            return Response('Logged out')
         except Exception as error:
             print(error)
             unknown_exception_response(action=_('log out'))
 
 #-------------------------------------------/ Users Views / -------------------------------------
-
 class OwnProfileView(APIView):
     @transaction.atomic
     def get(self, request):
@@ -138,7 +137,7 @@ class SpecificERPUser(APIView):
                 return not_found_response(object_name=_('The erp user'))
             try:
                 user.delete()
-                return success_response(detail=_("ERP user deleted successfully."))
+                return Response("ERP user deleted successfully.")
             except ProtectedError as er:
                 return protected_error_response(object_name=_('erp user'))
             except Exception as error:
@@ -208,7 +207,7 @@ class SpecificAdminAgent(APIView):
                 return not_found_response(object_name=_('The admin agent'))
             try:
                 user.delete()
-                return success_response(detail=_("Admin agent deleted successfully"))
+                return Response("Admin agent deleted successfully")
             except ProtectedError as er:
                 return protected_error_response(object_name=_('admin agent'))
             except Exception as error:
@@ -278,7 +277,7 @@ class SpecificAgent(APIView):
                 return not_found_response(object_name=_('The agent'))
             try:
                 user.delete()
-                return success_response(detail=_( "Agent deleted successfully"))
+                return Response( "Agent deleted successfully")
             except ProtectedError as er:
                 return protected_error_response(object_name=_('agent'))
             except Exception as error:
@@ -360,7 +359,7 @@ class SpecificClientUser(APIView):
                 return unauthorized_response
             try:
                 client_user.delete()
-                return success_response(detail=_("Client user deleted successfully"))
+                return Response("Client user deleted successfully")
             except ProtectedError as er:
                 return protected_error_response(object_name=_('client user'))
             except Exception as error:
@@ -382,5 +381,5 @@ class UpdateUserPassword(APIView):
         if user.check_password(data.get('current_password')):
             user.set_password(data['password'])
             user.save()
-            return success_response(detail=_( "Password updated"))
+            return Response( "Password updated")
         return error_response(detail=_("passwords don't match"), status=status.HTTP_400_BAD_REQUEST )

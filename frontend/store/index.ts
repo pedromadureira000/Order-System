@@ -5,6 +5,7 @@ export interface RootState {
     showAlert: boolean;
     alertID: number
   },
+  connectionError: boolean
 }
 
 export const state = (): RootState => ({
@@ -14,6 +15,7 @@ export const state = (): RootState => ({
     showAlert: false,
     alertID: 0
   },
+  connectionError: false
 });
 
 import { MutationTree } from "vuex";
@@ -37,6 +39,9 @@ export const mutations: MutationTree<RootState> = {
   // removeOneFromAlertqueue(state){
     // state.alert.alertqueue = state.alert.alertqueue - 1
   // }
+  switchConnectionError(state){
+    state.connectionError = !state.connectionError
+  }
 
 };
 
@@ -61,4 +66,7 @@ export const actions: ActionTree<RootState, RootState> = {
       }, payload.timeout);
     }, timeout);
   },
+  switchConnectionError({ commit}: { commit: Commit}){
+    commit('switchConnectionError')
+  }
 };
