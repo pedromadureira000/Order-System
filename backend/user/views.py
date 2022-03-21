@@ -7,7 +7,7 @@ from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .facade import get_all_client_users_by_agent
-from .serializers import AdminAgentSerializer, AgentSerializer, ClientUserSerializer, ERPUserSerializer, OwnProfileSerializer, UserSerializer, SwaggerLoginSerializer, SwaggerProfilePasswordSerializer
+from .serializers import AdminAgentSerializer, AgentSerializer, ClientUserSerializer, ERPUserSerializer, OwnProfileSerializer, SwaggerLoginSerializer, SwaggerProfilePasswordSerializer
 from .models import User
 from rolepermissions.checkers import has_permission, has_role
 from django.db import transaction
@@ -72,7 +72,8 @@ class OwnProfileView(APIView):
     @swagger_auto_schema(request_body=OwnProfileSerializer) 
     @transaction.atomic
     def put(self, request):
-        serializer = UserSerializer(request.user, data=request.data, partial=True, context={"request": request, "view": "update own profile"})
+        serializer = OwnProfileSerializer(request.user, data=request.data, partial=True, context={"request": request,
+            "view": "update own profile"})
         if serializer.is_valid():
             try:
                 serializer.save()
