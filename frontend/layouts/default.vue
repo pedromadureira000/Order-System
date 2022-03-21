@@ -90,17 +90,29 @@
     <login-dialog ref="login_dialog"/>
 
     <session-error-dialog/>
+
     <problem-connecting-error-dialog/>
 
-		<v-alert 
-      v-if='$store.state.alert.showAlert' 
-      :type='$store.state.alert.alertType' 
-      style="width: 50%;" 
-      class="alert_message" 
-      dismissible>
-		{{$store.state.alert.alertMessage}}
-		</v-alert>
+    <!-- Alert -->
+    <div>
+      <v-alert 
+        :value="$store.state.alert.showAlert"
+        :type='$store.state.alert.alertType' 
+        style="width: 50%;" 
+        class="alert_message" 
+        dismissible
+      >
+        <!-- ## dismissible get the same error as my custom v-btn ## -->
 
+        <!-- <v-btn @focus.stop.prevent="$store.dispatch('removeAlert')">Close</v-btn> -->
+
+        <!-- <v-btn  -->
+          <!-- @focus.capture.stop="wtf"         ) :             -->
+          <!-- @click.capture.stop="wtf" --> 
+        <!-- >Close</v-btn>  -->
+        {{$store.state.alert.alertMessage}}
+      </v-alert>
+    </div>
 		<le-footer/>
   </v-app>
 </template>
@@ -155,8 +167,14 @@ export default {
 			this.$store.dispatch('user/logout')
     },
 
+    /** wtf(event){ */
+      /** event.stopPropagation() */
+      /** console.log(">>>>>>>JESUS!!!!!!: ", event) */
+    /** }, */
+
     async testF(){
       /** this.$store.dispatch("setAlert", {message: "User deleted", alertType: "success"}, { root: true }) */
+      this.$store.dispatch("setAlert", {message: "errorrr", alertType: "error"}, { root: true })
 
       /** this.$store.dispatch("switchConnectionError") */
 
@@ -178,7 +196,7 @@ export default {
             /** console.log(">>>>>>> ***********************", error.message) */
             /** handleError(error, this.$store.commit, this.$store.dispatch, this.$i18n, 'Error on the test' ) */
           /** }) */
-    }
+    },
   },
 
   computed: {

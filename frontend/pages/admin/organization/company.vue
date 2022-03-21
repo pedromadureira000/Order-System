@@ -157,22 +157,13 @@ export default {
   async fetch() {
     // Fetch Companies to EDIT list
     let companies = await this.$store.dispatch("organization/fetchCompanies");
-    for (const company_index in companies){
-      let company = companies[company_index]
-      this.companies.push(company)
-    }
+    this.companies.push(...companies)
     // Fetch client_table options
     let client_tables = await this.$store.dispatch("organization/fetchClientTables");
-    for (const client_table_index in client_tables){
-      let client_table = client_tables[client_table_index]
-      this.client_tables.push(client_table)
-    }
+    this.client_tables.push(...client_tables)
     // Fetch item_table options
     let item_tables = await this.$store.dispatch("item/fetchItemTables");
-    for (const item_table_index in item_tables){
-      let item_table = item_tables[item_table_index]
-      this.item_tables.push(item_table)
-    }
+    this.item_tables.push(...item_tables)
   },
 
   validations: {

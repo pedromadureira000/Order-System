@@ -217,7 +217,7 @@ export default {
 
   methods: {
     handleClick(index){
-      //this.menu_items[id].click()  #will get erros, because of function click will no can access propertie with it's own 'this'
+      //this.menu_items[id].click()  #will get errors because the function click will not access properties with its own 'this'
       this.menu_items[index].click.call(this) // will call the function but the function will use the vue instance 'this' context.
     },
 

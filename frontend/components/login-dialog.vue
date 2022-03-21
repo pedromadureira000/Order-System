@@ -4,13 +4,23 @@
       <v-card-title>Login</v-card-title>
       <v-card-text>
         <v-container fluid>
-					<v-text-field
-						v-model="username"
-						:error-messages="usernameErrors"
-						:label="$t('Username')"
-						required
-						@blur="$v.username.$touch()"
-					></v-text-field>
+          <v-text-field
+            v-model="username"
+            :error-messages="usernameErrors"
+            :label="$t('Username')"
+            required
+            @blur="$v.username.$touch()"
+          ></v-text-field>
+
+          <!-- <v-text-field -->
+            <!-- v-model="username" -->
+            <!-- :error-messages="usernameErrors" -->
+            <!-- :label="$t('Username')" -->
+            <!-- required -->
+            <!-- @blur="$v.username.$touch()" -->
+            <!-- @focus.self="wtf($event)"   VERY SAD! -->
+            <!-- @click.self="wtf($event)" -->
+          <!-- ></v-text-field> -->
 					<v-text-field
 						v-model="contracting_code"
 						:error-messages="contracting_codeErrors"
@@ -65,6 +75,9 @@ export default {
   },
 
   methods: {
+    /** wtf(event){ */
+      /** console.log(">>>>>>>WTF!!!!!!!!!: ", event) */
+    /** }, */
     open() {
       this.visible = true
     },
@@ -80,6 +93,10 @@ export default {
         await this.$store.dispatch('user/login', {username: this.username, contracting_code: this.contracting_code, password: this.password} )
         if (this.$store.state.user.currentUser){
           this.visible = false
+          // clear form fields
+          this.username = ""
+          this.contracting_code = ""
+          this.password = ""
         }      
         this.loading = false
       }

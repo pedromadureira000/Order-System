@@ -203,16 +203,10 @@ export default {
   async fetch() {
     // Fetch Clients to EDIT list
     let clients = await this.$store.dispatch("organization/fetchClients");
-    for (const client_index in clients){
-      let client = clients[client_index]
-      this.clients.push(client)
-    }
+    this.clients.push(...clients)
     // Fetch company options
     let companies = await this.$store.dispatch("organization/fetchCompaniesToCreateClient");
-    for (const company_index in companies){
-      let company = companies[company_index]
-      this.companies.push(company)
-    }
+    this.companies.push(...companies)
   },
 
   validations: {
