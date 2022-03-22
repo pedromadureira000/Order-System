@@ -1,6 +1,20 @@
 import {Commit, Dispatch} from "vuex"
-let field_list = ['contracting_code', 'active_users_limit', 'company', 'company_code','item_table', 'client_table','cnpj_root' ,'establishment_code','client_code', 'client_table', 'vendor_code', 'name', 'cnpj', 'status', 'note', 'establishment', 'price_table' ]
-let nested_field_list = ['client_establishments']
+//Organization
+let contracting_fields = ['contracting_code', 'active_users_limit']
+let company_fields = ['company_code','item_table', 'client_table','cnpj_root']
+let establishment_fields = ['company' ,'establishment_code']
+let client_table_fields = ['client_table_code']
+let client_fields = ['client_code', 'client_table', 'vendor_code', 'establishment', 'price_table']
+// User
+let common_user_fields = ['username', 'first_name','last_name', 'email', 'password']
+let erp_user_fields  = ['contracting']
+let client_user_fields = ['client']
+// Item
+// Order
+let common_fields_list = ['name', 'cnpj', 'status', 'description', 'note']
+let field_list = contracting_fields.concat(company_fields, establishment_fields, client_table_fields, client_fields, common_user_fields, erp_user_fields, client_user_fields, common_fields_list)
+
+let nested_field_list = ['client_establishments', 'agent_establishments', 'agent_permissions']
 
 export const doesHttpOnlyCookieExist = (cookiename: string): boolean => {
 	var d = new Date();
@@ -35,7 +49,7 @@ export const eraseCookie = (name: string) => {
     document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 }
 
-export const handleError = (error: any, commit: Commit, dispatch: Dispatch, i18n: any, 
+export const ErrorHandler = (error: any, commit: Commit, dispatch: Dispatch, i18n: any, 
                             default_error_msg: any = i18n.t('Something_went_wrong')  ) => { 
   // -----------/ Time-out Error
   if (error.message == 'timeout of 15000ms exceeded'){

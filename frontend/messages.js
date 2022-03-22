@@ -6,7 +6,9 @@ export const messages = {
     logout_success_msg: "Logged out in with success.",
     updateCurrentUserProfile_succes_msg: "Your profile has been updated.",
     updatePassword_success_msg: "Your password has been updated.",
-    createUser_success_msg: "User created",
+    createClientUser_success_msg: "Client user created",
+    updateClientUser_success_msg: "Client user updated",
+    deleteClientUser_success_msg: "Client user deleted",
     //organizations
     createContracting_success_msg: "Contracting company created",
     updateContracting_success_msg: "The Contracting company has been updated.",
@@ -20,6 +22,9 @@ export const messages = {
     createEstablishment_success_msg: "Establishment created.",
     updateEstablishment_success_msg: "Establishment updated.",
     deleteEstablishment_success_msg: "Establishment deleted.",
+    createClientTable_success_msg: "Client table created.",
+    updateClientTable_success_msg: "Client table updated.",
+    deleteClientTable_success_msg: "Client table deleted.",
     //--------------------------------------------------------------------/Store APIs Error Messages (default_error_msg parameter)
     //user
     checkAuthenticated_error_msg: "Something went wrong when trying to get the user profile.",
@@ -28,6 +33,11 @@ export const messages = {
     logout_error_msg: "Something went wrong when trying to log out the user.",
     updateCurrentUserProfile_error_msg: "Something went wrong when trying to update the user's profile.",
     updatePassword_error_msg: "Something went wrong when trying to update the user's password.",
+    fetchClientsToCreateClientUser_error_msg: "Something went wrong when trying to fetch clients to create a client user.",
+    createClientUser_error_msg: "Something went wrong when trying to create a client user.",
+    fetchClientUsers_error_msg: "Something went wrong when trying to fetch client users.",
+    updateClientUser_error_msg: "Something went wrong when trying to update the client user.",
+    deleteClientUser_error_msg: "Something went wrong when trying to delete the client user.",
     //organizations.js
     createContracting_error_msg: "Something went wrong when trying to create a contracting company.",
     fetchContractingCompanies_error_msg: "Something went wrong when trying to fetch contracting companies.",
@@ -50,6 +60,9 @@ export const messages = {
     createEstablishment_error_msg: "Something went wrong when trying to create an establishment.",
     updateEstablishment_error_msg: "Something went wrong when trying to update the establishment.",
     deleteEstablishment_error_msg: "Something went wrong when trying to update the establishment.",
+    createClientTable_error_msg: "Something went wrong when trying to create a client table.",
+    updateClientTable_error_msg: "Something went wrong when trying to update the client table.",
+    deleteClientTable_error_msg: "Something went wrong when trying to delete the client table.",
 
     // -------------------------------------------------------------------/ Error Handler
     // Fields
@@ -118,6 +131,7 @@ export const messages = {
     Current_password: 'Current password',
     Password_Confirm: 'Password Confirm',
     You_have_not_changed_any_fields: 'You have not changed any fields.',
+    "Must be valid e-mail" : "Must be valid e-mail",
     // cpf_validation_error: 'This field should have the format 999.999.999-99',
     Password_must_be_different_from_current_password: 'The password should not be equal to the current password.',
     password_confirm_does_not_match: 'The password confirmation fail.',
@@ -170,6 +184,11 @@ export const messages = {
     Create_Establishment: "Create Establishment",
     Establishment_Status: "Establishment Status",
     Edit_Establishment: "Edit Establishment",
+    // -------------------------------/admin/organizations/client_table
+    "Create Client Table": "Create Client Table",
+    "Edit Client Table": "Edit Client Table",
+    "Client Table Code": "Client Table Code",
+    
     // -------------------------------/admin/organizations/client
     cnpjValidationError: "This field must be in the format '99.999.999/9999-99'",
     Create_Client: "Create Client",
@@ -178,12 +197,18 @@ export const messages = {
     Edit_Client: "Edit Client",
     Vendor_Code: "Vendor Code",
     Client_Establishments: "Client Establishments",
-    // -------------------------------/admin/user
+    // ------------------------------------------------------------------------------------/admin/user
     ERP_User: 'ERP User',
     Admin_Agent: 'Admin Agent',
     Agent: 'Agent',
     Client_User: 'Client User',
-    // -------------------------------/admin/item
+    // -------------------------------/admin/user/ERP_User
+    // -------------------------------/admin/user/Agent
+    // -------------------------------/admin/user/client_user
+    "Create Client User": "Create Client User",
+    "Edit Client User": "Edit Client User",
+    "Complete name" : "Complete name",
+    // -----------------------------------------------------------------------------------/admin/item
     Price_Table: 'Price Table',
     Item_Category: 'Item Category',
     // -------------------------------------------------------------------/ Components
@@ -216,7 +241,9 @@ export const messages = {
     logout_success_msg: "Usuário deslogado.",
     updateCurrentUserProfile_succes_msg: "Seu perfil foi atualizado.",
     updatePassword_success_msg: "Sua senha foi atualizada.",
-    createUser_success_msg: "Usuário criado.",
+    createClientUser_success_msg: "Usuário cliente criado.",
+    updateClientUser_success_msg: "Usuário cliente atualizado.",
+    deleteClientUser_success_msg: "Usuário cliente excluído.",
     //organizations
     createContracting_success_msg: "Contratante criada.",
     updateContracting_success_msg: "Contratante atualizada.",
@@ -230,6 +257,9 @@ export const messages = {
     createEstablishment_success_msg: "Estabelecimento criado.",
     updateEstablishment_success_msg: "Estabelecimento atualizado.",
     deleteEstablishment_success_msg: "Estabelecimento excluído.",
+    createClientTable_success_msg: "Tabela de clientes criada.",
+    updateClientTable_success_msg: "Tabela de clientes atualizada.",
+    deleteClientTable_success_msg: "Tabela de clientes excluída.",
     //--------------------------------------------------------------------/Store APIs Error Messages (default_error_msg parameter)
     //user
     checkAuthenticated_error_msg: "Algo deu errado ao tentar obter o perfil do usuário.",
@@ -238,6 +268,11 @@ export const messages = {
     logout_error_msg: "Algo deu errado ao tentar desconectar o usuário.",
     updateCurrentUserProfile_error_msg: "Algo deu errado ao tentar atualizar o perfil do usuário.",
     updatePassword_error_msg: "Algo deu errado ao tentar atualizar a senha do usuário.",
+    fetchClientsToCreateClientUser_error_msg: "Algo deu errado ao tentar buscar clientes para criar usuário cliente.",
+    createClientUser_error_msg: "Algo deu errado ao tentar criar um usuário cliente.",
+    fetchClientUsers_error_msg: "Algo deu errado ao tentar buscar usuários clientes.",
+    updateClientUser_error_msg: "Algo deu errado ao tentar atualizar o usuário cliente.",
+    deleteClientUser_error_msg: "Algo deu errado ao tentar excluir o usuário cliente.",
     //organizations.js
     createContracting_error_msg: "Algo deu errado ao tentar criar empresa contratante.",
     fetchContractingCompanies_error_msg: "Algo deu errado ao tentar buscar contratantes.",
@@ -260,6 +295,9 @@ export const messages = {
     createEstablishment_error_msg: "Algo deu errado ao tentar criar um estabelecimento.",
     updateEstablishment_error_msg: "Algo deu errado ao tentar atualizar o estabelecimento.",
     deleteEstablishment_error_msg:  "Algo deu errado ao tentar excluir o estabelecimento.",
+    createClientTable_error_msg: "Algo deu errado ao tentar criar o estabelecimento.",
+    updateClientTable_error_msg: "Algo deu errado ao tentar atualizar o estabelecimento.",
+    deleteClientTable_error_msg: "Algo deu errado ao tentar excluir o estabelecimento.",
 
     // -------------------------------------------------------------------/ Error Handler
     // Fields
@@ -328,6 +366,7 @@ export const messages = {
     Current_password: 'Senha atual',
     Password_Confirm: 'Confirmar Senha',
     You_have_not_changed_any_fields: 'Você não alterou nenhum campo.',
+    "Must be valid e-mail" : "O e-mail deve ter um formato valido.",
     // cpf_validation_error: 'Esse campo deve ter o formato 999.999.999-99',
     Password_must_be_different_from_current_password: 'A senha deve ser diferente da senha atual.',
     password_confirm_does_not_match: 'As senhas não coincidem.',
@@ -380,7 +419,11 @@ export const messages = {
     Create_Establishment: "Criar Estabelecimento",
     Establishment_Status: "Status do Estabelecimento",
     Edit_Establishment: "Editar Estabelecimento",
-
+    // -------------------------------/admin/organizations/client_table
+    "Create Client Table": "Criar Tabela de Clientes",
+    "Edit Client Table": "Editar Tabela de Clientes",
+    "Client Table Code": "Código da tabela de clientes",
+    
     // -------------------------------/admin/organizations/client
     cnpjValidationError: "Esse campo deve estar no formato '99.999.999/9999-99'",
     Create_Client: "Criar Cliente",
@@ -389,19 +432,25 @@ export const messages = {
     Edit_Client: "Editar Cliente",
     Vendor_Code: "Código do Vendedor",
     Client_Establishments: "Estabelecimentos do Cliente",
-    // -------------------------------/admin/user
+    // ---------------------------------------------------------------------------------------/admin/user
     ERP_User: 'Usuário ERP',
     Admin_Agent: 'Agente Admin',
     Agent: 'Agente',
     Client_User: 'Usuário Cliente',
-    // -------------------------------/admin/item
+    // -------------------------------/admin/user/ERP_User
+    // -------------------------------/admin/user/Agent
+    // -------------------------------/admin/user/client_user
+    "Create Client User": "Criar Usuário Cliente",
+    "Edit Client User": "Editar Usuário Cliente",
+    "Complete name" : "Nome completo",
+
+    // ----------------------------------------------------------------------------------------/admin/item
     Price_Table: 'Tabela de Preço',
     Item_Category: 'Categoria de Itens',
     // -------------------------------------------------------------------/ Components
     // -------------------------------/Problem Connecting Error dialog
     ProblemConnectingTitle: "Problem connecting",
     Check_your_internet_connection: "Check your internet connection and try again.",
-
     // -------------------------------/Session Error dialog
     SessionErrorText: 'The application is open in another window. Click "Use Here" to use the application in this window.',
     Use_Here: 'Use here',

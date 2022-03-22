@@ -208,7 +208,7 @@ export default {
     emailErrors() {
       const errors = [];
       if (!this.$v.email.$dirty) return errors;
-      !this.$v.email.email && errors.push("Must be valid e-mail");
+      !this.$v.email.email && errors.push(this.$t("Must be valid e-mail"));
       !this.$v.email.required && errors.push(this.$t("This_field_is_required"));      
       return errors;
     },

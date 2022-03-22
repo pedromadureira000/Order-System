@@ -176,7 +176,7 @@ class AgentSerializer(UserSerializer):
 
     class Meta(UserSerializer.Meta):
         fields = ['username', 'contracting', 'first_name', 'last_name', 'email', 'status', 'password',
-                'note', 'roles', 'permissions', 'agent_establishments', 'agent_permissions']
+                'note', 'roles', 'permissions', 'agent_establishments', 'agent_permissions', 'contracting_code']
         extra_kwargs = {
             'password': {'write_only': True},
             'agent_permissions': {'write_only': True},
@@ -235,7 +235,7 @@ class ClientUserSerializer(UserSerializer):
 
     class Meta(UserSerializer.Meta):
         fields = ['username',  'contracting', 'client', 'roles', 'permissions', 'first_name',
-                'last_name', 'email', 'status', 'password', 'note']
+                'last_name', 'email', 'status', 'password', 'note', 'contracting_code']
 
     def validate_client(self, value):
         request_user = self.context["request"].user

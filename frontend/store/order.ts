@@ -6,7 +6,7 @@ export const state = (): OrderState => ({
   test: true
 })  
 
-import {handleError} from "~/helpers/functions";
+import {ErrorHandler} from "~/helpers/functions";
 // ------------------------------------------/actions/-------------------------------------------
 
 import {ActionTree, Commit, Dispatch} from "vuex"

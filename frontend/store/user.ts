@@ -38,7 +38,7 @@ export const actions: ActionTree<UserState, RootState> = {
 			let data: any = await api.checkAuthenticated()
 			commit("SET_USER", data);
 		} catch (error) {
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t("checkAuthenticated_error_msg"))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("checkAuthenticated_error_msg"))
 		}	
 	},
 
@@ -47,7 +47,7 @@ export const actions: ActionTree<UserState, RootState> = {
 			api.getCsrf() 
 			commit("setCsrf");
 		} catch (error) {
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t("getCsrf_error_msg"))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("getCsrf_error_msg"))
 		}
 	},
 
@@ -59,7 +59,7 @@ export const actions: ActionTree<UserState, RootState> = {
 			commit("setCsrf");
 			dispatch("setAlert", {message: this.app.i18n.t('login_success_msg'), alertType: "success"}, { root: true })
 		} catch(error){
-        handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t("login_error_msg"))
+        ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("login_error_msg"))
 		}
 	},
 	
@@ -70,7 +70,7 @@ export const actions: ActionTree<UserState, RootState> = {
 		dispatch("setAlert", {message: this.app.i18n.t('logout_success_msg'), alertType: "success"}, { root: true })
 		this.$router.push("/")
 		} catch (error) {
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t("logout_error_msg"))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("logout_error_msg"))
 		}
 	},
 
@@ -81,7 +81,7 @@ export const actions: ActionTree<UserState, RootState> = {
       dispatch("setAlert", {message: this.app.i18n.t('updateCurrentUserProfile_succes_msg'), alertType: "success"}, { root: true })
 		}
 		catch(error){
-        handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t("updateCurrentUserProfile_error_msg"))
+        ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("updateCurrentUserProfile_error_msg"))
 		}
 	},
 
@@ -95,42 +95,62 @@ export const actions: ActionTree<UserState, RootState> = {
 			}, 600);
 		}
 		catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t("updatePassword_error_msg"))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("updatePassword_error_msg"))
 		}
 	},
 
 	// ----------------------------------------/ User API
   
-	async createUser({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
-		try {
-			let data = await api.createUser(payload)
-			dispatch("setAlert", {message: this.app.i.t('createUser_success_msg') , alertType: "success"}, { root: true })
-			return data
-		}
-		catch(error){
-      // handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('...'))
-		}
-	},
-
-	async fetchUsersByAdmin({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
+	async fetchClientsToCreateClientUser({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
     try{
-      let users = await api.fetchUsersByAdmin()
+      let users = await api.fetchClientsToCreateClientUser()
       return users
     }
     catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t("error..."))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("fetchClientsToCreateClientUser_error_msg"))
+    }
+	},
+  
+	async createClientUser({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
+		try {
+			let data = await api.createClientUser(payload)
+			dispatch("setAlert", {message: this.app.i18n.t('createClientUser_success_msg') , alertType: "success"}, { root: true })
+			return data
+		}
+		catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('createClientUser_error_msg'))
+		}
+	},
+
+	async fetchClientUsers({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
+    try{
+      let users = await api.fetchClientUsers()
+      return users
+    }
+    catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("fetchClientUsers_error_msg"))
     }
 	},
 
-	async deleteUserByAdmin({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
+  async updateClientUser({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
+    try {
+      let data = await api.updateClientUser(payload)
+      dispatch("setAlert", {message: this.app.i18n.t('updateClientUser_success_msg'), alertType: "success"}, { root: true })
+      return data
+    }
+    catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('updateClientUser_error_msg'))
+    }
+  },
+
+	async deleteClientUser({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
 		try {
-			let data = await api.deleteUserByAdmin(payload)
-			console.log(">>>",data)
-			dispatch("setAlert", {message: "User deleted", alertType: "success"}, { root: true })
+			await api.deleteClientUser(payload)
+			dispatch("setAlert", {message: this.app.i18n.t('deleteClientUser_success_msg'), alertType: "success"}, { root: true })
 			return "ok"
 		}
 		catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t("error..."))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("deleteClientUser_error_msg"))
 		}
 	},
 
@@ -139,7 +159,7 @@ export const actions: ActionTree<UserState, RootState> = {
 // --------------------------------------------/MUTATIONS/---------------------------------------------
 
 import {MutationTree} from "vuex"
-import {handleError} from "~/helpers/functions";
+import {ErrorHandler} from "~/helpers/functions";
 
 export const mutations: MutationTree<UserState> = { 
 	SET_USER(state, user: User) {

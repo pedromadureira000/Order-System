@@ -18,9 +18,9 @@
       return {
         value: '',
         allMenuItems: [
-          {permissions: CRUDerpUserPermissions, title: "ERP_User", icon: "mdi-account", to: "admin-user-erp_user"},
-          {permissions: CRUDadminAgentPermissions, title: "Admin_Agent", icon: "mdi-account", to: "admin-user-admin_agent"},
-          {permissions: CRUDagentPermissions, title: "Agent", icon: "mdi-account", to: "admin-user-agent"},
+          /** {permissions: CRUDerpUserPermissions, title: "ERP_User", icon: "mdi-account", to: "admin-user-erp_user"}, */
+          /** {permissions: CRUDadminAgentPermissions, title: "Admin_Agent", icon: "mdi-account", to: "admin-user-admin_agent"}, */
+          /** {permissions: CRUDagentPermissions, title: "Agent", icon: "mdi-account", to: "admin-user-agent"}, */
           {permissions: CRUDclientUserPermissions, title: "Client_User", icon: "mdi-account", to: "admin-user-client_user"},
         ],
       }

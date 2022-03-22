@@ -62,7 +62,8 @@ export default {
   i18n: {
     locales: ['en', 'pt-BR'],
     strategy: 'prefix_except_default',
-    defaultLocale: 'pt-BR',
+    // defaultLocale: 'pt-BR',
+    defaultLocale: 'en',
     detectBrowserLanguage: {
       useCookie: true,
       cookieKey: 'lang',

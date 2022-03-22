@@ -53,6 +53,8 @@ export default {
 				})
 	},
 
+  // -----------------------------/ Company
+  
 	async createCompany(payload){
     let data_body = {
       name: payload.name,
@@ -106,11 +108,18 @@ export default {
 				})
 	}, 
 
-  	async fetchEstablishments(){
+// ------------------------/ Client Table
+
+	async createClientTable(payload){
+    let data_body = {
+      description: payload.description,
+      client_table_code: payload.client_table_code,
+      note: payload.note,
+		}
 		return await axios({ 
-		method: "get",
-		url: "/api/organization/establishment",
-			}).then((request) => {
+		method: "post",
+		url: "/api/organization/client_table",
+		data: data_body}).then((request) => {
 					return request.data 
 				})
 	},
@@ -123,6 +132,29 @@ export default {
 					return request.data 
 				})
 	},
+
+	async updateClientTable(payload){
+		return await axios({ 
+		method: "put",
+    url: `/api/organization/client_table/${payload.client_table_compound_id}`,
+		data:{
+      client_table_compound_id: payload.client_table_compound_id,
+      description: payload.description,
+      note: payload.note,
+		}
+			}).then((request) => {
+					return request.data 
+				})
+	},
+  
+	async deleteClientTable(payload){
+		return await axios({ 
+		method: "delete",
+		url: `/api/organization/client_table/${payload.client_table_compound_id}`,
+			}).then((request) => {
+					return request.data 
+				})
+	}, 
 
   //------------------------- Client API
   
@@ -236,6 +268,15 @@ export default {
 	},
 
   
+  async fetchEstablishments(){
+		return await axios({ 
+		method: "get",
+		url: "/api/organization/establishment",
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
 	async updateEstablishment(payload){
 		return await axios({ 
 		method: "put",
@@ -321,50 +362,94 @@ export default {
 
   // --------------------------------------/ CRUD User APIs /----------------------------------------
   
-	async createUser(payload){
-    let data_body = {
-      username: payload.username,
-      contracting: payload.contracting_code,
-			first_name: payload.first_name,
-			last_name: payload.last_name,
-			email: payload.email,
-			cpf: payload.cpf,
-			password: payload.password,
-      role: payload.role,
-      agent_permissions: []
-		}
-    if (payload.role === "agent"){
-      let permissions = []
-      for (const permission in payload.agentPermissions){
-        if (payload.agentPermissions[permission] === true){
-          permissions.push(permission)
-        }
-      }
-      console.log(">>>>", permissions)
-      data_body["agent_permissions"] =  permissions
-    }
-		return await axios({ 
-		method: "post",
-		url: "/api/user/user",
-		data: data_body}).then((request) => {
-					return request.data 
-				})
-	},
+	// async createAgent(payload){
+    // let data_body = {
+      // username: payload.username,
+      // contracting: payload.contracting_code,
+			// first_name: payload.first_name,
+			// last_name: payload.last_name,
+			// email: payload.email,
+			// cpf: payload.cpf,
+			// password: payload.password,
+      // role: payload.role,
+      // agent_permissions: []
+		// }
+    // if (payload.role === "agent"){
+      // let permissions = []
+      // for (const permission in payload.agentPermissions){
+        // if (payload.agentPermissions[permission] === true){
+          // permissions.push(permission)
+        // }
+      // }
+      // console.log(">>>>", permissions)
+      // data_body["agent_permissions"] =  permissions
+    // }
+		// return await axios({ 
+		// method: "post",
+		// url: "/api/user/user",
+		// data: data_body}).then((request) => {
+					// return request.data 
+				// })
+	// },
 
-	async fetchUsersByAdmin(){
+	async fetchClientsToCreateClientUser(){
 		return await axios({ 
 		method: "get",
-		url: "/api/user/user",
+		url: "/api/user/clients_to_create_client_user",
 			}).then((request) => {
 					return request.data 
 				})
 	},
 
-	async deleteUserByAdmin(payload){
+
+	async createClientUser(payload){
+    let data_body = {
+      username: payload.username,
+      client: payload.client,
+			first_name: payload.first_name,
+			last_name: payload.last_name,
+			email: payload.email,
+			note: payload.note,
+			// status: payload.status,  
+			password: payload.password,
+		}
+		return await axios({ 
+		method: "post",
+		url: "/api/user/client_user",
+		data: data_body}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async fetchClientUsers(){
+		return await axios({ 
+		method: "get",
+		url: "/api/user/client_user",
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async updateClientUser(payload){
+    let data_body = {
+			first_name: payload.first_name,
+			last_name: payload.last_name,
+			email: payload.email,
+			note: payload.note,
+      status: payload.status,  
+			// password: payload.password,
+		}
+		return await axios({ 
+		method: "put",
+		url: `/api/user/client_user/${payload.contracting_code}/${payload.username}`,
+		data: data_body}).then((request) => {
+					return request.data 
+				})
+	},
+	async deleteClientUser(payload){
 		return await axios({ 
 		method: "delete",
-		// url: `/api/user/${payload.username}&${payload.contracting_code}`,
-		url: `/api/user/user/${payload.contracting_code}/${payload.username}`,
+		url: `/api/user/client_user/${payload.contracting_code}/${payload.username}`,
 			}).then((request) => {
 					return request.data 
 				})

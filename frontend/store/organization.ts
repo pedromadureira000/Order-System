@@ -1,4 +1,4 @@
-import {handleError} from "~/helpers/functions";
+import {ErrorHandler} from "~/helpers/functions";
 import {ActionTree, Commit, Dispatch} from "vuex"
 import {RootState} from "@/store/index"
  // @ts-ignore: This module is dynamically added in nuxt.config.js
@@ -16,7 +16,7 @@ export const actions: ActionTree<UserState, RootState> = {
 			return data
 		}
 		catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t("createContracting_error_msg"))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("createContracting_error_msg"))
 		}
 	},
 
@@ -26,7 +26,7 @@ export const actions: ActionTree<UserState, RootState> = {
       return users
     }
 		catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t("fetchContractingCompanies_error_msg"))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("fetchContractingCompanies_error_msg"))
 		}
 	},
 
@@ -37,7 +37,7 @@ export const actions: ActionTree<UserState, RootState> = {
     return data
     }
     catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('updateContracting_error_msg'))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('updateContracting_error_msg'))
 		}
   },
 
@@ -48,7 +48,7 @@ export const actions: ActionTree<UserState, RootState> = {
 			return "ok"
 		}
     catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('deleteContracting_error_msg'))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('deleteContracting_error_msg'))
 		}
 	},
 
@@ -61,7 +61,7 @@ export const actions: ActionTree<UserState, RootState> = {
 			return data
 		}
     catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('createCompany_error_msg'))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('createCompany_error_msg'))
 		}
 	},
 
@@ -71,7 +71,7 @@ export const actions: ActionTree<UserState, RootState> = {
       return companies
     }
     catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchCompanies_error_msg'))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchCompanies_error_msg'))
 		}
 	},
 
@@ -82,7 +82,7 @@ export const actions: ActionTree<UserState, RootState> = {
       return data
     }
     catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('updateCompany_error_msg'))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('updateCompany_error_msg'))
 		}
   },
 
@@ -93,7 +93,7 @@ export const actions: ActionTree<UserState, RootState> = {
 			return "ok"
 		}
     catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('deleteCompany_error_msg'))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('deleteCompany_error_msg'))
 		}
 	},
 
@@ -105,7 +105,7 @@ export const actions: ActionTree<UserState, RootState> = {
       return companies
     }
     catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchCompaniesToCreateEstablishment_error_msg'))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchCompaniesToCreateEstablishment_error_msg'))
 		}
 	},
 
@@ -116,7 +116,7 @@ export const actions: ActionTree<UserState, RootState> = {
 			return data
 		}
     catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('createEstablishment_error_msg'))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('createEstablishment_error_msg'))
 		}
 	},
 
@@ -126,7 +126,7 @@ export const actions: ActionTree<UserState, RootState> = {
       return establishments
     }
     catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchEstablishments_error_msg'))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchEstablishments_error_msg'))
 		}
 	},
 
@@ -137,7 +137,7 @@ export const actions: ActionTree<UserState, RootState> = {
       return data
     }
     catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('updateEstablishment_error_msg'))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('updateEstablishment_error_msg'))
     }
   },
 
@@ -148,11 +148,22 @@ export const actions: ActionTree<UserState, RootState> = {
       return "ok"
     }
     catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('deleteEstablishment_error_msg'))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('deleteEstablishment_error_msg'))
     }
   },
 
   //----------------/ Client Table APIs
+  
+	async createClientTable({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
+		try {
+			let data = await api.createClientTable(payload)
+			dispatch("setAlert", {message: this.app.i18n.t('createClientTable_success_msg'), alertType: "success"}, { root: true })
+			return data
+		}
+    catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('createClientTable_error_msg'))
+		}
+	},
   
 	async fetchClientTables({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
     try{
@@ -160,9 +171,32 @@ export const actions: ActionTree<UserState, RootState> = {
       return client_tables
     }
     catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchClientTables_error_msg'))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchClientTables_error_msg'))
 		}
 	},
+
+  async updateClientTable({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
+    try {
+      let data = await api.updateClientTable(payload)
+      dispatch("setAlert", {message: this.app.i18n.t('updateClientTable_success_msg'), alertType: "success"}, { root: true })
+      return data
+    }
+    catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('updateClientTable_error_msg'))
+    }
+  },
+
+  async deleteClientTable({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
+    try {
+      await api.deleteClientTable(payload)
+      dispatch("setAlert", {message: this.app.i18n.t('deleteClientTable_success_msg'), alertType: "success"}, { root: true })
+      return "ok"
+    }
+    catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('deleteClientTable_error_msg'))
+    }
+  },
+
 
   //----------------/ Client APIs
   
@@ -172,7 +206,7 @@ export const actions: ActionTree<UserState, RootState> = {
       return price_tables
     }
     catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchPriceTablesToCreateClient_error_msg'))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchPriceTablesToCreateClient_error_msg'))
 		}
 	},
 
@@ -182,7 +216,7 @@ export const actions: ActionTree<UserState, RootState> = {
       return establishments
     }
     catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchEstablishmentsToCreateClient_error_msg'))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchEstablishmentsToCreateClient_error_msg'))
 		}
 	},
 
@@ -192,7 +226,7 @@ export const actions: ActionTree<UserState, RootState> = {
       return companies
     }
     catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchCompaniesToCreateClient_error_msg'))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchCompaniesToCreateClient_error_msg'))
 		}
 	},
 
@@ -203,7 +237,7 @@ export const actions: ActionTree<UserState, RootState> = {
 			return data
 		}
     catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('createClient_error_msg'))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('createClient_error_msg'))
 		}
 	},
 
@@ -213,7 +247,7 @@ export const actions: ActionTree<UserState, RootState> = {
       return clients
     }
     catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchClients_error_msg'))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchClients_error_msg'))
 		}
 	},
  
@@ -224,7 +258,7 @@ export const actions: ActionTree<UserState, RootState> = {
       return data
     }
     catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('updateClient_error_msg'))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('updateClient_error_msg'))
 		}
   },
 
@@ -235,7 +269,7 @@ export const actions: ActionTree<UserState, RootState> = {
 			return "ok"
 		}
     catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t('deleteClient_error_msg'))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('deleteClient_error_msg'))
 		}
 	},
 

@@ -6,6 +6,10 @@ from rest_framework import status, permissions
 #  from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from organization.facade import get_clients_by_agent
+
+from organization.models import Client
+from organization.serializers import ClientSerializerPOST
 from .facade import get_all_client_users_by_agent
 from .serializers import AdminAgentSerializer, AgentSerializer, ClientUserSerializer, ERPUserSerializer, OwnProfileSerializer, SwaggerLoginSerializer, SwaggerProfilePasswordSerializer
 from .models import User
@@ -287,10 +291,25 @@ class SpecificAgent(APIView):
                 return unknown_exception_response(action=_('delete agent'))
         return unauthorized_response
 
+class fetchClientsToCreateClientUser(APIView):
+    def get(self, request):
+        user = request.user
+        if has_permission(user, 'create_client_user'):
+            if req_user_is_agent_without_all_estabs(user):
+                clients = get_clients_by_agent(user).filter(status=1) #TODO TEST
+                data = ClientSerializerPOST(clients, many=True).data
+                return Response(data)
+            clients = Client.objects.filter(client_table__contracting=user.contracting, status=1)
+            data = ClientSerializerPOST(clients, many=True).data
+            return Response(data)
+        return unauthorized_response
+
+
 class ClientUserView(APIView):
     def get(self, request):
         if has_permission(request.user, 'get_client_users'):
             user = request.user
+            #  if req_user_is_agent_without_all_estabs(user):  <- This is not used because get_all_client_users_by_agent does it.
             if has_role(user, 'agent'):
                 client_users = get_all_client_users_by_agent(user)
                 return Response(ClientUserSerializer(client_users, many=True).data)

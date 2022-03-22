@@ -6,7 +6,7 @@ export const state = (): ItemState => ({
   test: true
 })  
 
-import {handleError} from "~/helpers/functions";
+import {ErrorHandler} from "~/helpers/functions";
 // ------------------------------------------/actions/-------------------------------------------
 
 import {ActionTree, Commit, Dispatch} from "vuex"
@@ -22,7 +22,7 @@ export const actions: ActionTree<ItemState, RootState> = {
 		return item_tables
     }
 		catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t("error..."))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("error..."))
 		}
 	},
 
@@ -34,7 +34,7 @@ export const actions: ActionTree<ItemState, RootState> = {
       return data
     }
     catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t("error..."))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("error..."))
     }
   },
 
@@ -46,7 +46,7 @@ export const actions: ActionTree<ItemState, RootState> = {
       return data
     }
     catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t("error..."))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("error..."))
     }
   },
 
@@ -58,7 +58,7 @@ export const actions: ActionTree<ItemState, RootState> = {
       return data
     }
     catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t("error..."))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("error..."))
     }
   },
 
@@ -69,7 +69,7 @@ export const actions: ActionTree<ItemState, RootState> = {
     dispatch("setAlert", {message: "Price table has been updated.", alertType: "success"}, { root: true })
     }
     catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t("error..."))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("error..."))
     }
   },
 
@@ -79,7 +79,7 @@ export const actions: ActionTree<ItemState, RootState> = {
       return items
     }
     catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t("error..."))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("error..."))
     }
   },
 
@@ -89,7 +89,7 @@ export const actions: ActionTree<ItemState, RootState> = {
       return items
     }
     catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t("error..."))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("error..."))
     }
   },
 
@@ -99,7 +99,7 @@ export const actions: ActionTree<ItemState, RootState> = {
       return items
     }
     catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t("error..."))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("error..."))
     }
   },
 
@@ -111,7 +111,7 @@ export const actions: ActionTree<ItemState, RootState> = {
       return "ok"
     }
     catch(error){
-      handleError(error, commit, dispatch, this.app.i18n, this.app.i18n.t("error..."))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("error..."))
     }
   },
 }

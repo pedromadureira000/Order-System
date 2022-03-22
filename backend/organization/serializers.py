@@ -57,7 +57,7 @@ class CompanySerializer(serializers.ModelSerializer):
         if validated_data.get('company_code'): validated_data.pop('company_code')
         return super().update(instance, validated_data)
 
-class EstablishmentSerializer(serializers.ModelSerializer):
+class EstablishmentPOSTSerializer(serializers.ModelSerializer):
     company=serializers.SlugRelatedField(slug_field='company_compound_id', queryset=Company.objects.all())
     
     class Meta:
@@ -70,6 +70,8 @@ class EstablishmentSerializer(serializers.ModelSerializer):
         if value:
             if value.contracting != self.context["request"].user.contracting:
                 raise serializers.ValidationError(_("Company not found."))
+            if value.status != 1:
+                raise serializers.ValidationError(_("The company must be active."))
             return value
         return value
 
@@ -79,12 +81,13 @@ class EstablishmentSerializer(serializers.ModelSerializer):
                 validated_data['company'].company_code + "&" + validated_data['establishment_code']
         return super().create(validated_data)
 
-    def update(self, instance, validated_data):
-        # Not allow to update this fields
-        validated_data['establishment_code'] = instance.establishment_code
-        validated_data['company'] = instance.company
-        return super().update(instance, validated_data)
-
+class EstablishmentPUTSerializer(serializers.ModelSerializer):
+    company=serializers.SlugRelatedField(slug_field='company_compound_id', read_only=True)
+    
+    class Meta:
+        model = Establishment
+        fields = ['establishment_compound_id', 'establishment_code', 'company', 'name', 'cnpj', 'status', 'note']
+        read_only_fields = ['establishment_code', 'company']
 
 class ClientTableSerializer(serializers.ModelSerializer):
     contracting=serializers.HiddenField(default=UserContracting())

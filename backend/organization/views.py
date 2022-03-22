@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from item.serializers import PriceTableGetSerializer
 from organization.facade import get_clients_by_agent, get_companies_to_create_client, get_establishments_to_create_client, get_price_tables_to_create_client
-from organization.serializers import  ClientSerializerPOST, ClientSerializerPUT, ClientTableSerializer, CompanySerializer, ContractingSerializer, EstablishmentSerializer
+from organization.serializers import  ClientSerializerPOST, ClientSerializerPUT, ClientTableSerializer, CompanySerializer, ContractingSerializer, EstablishmentPOSTSerializer, EstablishmentPUTSerializer
 from organization.models import Client, ClientTable, Company, Contracting, Establishment
 from rolepermissions.checkers import has_permission, has_role
 from django.db import transaction
@@ -158,15 +158,15 @@ class EstablishmentView(APIView):
         user = request.user
         if has_permission(request.user, 'get_establishments'):
             establishments = Establishment.objects.filter(company__contracting=user.contracting)
-            data = EstablishmentSerializer(establishments, many=True).data
+            data = EstablishmentPOSTSerializer(establishments, many=True).data
             return Response(data)
         return unauthorized_response
-    @swagger_auto_schema(request_body=EstablishmentSerializer) 
+    @swagger_auto_schema(request_body=EstablishmentPOSTSerializer) 
     @transaction.atomic
     def post(self, request):
         if has_permission(request.user, 'create_establishment'):
             data = request.data
-            serializer = EstablishmentSerializer(data=data, context={"request":request})
+            serializer = EstablishmentPOSTSerializer(data=data, context={"request":request})
             if serializer.is_valid():
                 try:
                     serializer.save()
@@ -179,7 +179,7 @@ class EstablishmentView(APIView):
         return unauthorized_response
 
 class SpecificEstablishment(APIView):
-    @swagger_auto_schema(request_body=EstablishmentSerializer) 
+    @swagger_auto_schema(request_body=EstablishmentPUTSerializer) 
     @transaction.atomic
     def put(self, request, establishment_compound_id):
         if has_permission(request.user, 'update_establishment'):
@@ -189,7 +189,7 @@ class SpecificEstablishment(APIView):
                 establishment = Establishment.objects.get(establishment_compound_id=establishment_compound_id)
             except Establishment.DoesNotExist:
                 return not_found_response(object_name=_('The establishment'))
-            serializer = EstablishmentSerializer(establishment, data=request.data, partial=True, context={"request":request} )
+            serializer = EstablishmentPUTSerializer(establishment, data=request.data, partial=True, context={"request":request} )
             if serializer.is_valid():
                 try:
                     serializer.save()

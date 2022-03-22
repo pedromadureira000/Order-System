@@ -95,20 +95,22 @@
 
     <!-- Alert -->
     <div>
-      <v-alert 
+        <!-- dismissible -->
+      <v-alert
         :value="$store.state.alert.showAlert"
         :type='$store.state.alert.alertType' 
         style="width: 50%;" 
         class="alert_message" 
-        dismissible
       >
         <!-- ## dismissible get the same error as my custom v-btn ## -->
-
-        <!-- <v-btn @focus.stop.prevent="$store.dispatch('removeAlert')">Close</v-btn> -->
+        <v-btn 
+          @focus.prevent.self="$store.dispatch('removeAlert')"
+          @click.prevent.self="" 
+        >Close</v-btn>
 
         <!-- <v-btn  -->
-          <!-- @focus.capture.stop="wtf"         ) :             -->
-          <!-- @click.capture.stop="wtf" --> 
+          <!-- @focus.prevent.self="wtf" -->
+          <!-- @click.prevent.self="wtf"  -->
         <!-- >Close</v-btn>  -->
         {{$store.state.alert.alertMessage}}
       </v-alert>
@@ -124,9 +126,9 @@ import sessionErrorDialog from '~/components/session-error-dialog.vue'
 import problemConnectingErrorDialog from '~/components/problem-connecting-dialog.vue'
 import {CRUDerpUserPermissions, CRUDadminAgentPermissions, CRUDagentPermissions, CRUDclientUserPermissions, CRUDcontractingPermissions, CRUDcompanyPermissions, CRUDestablishmentPermissions, CRUDclientTablePermissions, CRUDclientPermissions,CRUDitemTablePerms,CRUDitemPermissions, CRUDitemCategoryPerms, CRUDpriceTablePerms, client_user} from '~/helpers/permissions'
 
-let usersMenuPermissions = CRUDerpUserPermissions.concat(CRUDadminAgentPermissions).concat(CRUDagentPermissions).concat(CRUDclientUserPermissions)
-let organizationPermissions = CRUDcontractingPermissions.concat(CRUDcompanyPermissions).concat(CRUDestablishmentPermissions).concat(CRUDclientTablePermissions).concat(CRUDclientPermissions)
-let itemsMenuPermissions = CRUDitemTablePerms.concat(CRUDitemPermissions).concat(CRUDitemCategoryPerms).concat(CRUDpriceTablePerms)
+let usersMenuPermissions = CRUDerpUserPermissions.concat(CRUDadminAgentPermissions, CRUDagentPermissions, CRUDclientUserPermissions)
+let organizationPermissions = CRUDcontractingPermissions.concat(CRUDcompanyPermissions, CRUDestablishmentPermissions, CRUDclientTablePermissions, CRUDclientPermissions)
+let itemsMenuPermissions = CRUDitemTablePerms.concat(CRUDitemPermissions, CRUDitemCategoryPerms, CRUDpriceTablePerms)
 let orderPermissions = client_user
 
 /** import {handleError} from '~/helpers/functions' //TODO REmove it  */
