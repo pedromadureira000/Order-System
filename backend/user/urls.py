@@ -1,7 +1,7 @@
 from django.urls import path
 #  from rest_framework.authtoken.views import obtain_auth_token
 from .views import (
-    AdminAgentView, AgentView, ClientUserView, ERPUserView, OwnProfileView, SpecificAdminAgent, SpecificAgent, SpecificClientUser, SpecificERPUser, UpdateUserPassword, Login, Logout, GetCSRFToken, fetchClientsToCreateClientUser, fetchEstablishmentsToCreateAgent
+    AdminAgentView, AgentView, ClientUserView, ERPUserView, OwnProfileView, SpecificAdminAgent, SpecificAgent, SpecificClientUser, SpecificERPUser, UpdateUserPassword, Login, Logout, GetCSRFToken, fetchClientsToCreateClientUser, fetchContractingCompaniesToCreateERPuser, fetchEstablishmentsToCreateAgent
 )
 
 urlpatterns = [
@@ -12,6 +12,8 @@ urlpatterns = [
     #User
     path('own_profile', OwnProfileView.as_view()),
 
+    
+    path('fetch_contracting_companies_to_create_erp_user', fetchContractingCompaniesToCreateERPuser.as_view()),
     path('erp_user', ERPUserView.as_view()),
     path('erp_user/<contracting_code>/<username>', SpecificERPUser.as_view()),
 

@@ -100,6 +100,105 @@ export const actions: ActionTree<UserState, RootState> = {
 	},
 
 	// ----------------------------------------/ User API
+  // ------------/ERP user
+  	async fetchContractingCompaniesToCreateERPuser({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
+    try{
+      let users = await api.fetchContractingCompaniesToCreateERPuser()
+      return users
+    }
+    catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("fetchContractingCompaniesToCreateERPuser_msg_error"))
+    }
+	},
+
+	async createERPuser({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
+		try {
+			let data = await api.createERPuser(payload)
+			dispatch("setAlert", {message: this.app.i18n.t('createERPuser_success_msg') , alertType: "success"}, { root: true })
+			return data
+		}
+		catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('createERPuser_error_msg'))
+		}
+	},
+
+	async fetchERPusers({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
+    try{
+      let users = await api.fetchERPusers()
+      return users
+    }
+    catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("fetchERPusers_error_msg"))
+    }
+	},
+
+  async updateERPuser({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
+    try {
+      let data = await api.updateERPuser(payload)
+      dispatch("setAlert", {message: this.app.i18n.t('updateERPuser_success_msg'), alertType: "success"}, { root: true })
+      return data
+    }
+    catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('updateERPuser_error_msg'))
+    }
+  },
+
+	async deleteERPuser({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
+		try {
+			await api.deleteERPuser(payload)
+			dispatch("setAlert", {message: this.app.i18n.t('deleteERPuser_success_msg'), alertType: "success"}, { root: true })
+			return "ok"
+		}
+		catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("deleteERPuser_error_msg"))
+		}
+	},
+
+ //------------Admin Agent
+
+	async createAdminAgent({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
+		try {
+			let data = await api.createAdminAgent(payload)
+			dispatch("setAlert", {message: this.app.i18n.t('createAdminAgent_success_msg') , alertType: "success"}, { root: true })
+			return data
+		}
+		catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('createAdminAgent_error_msg'))
+		}
+	},
+
+	async fetchAdminAgents({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
+    try{
+      let users = await api.fetchAdminAgents()
+      return users
+    }
+    catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("fetchAdminAgents_error_msg"))
+    }
+	},
+
+  async updateAdminAgent({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
+    try {
+      let data = await api.updateAdminAgent(payload)
+      dispatch("setAlert", {message: this.app.i18n.t('updateAdminAgent_success_msg'), alertType: "success"}, { root: true })
+      return data
+    }
+    catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('updateAdminAgent_error_msg'))
+    }
+  },
+
+	async deleteAdminAgent({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
+		try {
+			await api.deleteAdminAgent(payload)
+			dispatch("setAlert", {message: this.app.i18n.t('deleteAdminAgent_success_msg'), alertType: "success"}, { root: true })
+			return "ok"
+		}
+		catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("deleteAdminAgent_error_msg"))
+		}
+	},
+
  // ----------- Agent
   
   	async fetchEstablishmentsToCreateAgent({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){

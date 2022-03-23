@@ -8,8 +8,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from organization.facade import get_clients_by_agent
 
-from organization.models import Client, Establishment
-from organization.serializers import ClientSerializerPOST, EstablishmentPOSTSerializer
+from organization.models import Client, Contracting, Establishment
+from organization.serializers import ClientSerializerPOST, ContractingSerializer, EstablishmentPOSTSerializer
 from .facade import get_all_client_users_by_agent
 from .serializers import AdminAgentSerializer, AgentSerializer, ClientUserSerializer, ERPUserSerializer, OwnProfileSerializer, SwaggerLoginSerializer, SwaggerProfilePasswordSerializer
 from .models import User
@@ -86,6 +86,14 @@ class OwnProfileView(APIView):
                 print(error)
                 return unknown_exception_response(action=_('update request user profile'))
         return serializer_invalid_response(serializer.errors)
+
+
+class fetchContractingCompaniesToCreateERPuser(APIView):
+    def get(self, request):
+        if has_permission(request.user, 'create_erp_user'):
+            erp_users = Contracting.objects.filter(status=1)
+            return Response(ContractingSerializer(erp_users, many=True).data)
+        return unauthorized_response
 
 class ERPUserView(APIView):
     def get(self, request):

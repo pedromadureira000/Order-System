@@ -362,6 +362,120 @@ export default {
 
 
   // --------------------------------------/ CRUD User APIs /----------------------------------------
+  // -----/ERP user
+	async fetchContractingCompaniesToCreateERPuser(){
+		return await axios({ 
+		method: "get",
+		url: "/api/user/fetch_contracting_companies_to_create_erp_user",
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async createERPuser(payload){
+    let data_body = {
+      contracting: payload.contracting,
+      username: payload.username,
+			first_name: payload.first_name,
+			last_name: payload.last_name,
+			email: payload.email,
+			note: payload.note,
+			password: payload.password,
+		}
+		return await axios({ 
+		method: "post",
+		url: "/api/user/erp_user",
+		data: data_body}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async fetchERPusers(){
+		return await axios({ 
+		method: "get",
+		url: "/api/user/erp_user",
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async updateERPuser(payload){
+    let data_body = {
+			first_name: payload.first_name,
+			last_name: payload.last_name,
+			email: payload.email,
+			note: payload.note,
+      status: payload.status,  
+			// password: payload.password,
+		}
+		return await axios({ 
+		method: "put",
+		url: `/api/user/erp_user/${payload.contracting_code}/${payload.username}`,
+		data: data_body}).then((request) => {
+					return request.data 
+				})
+	},
+	async deleteERPuser(payload){
+		return await axios({ 
+		method: "delete",
+		url: `/api/user/erp_user/${payload.contracting_code}/${payload.username}`,
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+  // -----/Admin Agent
+
+	async createAdminAgent(payload){
+    let data_body = {
+      username: payload.username,
+			first_name: payload.first_name,
+			last_name: payload.last_name,
+			email: payload.email,
+			note: payload.note,
+			password: payload.password,
+		}
+		return await axios({ 
+		method: "post",
+		url: "/api/user/admin_agent",
+		data: data_body}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async fetchAdminAgents(){
+		return await axios({ 
+		method: "get",
+		url: "/api/user/admin_agent",
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async updateAdminAgent(payload){
+    let data_body = {
+			first_name: payload.first_name,
+			last_name: payload.last_name,
+			email: payload.email,
+			note: payload.note,
+      status: payload.status,  
+			// password: payload.password,
+		}
+		return await axios({ 
+		method: "put",
+		url: `/api/user/admin_agent/${payload.contracting_code}/${payload.username}`,
+		data: data_body}).then((request) => {
+					return request.data 
+				})
+	},
+	async deleteAdminAgent(payload){
+		return await axios({ 
+		method: "delete",
+		url: `/api/user/admin_agent/${payload.contracting_code}/${payload.username}`,
+			}).then((request) => {
+					return request.data 
+				})
+	},
   // ---- Agent
   
 	async fetchEstablishmentsToCreateAgent(){
