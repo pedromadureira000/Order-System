@@ -51,6 +51,7 @@ export const eraseCookie = (name: string) => {
 
 export const ErrorHandler = (error: any, commit: Commit, dispatch: Dispatch, i18n: any, 
                             default_error_msg: any = i18n.t('Something_went_wrong')  ) => { 
+  // error.response.data = null  // <<- this line is for test some errors
   // -----------/ Time-out Error
   if (error.message == 'timeout of 15000ms exceeded'){
     dispatch("setAlert", {message: i18n.t("Request_Time_out"), alertType: "error"}, { root: true })
@@ -61,7 +62,7 @@ export const ErrorHandler = (error: any, commit: Commit, dispatch: Dispatch, i18
     dispatch("switchConnectionError")
   // ---------/ Other Error
   } 
-  else if (error.response){
+  else if (error.response && error.response.data){
     let response = error.response
     let  first_key = Object.keys(error.response.data)[0]
     // 2 Sessions At the same time.

@@ -75,7 +75,13 @@
         <!-- Submit Button -->
         <v-card-actions class="d-flex justify-space-around" style="width:100%;">
           <v-btn class="blue--text darken-1" text @click="show_edit_dialog = false">{{$t('Cancel')}}</v-btn>
-          <v-btn class="blue--text darken-1" text @click="updateCompany()">{{$t('Save')}}</v-btn>
+          <v-btn 
+            class="blue--text darken-1" 
+            text 
+            @click="updateCompany()"
+            :loading="loading"
+            :disabled="loading"
+          >{{$t('Save')}}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -188,7 +194,11 @@ export default {
         this.menu_items[index].click.call(this) // will call the function but the function will use the vue instance 'this' context.
       },
       async updateCompany(){
-        try {
+        this.$v.companyInfoGroup.$touch();
+        if (this.$v.companyInfoGroup.$invalid) {
+          this.$store.dispatch("setAlert", { message: this.$t("Please_fill_the_form_correctly"), alertType: "error" }, { root: true })
+        } else {
+          this.loading = true;
           let data = await this.$store.dispatch("organization/updateCompany", {
             company_compound_id: this.company.company_compound_id,
             name: this.name,
@@ -199,14 +209,15 @@ export default {
             note: this.note,
           })
           // Reactivity for Company list inside Company.vue 
-          this.company.name = data.name
-          this.company.cnpj_root = data.cnpj_root
-          this.company.client_table = data.client_table
-          this.company.item_table = data.item_table
-          this.company.status = data.status
-          this.company.note = data.note
-        } catch(e){
-        // error is being handled inside action
+          this.loading = false;
+          if (data) {
+            this.company.name = data.name
+            this.company.cnpj_root = data.cnpj_root
+            this.company.client_table = data.client_table
+            this.company.item_table = data.item_table
+            this.company.status = data.status
+            this.company.note = data.note
+          }
         }
       },
       async deleteCompany(){

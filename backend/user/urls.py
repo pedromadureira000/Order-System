@@ -1,7 +1,7 @@
 from django.urls import path
 #  from rest_framework.authtoken.views import obtain_auth_token
 from .views import (
-    AdminAgentView, AgentView, ClientUserView, ERPUserView, OwnProfileView, SpecificAdminAgent, SpecificAgent, SpecificClientUser, SpecificERPUser, UpdateUserPassword, Login, Logout, GetCSRFToken, fetchClientsToCreateClientUser
+    AdminAgentView, AgentView, ClientUserView, ERPUserView, OwnProfileView, SpecificAdminAgent, SpecificAgent, SpecificClientUser, SpecificERPUser, UpdateUserPassword, Login, Logout, GetCSRFToken, fetchClientsToCreateClientUser, fetchEstablishmentsToCreateAgent
 )
 
 urlpatterns = [
@@ -18,6 +18,8 @@ urlpatterns = [
     path('admin_agent', AdminAgentView.as_view()),
     path('admin_agent/<contracting_code>/<username>', SpecificAdminAgent.as_view()),
 
+
+    path('establishments_to_create_agent', fetchEstablishmentsToCreateAgent.as_view()),
     path('agent', AgentView.as_view()),
     path('agent/<contracting_code>/<username>', SpecificAgent.as_view()),
 

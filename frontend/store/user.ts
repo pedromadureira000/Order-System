@@ -100,7 +100,63 @@ export const actions: ActionTree<UserState, RootState> = {
 	},
 
 	// ----------------------------------------/ User API
+ // ----------- Agent
   
+  	async fetchEstablishmentsToCreateAgent({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
+    try{
+      let users = await api.fetchEstablishmentsToCreateAgent()
+      return users
+    }
+    catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("fetchEstablishmentsToCreateAgent_error_msg"))
+    }
+	},
+  
+	async createAgent({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
+		try {
+			let data = await api.createAgent(payload)
+			dispatch("setAlert", {message: this.app.i18n.t('createAgent_success_msg') , alertType: "success"}, { root: true })
+			return data
+		}
+		catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('createAgent_error_msg'))
+		}
+	},
+
+	async fetchAgents({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
+    try{
+      let users = await api.fetchAgents()
+      return users
+    }
+    catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("fetchAgents_error_msg"))
+    }
+	},
+
+  async updateAgent({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
+    try {
+      let data = await api.updateAgent(payload)
+      dispatch("setAlert", {message: this.app.i18n.t('updateAgent_success_msg'), alertType: "success"}, { root: true })
+      return data
+    }
+    catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('updateAgent_error_msg'))
+    }
+  },
+
+	async deleteAgent({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
+		try {
+			await api.deleteAgent(payload)
+			dispatch("setAlert", {message: this.app.i18n.t('deleteAgent_success_msg'), alertType: "success"}, { root: true })
+			return "ok"
+		}
+		catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("deleteAgent_error_msg"))
+		}
+	},
+
+ //------Client User 
+
 	async fetchClientsToCreateClientUser({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
     try{
       let users = await api.fetchClientsToCreateClientUser()

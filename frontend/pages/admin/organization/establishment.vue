@@ -95,6 +95,9 @@
         <template v-slot:item.actions="{ item }">
           <establishment-edit-menu :establishment="item" @establishment-deleted="deleteEstablishment(item)" />
         </template>
+        <template v-slot:item.cnpj_with_mask="{ item }">
+          <input type="text" v-mask="'##.###.###/####-##'" :value="item.cnpj" disabled style="color: #000000DE;"/>
+        </template>
       </v-data-table>
     </div>
   </div>
@@ -133,7 +136,7 @@ export default {
         { text: this.$t('Name'), value: 'name' },
         { text: this.$t('Establishment_code'), value: 'establishment_code' },
         { text: this.$t('Company'), value: 'company' },
-        { text: 'CNPJ', value: 'cnpj' },
+        { text: 'CNPJ', value: 'cnpj_with_mask' },
         { text: 'Status', value: 'status' },
         { text: this.$t('Note'), value: 'note' },
         { text: this.$t('Actions'), value: 'actions' },
@@ -144,10 +147,11 @@ export default {
   async fetch() {
     // Fetch Establishments to EDIT list
     let establishments = await this.$store.dispatch("organization/fetchEstablishments");
-    this.establishments.push(...establishments)
+    if (establishments){this.establishments.push(...establishments)}
     // Fetch company options
     let companies = await this.$store.dispatch("organization/fetchCompaniesToCreateEstablishment");
-    this.companies.push(...companies)
+    if (companies) {this.companies.push(...companies)}
+    
   },
 
   validations: {

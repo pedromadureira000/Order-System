@@ -29,7 +29,13 @@
         <v-divider></v-divider>
         <v-card-actions class="d-flex justify-space-around" style="width:100%;">
           <v-btn class="blue--text darken-1" text @click="show_edit_dialog = false">{{$t('Cancel')}}</v-btn>
-          <v-btn class="blue--text darken-1" text @click="updateClientTable()">{{$t('Save')}}</v-btn>
+          <v-btn 
+            class="blue--text darken-1" 
+            text 
+            @click="updateClientTable()"
+            :loading="loading"
+            :disabled="loading"
+          >{{$t('Save')}}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -67,6 +73,7 @@ export default {
       note: null,
       show_edit_dialog: false,
       show_delete_confirmation_dialog: false,
+      loading: false,
       menu_items: [
         { 
           title: this.$t('Edit'),
@@ -124,19 +131,24 @@ export default {
       this.menu_items[index].click.call(this) // will call the function but the function will use the Vue instance 'this' context.
     },
     async updateClientTable(){
+      this.$v.clientTableInfoGroup.$touch();
+      if (this.$v.clientTableInfoGroup.$invalid) {
+        this.$store.dispatch("setAlert", { message: this.$t("Please_fill_the_form_correctly"), alertType: "error" }, { root: true })
+      } else {
+        this.loading = true
       // If update is successful, I update in the client_table prop
-      try{
         let data = await this.$store.dispatch("organization/updateClientTable", {
           client_table_compound_id: this.client_table.client_table_compound_id,
           description: this.description,
           note: this.note,
         })
-        this.client_table.description = data.description
-        this.client_table.active_users_limit = data.active_users_limit
-        this.client_table.status = data.status
-        this.client_table.note = data.note
-      } catch(e){
-        // error is being handled inside action
+        this.loading = false
+        if (data){
+          this.client_table.description = data.description
+          this.client_table.active_users_limit = data.active_users_limit
+          this.client_table.status = data.status
+          this.client_table.note = data.note
+        }
 		  }
     },
 

@@ -105,6 +105,9 @@
         <template v-slot:item.actions="{ item }">
           <company-edit-menu :company="item" :client_tables="client_tables" :item_tables="item_tables" @company-deleted="deleteCompany(item)" />
         </template>
+        <template v-slot:item.cnpj_root_with_mask="{ item }">
+          <input type="text" v-mask="'##.###.###'" :value="item.cnpj_root" disabled style="color: #000000DE;"/>
+        </template>
       </v-data-table>
     </div>
   </div>
@@ -144,7 +147,7 @@ export default {
       headers: [
         { text: this.$t('Name'), value: 'name' },
         { text: this.$t('Company_code'), value: 'company_code' },
-        { text: this.$t('CNPJ_Root'), value: 'cnpj_root' },
+        { text: this.$t('CNPJ_Root'), value: 'cnpj_root_with_mask' },
         { text: this.$t('Client_table'), value: 'client_table' },
         { text: this.$t('Item_Table'), value: 'item_table' },
         { text: 'Status', value: 'status' },
@@ -157,13 +160,13 @@ export default {
   async fetch() {
     // Fetch Companies to EDIT list
     let companies = await this.$store.dispatch("organization/fetchCompanies");
-    this.companies.push(...companies)
+    if (companies){this.companies.push(...companies)}
     // Fetch client_table options
     let client_tables = await this.$store.dispatch("organization/fetchClientTables");
-    this.client_tables.push(...client_tables)
+    if (client_tables){this.client_tables.push(...client_tables)}
     // Fetch item_table options
     let item_tables = await this.$store.dispatch("item/fetchItemTables");
-    this.item_tables.push(...item_tables)
+    if (item_tables) {this.item_tables.push(...item_tables)}
   },
 
   validations: {

@@ -106,7 +106,9 @@ export default {
 
   async fetch() {
     let client_tables = await this.$store.dispatch("organization/fetchClientTables");
-    this.client_tables.push(...client_tables)
+    if (client_tables){
+      this.client_tables.push(...client_tables)
+    }
   },
 
   validations: {

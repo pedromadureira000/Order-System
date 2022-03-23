@@ -50,7 +50,13 @@
         <!-- Submit Button -->
         <v-card-actions class="d-flex justify-space-around" style="width:100%;">
           <v-btn class="blue--text darken-1" text @click="show_edit_dialog = false">{{$t('Cancel')}}</v-btn>
-          <v-btn class="blue--text darken-1" text @click="updateEstablishment()">{{$t('Save')}}</v-btn>
+            <v-btn 
+              class="blue--text darken-1" 
+              text 
+              @click="updateEstablishment()"
+              :loading="loading"
+              :disabled="loading"
+            >{{$t('Save')}}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -76,13 +82,15 @@ import {
   maxLength,
 } from "vuelidate/lib/validators";
 import { validationMixin } from "vuelidate";
-import {raizcnpjFieldValidator} from "~/helpers/validators"
+import {cnpjFieldValidator} from "~/helpers/validators"
+import {mask} from 'vue-the-mask'
 export default {
   mixins: [validationMixin],
   components: {
     "dots-menu-update-delete": require("@/components/dots-menu-update-delete.vue").default,
   },
   props: ['establishment'],
+  directives: {mask},
   data() {
     return {
       show_edit_dialog: false,
@@ -119,7 +127,7 @@ export default {
     },
     cnpj: {
       required, 
-      raizcnpjFieldValidator,
+      cnpjFieldValidator,
     },
     note: {
       maxLength: maxLength(800)
@@ -161,22 +169,27 @@ export default {
         this.menu_items[index].click.call(this) // will call the function but the function will use the vue instance 'this' context.
       },
       async updateEstablishment(){
-        try {
-          let data = await this.$store.dispatch("organization/updateEstablishment", {
-            establishment_compound_id: this.establishment.establishment_compound_id,
-            name: this.name,
-            cnpj: this.cnpj,
-            status: this.status,
-            note: this.note,
-          })
-          // Reactivity for Establishment list inside Establishment.vue 
-          this.establishment.name = data.name
-          this.establishment.cnpj = data.cnpj
-          this.establishment.status = data.status
-          this.establishment.note = data.note
-        } catch(e){
-        // error is being handled inside action
-        }
+        this.$v.establishmentInfoGroup.$touch();
+        if (this.$v.establishmentInfoGroup.$invalid) {
+          this.$store.dispatch("setAlert", { message: this.$t("Please_fill_the_form_correctly"), alertType: "error" }, { root: true })
+        } else {
+            this.loading = true;
+            let data = await this.$store.dispatch("organization/updateEstablishment", {
+              establishment_compound_id: this.establishment.establishment_compound_id,
+              name: this.name,
+              cnpj: this.cnpj,
+              status: this.status,
+              note: this.note,
+            })
+            this.loading = false;
+            if (data){
+              // Reactivity for Establishment list inside Establishment.vue 
+              this.establishment.name = data.name
+              this.establishment.cnpj = data.cnpj
+              this.establishment.status = data.status
+              this.establishment.note = data.note
+            }
+          }
       },
       async deleteEstablishment(){
         let data = await this.$store.dispatch(

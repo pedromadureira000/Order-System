@@ -49,7 +49,13 @@
         <v-divider></v-divider>
         <v-card-actions class="d-flex justify-space-around" style="width:100%;">
           <v-btn class="blue--text darken-1" text @click="show_edit_dialog = false">{{$t('Cancel')}}</v-btn>
-          <v-btn class="blue--text darken-1" text @click="updateContracting()">{{$t('Save')}}</v-btn>
+          <v-btn 
+            class="blue--text darken-1" 
+            text 
+            @click="updateContracting()"
+            :loading="loading"
+            :disabled="loading"
+          >{{$t('Save')}}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -92,6 +98,7 @@ export default {
       note: null,
       show_edit_dialog: false,
       show_delete_confirmation_dialog: false,
+      loading: false,
       menu_items: [
         { 
           title: this.$t('Edit'),
@@ -128,7 +135,6 @@ export default {
     },
     contractingInfoGroup: [
       "name",
-      "contracting_code",
       "active_users_limit",
       "note",
     ],
@@ -167,21 +173,25 @@ export default {
     },
     async updateContracting(){
       // If update is successful, I update in the contracting prop
-      try{
+      this.$v.contractingInfoGroup.$touch();
+      if (this.$v.contractingInfoGroup.$invalid) {
+        this.$store.dispatch("setAlert", { message: this.$t("Please_fill_the_form_correctly"), alertType: "error" }, { root: true })
+      } else {
+        this.loading = true;
         let data = await this.$store.dispatch("organization/updateContracting", {
           contracting_code: this.contracting.contracting_code,
           name: this.name,
           active_users_limit: this.active_users_limit,
           status: this.status,
           note: this.note,
-
         })
-        this.contracting.name = data.name
-        this.contracting.active_users_limit = data.active_users_limit
-        this.contracting.status = data.status
-        this.contracting.note = data.note
-      } catch(e){
-        // error is being handled inside action
+        this.loading = false
+        if (data){
+          this.contracting.name = data.name
+          this.contracting.active_users_limit = data.active_users_limit
+          this.contracting.status = data.status
+          this.contracting.note = data.note
+        }
 		  }
     },
 

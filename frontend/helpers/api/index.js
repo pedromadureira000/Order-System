@@ -360,38 +360,77 @@ export default {
 	},
 
 
-  // --------------------------------------/ CRUD User APIs /----------------------------------------
-  
-	// async createAgent(payload){
-    // let data_body = {
-      // username: payload.username,
-      // contracting: payload.contracting_code,
-			// first_name: payload.first_name,
-			// last_name: payload.last_name,
-			// email: payload.email,
-			// cpf: payload.cpf,
-			// password: payload.password,
-      // role: payload.role,
-      // agent_permissions: []
-		// }
-    // if (payload.role === "agent"){
-      // let permissions = []
-      // for (const permission in payload.agentPermissions){
-        // if (payload.agentPermissions[permission] === true){
-          // permissions.push(permission)
-        // }
-      // }
-      // console.log(">>>>", permissions)
-      // data_body["agent_permissions"] =  permissions
-    // }
-		// return await axios({ 
-		// method: "post",
-		// url: "/api/user/user",
-		// data: data_body}).then((request) => {
-					// return request.data 
-				// })
-	// },
 
+  // --------------------------------------/ CRUD User APIs /----------------------------------------
+  // ---- Agent
+  
+	async fetchEstablishmentsToCreateAgent(){
+		return await axios({ 
+		method: "get",
+		url: "/api/user/establishments_to_create_agent",
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async createAgent(payload){
+    let data_body = {
+      agent_permissions: payload.permissions,
+      agent_establishments: payload.agent_establishments,
+      username: payload.username,
+      client: payload.client,
+			first_name: payload.first_name,
+			last_name: payload.last_name,
+			email: payload.email,
+			note: payload.note,
+			password: payload.password,
+		}
+		return await axios({ 
+		method: "post",
+		url: "/api/user/agent",
+		data: data_body}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async fetchAgents(){
+		return await axios({ 
+		method: "get",
+		url: "/api/user/agent",
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async updateAgent(payload){
+    let data_body = {
+      agent_permissions: payload.permissions,
+      agent_establishments: payload.agent_establishments,
+			first_name: payload.first_name,
+			last_name: payload.last_name,
+			email: payload.email,
+			note: payload.note,
+      status: payload.status,  
+			// password: payload.password,
+		}
+		return await axios({ 
+		method: "put",
+		url: `/api/user/agent/${payload.contracting_code}/${payload.username}`,
+		data: data_body}).then((request) => {
+					return request.data 
+				})
+	},
+	async deleteAgent(payload){
+		return await axios({ 
+		method: "delete",
+		url: `/api/user/agent/${payload.contracting_code}/${payload.username}`,
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+  // ------- Client User
+  
 	async fetchClientsToCreateClientUser(){
 		return await axios({ 
 		method: "get",
@@ -400,7 +439,6 @@ export default {
 					return request.data 
 				})
 	},
-
 
 	async createClientUser(payload){
     let data_body = {

@@ -304,7 +304,7 @@ class GetEstablishmentsToCreateClient(APIView):
                 return error_response(detail="You cannot access this 'client_table'", status=status.HTTP_403_FORBIDDEN) #TODO translate
             request_user_is_agent_without_all_estabs = req_user_is_agent_without_all_estabs(request.user)
             establishments = get_establishments_to_create_client(request.user, client_table_compound_id,request_user_is_agent_without_all_estabs)
-            return Response(EstablishmentSerializer(establishments, many=True).data)
+            return Response(EstablishmentPOSTSerializer(establishments, many=True).data)
 
 class GetCompaniesToCreateClient(APIView):
     def get(self, request):

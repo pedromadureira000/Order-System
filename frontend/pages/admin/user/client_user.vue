@@ -3,7 +3,7 @@
   <p v-else-if="$fetchState.error">{{$t('Error_fetching_data')}}</p>
   <div v-else>
     <div class="ma-3">
-      <v-expansion-panels v-if="haveCreateClientUserPermission()">
+      <v-expansion-panels v-if="hasCreateClientUserPermission()">
         <v-expansion-panel>
           <v-expansion-panel-header>
             <h3>{{$t('Create Client User')}}</h3>
@@ -90,7 +90,7 @@
         </v-expansion-panel>
       </v-expansion-panels>
 
-      <div v-if="haveGetClientUserPermission()">
+      <div v-if="hasGetClientUserPermission()">
         <h3 class="mt-6">{{$t('Edit Client User')}}</h3>
         <v-data-table
           :headers="headers"
@@ -99,8 +99,6 @@
           item-key="username"
           class="elevation-1"
         >
-          <template v-slot:top>
-          </template>
           <template v-slot:item.actions="{ item }">
             <client-user-edit-menu :client_user="item" @client-user-deleted="deleteClientUser(item)" />
           </template>
@@ -146,6 +144,7 @@ export default {
         { text: this.$t('Complete name'), value: 'complete_name' },
         { text: 'Email', value: 'email' },
         { text: this.$t('Client'), value: 'client' },
+        { text: 'Status', value: 'status'},
         { text: this.$t('Note'), value: 'note' },
         { text: this.$t('Actions'), value: 'actions' },
       ]
@@ -155,13 +154,15 @@ export default {
   async fetch() {
     // Fetch client_users
     let client_users = await this.$store.dispatch("user/fetchClientUsers");
-    for (const user_index in client_users){
-      let user = client_users[user_index]
-      this.client_users.push({...user, complete_name: `${user.first_name} ${user.last_name}`})
+    if (client_users) {
+      for (const user_index in client_users){
+        let user = client_users[user_index]
+        this.client_users.push({...user, complete_name: `${user.first_name} ${user.last_name}`})
+      }
     }
     // Fetch client option
     let clients = await this.$store.dispatch("user/fetchClientsToCreateClientUser");
-    this.clients.push(...clients)
+    if (clients){this.clients.push(...clients)}
   },
 
   validations: {
@@ -232,11 +233,11 @@ export default {
       this.client_users = this.client_users.filter((user) => user.username != 
         userToDelete.username);
     },
-    haveCreateClientUserPermission(){
+    hasCreateClientUserPermission(){
       let user = this.$store.state.user.currentUser;
       return user.permissions.includes("create_client_user")
     },
-    haveGetClientUserPermission(){
+    hasGetClientUserPermission(){
       let user = this.$store.state.user.currentUser;
       return user.permissions.includes("get_client_users")
     },

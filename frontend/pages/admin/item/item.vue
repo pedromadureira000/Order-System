@@ -79,7 +79,7 @@
         class="elevation-1"
       >
         <template v-slot:item.actions="{ item }">
-          <user-edit-menu :user="item" @user-deleted="deleteUser(item)" />
+          <!-- <user-edit-menu :user="item" @user-deleted="deleteUser(item)" /> -->
         </template>
       </v-data-table>
     </div>
@@ -98,7 +98,6 @@
 export default {
   middleware: ["authenticated"],
   components: {
-    "user-edit-menu": require("@/components/admin/user/user-edit-menu.vue").default,
   },
   /** mixins: [validationMixin], */
 

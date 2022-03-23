@@ -9,6 +9,9 @@ export const messages = {
     createClientUser_success_msg: "Client user created",
     updateClientUser_success_msg: "Client user updated",
     deleteClientUser_success_msg: "Client user deleted",
+    createAgent_success_msg: "Agent created",
+    updateAgent_success_msg: "Agent updated",
+    deleteAgent_success_msg: "Agent deleted",
     //organizations
     createContracting_success_msg: "Contracting company created",
     updateContracting_success_msg: "The Contracting company has been updated.",
@@ -38,6 +41,10 @@ export const messages = {
     fetchClientUsers_error_msg: "Something went wrong when trying to fetch client users.",
     updateClientUser_error_msg: "Something went wrong when trying to update the client user.",
     deleteClientUser_error_msg: "Something went wrong when trying to delete the client user.",
+    createAgent_error_msg: "Something went wrong when trying to create a agent.",
+    fetchAgents_error_msg: "Something went wrong when trying to fetch agents.",
+    updateAgent_error_msg: "Something went wrong when trying to update the agent.",
+    deleteAgent_error_msg: "Something went wrong when trying to delete the agent.",
     //organizations.js
     createContracting_error_msg: "Something went wrong when trying to create a contracting company.",
     fetchContractingCompanies_error_msg: "Something went wrong when trying to fetch contracting companies.",
@@ -204,6 +211,10 @@ export const messages = {
     Client_User: 'Client User',
     // -------------------------------/admin/user/ERP_User
     // -------------------------------/admin/user/Agent
+    "Create Agent": "Create Agent",
+    "Edit Agent": "Edit Agent",
+    "Agent Establishments" : "Agent Establishments",
+    "Agent Permissions": "Agent Permissions",
     // -------------------------------/admin/user/client_user
     "Create Client User": "Create Client User",
     "Edit Client User": "Edit Client User",
@@ -244,6 +255,9 @@ export const messages = {
     createClientUser_success_msg: "Usuário cliente criado.",
     updateClientUser_success_msg: "Usuário cliente atualizado.",
     deleteClientUser_success_msg: "Usuário cliente excluído.",
+    createAgent_success_msg: "Agente criado.",
+    updateAgent_success_msg: "Agente atualizado.",
+    deleteAgent_success_msg: "Agente excluído.",
     //organizations
     createContracting_success_msg: "Contratante criada.",
     updateContracting_success_msg: "Contratante atualizada.",
@@ -273,6 +287,10 @@ export const messages = {
     fetchClientUsers_error_msg: "Algo deu errado ao tentar buscar usuários clientes.",
     updateClientUser_error_msg: "Algo deu errado ao tentar atualizar o usuário cliente.",
     deleteClientUser_error_msg: "Algo deu errado ao tentar excluir o usuário cliente.",
+    createAgent_error_msg: "Algo deu errado ao tentar criar um agente.",
+    fetchAgents_error_msg: "Algo deu errado ao tentar buscar agentes.",
+    updateAgent_error_msg: "Algo deu errado ao tentar atualizar o agente.",
+    deleteAgent_error_msg: "Algo deu errado ao tentar excluir o agentes.",
     //organizations.js
     createContracting_error_msg: "Algo deu errado ao tentar criar empresa contratante.",
     fetchContractingCompanies_error_msg: "Algo deu errado ao tentar buscar contratantes.",
@@ -439,6 +457,10 @@ export const messages = {
     Client_User: 'Usuário Cliente',
     // -------------------------------/admin/user/ERP_User
     // -------------------------------/admin/user/Agent
+    "Create Agent": "Criar Agente",
+    "Edit Agent": "Editar Agente",
+    "Agent Establishments" : "Estabelecimentos do Agente",
+    "Agent Permissions": "Permissões do Agente",
     // -------------------------------/admin/user/client_user
     "Create Client User": "Criar Usuário Cliente",
     "Edit Client User": "Editar Usuário Cliente",

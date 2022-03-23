@@ -40,9 +40,11 @@ export default {
         console.log(">>>>>>> I fetch IT $$$$$$$$$$$$$$$$$")
         this.loading = true
         let price_tables = await this.$store.dispatch("organization/fetchPriceTablesToCreateClient", this.establishment.company);
-        this.price_tables.push(...price_tables)
         this.loading = false
-        this.$emit('update-price-table-groups', {group_id: this.establishment.company, price_tables: this.price_tables})
+        if (price_tables) {
+          this.price_tables.push(...price_tables)
+          this.$emit('update-price-table-groups', {group_id: this.establishment.company, price_tables: this.price_tables})
+        }
       }
     },
   },

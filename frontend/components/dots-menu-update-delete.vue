@@ -32,5 +32,8 @@
 <script>
 export default {
   props: ['menu_items', 'handleClick'],
+  /** mounted() { */
+  /** } */
 }
+
 </script>

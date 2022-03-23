@@ -20,6 +20,7 @@
             <v-text-field
               label="CNPJ"
               v-model="cnpj"
+              v-mask="'##.###.###/####-##'"
               required
               :error-messages="cnpjError"
               @blur="$v.cnpj.$touch()"
@@ -96,7 +97,13 @@
         <!-- Submit Button -->
         <v-card-actions class="d-flex justify-space-around" style="width:100%;">
           <v-btn class="blue--text darken-1" text @click="show_edit_dialog = false">{{$t('Cancel')}}</v-btn>
-          <v-btn class="blue--text darken-1" text @click="updateClient()">{{$t('Save')}}</v-btn>
+          <v-btn 
+            class="blue--text darken-1" 
+            text 
+            @click="updateClient()"
+            :loading="loading"
+            :disabled="loading"
+          >{{$t('Save')}}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -123,12 +130,14 @@ import {
 } from "vuelidate/lib/validators";
 import { validationMixin } from "vuelidate";
 import {cnpjFieldValidator} from "~/helpers/validators"
+import {mask} from 'vue-the-mask'
 export default {
   mixins: [validationMixin],
   components: {
     "dots-menu-update-delete": require("@/components/dots-menu-update-delete.vue").default,
     "price-table-v-select": require("@/components/admin/organization/price-table-v-select.vue").default,
   },
+  directives: {mask},
   props: ['client', 'establishment_groups', 'price_table_groups'],
   data() {
     return {
@@ -143,20 +152,20 @@ export default {
       note: null,
       loading: false,
       menu_items: [
-        { 
+      ...(this.hasUpdateClientPermission() ? [{ 
           title: this.$t('Edit'),
           icon: 'mdi-pencil',
           async click(){
             this.show_edit_dialog = true
           }
-        },
-        { 
+        }] : [] ),
+        ...(this.hasDeleteClientPermission() ? [{ 
           title: this.$t('Delete'),
           icon: 'mdi-delete',
           async click(){
             this.show_delete_confirmation_dialog = true
           }
-        },
+        }] : []),
       ]
     }
   },
@@ -228,51 +237,63 @@ export default {
         var establishments = establishment_group.establishments
       }else{
         var establishments = await this.$store.dispatch("organization/fetchEstablishmentsToCreateClient", this.client.client_table);
-        this.establishment_groups.push({group_id: this.client.client_table, establishments: [...establishments]})
-      }
-      for (const establishment_index in establishments){
-        let establishment = establishments[establishment_index]
-        // This will be necessary for update clie_estab.price_table(added from a checkbox) from a v-select.
-        // The client_establishments objects from this.client_establishments must be same objects as the AUX variables
-        let cli_estab = this.client.client_establishments.find(el=>el.establishment == establishment.establishment_compound_id)
-        if (cli_estab){
-          establishment['AUX_cli_estab_' + this.client.client_compound_id] = cli_estab
-          this.client_establishments.push(cli_estab)
-          // If cli_estab exists for this client, fetch price_tables for this estab.company 
-          let price_table_already_fetched = this.price_table_groups.find(el=>el.group_id === establishment.company)
-          if (!price_table_already_fetched){
-            let price_tables = await this.$store.dispatch("organization/fetchPriceTablesToCreateClient", establishment.company);
-            this.updatePriceTableGroups({group_id: establishment.company, price_tables: [{price_table_compound_id: null, 
-              description: 'default_null_value', table_code: 'default_null_value'}, ...price_tables]}) 
-          }
-        }else{
-          establishment['AUX_cli_estab_' + this.client.client_compound_id] = {establishment: establishment.establishment_compound_id,
-            price_table: null}
+        if (establishments){
+          this.establishment_groups.push({group_id: this.client.client_table, establishments: [...establishments]})
         }
       }
-      this.establishments.push(...establishments)
+      if (establishments){
+        for (const establishment_index in establishments){
+          let establishment = establishments[establishment_index]
+          // This will be necessary for update clie_estab.price_table(added from a checkbox) from a v-select.
+          // The client_establishments objects from this.client_establishments must be same objects as the AUX variables
+          let cli_estab = this.client.client_establishments.find(el=>el.establishment == establishment.establishment_compound_id)
+          if (cli_estab){
+            establishment['AUX_cli_estab_' + this.client.client_compound_id] = cli_estab
+            this.client_establishments.push(cli_estab)
+            // If cli_estab exists for this client, fetch price_tables for this estab.company 
+            let price_table_already_fetched = this.price_table_groups.find(el=>el.group_id === establishment.company)
+            if (!price_table_already_fetched){
+              let price_tables = await this.$store.dispatch("organization/fetchPriceTablesToCreateClient", establishment.company);
+              if (price_tables){
+                this.updatePriceTableGroups({group_id: establishment.company, price_tables: [{price_table_compound_id: null, 
+                  description: 'default_null_value', table_code: 'default_null_value'}, ...price_tables]}) 
+              }
+            }
+          }
+          else{
+            establishment['AUX_cli_estab_' + this.client.client_compound_id] = {establishment: establishment.establishment_compound_id,
+              price_table: null}
+          }
+        }
+        this.establishments.push(...establishments)
+      }
     },
 
     async updateClient(){
-      try {
-        let data = await this.$store.dispatch("organization/updateClient", {
-          client_compound_id: this.client.client_compound_id,
-          name: this.name,
-          cnpj: this.cnpj,
-          status: this.status,
-          client_establishments: this.client_establishments,
-          vendor_code: this.vendor_code,
-          note: this.note,
-        })
-        // Reactivity for Client list inside Client.vue 
-        this.client.name = data.name
-        this.client.cnpj = data.cnpj
-        this.client.status = data.status
-        this.client.client_establishments = data.client_establishments
-        this.client.vendor_code = data.vendor_code
-        this.client.note = data.note
-      } catch(e){
-      // error is being handled inside action
+      this.$v.clientInfoGroup.$touch();
+      if (this.$v.clientInfoGroup.$invalid) {
+        this.$store.dispatch("setAlert", { message: this.$t("Please_fill_the_form_correctly"), alertType: "error" }, { root: true })
+      } else {
+          this.loading = true;
+          let data = await this.$store.dispatch("organization/updateClient", {
+            client_compound_id: this.client.client_compound_id,
+            name: this.name,
+            cnpj: this.cnpj,
+            status: this.status,
+            client_establishments: this.client_establishments,
+            vendor_code: this.vendor_code,
+            note: this.note,
+          })
+          this.loading = false;
+          // Reactivity for Client list inside Client.vue 
+          if (data){
+            this.client.name = data.name
+            this.client.cnpj = data.cnpj
+            this.client.status = data.status
+            this.client.client_establishments = data.client_establishments
+            this.client.vendor_code = data.vendor_code
+            this.client.note = data.note
+          }
       }
     },
     updatePriceTable(estab, value){
@@ -294,7 +315,17 @@ export default {
         this.$emit('client-deleted')
       }
 
-    }
+    },
+
+    hasUpdateClientPermission(){
+      let user = this.$store.state.user.currentUser;
+      return user.permissions.includes("update_client")
+    },
+    hasDeleteClientPermission(){
+      let user = this.$store.state.user.currentUser;
+      return user.permissions.includes("delete_client")
+    },
+
   },
 
   watch: {

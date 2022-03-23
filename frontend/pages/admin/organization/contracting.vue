@@ -131,7 +131,7 @@ export default {
 
   async fetch() {
     let contracting_companies = await this.$store.dispatch("organization/fetchContractingCompanies");
-    this.contracting_companies.push(...contracting_companies)
+    if (contracting_companies){this.contracting_companies.push(...contracting_companies)}
   },
 
   validations: {

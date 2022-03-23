@@ -1,5 +1,6 @@
 <template>
   <div>
+     <!-- Menu Items -->
     <dots-menu-update-delete :menu_items="menu_items" :handleClick="handleClick"/>
      <!-- Edit Dialog -->
     <v-dialog v-model="show_edit_dialog" max-width="50%">
@@ -69,6 +70,58 @@
                 <!-- required -->
                 <!-- @blur="$v.password_confirm.$touch()" -->
               <!-- /> -->
+
+              <!-- Agent Permissions -->
+              <v-expansion-panels class="mb-5">
+                <v-expansion-panel>
+                  <v-expansion-panel-header>{{$t('Agent Permissions')}}</v-expansion-panel-header>
+                  <v-expansion-panel-content
+                    class="px-0 mb-2"
+                    fluid
+                    style="width: 85%; display: flex; justify-content: space-between;"
+                  >
+                    <v-row
+                      class="px-0 mb-2"
+                      fluid
+                      style="width: 85%; display: flex; justify-content: space-between;"
+                    >
+                      <v-checkbox 
+                        v-for="(value, key) in agentPermissions"
+                        :key="key"
+                        v-model="permissions"
+                        :value="value"
+                        :label="value"
+                        style="margin-right: 27px;"
+                      ></v-checkbox>
+                    </v-row>
+                  </v-expansion-panel-content>
+                </v-expansion-panel>
+              </v-expansion-panels>
+              <!-- Agent Establishments -->
+              <v-expansion-panels class="mb-5">
+                <v-expansion-panel>
+                  <v-expansion-panel-header>{{$t('Agent Establishments')}}</v-expansion-panel-header>
+                    <v-expansion-panel-content>
+                      <v-container
+                        v-for="establishment in establishments"
+                        :key="establishment.establishment_compound_id"
+                        class="grey lighten-5 mb-6"
+                      >
+                        <v-row align="center" class="ml-1 mt-0">
+                          <v-col>
+                            <v-checkbox
+                              :label="establishment.establishment_code + ' - ' + establishment.name + ' (' + $t('Company') + ': ' + establishment.company + ')'"
+                              v-model="agent_establishments"
+                              :value='establishment.AUX_agent_estab'
+                              hide-details
+                              class="shrink mr-2 mt-0"
+                            ></v-checkbox>
+                          </v-col>
+                        </v-row>
+                      </v-container>
+                    </v-expansion-panel-content>
+                </v-expansion-panel>
+              </v-expansion-panels>
           </v-container>
         </v-card-text>
         <v-divider></v-divider>
@@ -78,7 +131,7 @@
           <v-btn 
             class="blue--text darken-1" 
             text 
-            @click="updateClientUser()"
+            @click="updateAgent()"
             :loading="loading"
             :disabled="loading"
           >{{$t('Save')}}</v-btn>
@@ -92,7 +145,7 @@
         <v-card-text class="d-flex justify-center">
           <v-card-actions class="d-flex justify-space-around" style="width:100%;">
             <v-btn class="black--text darken-1" text @click="show_delete_confirmation_dialog = false">{{$t('Cancel')}}</v-btn>
-            <v-btn class="red--text darken-1" text @click="deleteClientUser()">{{$t('Delete')}}</v-btn>
+            <v-btn class="red--text darken-1" text @click="deleteAgent()">{{$t('Delete')}}</v-btn>
           </v-card-actions>
         </v-card-text>
       </v-card>
@@ -110,10 +163,10 @@ import {
 import { validationMixin } from "vuelidate";
 export default {
   mixins: [validationMixin],
-  /** components: { */
-    /** "dots-menu-update-delete": require("@/components/dots-menu-update-delete.vue").default, */
-  /** }, */
-  props: ['client_user'],
+  components: {
+    "dots-menu-update-delete": require("@/components/dots-menu-update-delete.vue").default,
+  },
+  props: ['agent', 'establishments'],
   data() {
     return {
       show_edit_dialog: false,
@@ -126,21 +179,48 @@ export default {
       status: null,
       note: "",
       loading: false,
+      agent_establishments: [],
+      permissions: [],
+      agentPermissions: [
+          "access_all_establishments",
+          "create_client",
+          "get_clients",
+          "update_client",
+          "delete_client",
+          "create_client_user",
+          "get_client_users",
+          "update_client_user",
+          "delete_client_user",
+          "create_item",
+          "get_items",
+          "update_item",
+          "delete_item",
+          "create_item_category",
+          "get_item_category",
+          "update_item_category",
+          "delete_item_category",
+          "create_price_table",
+          "get_price_tables",
+          "update_price_table",
+          "delete_price_table",
+          "get_orders",
+          "update_order_status"
+      ],
       menu_items: [
-      ...(this.hasUpdateClientUserPermission() ? [{ 
+        { 
           title: this.$t('Edit'),
           icon: 'mdi-pencil',
           async click(){
             this.show_edit_dialog = true
           }
-        }] : [] ),
-        ...(this.hasDeleteClientUserPermission() ? [{ 
+        },
+        { 
           title: this.$t('Delete'),
           icon: 'mdi-delete',
           async click(){
             this.show_delete_confirmation_dialog = true
           }
-        }] : []),
+        },
       ]
     }
   },
@@ -169,7 +249,7 @@ export default {
     /** password_confirm: { */
       /** password_confirm: sameAs("password"), */
     /** }, */
-    clientUserInfoGroup: [
+    agentInfoGroup: [
       "first_name",
       "last_name",
       "email",
@@ -231,15 +311,17 @@ export default {
       this.menu_items[index].click.call(this) // will call the function but the function will use the vue instance 'this' context.
     },
 
-    async updateClientUser(){
-      this.$v.clientUserInfoGroup.$touch();
-      if (this.$v.clientUserInfoGroup.$invalid) {
+    async updateAgent(){
+      this.$v.agentInfoGroup.$touch();
+      if (this.$v.agentInfoGroup.$invalid) {
         this.$store.dispatch("setAlert", { message: this.$t("Please_fill_the_form_correctly"), alertType: "error" }, { root: true })
       } else {
         this.loading = true;
-        let data = await this.$store.dispatch("user/updateClientUser", {
-          contracting_code: this.client_user.contracting_code,
-          username: this.client_user.username,
+        let data = await this.$store.dispatch("user/updateAgent", {
+          agent_establishments: this.agent_establishments,
+          permissions: this.permissions,
+          contracting_code: this.agent.contracting_code,
+          username: this.agent.username,
           first_name: this.first_name,
           last_name: this.last_name,
           email: this.email,
@@ -248,47 +330,45 @@ export default {
         })
         this.loading = false;
         if (data){
-          // Reactivity for client_user list inside client_user.vue 
-          this.client_user.first_name = data.first_name
-          this.client_user.last_name = data.last_name
-          this.client_user.status = data.status
-          this.client_user.email = data.email
-          this.client_user.note = data.note
-          this.client_user.complete_name =  `${data.first_name} ${data.last_name}`
+          // Reactivity for agent list inside agent.vue 
+          this.agent.first_name = data.first_name
+          this.agent.last_name = data.last_name
+          this.agent.status = data.status
+          this.agent.email = data.email
+          this.agent.note = data.note
+          this.agent.complete_name =  `${data.first_name} ${data.last_name}`
         }
       }
     },
 
-    async deleteClientUser(){
+    async deleteAgent(){
       let data = await this.$store.dispatch(
-        'user/deleteClientUser', {
-          contracting_code: this.client_user.contracting_code,
-          username: this.client_user.username
+        'user/deleteAgent', {
+          contracting_code: this.agent.contracting_code,
+          username: this.agent.username
         }
       )
       if (data === "ok"){
-        this.$emit('client-user-deleted')
+        this.$emit('agent-deleted')
       }
-
-    },
-
-    hasUpdateClientUserPermission(){
-      let user = this.$store.state.user.currentUser;
-      return user.permissions.includes("update_client_user")
-    },
-
-    hasDeleteClientUserPermission(){
-      let user = this.$store.state.user.currentUser;
-      return user.permissions.includes("delete_client_user")
     },
   },
 
   mounted() {
-    this.first_name = this.client_user.first_name
-    this.last_name = this.client_user.last_name
-    this.email = this.client_user.email
-    this.status = String(this.client_user.status)
-    this.note = this.client_user.note
+    this.permissions = this.agent.permissions
+    // Add AUX_agent_estab in this.agent_establishments
+    for (let key in this.establishments){
+      let estab = this.establishments[key]
+      if (this.agent.agent_establishments.some(el=>el.establishment===estab.AUX_agent_estab.establishment)){
+        this.agent_establishments.push(estab.AUX_agent_estab)
+      }
+    }
+    console.log(">>>>>>> this.agent_establishments: ", this.agent_establishments)
+    this.first_name = this.agent.first_name
+    this.last_name = this.agent.last_name
+    this.email = this.agent.email
+    this.status = String(this.agent.status)
+    this.note = this.agent.note
   }
 }
 </script>

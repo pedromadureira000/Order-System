@@ -8,8 +8,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from organization.facade import get_clients_by_agent
 
-from organization.models import Client
-from organization.serializers import ClientSerializerPOST
+from organization.models import Client, Establishment
+from organization.serializers import ClientSerializerPOST, EstablishmentPOSTSerializer
 from .facade import get_all_client_users_by_agent
 from .serializers import AdminAgentSerializer, AgentSerializer, ClientUserSerializer, ERPUserSerializer, OwnProfileSerializer, SwaggerLoginSerializer, SwaggerProfilePasswordSerializer
 from .models import User
@@ -219,6 +219,13 @@ class SpecificAdminAgent(APIView):
                 transaction.rollback()
                 print(error)
                 return unknown_exception_response(action=_('delete admin agent'))
+        return unauthorized_response
+
+class fetchEstablishmentsToCreateAgent(APIView):
+    def get(self, request):
+        if has_permission(request.user, 'create_agent'):
+            estabs = Establishment.objects.filter(company__contracting=request.user.contracting,status=1)
+            return Response(EstablishmentPOSTSerializer(estabs, many=True).data)
         return unauthorized_response
 
 class AgentView(APIView):

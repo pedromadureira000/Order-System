@@ -3,7 +3,7 @@
   <p v-else-if="$fetchState.error">{{$t('Error_fetching_data')}}</p>
   <div v-else>
     <div class="ma-3">
-      <v-expansion-panels>
+      <v-expansion-panels v-if="hasCreateClientPermission()">
         <v-expansion-panel>
           <v-expansion-panel-header>
             <h3>{{$t('Create_Client')}}</h3>
@@ -131,24 +131,29 @@
         </v-expansion-panel>
       </v-expansion-panels>
 
-      <h3 class="mt-6">{{$t('Edit_Client')}}</h3>
-      <v-data-table
-        :headers="headers"
-        :items="clients"
-        :items-per-page="10"
-        item-key="client_compound_id"
-        class="elevation-1"
-      >
-        <!-- <template v-slot:item.actions="{ item }"> -->
-        <template v-slot:[`item.actions`]="{ item }">
-          <client-edit-menu 
-            :client="item" 
-            :establishment_groups="establishment_groups" 
-            :price_table_groups="price_table_groups" 
-            @client-deleted="deleteClient(item)" 
-          />
-        </template>
-      </v-data-table>
+      <div v-if="hasGetClientPermission()">
+        <h3 class="mt-6">{{$t('Edit_Client')}}</h3>
+        <v-data-table
+          :headers="headers"
+          :items="clients"
+          :items-per-page="10"
+          item-key="client_compound_id"
+          class="elevation-1"
+        >
+          <!-- <template v-slot:item.actions="{ item }"> -->
+          <template v-slot:[`item.actions`]="{ item }">
+            <client-edit-menu 
+              :client="item" 
+              :establishment_groups="establishment_groups" 
+              :price_table_groups="price_table_groups" 
+              @client-deleted="deleteClient(item)" 
+            />
+          </template>
+          <template v-slot:item.cnpj_with_mask="{ item }">
+            <input type="text" v-mask="'##.###.###/####-##'" :value="item.cnpj" disabled style="color: #000000DE;"/>
+          </template>
+        </v-data-table>
+      </div>
     </div>
   </div>
 </template>
@@ -171,7 +176,6 @@ export default {
   middleware: ["authenticated"],
   mixins: [validationMixin],
   directives: {mask},
-
   data() {
     return {
       company: null,
@@ -191,7 +195,7 @@ export default {
       headers: [
         { text: this.$t('Client_code'), value: 'client_code' },
         { text: this.$t('Name'), value: 'name' },
-        { text: 'CNPJ', value: 'cnpj' },
+        { text: 'CNPJ', value: 'cnpj_with_mask' },
         { text: 'Status', value: 'status' },
         { text: this.$t('Vendor_Code'), value: 'vendor_code' },
         { text: this.$t('Note'), value: 'note' },
@@ -203,10 +207,10 @@ export default {
   async fetch() {
     // Fetch Clients to EDIT list
     let clients = await this.$store.dispatch("organization/fetchClients");
-    this.clients.push(...clients)
+    if (clients) {this.clients.push(...clients)}
     // Fetch company options
     let companies = await this.$store.dispatch("organization/fetchCompaniesToCreateClient");
-    this.companies.push(...companies)
+    if (companies) {this.companies.push(...companies)}
   },
 
   validations: {
@@ -308,13 +312,16 @@ export default {
     async fetchEstablishmentsToCreateClient(){
       if (this.establishments.length > 0) {this.establishments = []}
       let establishments = await this.$store.dispatch("organization/fetchEstablishmentsToCreateClient", this.company.client_table);
-      for (const establishment_index in establishments){
-        let establishment = establishments[establishment_index]
-        // This will be necessary for update clie_estab.price_table(added from a checkbox) from a v-select.
-        establishment.AUX_cli_estab = {establishment: establishment.establishment_compound_id, price_table: null}
-        this.establishments.push(establishment)
+      if (establishments) {
+        for (const establishment_index in establishments){
+          let establishment = establishments[establishment_index]
+          // This will be necessary for update clie_estab.price_table(added from a checkbox) from a v-select.
+          establishment.AUX_cli_estab = {establishment: establishment.establishment_compound_id, price_table: null}
+          this.establishments.push(establishment)
+        }
+        this.establishment_groups = [{group_id: this.company.client_table, establishments: [...establishments]}]
+
       }
-      this.establishment_groups = [{group_id: this.company.client_table, establishments: [...establishments]}]
     },
 
     updatePriceTable(estab, value){
@@ -324,6 +331,14 @@ export default {
 
     updatePriceTableGroups(payload){
       this.price_table_groups.push(payload)
+    },
+    hasCreateClientPermission(){
+      let user = this.$store.state.user.currentUser;
+      return user.permissions.includes("create_client")
+    },
+    hasGetClientPermission(){
+      let user = this.$store.state.user.currentUser;
+      return user.permissions.includes("get_clients")
     },
   },
 
