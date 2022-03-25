@@ -124,11 +124,11 @@ import footer from '~/components/Footer.vue';
 import loginDialog from '~/components/login-dialog.vue'
 import sessionErrorDialog from '~/components/session-error-dialog.vue'
 import problemConnectingErrorDialog from '~/components/problem-connecting-dialog.vue'
-import {CRUDerpUserPermissions, CRUDadminAgentPermissions, CRUDagentPermissions, CRUDclientUserPermissions, CRUDcontractingPermissions, CRUDcompanyPermissions, CRUDestablishmentPermissions, CRUDclientTablePermissions, CRUDclientPermissions,CRUDitemTablePerms,CRUDitemPermissions, CRUDitemCategoryPerms, CRUDpriceTablePerms, client_user} from '~/helpers/permissions'
+import {CRUDerpUserPermissions, CRUDadminAgentPermissions, CRUDagentPermissions, CRUDclientUserPermissions, CRUDcontractingPermissions, CRUDcompanyPermissions, CRUDestablishmentPermissions, CRUDclientTablePermissions, CRUDclientPermissions,CRUDitemTablePerms,CRUDitemPerms, CRUDitemCategoryPerms, CRUDpriceTablePerms, client_user} from '~/helpers/permissions'
 
 let usersMenuPermissions = CRUDerpUserPermissions.concat(CRUDadminAgentPermissions, CRUDagentPermissions, CRUDclientUserPermissions)
 let organizationPermissions = CRUDcontractingPermissions.concat(CRUDcompanyPermissions, CRUDestablishmentPermissions, CRUDclientTablePermissions, CRUDclientPermissions)
-let itemsMenuPermissions = CRUDitemTablePerms.concat(CRUDitemPermissions, CRUDitemCategoryPerms, CRUDpriceTablePerms)
+let itemsMenuPermissions = CRUDitemTablePerms.concat(CRUDitemPerms, CRUDitemCategoryPerms, CRUDpriceTablePerms)
 let orderPermissions = client_user
 
 /** import {handleError} from '~/helpers/functions' //TODO REmove it  */

@@ -1,5 +1,5 @@
 from rolepermissions.checkers import has_permission
-from item.models import ItemCategory, Item, PriceTable, ItemTable
+from item.models import ItemCategory, Item, PriceItem, PriceTable, ItemTable
 from organization.models import Company
 #  from organization.facade import get_agent_companies  # /!\ This import is causing a circular dependency error
 from organization import facade
@@ -22,6 +22,12 @@ def get_price_tables_by_agent(agent):
 
 def get_agent_item_tables(agent):
     return ItemTable.objects.filter(company__in=facade.get_agent_companies(agent))
+
+def get_companies_to_create_item_category_or_pricetabe_by_agent(agent):
+    return facade.get_agent_companies(agent).exclude(item_table=None)
+
+def get_categories_to_create_item_by_agent_without_all_estabs(agent, item_table_compound_id):
+    return ItemCategory.objects.filter(item_table__company__in=Company.objects.filter(establishment__in=agent.establishments.all()), item_table__item_table_compound_id=item_table_compound_id)
 
 #------------------------------------/Reverse Foreign key Batch Updates/---------------------------------------------------
 

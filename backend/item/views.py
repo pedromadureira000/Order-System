@@ -2,10 +2,14 @@ from django.db import transaction
 from django.db.models.deletion import ProtectedError
 from rest_framework import status
 from rest_framework.response import Response
+from item.facade import get_agent_item_tables
+
+from organization.models import Company
+from organization.serializers import CompanySerializer
 from .validators import agent_has_access_to_this_item_table, agent_has_access_to_this_price_table 
 from user.validators import req_user_is_agent_without_all_estabs
-from .facade import get_categories_by_agent, get_items_by_agent, get_price_tables_by_agent
-from .serializers import ForTablePriceItemSerializer, ItemSerializer, CategorySerializer, ItemTableSerializer, PriceTableGetSerializer, PriceTablePOSTSerializer, SpecificPriceTablePUTSerializer, SpecificPriceItemSerializer
+from .facade import get_categories_by_agent, get_categories_to_create_item_by_agent_without_all_estabs, get_companies_to_create_item_category_or_pricetabe_by_agent, get_items_by_agent, get_price_tables_by_agent
+from .serializers import ForTablePriceItemSerializer, ItemPOSTSerializer, ItemPUTSerializer, CategoryPOSTSerializer, CategoryPUTSerializer, ItemTablePOSTSerializer, ItemTablePUTSerializer, PriceTableGetSerializer, PriceTablePOSTSerializer, SpecificPriceTablePUTSerializer, SpecificPriceItemSerializer
 from .models import ItemTable, Item, ItemCategory, PriceTable, PriceItem
 from rest_framework.views import APIView
 from rolepermissions.checkers import has_permission, has_role
@@ -19,15 +23,15 @@ class ItemTableView(APIView):
         user = request.user
         if has_permission(user, 'get_item_tables'):
             item_table = ItemTable.objects.filter(contracting=user.contracting)
-            data = ItemTableSerializer(item_table, many=True).data
+            data = ItemTablePOSTSerializer(item_table, many=True).data
             return Response(data)
         return unauthorized_response
-    @swagger_auto_schema(request_body=ItemTableSerializer) 
+    @swagger_auto_schema(request_body=ItemTablePOSTSerializer) 
     @transaction.atomic
     def post(self, request):
             if has_permission(request.user, 'create_item_table'):
                 data = request.data
-                serializer = ItemTableSerializer(data=data, context={"request":request})
+                serializer = ItemTablePOSTSerializer(data=data, context={"request":request})
                 if serializer.is_valid():
                     try:
                         serializer.save()
@@ -41,7 +45,7 @@ class ItemTableView(APIView):
 
 class SpecificItemTable(APIView):
     @transaction.atomic
-    @swagger_auto_schema(request_body=ItemTableSerializer) 
+    @swagger_auto_schema(request_body=ItemTablePUTSerializer) 
     def put(self, request, item_table_compound_id):
         if has_permission(request.user, 'update_item_table'):
             if item_table_compound_id.split("&")[0] != request.user.contracting.contracting_code:
@@ -50,7 +54,7 @@ class SpecificItemTable(APIView):
                 item_table = ItemTable.objects.get(item_table_compound_id=item_table_compound_id)
             except ItemTable.DoesNotExist:
                 return not_found_response(object_name=_('Item table'))
-            serializer = ItemTableSerializer(item_table, data=request.data, partial=True)
+            serializer = ItemTablePUTSerializer(item_table, data=request.data, partial=True)
             if serializer.is_valid():
                 try:
                     serializer.save()
@@ -75,10 +79,23 @@ class SpecificItemTable(APIView):
                 return Response("Item table deleted")
             except ProtectedError:
                 return protected_error_response(object_name=_('item table'))
+            #  "Você não pode deletar esse tabela de itens pois ele possui registro ligados a ele." #TODO wrong translation
             except Exception as error:
                 transaction.rollback()
                 print(error)
                 return unknown_exception_response(action=_('delete item table'))
+        return unauthorized_response
+
+class fetchCompaniesToCreateItemOrCategoryOrPriceTable(APIView):
+    def get(self, request):
+        if has_permission(request.user, 'create_item') or has_permission(request.user,  'create_item_category') or \
+                has_permission(request.user, 'create_price_table'):
+            if req_user_is_agent_without_all_estabs(request.user):
+                companies = get_companies_to_create_item_category_or_pricetabe_by_agent(request.user)
+                return Response(CompanySerializer(companies, many=True).data)
+            companies = Company.objects.filter(status=1).exclude(item_table=None)
+            serializer = CompanySerializer(companies, many=True)
+            return Response(serializer.data)
         return unauthorized_response
 
 class CategoryView(APIView):
@@ -86,16 +103,16 @@ class CategoryView(APIView):
         if has_permission(request.user, 'get_item_category'):
             if has_role(request.user, 'agent'):
                 item_categories = get_categories_by_agent(request.user)
-                return Response(CategorySerializer(item_categories, many=True).data)
+                return Response(CategoryPOSTSerializer(item_categories, many=True).data)
             item_categories = ItemCategory.objects.filter(item_table__contracting=request.user.contracting).all()
-            serializer = CategorySerializer(item_categories, many=True)
+            serializer = CategoryPOSTSerializer(item_categories, many=True)
             return Response(serializer.data)
         return unauthorized_response
     @transaction.atomic
-    @swagger_auto_schema(request_body=CategorySerializer) 
+    @swagger_auto_schema(request_body=CategoryPOSTSerializer) 
     def post(self, request):
         if has_permission(request.user, 'create_item_category'):
-            serializer = CategorySerializer(data=request.data, context={"request": request})
+            serializer = CategoryPOSTSerializer(data=request.data, context={"request": request})
             if serializer.is_valid():
                 try:
                     serializer.save()
@@ -109,7 +126,7 @@ class CategoryView(APIView):
 
 class SpecificCategoryView(APIView):
     @transaction.atomic
-    @swagger_auto_schema(request_body=CategorySerializer) 
+    @swagger_auto_schema(request_body=CategoryPUTSerializer) 
     def put(self, request, category_compound_id):
         user = request.user
         if has_permission(user, 'update_item_category'):
@@ -120,11 +137,11 @@ class SpecificCategoryView(APIView):
             except ItemCategory.DoesNotExist:
                 return not_found_response(object_name=_('The item category')) 
             # Check if agent without all estabs have access to this item category
-            request_user_is_agent_without_all_estabs = req_user_is_agent_without_all_estabs(request_user)
+            request_user_is_agent_without_all_estabs = req_user_is_agent_without_all_estabs(request.user)
             if request_user_is_agent_without_all_estabs and not \
                     agent_has_access_to_this_item_table(request.user, item_category.item_table):
                 return not_found_response(object_name=_('The item category')) 
-            serializer = CategorySerializer(item_category, data=request.data, partial=True, context={"request":request,
+            serializer = CategoryPUTSerializer(item_category, data=request.data, partial=True, context={"request":request,
                 "request_user_is_agent_without_all_estabs": request_user_is_agent_without_all_estabs})
             if serializer.is_valid():
                 try:
@@ -159,20 +176,36 @@ class SpecificCategoryView(APIView):
                 return unknown_exception_response(action=_('delete item category'))
         return unauthorized_response
 
+class fetchCategoriesToCreateItem(APIView):
+    def get(self, request, item_table_compound_id):
+        if has_permission(request.user, 'create_item'):
+            if item_table_compound_id.split("&")[0] != request.user.contracting.contracting_code:
+                return not_found_response(object_name=_('The item table')) #TODO check translation
+            try:
+                item_table = ItemTable.objects.get(item_table_compound_id=item_table_compound_id)
+            except ItemTable.DoesNotExist:
+                return not_found_response(object_name=_('The item table')) 
+            if req_user_is_agent_without_all_estabs(request.user):
+                categories = get_categories_to_create_item_by_agent_without_all_estabs(request.user, item_table_compound_id)
+                return Response(CategoryPOSTSerializer(categories, many=True).data)
+            categories = ItemCategory.objects.filter(item_table__item_table_compound_id=item_table_compound_id)
+            return Response(CategoryPOSTSerializer(categories, many=True).data)
+        return unauthorized_response
+
 class ItemView(APIView):
     def get(self, request):
         if has_permission(request.user, 'get_items'):
             if has_role(request.user, 'agent'):
                 items = get_items_by_agent(request.user)
-                return Response(ItemSerializer(items, many=True).data)
+                return Response(ItemPOSTSerializer(items, many=True).data)
             items = Item.objects.filter(item_table__contracting=request.user.contracting).all()
-            return Response(ItemSerializer(items, many=True).data)
+            return Response(ItemPOSTSerializer(items, many=True).data)
         return unauthorized_response
     @transaction.atomic
-    @swagger_auto_schema(request_body=ItemSerializer) 
+    @swagger_auto_schema(request_body=ItemPOSTSerializer) 
     def post(self, request):
         if has_permission(request.user, 'create_item'):
-            serializer = ItemSerializer(data=request.data, context={"request": request, 
+            serializer = ItemPOSTSerializer(data=request.data, context={"request": request, 
                 "request_user_is_agent_without_all_estabs": req_user_is_agent_without_all_estabs(request.user)})
             if serializer.is_valid():
                 try:
@@ -187,7 +220,7 @@ class ItemView(APIView):
 
 class SpecificItemView(APIView):
     @transaction.atomic
-    @swagger_auto_schema(request_body=ItemSerializer) 
+    @swagger_auto_schema(request_body=ItemPUTSerializer) 
     def put(self, request, item_compound_id):
         if has_permission(request.user, 'update_item'):
             if item_compound_id.split("&")[0] != request.user.contracting.contracting_code:
@@ -201,7 +234,7 @@ class SpecificItemView(APIView):
             if request_user_is_agent_without_all_estabs and not \
                     agent_has_access_to_this_item_table(request.user, item.item_table):
                 return not_found_response(object_name=_('The item'))
-            serializer = ItemSerializer(item, data=request.data, context={"request": request,
+            serializer = ItemPUTSerializer(item, data=request.data, context={"request": request,
                 "request_user_is_agent_without_all_estabs": request_user_is_agent_without_all_estabs})
             if serializer.is_valid():
                 try:
@@ -234,6 +267,25 @@ class SpecificItemView(APIView):
                 transaction.rollback()
                 print(error)
                 return unknown_exception_response(action=_('delete item'))
+        return unauthorized_response
+
+class fetchItemsToCreatePriceTable(APIView):
+    def get(self, request, item_table_compound_id):
+        if has_permission(request.user, 'create_price_table'):
+            if item_table_compound_id.split("&")[0] != request.user.contracting.contracting_code:
+                return not_found_response(object_name=_('The item table')) # TODO Translate it
+            try:
+                item_table = ItemTable.objects.get(item_table_compound_id=item_table_compound_id)
+            except Company.DoesNotExist:
+                return not_found_response(object_name=_('The item table'))
+            if req_user_is_agent_without_all_estabs(request.user):
+                agent_item_tables = get_agent_item_tables(request.user)
+                if item_table in agent_item_tables:
+                    items = Item.objects.filter(item_table=item_table, status=1)
+                    return Response(ItemPOSTSerializer(items, many=True).data)
+                return not_found_response(object_name=_('The item table'))
+            items = Item.objects.filter(item_table=item_table, status=1)
+            return Response(ItemPOSTSerializer(items, many=True).data)
         return unauthorized_response
 
 class PriceTableView(APIView):

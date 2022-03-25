@@ -110,22 +110,22 @@ export default {
         en: '/admin/user',
         'pt-BR': '/admin/usuario',
       },
-      // 'admin/user/erp_user': {
-        // en: '/admin/user/erp_user',
-        // 'pt-BR': '/admin/usuario/usuario_erp',
-      // },
-      // 'admin/user/admin_agent': {
-        // en: '/admin/user/admin_agent',
-        // 'pt-BR': '/admin/usuario/agente_admin',
-      // },
-      // 'admin/user/agent': {
-        // en: '/admin/user/agent',
-        // 'pt-BR': '/admin/usuario/agente',
-      // },
-      // 'admin/user/client_user': {
-        // en: '/admin/user/client_user',
-        // 'pt-BR': '/admin/usuario/usuario_cliente',
-      // },
+      'admin/user/erp_user': {
+        en: '/admin/user/erp_user',
+        'pt-BR': '/admin/usuario/usuario_erp',
+      },
+      'admin/user/admin_agent': {
+        en: '/admin/user/admin_agent',
+        'pt-BR': '/admin/usuario/agente_admin',
+      },
+      'admin/user/agent': {
+        en: '/admin/user/agent',
+        'pt-BR': '/admin/usuario/agente',
+      },
+      'admin/user/client_user': {
+        en: '/admin/user/client_user',
+        'pt-BR': '/admin/usuario/usuario_cliente',
+      },
       // Item
       'admin/item': {
         en: '/admin/item',

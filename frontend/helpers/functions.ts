@@ -10,11 +10,18 @@ let common_user_fields = ['username', 'first_name','last_name', 'email', 'passwo
 let erp_user_fields  = ['contracting']
 let client_user_fields = ['client']
 // Item
+let item_table_fields = ['item_table_code']
+let item_fields = ['item_code', 'category', 'unit', 'barcode', 'technical_description']
+let category_fields = ['category_code']
+let price_table_fields = ['unit_price', 'table_code']
 // Order
-let common_fields_list = ['name', 'cnpj', 'status', 'description', 'note']
-let field_list = contracting_fields.concat(company_fields, establishment_fields, client_table_fields, client_fields, common_user_fields, erp_user_fields, client_user_fields, common_fields_list)
 
-let nested_field_list = ['client_establishments', 'agent_establishments', 'agent_permissions']
+// commum fields
+let common_fields_list = ['name', 'cnpj', 'status', 'description', 'note']
+// field_list
+let field_list = contracting_fields.concat(company_fields, establishment_fields, client_table_fields, client_fields, common_user_fields, erp_user_fields, client_user_fields, item_table_fields, item_fields, category_fields, price_table_fields, common_fields_list)
+
+let nested_field_list = ['client_establishments', 'agent_establishments', 'agent_permissions', 'price_items']
 
 export const doesHttpOnlyCookieExist = (cookiename: string): boolean => {
 	var d = new Date();

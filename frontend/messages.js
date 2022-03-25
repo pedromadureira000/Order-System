@@ -34,6 +34,20 @@ export const messages = {
     createClientTable_success_msg: "Client table created.",
     updateClientTable_success_msg: "Client table updated.",
     deleteClientTable_success_msg: "Client table deleted.",
+    // Item
+    createItemTable_success_msg: "Item table created.",
+    updateItemTable_success_msg: "Item table updated.",
+    deleteItemTable_success_msg: "Item table deleted.",
+    createItem_success_msg: "Item created.",
+    updateItem_success_msg: "Item updated.",
+    deleteItem_success_msg: "Item deleted.",
+    createCategory_success_msg: "Category created.",
+    updateCategory_success_msg: "Category updated.",
+    deleteCategory_success_msg: "Category deleted.",
+    createPriceTable_success_msg: "Price Table created.",
+    updatePriceTable_success_msg: "Price Table updated.",
+    deletePriceTable_success_msg: "Price Table deleted.",
+    
     //--------------------------------------------------------------------/Store APIs Error Messages (default_error_msg parameter)
     //user
     checkAuthenticated_error_msg: "Something went wrong when trying to get the user profile.",
@@ -69,8 +83,6 @@ export const messages = {
     fetchCompanies_error_msg: "Something went wrong when trying to fetch companies.",
     updateCompany_error_msg: "Something went wrong when trying to update the company.",
     deleteCompany_error_msg: "Something went wrong when trying to delete the company.",
-    fetchEstablishments_error_msg: "Something went wrong when trying to fetch establishments.",
-    fetchClientTables_error_msg: "Something went wrong when trying to fetch client tables.",
     fetchPriceTablesToCreateClient_error_msg: "Something went wrong when trying to fetch price tables to create a client.",
     fetchEstablishmentsToCreateClient_error_msg: "Something went wrong when trying to fetch establishments to create a client.",
     fetchCompaniesToCreateClient_error_msg: "Something went wrong when trying to fetch companies to create a client.",
@@ -80,11 +92,34 @@ export const messages = {
     deleteClient_error_msg: "Something went wrong when trying to delete the client.",
     fetchCompaniesToCreateEstablishment_error_msg: "Something went wrong when trying to fetch companies to create an establishment.",
     createEstablishment_error_msg: "Something went wrong when trying to create an establishment.",
+    fetchEstablishments_error_msg: "Something went wrong when trying to fetch establishments.",
     updateEstablishment_error_msg: "Something went wrong when trying to update the establishment.",
     deleteEstablishment_error_msg: "Something went wrong when trying to update the establishment.",
     createClientTable_error_msg: "Something went wrong when trying to create a client table.",
+    fetchClientTables_error_msg: "Something went wrong when trying to fetch client tables.",
     updateClientTable_error_msg: "Something went wrong when trying to update the client table.",
     deleteClientTable_error_msg: "Something went wrong when trying to delete the client table.",
+    // Item
+    createItemTable_error_msg: "Something went wrong when trying to create a item table.",
+    fetchItemTables_error_msg: "Something went wrong when trying to fetch item tables.",
+    updateItemTable_error_msg: "Something went wrong when trying to update the item table.",
+    deleteItemTable_error_msg: "Something went wrong when trying to delete the item table.",
+    fetchCompaniesToCreateItemOrCategoryOrPriceTable_error_msg: "Something went wrong when trying to fetch companies to create an item, category or price table.",
+    fetchCategoriesToCreateItem_error_msg: "Something went wrong when trying to fetch categories to create item.",
+    createItem_error_msg: "Something went wrong when trying to create a item.",
+    fetchItems_error_msg: "Something went wrong when trying to fetch items.",
+    updateItem_error_msg: "Something went wrong when trying to update the item.",
+    deleteItem_error_msg: "Something went wrong when trying to delete the item.",
+    createCategory_error_msg: "Something went wrong when trying to create a category.",
+    fetchCategories_error_msg: "Something went wrong when trying to fetch categories.",
+    updateCategory_error_msg: "Something went wrong when trying to update the category.",
+    deleteCategory_error_msg: "Something went wrong when trying to delete the category.",
+    fetchItemsToCreatePriceTable_error_msg: "Something went wrong when trying to fetch items to create price table.",
+    fetchPriceItemsFromThePriceTable_error_msg: "Something went wrong when trying to fetch price items to update the price table.",
+    createPriceTable_error_msg: "Something went wrong when trying to create a price table.",
+    fetchPriceTables_error_msg: "Something went wrong when trying to fetch price tables.",
+    updatePriceTable_error_msg: "Something went wrong when trying to update the price table.",
+    deletePriceTable_error_msg: "Something went wrong when trying to delete the price table.",
 
     // -------------------------------------------------------------------/ Error Handler
     // Fields
@@ -157,7 +192,7 @@ export const messages = {
     // cpf_validation_error: 'This field should have the format 999.999.999-99',
     Password_must_be_different_from_current_password: 'The password should not be equal to the current password.',
     password_confirm_does_not_match: 'The password confirmation fail.',
-    // -------------------------------/admin/organizations
+    // ------------------------------------------------------------/admin/organizations
     Contracting: 'Contracting',
     Company: 'Company',
     Establishment: 'Establishment',
@@ -230,7 +265,6 @@ export const messages = {
     // -------------------------------/admin/user/AdminAgent
     "Create Admin Agent": "Create Admin Agent",
     "Edit Admin Agent": "Edit Admin Agent",
-    //
     // -------------------------------/admin/user/Agent
     "Create Agent": "Create Agent",
     "Edit Agent": "Edit Agent",
@@ -243,6 +277,27 @@ export const messages = {
     // -----------------------------------------------------------------------------------/admin/item
     Price_Table: 'Price Table',
     Item_Category: 'Item Category',
+    "Item Table" : "Item Table",
+    // Item table
+    "Create Item Table": "Create Item Table",
+    "Edit Item Table": "Edit Item Table",
+    // Item
+    "Create Item": "Create Item",
+    "Edit Item": "Edit Item",
+    "Technical description": "Technical description",
+    "Item Code": "Item Code",
+    // Category
+    "Create Category": "Create Category",
+    "Edit Category": "Edit Category",
+    "Category code": "Category code",
+    // PriceTable
+    "Create Price Table": "Create Price Table",
+    "Edit Price Table": "Edit Price Table",
+    "Price table code": "Price table code",
+    "Price Table Code": "Price Table Code",
+    "Add Price Items": "Add Prices",
+    "Remove Items": "Remove Items",
+    "Add Items": "Add Items",
     // -------------------------------------------------------------------/ Components
     // -------------------------------/Problem Connecting Error dialog
     ProblemConnectingTitle: "Problema de conexão",
@@ -301,6 +356,19 @@ export const messages = {
     createClientTable_success_msg: "Tabela de clientes criada.",
     updateClientTable_success_msg: "Tabela de clientes atualizada.",
     deleteClientTable_success_msg: "Tabela de clientes excluída.",
+    // Item
+    createItemTable_success_msg: "Tabela de itens criada.",
+    updateItemTable_success_msg: "Tabela de itens atualizada.",
+    deleteItemTable_success_msg: "Tabela de itens excluída.",
+    createItem_success_msg: "Item criado.",
+    updateItem_success_msg: "Item atualizado.",
+    deleteItem_success_msg: "Item excluído.",
+    createCategory_success_msg: "Categoria criada.",
+    updateCategory_success_msg: "Categoria atualizada.",
+    deleteCategory_success_msg: "Categoria excluída.",
+    createPriceTable_success_msg: "Tabela de preço criada.",
+    updatePriceTable_success_msg: "Tabela de preço atualizada.",
+    deletePriceTable_success_msg: "Tabela de preço excluída.",
     //--------------------------------------------------------------------/Store APIs Error Messages (default_error_msg parameter)
     //user
     checkAuthenticated_error_msg: "Algo deu errado ao tentar obter o perfil do usuário.",
@@ -336,8 +404,6 @@ export const messages = {
     fetchCompanies_error_msg: "Algo deu errado ao tentar buscar empresas.",
     updateCompany_error_msg: "Algo deu errado ao tentar atualizar a empresa.",
     deleteCompany_error_msg: "Algo deu errado ao tentar excluir a empresa.",
-    fetchEstablishments_error_msg: "Algo deu errado ao tentar buscar estabelecimentos.",
-    fetchClientTables_error_msg: "Algo deu errado ao tentar buscar tabelas de clientes.",
     fetchPriceTablesToCreateClient_error_msg: "Algo deu errado ao tentar buscar tabelas de preço na pagina de criação de cliente.",
     fetchEstablishmentsToCreateClient_error_msg: "Algo deu errado ao tentar buscar estabelecimentos na pagina de criação de cliente.",
     fetchCompaniesToCreateClient_error_msg: "Algo deu errado ao tentar buscar empresas na pagina de criação de cliente.",
@@ -347,11 +413,34 @@ export const messages = {
     deleteClient_error_msg: "Algo deu errado ao tentar excluir o cliente.",
     fetchCompaniesToCreateEstablishment_error_msg: "Algo deu errado ao tentar buscar empresas na pagina de criação de estabelecimento.",
     createEstablishment_error_msg: "Algo deu errado ao tentar criar um estabelecimento.",
+    fetchEstablishments_error_msg: "Algo deu errado ao tentar buscar estabelecimentos.",
     updateEstablishment_error_msg: "Algo deu errado ao tentar atualizar o estabelecimento.",
     deleteEstablishment_error_msg:  "Algo deu errado ao tentar excluir o estabelecimento.",
     createClientTable_error_msg: "Algo deu errado ao tentar criar o estabelecimento.",
+    fetchClientTables_error_msg: "Algo deu errado ao tentar buscar tabelas de clientes.",
     updateClientTable_error_msg: "Algo deu errado ao tentar atualizar o estabelecimento.",
     deleteClientTable_error_msg: "Algo deu errado ao tentar excluir o estabelecimento.",
+    // Item
+    createItemTable_error_msg: "Algo deu errado ao tentar criar a tabela de itens.",
+    fetchItemTables_error_msg: "Algo deu errado ao tentar buscar as tabelas de itens.",
+    updateItemTable_error_msg: "Algo deu errado ao tentar atualizar a tabela de itens.",
+    deleteItemTable_error_msg: "Algo deu errado ao tentar excluir a tabela de itens.",
+    fetchCompaniesToCreateItemOrCategoryOrPriceTable_error_msg: "Algo deu errado ao tentar buscar empresas para criar item, categoria ou tabela de preços.",
+    fetchCategoriesToCreateItem_error_msg: "Algo deu errado ao tentar buscar categorias para criar item.",
+    createItem_error_msg: "Algo deu errado ao tentar criar um item.",
+    fetchItems_error_msg: "Algo deu errado ao tentar buscar itens.",
+    updateItem_error_msg: "Algo deu errado ao tentar atualizar o item.",
+    deleteItem_error_msg: "Algo deu errado ao tentar excluir o item.",
+    createCategory_error_msg: "Algo deu errado ao tentar criar uma categoria.",
+    fetchCategories_error_msg: "Algo deu errado ao tentar buscar categorias.",
+    updateCategory_error_msg: "Algo deu errado ao tentar atualizar a categoria.",
+    deleteCategory_error_msg: "Algo deu errado ao tentar excluir a categoria.",
+    fetchItemsToCreatePriceTable_error_msg: "Algo deu errado ao tentar buscar itens para criar tabela de preço.",
+    fetchPriceItemsFromThePriceTable_error_msg: "Algo deu errado ao tentar buscar itens preço para atualizar tabela de preço.",
+    createPriceTable_error_msg: "Algo deu errado ao tentar criar a tabela de preço.",
+    fetchPriceTables_error_msg: "Algo deu errado ao tentar buscar tabelas de preço.",
+    updatePriceTable_error_msg: "Algo deu errado ao tentar atualizar a tabela de preço.",
+    deletePriceTable_error_msg: "Algo deu errado ao tentar excluir a tabela de preço.",
 
     // -------------------------------------------------------------------/ Error Handler
     // Fields
@@ -506,10 +595,31 @@ export const messages = {
     "Create Client User": "Criar Usuário Cliente",
     "Edit Client User": "Editar Usuário Cliente",
     "Complete name" : "Nome completo",
-
     // ----------------------------------------------------------------------------------------/admin/item
     Price_Table: 'Tabela de Preço',
     Item_Category: 'Categoria de Itens',
+    "Item Table" : "Tabela de Itens",
+    // Item table
+    "Create Item Table": "Criar Tabela de Itens",
+    "Edit Item Table": "Editar Tabela de Itens",
+    // Item
+    "Create Item": "Criar Item",
+    "Edit Item": "Editar Item",
+    "Technical description": "Descrição técnica",
+    "Item Code": "Código do item",
+    // Category
+    "Create Category": "Criar Categoria",
+    "Edit Category": "Editar Categoria",
+    "Category code": "Código da categoria.",
+    // PriceTable
+    "Create Price Table": "Criar Tabela de Preço",
+    "Edit Price Table": "Editar Tabela de Preço",
+    "Price table code": "Código da tabela de preço",
+    "Price Table Code": "Código da Tabela de Preço",
+    "Add Price Items": "Adicionar Preços",
+    "Remove Items": "Remover Itens",
+    "Add Items": "Adicionar Itens",
+
     // -------------------------------------------------------------------/ Components
     // -------------------------------/Problem Connecting Error dialog
     ProblemConnectingTitle: "Problem connecting",

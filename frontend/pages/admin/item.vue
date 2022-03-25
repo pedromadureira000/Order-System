@@ -11,14 +11,15 @@
 </template>
 
 <script>
-  import {CRUDitemPermissions, CRUDpriceTablePerms, CRUDitemCategoryPerms } from '~/helpers/permissions'
+  import {CRUDitemTablePerms, CRUDitemPerms, CRUDitemCategoryPerms, CRUDpriceTablePerms } from '~/helpers/permissions'
   export default {
     middleware: ["authenticated"],
     data(){ 
       return {
         value: 'Item',
         allMenuItems: [
-          {"permissions": CRUDitemPermissions, title: "Item", icon:"mdi-cart-variant", to: "admin-item"},
+          {"permissions": CRUDitemTablePerms, title: "Item Table", icon:"mdi-cart-variant", to: "admin-item-item_table"},
+          {"permissions": CRUDitemPerms, title: "Item", icon:"mdi-cart-variant", to: "admin-item-item"},
           {"permissions": CRUDitemCategoryPerms, title: "Item_Category", icon:"mdi-format-list-bulleted-type", to: "admin-item-item_category"},
           {"permissions": CRUDpriceTablePerms, title: "Price_Table", icon:"mdi-table-large", to: "admin-item-price_table"},
         ],

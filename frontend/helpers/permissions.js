@@ -71,7 +71,7 @@ export const CRUDitemCategoryPerms = [
   "update_item_category",
   "delete_item_category",
 ]
-export const CRUDitemPermissions = [
+export const CRUDitemPerms = [
   "create_item",
   "get_items",
   "update_item",

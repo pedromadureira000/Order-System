@@ -1,157 +1,209 @@
 <template>
-  <div class="ma-3">
-    <h3>Create Item Category</h3>
-    <form @submit.prevent="createCategory">
-      <div class="mb-3">
-        <v-text-field
-          label="Name"
-          v-model="name"
-          required
-        />
-      </div>
-      <div class="mb-3">
-        <v-text-field
-          label="Category code"
-          v-model="category_code"
-          required
-        />
-      </div>
-      <div class="mb-3">
-        <v-text-field
-          label="Description"
-          v-model="description"
-          required
-        />
-      </div>
-      <v-btn
-        color="primary"
-        type="submit"
-        :loading="loading"
-        :disabled="loading"
-        >Submit</v-btn
-      >
-    </form>
+  <p v-if="$fetchState.pending">Fetching data ...</p>
+  <p v-else-if="$fetchState.error">An error occurred :(</p>
+  <div v-else>
+    <div class="ma-3">
+      <v-expansion-panels v-if="hasCreateItemCategoryPermission()">
+        <v-expansion-panel>
+          <v-expansion-panel-header>
+            <h3>{{$t('Create Category')}}</h3>
+          </v-expansion-panel-header>
+          <v-expansion-panel-content>
+            <form @submit.prevent="createItemCategory">
+              <!-- Company -->
+              <v-row align="center">
+                <v-col
+                  class="d-flex"
+                  cols="12"
+                  sm="6"
+                >
+                  <v-select
+                    v-model="item_table"
+                    :label="$t('Company')"
+                    :items="companies"
+                    :item-text="(x) => x.company_code + ' - ' + x.name"
+                    :item-value="(x) => x.item_table"
+                  ></v-select>
+                </v-col>
+              </v-row>
+              <!-- Item Category Code -->
+              <v-text-field
+                :label="$t('Item Category Code')"
+                v-model="category_code"
+                :error-messages="itemCategoryCodeErrors"
+                required
+                @blur="$v.category_code.$touch()"
+                class="mb-3"
+              />
+              <!-- Description -->
+              <v-text-field
+                :label="$t('Description')"
+                v-model.trim="description"
+                :error-messages="descriptionErrors"
+                @blur="$v.description.$touch()"
+                required
+                class="mb-3"
+              />
+              <!-- Note -->
+              <v-text-field
+                :label="$t('Note')"
+                v-model.trim="note"
+                :error-messages="noteErrors"
+                @blur="$v.note.$touch()"
+                required
+                class="mb-3"
+              />
+              <!-- Submit -->
+              <v-btn
+                color="primary"
+                type="submit"
+                :loading="loading"
+                :disabled="loading"
+              >{{$t('Submit')}}</v-btn>
+            </form>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+      </v-expansion-panels>
 
-    <h3 class="mt-6">Edit Item Category</h3>
-    <v-data-table
-      :headers="headers"
-      :items="categories"
-      :items-per-page="10"
-      item-key="category_compound_id"
-      class="elevation-1"
-    >
-      <template v-slot:item.actions="{ item }">
-        <!-- <user-edit-menu :user="item" @user-deleted="deleteUser(item)" /> -->
-      </template>
-    </v-data-table>
+      <div v-if="hasGetItemCategoriesPermission()">
+        <h3 class="mt-6">{{$t('Edit Category')}}</h3>
+        <v-data-table
+          :headers="headers"
+          :items="categories"
+          :items-per-page="10"
+          item-key="category_compound_id"
+          class="elevation-1"
+        >
+          <template v-slot:item.actions="{ item }">
+            <item-category-edit-menu :category="item" @item-category-deleted="deleteItemCategory(item)" />
+          </template>
+        </v-data-table>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-/** import { */
-  /** required, */
-  /** maxLength, */
-  /** alphaNum, */
-  /** integer */
-/** } from "vuelidate/lib/validators"; */
-/** import { validationMixin } from "vuelidate"; */
+import {
+  required,
+  maxLength,
+  minLength,
+} from "vuelidate/lib/validators";
+import { validationMixin } from "vuelidate";
+import {slugFieldValidator} from "~/helpers/validators"
 
 export default {
   middleware: ["authenticated"],
   components: {
-    /** "user-edit-menu": require("@/components/admin/item/user-edit-menu.vue").default, */
+    "item-category-edit-menu": require("@/components/admin/item/item-category-edit-menu.vue").default,
   },
-  /** mixins: [validationMixin], */
+  mixins: [validationMixin],
 
   data() {
     return {
-      name: null,
+      item_table: null,
       category_code: null,
       description: null,
+      note: null,
       categories: [],
+      companies: [],
       loading: false,
       headers: [
-        { text: 'Name', value: 'name' },
-        { text: 'Category code', value: 'category_code' },
-        { text: 'Description', value: 'description' },
-        { text: 'Actions', value: 'actions' },
+        { text: this.$t('Description'), value: 'description' },
+        { text: this.$t('Category code'), value: 'category_code' },
+        { text: this.$t('Note'), value: 'note' },
+        { text: this.$t('Actions'), value: 'actions' },
       ]
     };
   },
 
   async fetch() {
     let categories = await this.$store.dispatch("item/fetchCategories");
-    for (const item_index in categories){
-      let category = categories[item_index]
-      this.categories.push(category)
-    }
-    this.categories = await this.$store.dispatch("item/fetchCategories"); 
-    console.log(this.categories)
+    if (categories){this.categories.push(...categories)}
+
+    // Fetch Companies
+    let companies = await this.$store.dispatch("item/fetchCompaniesToCreateItemOrCategoryOrPriceTable"); 
+    if (companies){this.companies.push(...companies)}
   },
 
-  /** validations: { */
-    /** name: {  */
-      /** required,  */
-      /** alphaNum,  */
-      /** maxLength: maxLength(12) */
-    /** }, */
-    /** company_code: { */
-      /** required,  */
-      /** integer */
-    /** }, */
-    /** companyInfoGroup: [ */
-      /** "name", */
-      /** "company_code", */
-    /** ], */
-  /** }, */
-
   methods: {
-    async createCategory() {
-      /** this.$v.companyInfoGroup.$touch(); */
-      /** if (this.$v.companyInfoGroup.$invalid) { */
-        /** this.$store.dispatch("setAlert", { message: "Please fill the form correctly.", alertType: "error" }, { root: true }) */
-      /** } else { */
+    async createItemCategory() {
+      this.$v.itemInfoGroup.$touch();
+      if (this.$v.itemInfoGroup.$invalid) {
+        this.$store.dispatch("setAlert", { message: this.$t('Please_fill_the_form_correctly'), alertType: "error" }, { root: true })
+      } else {
         this.loading = true;
         let data = await this.$store.dispatch("item/createCategory", {
-          name: this.name, 
+          item_table: this.item_table,
           category_code: this.category_code,
           description: this.description,
+          note: this.note,
         });
         if (data) {
           this.categories.push(data);
         }
         this.loading = false;
-      /** } */
+      }
     },
-    deleteItem(categoryToDelete) {
-      this.categories = this.categories.filter((category) => category.category_code != categoryToDelete.category_code);
+    deleteItemCategory(itemToDelete) {
+      this.categories = this.categories.filter((item) => item.category_code != itemToDelete.category_code);
+    },
+
+    hasCreateItemCategoryPermission(){
+      let user = this.$store.state.user.currentUser;
+      return user.permissions.includes("create_item_category")
+    },
+    hasGetItemCategoriesPermission(){
+      let user = this.$store.state.user.currentUser;
+      return user.permissions.includes("get_item_category")
     },
   },
 
-  /** computed: { */
-    /** nameErrors() { */
-      /** const errors = []; */
-      /** if (!this.$v.name.$dirty) return errors; */
-      /** !this.$v.name.alphaNum && errors.push("Must have only alphanumeric characters."); */
-      /** !this.$v.name.required && errors.push("Name is required"); */
-      /** !this.$v.name.maxLength && errors.push("This field must have up to 12 characters."); */
-      /** return errors; */
-    /** }, */
-    /** companyCodeErrors() { */
-      /** const errors = []; */
-      /** if (!this.$v.company_code.$dirty) return errors; */
-      /** !this.$v.company_code.integer && errors.push("Must be a integer"); */
-      /** !this.$v.company_code.required && errors.push("Company code required"); */
-      /** return errors; */
-    /** }, */
-    /** cpfErrors() {  */
-      /** const errors = []; */
-      /** if (!this.$v.cpf.$dirty) return errors; */
-      /** !this.$v.cpf.required && errors.push("CPF is required."); */
-      /** !this.$v.cpf.maxLength && errors.push("This field must have up to 14 characters."); */
-      /** return errors; */
-    /** }, */
-  /** }, */
+  validations: {
+    description: { 
+      required, 
+      minLength: minLength(3),
+      maxLength: maxLength(60)
+    },
+    category_code: {
+      required, 
+      slugFieldValidator, 
+      maxLength: maxLength(8)
+    },
+    note: {
+      maxLength: maxLength(800)
+    },
+    itemInfoGroup: [
+      "category_code",
+      "description",
+      "note",
+    ],
+  },
+
+  computed: {
+    descriptionErrors() {
+      const errors = [];
+      if (!this.$v.description.$dirty) return errors;
+      !this.$v.description.required && errors.push(this.$t("This_field_is_required"));
+      !this.$v.description.minLength && errors.push(this.$formatStr(this.$t("This_field_must_have_at_least_X_characters"), 3));
+      !this.$v.description.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 60));
+      return errors;
+    },
+    itemCategoryCodeErrors() {
+      const errors = [];
+      if (!this.$v.category_code.$dirty) return errors;
+      !this.$v.category_code.required && errors.push(this.$t("This_field_is_required"));
+      !this.$v.category_code.slugFieldValidator && errors.push(this.$t('SlugFieldErrorMessage'));
+      !this.$v.category_code.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 8));
+      return errors;
+    },
+    noteErrors() {
+      const errors = [];
+      if (!this.$v.note.$dirty) return errors;
+      !this.$v.note.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 800));
+      return errors;
+    },
+  },
 };
 </script>
 <style scoped>

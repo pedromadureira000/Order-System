@@ -9,8 +9,9 @@ from item.models import ItemTable, Item, ItemCategory, PriceTable, PriceItem
 from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import NotFound
 from settings.utils import positive_number
+from user.validators import req_user_is_agent_without_all_estabs
 
-class ItemTableSerializer(serializers.ModelSerializer):
+class ItemTablePOSTSerializer(serializers.ModelSerializer):
     contracting=serializers.HiddenField(default=UserContracting())
     class Meta:
         model = ItemTable
@@ -25,30 +26,31 @@ class ItemTableSerializer(serializers.ModelSerializer):
                 "&" + validated_data['item_table_code']
         return super().create(validated_data)
 
-    def update(self, instance, validated_data):
-        # Not allow to update this fields
-        if validated_data.get('item_table_code'): validated_data.pop('item_table_code')
-        return super().update(instance, validated_data)
+class ItemTablePUTSerializer(serializers.ModelSerializer):
+    contracting=serializers.HiddenField(default=UserContracting())
+    class Meta:
+        model = ItemTable
+        fields =  ['item_table_compound_id' ,'item_table_code', 'contracting', 'description', 'note']
+        read_only_fields =  ['item_table_code']
 
-class CategorySerializer(serializers.ModelSerializer):
+class CategoryPOSTSerializer(serializers.ModelSerializer):
+    item_table = serializers.SlugRelatedField(slug_field='item_table_compound_id', queryset=ItemTable.objects.all())
     class Meta:
         model = ItemCategory
         fields = ['item_table', 'category_compound_id', 'category_code', 'description', 'note']
-        read_only_fields =  ['category_compound_id']
         validators = [UniqueTogetherValidator(queryset=ItemCategory.objects.all(), fields=['item_table', 'category_code'], 
             message=_("The 'category_code' field must be unique by 'item_table'."))]
 
     def validate_item_table(self, value):
         request_user = self.context['request'].user
-        if self.context['request'].method == 'POST':
-            # If the request is for update the instance, some related fields may not be sent since 'parcial=True' is being used
-            # item_table belongs to user contracting
-            if value.contracting != request_user.contracting:
-                raise NotFound(detail={"error": [_("Item table not found.")]})
-            # Agent without access to all establishments can't access an category from an item_table which he doesn't have access.
-            if self.context['request_user_is_agent_without_all_estabs'] and not \
-                    agent_has_access_to_this_item_table(request_user, value):
-                raise NotFound(detail={"error": [_("Item table not found.")]})
+        # If the request is for update the instance, some related fields may not be sent since 'parcial=True' is being used
+        # item_table belongs to user contracting
+        if value.contracting != request_user.contracting:
+            raise NotFound(detail={"error": [_("Item table not found.")]})
+        # Agent without access to all establishments can't access an category from an item_table which he doesn't have access.
+        if req_user_is_agent_without_all_estabs(self.context['request'].user) and not \
+                agent_has_access_to_this_item_table(request_user, value):
+            raise NotFound(detail={"error": [_("Item table not found.")]})
         return value
 
     def create(self, validated_data):
@@ -58,19 +60,27 @@ class CategorySerializer(serializers.ModelSerializer):
         item_category.save()
         return item_category
 
-    def update(self, instance, validated_data):
-        # Not allow to update this fields
-        if validated_data.get('category_code'): validated_data.pop('item_table_code')
-        if validated_data.get('item_table'): validated_data.pop('item_table')
-        return super().update(instance, validated_data)
+class CategoryPUTSerializer(serializers.ModelSerializer):
+    item_table = serializers.SlugRelatedField(slug_field='item_table_compound_id', read_only=True)
+    class Meta:
+        model = ItemCategory
+        fields = ['item_table', 'category_compound_id', 'category_code', 'description', 'note']
+        read_only_fields =  ['item_table', 'category_code']
 
-class ItemSerializer(serializers.ModelSerializer):
+    def create(self, validated_data):
+        validated_data['category_compound_id'] =  self.context['request'].user.contracting.contracting_code + \
+                "&" + validated_data['item_table'].item_table_code + "&" + validated_data["category_code"]
+        item_category = ItemCategory.objects.create(**validated_data)
+        item_category.save()
+        return item_category
+
+class ItemPOSTSerializer(serializers.ModelSerializer):
     item_table = serializers.SlugRelatedField(slug_field='item_table_compound_id', queryset=ItemTable.objects.all())
     category = serializers.SlugRelatedField(slug_field='category_compound_id', queryset=ItemCategory.objects.all())
     class Meta:
         model = Item
-        fields = ['item_compound_id', 'item_table', 'item_code', 'category', 'description', 'unit', 'barcode', 'status', 'image', 'technical_description'] 
-        read_only_fields =  ['item_compound_id']
+        fields = ['item_compound_id', 'item_table', 'item_code', 'category', 'description', 'unit', 'barcode', 'status',
+                'image', 'technical_description'] 
         validators = [UniqueTogetherValidator(queryset=Item.objects.all(), fields=['item_table', 'item_code'], 
             message=_("The 'item_code' field  must be unique by 'item_table'."))]
 
@@ -78,26 +88,15 @@ class ItemSerializer(serializers.ModelSerializer):
         request_user = self.context['request'].user
         item_table = attrs.get('item_table')
         category = attrs.get('category')
-        if self.context['request'].method == 'POST':
-            # item_table belongs to user contracting
-            if item_table.contracting != request_user.contracting:
-                raise NotFound(detail={"error": [_("Item table not found.")]})
-            # Category must have the same item_table that the item item_table
-            if category.item_table != item_table:
-                raise serializers.ValidationError(_("You cannot choose this category because it is from another item table."))
-            # Agent without access to all establishments can't access an item from item_table which he doesn't have access.
-            if self.context['request_user_is_agent_without_all_estabs'] and not agent_has_access_to_this_item_table(request_user, item_table):
-                raise NotFound(detail={"error": [_("Item table not found.")]})
-
-        if self.context['request'].method == 'PUT':
-            # Verify if agent can assign this category.
-            if attrs.get('category'):
-                # Category belongs to user contracting
-                if category.item_table.contracting != request_user.contracting:
-                    raise NotFound(detail={"error": [_("Item category not found.")]})
-                # Category must have the same item_table that the item item_table
-                if category.item_table != self.instance.item_table:
-                    raise serializers.ValidationError(_("You cannot choose this category because it is from another item table."))
+        # item_table belongs to user contracting
+        if item_table.contracting != request_user.contracting:
+            raise NotFound(detail={"error": [_("Item table not found.")]})
+        # Category must have the same item_table that the item item_table
+        if category.item_table != item_table:
+            raise serializers.ValidationError(_("You cannot choose this category because it is from another item table."))
+        # Agent without access to all establishments can't access an item from item_table which he doesn't have access.
+        if self.context['request_user_is_agent_without_all_estabs'] and not agent_has_access_to_this_item_table(request_user, item_table):
+            raise NotFound(detail={"error": [_("Item table not found.")]})
         return super().validate(attrs)
 
     def create(self, validated_data):
@@ -106,11 +105,27 @@ class ItemSerializer(serializers.ModelSerializer):
         item = Item.objects.create(**validated_data)
         return item
 
-    def update(self, instance, validated_data):
-        # Not allow to update this fields
-        if validated_data.get('item_code'): validated_data.pop('item_code')
-        if validated_data.get('item_table'): validated_data.pop('item_table')
-        return super().update(instance, validated_data)
+class ItemPUTSerializer(serializers.ModelSerializer):
+    item_table = serializers.SlugRelatedField(slug_field='item_table_compound_id', read_only=True)
+    category = serializers.SlugRelatedField(slug_field='category_compound_id', queryset=ItemCategory.objects.all())
+    class Meta:
+        model = Item
+        fields = ['item_compound_id', 'item_table', 'item_code', 'category', 'description', 'unit', 'barcode',
+                'status', 'image', 'technical_description'] 
+        read_only_fields =  ['item_code', 'item_table']
+
+    def validate(self, attrs):
+        request_user = self.context['request'].user
+        category = attrs.get('category')
+        # Verify if agent can assign this category.
+        if attrs.get('category'):
+            # Category belongs to user contracting
+            if category.item_table.contracting != request_user.contracting:
+                raise NotFound(detail={"error": [_("Item category not found.")]})
+            # Category must have the same item_table that the item item_table
+            if category.item_table != self.instance.item_table:
+                raise serializers.ValidationError(_("You cannot choose this category because it is from another item table."))
+        return super().validate(attrs)
 
 class ForTablePriceItemSerializer(serializers.ModelSerializer):
     item = serializers.SlugRelatedField(slug_field='item_compound_id', queryset=Item.objects.all())
@@ -130,19 +145,27 @@ class ForTablePriceItemSerializer(serializers.ModelSerializer):
 
 class PriceTableGetSerializer(serializers.ModelSerializer):
     company = serializers.SlugRelatedField(slug_field='company_compound_id', read_only=True)
+    item_table = serializers.SerializerMethodField()
 
     class Meta:
         model = PriceTable
-        fields = ['price_table_compound_id', 'company', 'table_code', 'description', 'note']
+        fields = ['price_table_compound_id', 'item_table','company', 'table_code', 'description', 'note']
         read_only_fields = fields
+
+    def get_item_table(self, obj):
+        # TODO: This will really happen?
+        if obj.company.item_table != None:
+            return obj.company.item_table.item_table_compound_id
+        return None
 
 class PriceTablePOSTSerializer(serializers.ModelSerializer):
     price_items = ForTablePriceItemSerializer(many=True)
     company = serializers.SlugRelatedField(slug_field='company_compound_id', queryset=Company.objects.all())
+    item_table = serializers.SerializerMethodField()
 
     class Meta:
         model = PriceTable
-        fields = ['price_table_compound_id', 'company', 'price_items', 'table_code', 'description', 'note']
+        fields = ['price_table_compound_id', 'company', 'price_items', 'table_code', 'description', 'note', 'item_table']
         read_only_fields = ['price_table_compound_id']
         validators = [UniqueTogetherValidator(queryset=PriceTable.objects.all(), fields=['company', 'table_code'], 
             message=_("The 'table_code' field must be unique by 'company'."))]
@@ -182,6 +205,9 @@ class PriceTablePOSTSerializer(serializers.ModelSerializer):
             price_items_list.append(PriceItem(item=price_item['item'], unit_price=price_item['unit_price'], price_table=price_table))
         price_table.price_items.bulk_create(price_items_list)
         return price_table
+
+    def get_item_table(self, obj):
+        return obj.company.item_table.item_table_compound_id
 
 class SpecificPriceTablePUTSerializer(serializers.ModelSerializer):
     price_items = ForTablePriceItemSerializer(many=True)

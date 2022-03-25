@@ -609,6 +609,20 @@ export default {
 
   //------------------------------------------------------/ CRUD Item APIs /---------------------------------------------------
   
+	async createItemTable(payload){
+    let data_body = {
+      item_table_code: payload.item_table_code,
+      description: payload.description,
+      note: payload.note
+		}
+		return await axios({ 
+		method: "post",
+		url: "/api/item/item_table",
+		data: data_body}).then((request) => {
+					return request.data 
+				})
+	},
+
 	async fetchItemTables(){
 		return await axios({ 
 		method: "get",
@@ -618,17 +632,60 @@ export default {
 				})
 	},
   
+	async updateItemTable(payload){
+		return await axios({ 
+		method: "put",
+		url: `/api/item/item_table/${payload.item_table_compound_id}`,
+		data:{
+      description: payload.description,
+      note: payload.note
+		}
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async deleteItemTable(payload){
+		return await axios({ 
+		method: "delete",
+		url: `/api/item/item_table/${payload.item_table_compound_id}`
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+  // -------------/ Item
+  
+	async fetchCompaniesToCreateItemOrCategoryOrPriceTable(){
+		return await axios({ 
+		method: "get",
+		url: "/api/item/companies_to_create_item_category_or_pricetable",
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async fetchCategoriesToCreateItem(item_table_compound_id){
+		return await axios({ 
+		method: "get",
+		url: `/api/item/categories_to_create_item/${item_table_compound_id}`,
+			}).then((request) => {
+					return request.data 
+				})
+	},
+   
 	async createItem(payload){
     let data_body = {
-      name: payload.name, 
       item_code: payload.item_code,
+      item_table: payload.item_table,
       description: payload.description,
       category: payload.category, 
       unit: payload.unit, 
       barcode: payload.barcode, 
-      active: payload.active
+      status: payload.status,
+      technical_description: payload.technical_description
+      // image: payload.image TODO Image
 		}
-    //TODO Image
 		return await axios({ 
 		method: "post",
 		url: "/api/item/item",
@@ -646,11 +703,40 @@ export default {
 				})
 	},
 
+	async updateItem(payload){
+		return await axios({ 
+		method: "put",
+		url: `/api/item/item/${payload.item_compound_id}`,
+		data:{
+      description: payload.description,
+      category: payload.category, 
+      unit: payload.unit, 
+      barcode: payload.barcode, 
+      status: payload.status,
+      technical_description: payload.technical_description
+      // image: payload.image TODO Image
+		}
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async deleteItem(payload){
+		return await axios({ 
+		method: "delete",
+		url: `/api/item/item/${payload.item_compound_id}`
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+  // -------------/ Category
 	async createCategory(payload){
     let data_body = {
-        name: payload.name, 
-        category_code: payload.category_code,
-        description: payload.description,
+      item_table: payload.item_table,
+      category_code: payload.category_code,
+      description: payload.description,
+      note: payload.note
 		}
 		return await axios({ 
 		method: "post",
@@ -669,32 +755,61 @@ export default {
 				})
 	},
 
+	async updateCategory(payload){
+		return await axios({ 
+		method: "put",
+		url: `/api/item/category/${payload.category_compound_id}`,
+		data:{
+      description: payload.description,
+      note: payload.note
+		}
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async deleteCategory(payload){
+		return await axios({ 
+		method: "delete",
+		url: `/api/item/category/${payload.category_compound_id}`
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+  // -------------/ Price Table
+  
+	async fetchItemsToCreatePriceTable(item_table_compound_id){
+		return await axios({ 
+		method: "get",
+		url: `/api/item/items_to_create_price_table/${item_table_compound_id}`,
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+  
+	async fetchPriceItemsFromThePriceTable(price_table_compound_id){
+		return await axios({ 
+		method: "get",
+		url: `/api/item/get_price_items_for_agents/${price_table_compound_id}`,
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
 	async createPriceTable(payload){
     let data_body = {
-        name: payload.name, 
+        company: payload.company, 
+        price_items: payload.price_items,
         table_code: payload.table_code,
         description: payload.description,
-        price_items: payload.price_items
+        note: payload.note
 		}
 		return await axios({ 
 		method: "post",
 		url: "/api/item/pricetable",
 		data: data_body}).then((request) => {
-					return request.data 
-				})
-	},
-
-	async updatePriceTable(payload){
-		return await axios({ 
-		method: "put",
-		url: `/api/item/pricetable/${payload.table_code}`,
-		data:{
-      name: payload.name, 
-      table_code: payload.table_code,
-      description: payload.description,
-      price_items: payload.price_items
-		}
-			}).then((request) => {
 					return request.data 
 				})
 	},
@@ -708,10 +823,24 @@ export default {
 				})
 	},
 
+	async updatePriceTable(payload){
+		return await axios({ 
+		method: "put",
+		url: `/api/item/pricetable/${payload.price_table_compound_id}`,
+		data:{
+      price_items: payload.price_items,
+      description: payload.description,
+      note: payload.note
+		}
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
 	async deletePriceTable(payload){
 		return await axios({ 
 		method: "delete",
-		url: `/api/item/pricetable/${payload.table_code}`
+		url: `/api/item/pricetable/${payload.price_table_compound_id}`
 			}).then((request) => {
 					return request.data 
 				})
