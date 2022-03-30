@@ -7,6 +7,22 @@
         <v-card-title>{{$t('Edit')}}</v-card-title>
         <v-card-text>
           <v-container fluid>
+              <!-- Item Table -->
+              <v-row align="center">
+                <v-col
+                  class="d-flex"
+                  cols="12"
+                  sm="6"
+                >
+                  <v-select
+                    disabled
+                    v-model="item_table_from_item"
+                    :label="$t('Item_Table')"
+                    :items="item_tables"
+                    :item-text="(x) => x.item_table_code + ' - ' + x.description"
+                  ></v-select>
+                </v-col>
+              </v-row>
               <!-- Category -->
               <v-row align="center">
                 <v-col
@@ -47,16 +63,36 @@
                 v-model.trim="barcode"
                 :error-messages="barcodeErrors"
                 @blur="$v.barcode.$touch()"
-                required
                 class="mb-3"
               />
+              <!-- Image -->
+              <v-row>
+                <v-col>
+                  <v-file-input
+                    show-size
+                    accept="image/*"
+                    :label="$t('Image')"
+                    prepend-icon="mdi-camera"
+                    @change="onChange"
+                  ></v-file-input>
+                </v-col>
+                <v-col>
+                  <v-img
+                    v-if="img_url"
+                    contain
+                    width="115px"
+                    height="87px"
+                    :src="img_url"
+                  ></v-img>
+                </v-col>
+              </v-row>
               <!-- Technical Description -->
-              <v-text-field
+              <v-textarea
+                outlined
                 :label="$t('Technical description')"
                 v-model.trim="technical_description"
                 :error-messages="technicalDescriptionErrors"
                 @blur="$v.technical_description.$touch()"
-                required
                 class="mb-3"
               />
           </v-container>
@@ -91,6 +127,7 @@
 </template>
 
 <script>
+import axios from '~/plugins/axios'
 import {
   required,
   minLength,
@@ -102,9 +139,10 @@ export default {
   components: {
     "dots-menu-update-delete": require("@/components/dots-menu-update-delete.vue").default,
   },
-  props: ['item', 'category_group'],
+  props: ['item', 'item_tables', 'category_group'],
   data() {
     return {
+      item_table_from_item: null,
       show_edit_dialog: false,
       show_delete_confirmation_dialog: false,
       category: null,
@@ -114,6 +152,8 @@ export default {
       unit: null,
       barcode: null,
       status: "1",
+      image: null,
+      img_url: '',
       loading: false,
       menu_items: [
       ...(this.hasUpdateItemPermission() ? [{ 
@@ -209,16 +249,19 @@ export default {
           this.$store.dispatch("setAlert", { message: this.$t("Please_fill_the_form_correctly"), alertType: "error" }, { root: true })
         } else {
           this.loading = true;
-          let data = await this.$store.dispatch("item/updateItem", {
-            item_compound_id: this.item.item_compound_id,
-            category: this.category, 
-            description: this.description,
-            unit: this.unit, 
-            barcode: this.barcode, 
-            status: this.status,
-            technical_description: this.technical_description,
-            /** image: this.image */
-          })
+          //
+          const formData = new FormData()
+          formData.append('item_compound_id', this.item.item_compound_id)
+          formData.append('category', this.category)
+          formData.append('description', this.description)
+          formData.append('unit', this.unit)
+          formData.append('barcode', this.barcode)
+          formData.append('status', this.status)
+          formData.append('technical_description', this.technical_description)
+          if (this.image){
+            formData.append('image', this.image, this.image.name)
+          }
+          let data = await this.$store.dispatch("item/updateItem", formData);
           // Reactivity for Item list inside Item.vue 
           this.loading = false;
           if (data) {
@@ -228,6 +271,9 @@ export default {
             this.item.barcode = data.barcode
             this.item.status = data.status
             this.item.technical_description = data.technical_description
+            this.item.image = this.getImageUrl(data.image) 
+              // Close dialog
+            this.show_edit_dialog = false
           }
         }
       },
@@ -241,6 +287,7 @@ export default {
         }
       },
 
+      // Permissions
       hasUpdateItemPermission(){
         let user = this.$store.state.user.currentUser;
         return user.permissions.includes("update_item")
@@ -249,6 +296,35 @@ export default {
       hasDeleteItemPermission(){
         let user = this.$store.state.user.currentUser;
         return user.permissions.includes("delete_item")
+      },
+
+      //Image
+
+      onChange (event) {
+        /** console.log(">>>>>>> ", event) */
+        this.image = event
+        if (event === null){
+          this.img_url = ''
+        } else{
+          this.img_url = URL.createObjectURL(this.image)
+          /** console.log(">>>>>>> URL image: ", this.img_url) */
+        }
+      },
+
+      getImageUrl(image){
+        if (image) {
+          let url = image
+          if (url.startsWith('http')){
+            let url_fixed = url.split('/media/images/')[1]
+            return this.$store.state.CDNBaseUrl + '/media/images/' + url_fixed
+          }
+          else {
+            return this.$store.state.CDNBaseUrl + url
+          }
+        }
+        else {
+          return this.$store.state.CDNBaseUrl + '/media/images/items/defaultimage.jpeg'
+        }
       },
   },
 
@@ -259,6 +335,10 @@ export default {
     this.barcode = this.item.barcode
     this.status = this.item.status
     this.technical_description = this.item.technical_description
+    this.img_url = this.getImageUrl(this.item.image)
+    // Default value for item_table_from_item
+    let item_table = this.item_tables.find(el=>el.item_table_compound_id === this.item.item_table)
+    this.item_table_from_item = item_table
   },
 
   watch: {

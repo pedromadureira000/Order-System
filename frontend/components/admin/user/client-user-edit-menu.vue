@@ -7,6 +7,22 @@
         <v-card-title>{{$t('Edit')}}</v-card-title>
         <v-card-text>
           <v-container fluid>
+              <!-- Client -->
+              <v-row align="center">
+                <v-col
+                  class="d-flex"
+                  cols="12"
+                  sm="6"
+                >
+                  <v-select
+                    disabled
+                    :label="$t('Client')"
+                    :items="clients"
+                    :item-text="(x) =>  x.client_code + ' - ' + x.name"
+                    v-model="client_from_client_user"
+                  ></v-select>
+                </v-col>
+              </v-row>
               <!-- First Name -->
               <v-text-field
                 :label="$t('First_name')"
@@ -44,7 +60,8 @@
                 ></v-radio>
               </v-radio-group>
               <!-- Note -->
-              <v-text-field
+              <v-textarea
+                outlined
                 :label="$t('Note')"
                 v-model="note"
                 :error-messages="noteErrors"
@@ -113,9 +130,10 @@ export default {
   /** components: { */
     /** "dots-menu-update-delete": require("@/components/dots-menu-update-delete.vue").default, */
   /** }, */
-  props: ['client_user'],
+  props: ['client_user', 'clients'],
   data() {
     return {
+      client_from_client_user: null,
       show_edit_dialog: false,
       show_delete_confirmation_dialog: false,
       first_name: null,
@@ -255,6 +273,8 @@ export default {
           this.client_user.email = data.email
           this.client_user.note = data.note
           this.client_user.complete_name =  `${data.first_name} ${data.last_name}`
+            // Close dialog
+          this.show_edit_dialog = false
         }
       }
     },
@@ -289,6 +309,9 @@ export default {
     this.email = this.client_user.email
     this.status = String(this.client_user.status)
     this.note = this.client_user.note
+    /** defauld value for client_from_client_user */
+    let client = this.clients.find(el=>el.client_compound_id === this.client_user.client)
+    this.client_from_client_user = client.client_code + ' - ' + client.name
   }
 }
 </script>

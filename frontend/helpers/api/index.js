@@ -167,10 +167,10 @@ export default {
 				})
 	},
 
-	async fetchCompaniesToCreateClient(){
+	async fetchClientTablesToCreateClient(){
 		return await axios({ 
 		method: "get",
-		url: "/api/organization/companies_to_create_client",
+		url: "/api/organization/client_tables_to_create_client",
 			}).then((request) => {
 					return request.data 
 				})
@@ -656,10 +656,10 @@ export default {
 
   // -------------/ Item
   
-	async fetchCompaniesToCreateItemOrCategoryOrPriceTable(){
+	async fetchItemTablesToCreateItemOrCategoryOrPriceTable(){
 		return await axios({ 
 		method: "get",
-		url: "/api/item/companies_to_create_item_category_or_pricetable",
+		url: "/api/item/item_tables_to_create_item_category_or_pricetable",
 			}).then((request) => {
 					return request.data 
 				})
@@ -675,21 +675,10 @@ export default {
 	},
    
 	async createItem(payload){
-    let data_body = {
-      item_code: payload.item_code,
-      item_table: payload.item_table,
-      description: payload.description,
-      category: payload.category, 
-      unit: payload.unit, 
-      barcode: payload.barcode, 
-      status: payload.status,
-      technical_description: payload.technical_description
-      // image: payload.image TODO Image
-		}
 		return await axios({ 
 		method: "post",
 		url: "/api/item/item",
-		data: data_body}).then((request) => {
+		data: payload}).then((request) => {
 					return request.data 
 				})
 	},
@@ -706,16 +695,8 @@ export default {
 	async updateItem(payload){
 		return await axios({ 
 		method: "put",
-		url: `/api/item/item/${payload.item_compound_id}`,
-		data:{
-      description: payload.description,
-      category: payload.category, 
-      unit: payload.unit, 
-      barcode: payload.barcode, 
-      status: payload.status,
-      technical_description: payload.technical_description
-      // image: payload.image TODO Image
-		}
+		url: `/api/item/item/${payload.get('item_compound_id')}`,
+		data: payload
 			}).then((request) => {
 					return request.data 
 				})
@@ -778,6 +759,15 @@ export default {
 	},
 
   // -------------/ Price Table
+	async fetchCompaniesToCreatePriceTable(){
+		return await axios({ 
+		method: "get",
+		url: "/api/item/companies_to_create_price_table",
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
   
 	async fetchItemsToCreatePriceTable(item_table_compound_id){
 		return await axios({ 

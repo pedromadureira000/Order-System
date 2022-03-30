@@ -7,6 +7,22 @@
         <v-card-title>{{$t('Edit')}}</v-card-title>
         <v-card-text>
           <v-container fluid>
+              <!-- Item Table -->
+              <v-row align="center">
+                <v-col
+                  class="d-flex"
+                  cols="12"
+                  sm="6"
+                >
+                  <v-select
+                    disabled
+                    v-model="item_table_from_item"
+                    :label="$t('Item_Table')"
+                    :items="item_tables"
+                    :item-text="(x) => x.item_table_code + ' - ' + x.description"
+                  ></v-select>
+                </v-col>
+              </v-row>
               <!-- Description -->
               <v-text-field
                 :label="$t('Description')"
@@ -17,7 +33,8 @@
                 class="mb-3"
               />
               <!-- Note -->
-              <v-text-field
+              <v-textarea
+                outlined
                 :label="$t('Note')"
                 v-model.trim="note"
                 :error-messages="technicalDescriptionErrors"
@@ -68,7 +85,7 @@ export default {
   components: {
     "dots-menu-update-delete": require("@/components/dots-menu-update-delete.vue").default,
   },
-  props: ['category'],
+  props: ['category', 'item_tables'],
   data() {
     return {
       show_edit_dialog: false,
@@ -76,6 +93,7 @@ export default {
       description: null,
       note: null,
       loading: false,
+      item_table_from_item: null,
       menu_items: [
       ...(this.hasUpdateItemCategoryPermission() ? [{ 
           title: this.$t('Edit'),
@@ -163,6 +181,8 @@ export default {
           if (data) {
             this.category.description = data.description
             this.category.note = data.note
+              // Close dialog
+            this.show_edit_dialog = false
           }
         }
       },
@@ -190,6 +210,9 @@ export default {
   mounted() {
     this.description = this.category.description
     this.note = this.category.note
+    // Default value for item_table_from_item
+    let item_table = this.item_tables.find(el=>el.item_table_compound_id === this.category.item_table)
+    this.item_table_from_item = item_table
   },
 }
 </script>

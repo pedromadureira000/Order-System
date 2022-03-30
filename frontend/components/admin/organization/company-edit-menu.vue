@@ -20,37 +20,44 @@
             <v-text-field
               :label="$t('Root_of_CNPJ')"
               v-model="cnpj_root"
+              v-mask="'##.###.###'"
               required
               :error-messages="cnpjRootErrors"
               @blur="$v.cnpj_root.$touch()"
               class="mb-3"
             />
             <!-- Client table -->
-            <v-radio-group v-model="client_table" style="width: 25%;" :label="$t('Client_Table')" class="mb-3">
-              <v-radio
-                v-for="(client_table, key) in client_tables"
-                :key="key"
-                :label="client_table.description"
-                :value="client_table.client_table_compound_id"
-              ></v-radio>
-              <v-radio
-                :label="$t('None')"
-                value=""
-              ></v-radio>
-            </v-radio-group>
+              <v-row align="center">
+                <v-col
+                  class="d-flex"
+                  cols="12"
+                  sm="6"
+                >
+                  <v-select
+                    v-model="client_table"
+                    :label="$t('Client_Table')"
+                    :items="client_tables"
+                    :item-text="(x) => x.client_table_compound_id === null ? $t('Empty') : x.client_table_code + ' - ' + x.description"
+                    :item-value="(x) => x.client_table_compound_id"
+                  ></v-select>
+                </v-col>
+              </v-row>
             <!-- Item table -->
-            <v-radio-group v-model="item_table" style="width: 25%;" :label="$t('Item_Table')" class="mb-3">
-              <v-radio
-                v-for="(item_table, key) in item_tables"
-                :key="key"
-                :label="item_table.description"
-                :value="item_table.item_table_compound_id"
-              ></v-radio>
-              <v-radio
-                :label="$t('None')"
-                value=""
-              ></v-radio>
-            </v-radio-group>
+              <v-row align="center">
+                <v-col
+                  class="d-flex"
+                  cols="12"
+                  sm="6"
+                >
+                  <v-select
+                    v-model="item_table"
+                    :label="$t('Item_Table')"
+                    :items="item_tables"
+                    :item-text="(x) => x.item_table_compound_id === null ? $t('Empty') : x.item_table_code + ' - ' + x.description"
+                    :item-value="(x) => x.item_table_compound_id"
+                  ></v-select>
+                </v-col>
+              </v-row>
             <!-- Company Status -->
             <v-radio-group v-model="status" style="width: 25%;" :label="$t('Company_Status')" class="mb-3">
               <v-radio
@@ -63,7 +70,9 @@
               ></v-radio>
             </v-radio-group>
             <!-- Note -->
-            <v-text-field
+            <v-textarea
+              outlined
+              v-model="note"
               :label="$t('Note')"
               :error-messages="noteErrors"
               @blur="$v.note.$touch()"
@@ -108,12 +117,14 @@ import {
 } from "vuelidate/lib/validators";
 import { validationMixin } from "vuelidate";
 import {raizcnpjFieldValidator} from "~/helpers/validators"
+import {mask} from 'vue-the-mask'
 export default {
   mixins: [validationMixin],
   components: {
     "dots-menu-update-delete": require("@/components/dots-menu-update-delete.vue").default,
   },
   props: ['company', 'client_tables', 'item_tables'],
+  directives: {mask},
   data() {
     return {
       show_edit_dialog: false,
@@ -217,6 +228,8 @@ export default {
             this.company.item_table = data.item_table
             this.company.status = data.status
             this.company.note = data.note
+            // Close dialog
+            this.show_edit_dialog = false
           }
         }
       },

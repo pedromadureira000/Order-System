@@ -21,7 +21,7 @@
               />
               <!-- Item Table Code -->
               <v-text-field
-                :label="$t('Item Table Code')"
+                :label="$t('Table_code')"
                 v-model="item_table_code"
                 :error-messages="itemTableCodeErrors"
                 required
@@ -29,7 +29,8 @@
                 class="mb-3"
               />
               <!-- Note -->
-              <v-text-field
+              <v-textarea
+                outlined
                 :label="$t('Note')"
                 v-model="note"
                 :error-messages="noteErrors"
@@ -56,13 +57,19 @@
         :items="item_tables"
         :items-per-page="10"
         item-key="item_table_compound_id"
-        class="elevation-1"
+        class="elevation-1 mt-3"
       >
+        <template v-slot:item.description="{ item }">
+          <p style="width: 240px;">{{item.description}}</p>
+        </template>
         <template v-slot:item.actions="{ item }">
           <item-table-edit-menu
             :item_table="item" 
             @item-table-deleted="deleteItemTable(item)" 
           />
+        </template>
+        <template v-slot:item.note="{ item }">
+          <p>{{$getNote(item.note)}}</p>
         </template>
       </v-data-table>
     </div>
@@ -96,7 +103,7 @@ export default {
       loading: false,
       item_tables: [],
       headers: [
-        { text: this.$t('Item Table Code'), value: 'item_table_code' },
+        { text: this.$t('Table_code'), value: 'item_table_code' },
         { text: this.$t('Description'), value: 'description' },
         { text: this.$t('Note'), value: 'note' },
         { text: this.$t('Actions'), value: 'actions' },

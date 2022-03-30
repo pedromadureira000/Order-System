@@ -43,14 +43,6 @@
                 required
                 @blur="$v.email.$touch()"
               />
-              <!-- Note -->
-              <v-text-field
-                :label="$t('Note')"
-                v-model="note"
-                :error-messages="noteErrors"
-                @blur="$v.note.$touch()"
-                class="mb-3"
-              />
               <!-- Password -->
               <v-text-field
                 type="password"
@@ -76,19 +68,25 @@
                   <v-expansion-panel-content
                     class="px-0 mb-2"
                     fluid
-                    style="width: 85%; display: flex; justify-content: space-between;"
+                    style="display: flex; justify-content: space-between;"
                   >
+                    <v-checkbox 
+                      :label="$t('Select all')"
+                      style="margin-right: 27px;"
+                      @change="selectAllPermissions"
+                    ></v-checkbox>
+                    <v-divider class="mt-2 mb-4"></v-divider>
                     <v-row
                       class="px-0 mb-2"
                       fluid
-                      style="width: 85%; display: flex; justify-content: space-between;"
+                      style="display: flex; justify-content: space-between;"
                     >
                       <v-checkbox 
                         v-for="(value, key) in agentPermissions"
                         :key="key"
                         v-model="permissions"
                         :value="value"
-                        :label="value"
+                        :label="$t(value)"
                         style="margin-right: 27px;"
                       ></v-checkbox>
                     </v-row>
@@ -101,6 +99,12 @@
                 <v-expansion-panel>
                   <v-expansion-panel-header>{{$t('Agent Establishments')}}</v-expansion-panel-header>
                     <v-expansion-panel-content>
+                      <v-checkbox 
+                        :label="$t('Select all')"
+                        style="margin-right: 27px;"
+                        @change="selectAllEstablishments"
+                      ></v-checkbox>
+                      <v-divider class="mt-2 mb-4"></v-divider>
                       <v-container
                         v-for="establishment in establishments"
                         :key="establishment.establishment_compound_id"
@@ -121,6 +125,15 @@
                     </v-expansion-panel-content>
                 </v-expansion-panel>
               </v-expansion-panels>
+              <!-- Note -->
+              <v-textarea
+                outlined
+                :label="$t('Note')"
+                v-model="note"
+                :error-messages="noteErrors"
+                @blur="$v.note.$touch()"
+                class="mb-3"
+              />
               <!-- Submit Buttom -->
               <v-btn
                 color="primary"
@@ -141,12 +154,18 @@
           :items="agents"
           :items-per-page="10"
           item-key="username"
-          class="elevation-1"
+          class="elevation-1 mt-3"
         >
           <template v-slot:top>
           </template>
           <template v-slot:item.actions="{ item }">
             <agent-edit-menu :agent="item" :establishments="establishments" @agent-deleted="deleteAgent(item)" />
+          </template>
+          <template v-slot:item.status="{ item }">
+            <p>{{item.status === 1 ? $t('Active') : $t('Disabled')}}</p>
+          </template>
+          <template v-slot:item.note="{ item }">
+            <p>{{$getNote(item.note)}}</p>
           </template>
         </v-data-table>
       </div>
@@ -212,36 +231,10 @@ export default {
           "get_orders",
           "update_order_status"
       ],
-      /** agentPermissions: { */
-          /** access_all_establishments: false, */
-          /** create_client: false, */
-          /** get_clients: false, */
-          /** update_client: false, */
-          /** delete_client: false, */
-          /** create_client_user: false, */
-          /** get_client_users: false, */
-          /** update_client_user: false, */
-          /** delete_client_user: false, */
-          /** create_item: false, */
-          /** get_items: false, */
-          /** update_item: false, */
-          /** delete_item: false, */
-          /** create_item_category: false, */
-          /** get_item_category: false, */
-          /** update_item_category: false, */
-          /** delete_item_category: false, */
-          /** create_price_table: false, */
-          /** get_price_tables: false, */
-          /** update_price_table: false, */
-          /** delete_price_table: false, */
-          /** get_orders: false, */
-          /** update_order_status: false, */
-      /** }, */
       headers: [
         { text: 'Username', value: 'username' },
         { text: this.$t('Complete name'), value: 'complete_name' },
         { text: 'Email', value: 'email' },
-        /** { text: this.$t('Client'), value: 'client' }, */
         { text: 'Status', value: 'status'},
         { text: this.$t('Note'), value: 'note' },
         { text: this.$t('Actions'), value: 'actions' },
@@ -331,6 +324,19 @@ export default {
         });
         if (data) {
           this.agents.push({...data, complete_name: `${data.first_name} ${data.last_name}`})
+          // Clearing fields
+          this.$v.$reset()
+          // this avoid "This field is required" errors by vuelidate
+          this.agent_establishments = []
+          this.permissions = []
+          this.username = ""
+          this.first_name = ""
+          this.last_name = ""
+          this.email = ""
+          this.status = "1"
+          this.password = ""
+          this.password_confirm = ""
+          this.note = ""
         }
         this.loading = false;
       }
@@ -340,6 +346,24 @@ export default {
       this.agents = this.agents.filter((agent) => agent.username != agentToDelete.username);
     },
 
+    selectAllPermissions(){
+      if (this.permissions.length === this.agentPermissions.length){
+        this.permissions = []
+      }
+      else {
+        this.permissions = this.agentPermissions
+      }
+    },
+
+    selectAllEstablishments(){
+      let all_agent_estabs = this.establishments.map(el=>el.AUX_agent_estab)
+      if (this.agent_establishments.length === all_agent_estabs.length){
+        this.agent_establishments = []
+      }
+      else{
+        this.agent_establishments = all_agent_estabs
+      }
+    }
   },
 
   computed: {

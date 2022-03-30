@@ -16,7 +16,7 @@
     middleware: ["authenticated"],
     data(){ 
       return {
-        value: 'Item',
+        value: '',
         allMenuItems: [
           {"permissions": CRUDitemTablePerms, title: "Item Table", icon:"mdi-cart-variant", to: "admin-item-item_table"},
           {"permissions": CRUDitemPerms, title: "Item", icon:"mdi-cart-variant", to: "admin-item-item"},

@@ -19,6 +19,7 @@ from django.conf import settings
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('api/user/', include('user.urls')),
@@ -28,7 +29,9 @@ urlpatterns = [
 ] 
 
 if settings.DEBUG:
+    # Django Admin
     urlpatterns +=  path('admin/', admin.site.urls),
+    # Swagger
     schema_view = get_schema_view(
        openapi.Info(
           title="API Documentation",
@@ -42,9 +45,11 @@ if settings.DEBUG:
        permission_classes=(permissions.AllowAny,), 
     )
     urlpatterns += [
-        #Swagger
         path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
         path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
         # Debug Toolbar
         path('__debug__/', include('debug_toolbar.urls')),
     ]
+    # Static Files
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

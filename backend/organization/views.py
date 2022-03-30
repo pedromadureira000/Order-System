@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from item.serializers import PriceTableGetSerializer
-from organization.facade import get_clients_by_agent, get_companies_to_create_client, get_establishments_to_create_client, get_price_tables_to_create_client
+from organization.facade import get_agent_client_tables, get_clients_by_agent, get_establishments_to_create_client, get_price_tables_to_create_client
 from organization.serializers import  ClientSerializerPOST, ClientSerializerPUT, ClientTableSerializer, CompanySerializer, ContractingSerializer, EstablishmentPOSTSerializer, EstablishmentPUTSerializer
 from organization.models import Client, ClientTable, Company, Contracting, Establishment
 from rolepermissions.checkers import has_permission, has_role
@@ -306,12 +306,14 @@ class GetEstablishmentsToCreateClient(APIView):
             establishments = get_establishments_to_create_client(request.user, client_table_compound_id,request_user_is_agent_without_all_estabs)
             return Response(EstablishmentPOSTSerializer(establishments, many=True).data)
 
-class GetCompaniesToCreateClient(APIView):
+class GetClientTablesToCreateClient(APIView):
     def get(self, request):
         if has_permission(request.user, 'create_client'):
-            request_user_is_agent_without_all_estabs = req_user_is_agent_without_all_estabs(request.user)
-            companies = get_companies_to_create_client(request.user, request_user_is_agent_without_all_estabs)
-            return Response(CompanySerializer(companies, many=True).data)
+            if req_user_is_agent_without_all_estabs(request.user):
+                client_tables = get_agent_client_tables(request.user)
+                return Response(ClientTableSerializer(client_tables, many=True).data)
+            client_tables = ClientTable.objects.filter(contracting=request.user.contracting)
+            return Response(ClientTableSerializer(client_tables, many=True).data)
 
 class ClientView(APIView):
     def get(self, request):

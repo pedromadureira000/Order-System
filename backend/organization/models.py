@@ -64,9 +64,9 @@ class ClientTable(models.Model):
         verbose_name = _('client table')
         verbose_name_plural = _('client tables')
         constraints = [UniqueConstraint(fields=['contracting', 'client_table_code'], name='ClientTable compound primary key')]
-    client_table_compound_id = models.CharField(_('client table compound id'), max_length=6, unique=True, editable=False)
+    client_table_compound_id = models.CharField(_('client table compound id'), max_length=7, unique=True, editable=False)
     contracting = models.ForeignKey('Contracting', on_delete=models.PROTECT, verbose_name=_('contracting'))
-    client_table_code = models.SlugField(_('client table code'), max_length=2)
+    client_table_code = models.SlugField(_('client table code'), max_length=3)
     description = models.CharField(max_length=60, verbose_name=_('description'))
     note = models.CharField(blank=True, verbose_name=_('note'), max_length=800)
 

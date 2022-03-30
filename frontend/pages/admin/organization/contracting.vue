@@ -49,7 +49,8 @@
                 ></v-radio>
               </v-radio-group>
               <!-- Note -->
-              <v-text-field
+              <v-textarea
+                outlined
                 :label="$t('Note')"
                 v-model="note"
                 :error-messages="noteErrors"
@@ -76,13 +77,19 @@
         :items="contracting_companies"
         :items-per-page="10"
         item-key="contracting_compound_id"
-        class="elevation-1"
+        class="elevation-1 mt-3"
       >
         <template v-slot:item.actions="{ item }">
           <contracting-edit-menu
             :contracting="item" 
             @contracting-deleted="deleteContracting(item)" 
           />
+        </template>
+        <template v-slot:item.status="{ item }">
+          <p>{{item.status === 1 ? $t('Active') : $t('Disabled')}}</p>
+        </template>
+        <template v-slot:item.note_slot="{ item }">
+          <p>{{$getNote(item.note)}}</p>
         </template>
       </v-data-table>
     </div>
@@ -119,11 +126,11 @@ export default {
       loading: false,
       contracting_companies: [],
       headers: [
-        { text: this.$t('Name'), value: 'name' },
         { text: this.$t('Contracting_code'), value: 'contracting_code' },
+        { text: this.$t('Name'), value: 'name' },
         { text: 'Status', value: 'status' },
         { text: this.$t('Active_users_limit'), value: 'active_users_limit' },
-        { text: this.$t('Note'), value: 'note' },
+        { text: this.$t('Note'), value: 'note_slot' },
         { text: this.$t('Actions'), value: 'actions' },
       ]
     };
@@ -212,6 +219,14 @@ export default {
         });
         if (data) {
           this.contracting_companies.push(data);
+          // Clearing fields
+          this.$v.$reset()
+          // this avoid "This field is required" errors by vuelidate
+          this.name = ""
+          this.contracting_code = ""
+          this.status = "1"
+          this.active_users_limit = 5
+          this.note = ""
         }
         this.loading = false;
       }

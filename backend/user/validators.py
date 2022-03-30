@@ -26,7 +26,7 @@ def agent_permissions_exist_and_does_not_have_duplicates(agent_permissions):
             raise serializers.ValidationError(_("There are duplicate values for agent_permissions"))
         check_for_duplicate_values.append(permission)
         if not permission in Agent.available_permissions.keys():
-            raise serializers.ValidationError(_(f"You can't assign '{permission}' permission to an agent.").format(permission=permission))
+            raise serializers.ValidationError(_("You can't assign '{permission}' permission to an agent.").format(permission=permission))
 
 def req_user_is_agent_without_all_estabs(request_user):
     return has_role(request_user, 'agent') and not has_permission(request_user, 'access_all_establishments')

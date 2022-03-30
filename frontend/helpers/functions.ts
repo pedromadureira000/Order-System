@@ -98,6 +98,11 @@ export const ErrorHandler = (error: any, commit: Commit, dispatch: Dispatch, i18
       // DRF Normal Field Errors
       else if (field_list.includes(first_key)){
         let errorMessage = response.data[first_key][0]
+        // Translation Gambiarra: TODO Fix it
+        if (errorMessage.includes('is not valid cnpj')){
+          errorMessage = errorMessage.replace('is not valid cnpj', 'não é um CNPJ valido')
+        } 
+        //
         dispatch("setAlert", {message: i18n.t(first_key.substring(0,1).toUpperCase() + first_key.substring(1)) + ": " + errorMessage , 
                  alertType: "error"}, { root: true })
       }

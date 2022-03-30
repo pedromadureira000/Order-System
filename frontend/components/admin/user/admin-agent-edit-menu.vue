@@ -44,7 +44,8 @@
                 ></v-radio>
               </v-radio-group>
               <!-- Note -->
-              <v-text-field
+              <v-textarea
+                outlined
                 :label="$t('Note')"
                 v-model="note"
                 :error-messages="noteErrors"
@@ -255,6 +256,8 @@ export default {
           this.admin_agent.email = data.email
           this.admin_agent.note = data.note
           this.admin_agent.complete_name =  `${data.first_name} ${data.last_name}`
+            // Close dialog
+          this.show_edit_dialog = false
         }
       }
     },

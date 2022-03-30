@@ -38,7 +38,7 @@ export default {
 		// '@/plugins/axios',
     // '~/plugins/axios.js
 		'@/plugins/vuetify',
-		'~/plugins/formatStr',
+		'~/plugins/myFunctions',
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
@@ -127,21 +127,21 @@ export default {
         'pt-BR': '/admin/usuario/usuario_cliente',
       },
       // Item
-      'admin/item': {
-        en: '/admin/item',
-        'pt-BR': '/admin/item'
-      },
-      'admin/item/item': {
-        en: '/admin/item/item',
-        'pt-BR': '/admin/item/item'
-      },
+      // 'admin/item': {
+        // en: '/admin/item',
+        // 'pt-BR': '/admin/item'
+      // },
+      // 'admin/item/item': {
+        // en: '/admin/item/item',
+        // 'pt-BR': '/admin/item/item'
+      // },
       'admin/item/item_category': {
         en: '/admin/item/item_category',
-        'pt-BR': '/admin/item/item_category'
+        'pt-BR': '/admin/item/item_categoria'
       },
       'admin/item/price_table': {
         en: '/admin/item/price_table',
-        'pt-BR': '/admin/item/price_table'
+        'pt-BR': '/admin/item/tabela_de_preco'
       },
       // Order
       // 'client/client/price_table': {

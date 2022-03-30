@@ -130,6 +130,12 @@ class OwnProfileSerializer(UserSerializer):
 class ERPUserSerializer(UserSerializer):
     #overwrite UserSerializer contracting field
     contracting = serializers.SlugRelatedField(slug_field='contracting_code', queryset=Contracting.objects.all())
+    user_code = serializers.SerializerMethodField()
+
+    class Meta(UserSerializer.Meta):
+        fields = ['username', 'contracting', 'first_name', 'last_name', 'email', 'status',
+                'roles', 'permissions', 'contracting_code', 'user_code', 'note', 'password']
+
     #overwrite UserSerializer validation
     def validate_contracting(self, value):
         return value
@@ -154,6 +160,9 @@ class ERPUserSerializer(UserSerializer):
         validated_data.pop('contracting') if validated_data.get('contracting') else None
         return super().update(instance, validated_data)
 
+    def get_user_code(self, user):
+        return user.user_code
+
 class AdminAgentSerializer(UserSerializer):
     def create(self, validated_data):  
         username = validated_data['username']
@@ -170,7 +179,7 @@ class AdminAgentSerializer(UserSerializer):
         assign_role(user, 'admin_agent')
         return user
 
-class AgentSerializer(UserSerializer):
+class AgentPOSTSerializer(UserSerializer):
     agent_establishments = AgentEstablishmentToUserSerializer(many=True)
     agent_permissions = serializers.ListField(child=serializers.CharField(), write_only=True)
 
@@ -218,17 +227,37 @@ class AgentSerializer(UserSerializer):
             user.agent_establishments.bulk_create(establishment_to_add)
         return user
 
+class AgentPUTSerializer(UserSerializer):
+    agent_establishments = AgentEstablishmentToUserSerializer(many=True)
+    agent_permissions = serializers.ListField(child=serializers.CharField(), write_only=True)
+
+    class Meta(UserSerializer.Meta):
+        fields = ['username', 'contracting', 'first_name', 'last_name', 'email', 'status',
+                'note', 'roles', 'permissions', 'agent_establishments', 'agent_permissions', 'contracting_code']
+        read_only_fields = ['username']
+        extra_kwargs = {
+            'agent_permissions': {'write_only': True},
+        }
+    def validate_agent_establishments(self, value):
+        # Deny duplicate values
+        check_for_duplicate_values = []
+        for establishment in value:
+            if establishment in check_for_duplicate_values:
+                raise serializers.ValidationError(_("There are duplicate values for agent_establishments."))
+            check_for_duplicate_values.append(establishment)
+        return value
+
+    def validate_agent_permissions(self, value):
+        agent_permissions_exist_and_does_not_have_duplicates(value) # TODO test it (seems weird)
+        return value
+
     def update(self, instance, validated_data):
-        agent_permissions = validated_data.get("agent_permissions")
-        if agent_permissions or agent_permissions == []:
-            agent_permissions = validated_data.pop("agent_permissions")
-            update_agent_permissions(instance, agent_permissions)
-        agent_establishments = validated_data.get("agent_establishments")
-        if agent_establishments or agent_establishments == [] and not 'access_all_establishments' in agent_permissions:
-            agent_establishments = validated_data.pop("agent_establishments")
+        agent_permissions = validated_data.pop("agent_permissions")
+        update_agent_permissions(instance, agent_permissions)
+        agent_establishments = validated_data.pop("agent_establishments")
+        if not 'access_all_establishments' in agent_permissions:
             update_agent_establishments(instance, agent_establishments)
         return super().update(instance, validated_data)
-
 
 class ClientUserSerializer(UserSerializer):
     client = serializers.SlugRelatedField(slug_field='client_compound_id', queryset=Client.objects.all())

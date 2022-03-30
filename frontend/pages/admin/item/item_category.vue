@@ -1,6 +1,6 @@
 <template>
-  <p v-if="$fetchState.pending">Fetching data ...</p>
-  <p v-else-if="$fetchState.error">An error occurred :(</p>
+  <p v-if="$fetchState.pending">{{$t('Fetching_data')}}</p>
+  <p v-else-if="$fetchState.error">{{$t('Error_fetching_data')}}</p>
   <div v-else>
     <div class="ma-3">
       <v-expansion-panels v-if="hasCreateItemCategoryPermission()">
@@ -10,7 +10,7 @@
           </v-expansion-panel-header>
           <v-expansion-panel-content>
             <form @submit.prevent="createItemCategory">
-              <!-- Company -->
+              <!-- Item Table -->
               <v-row align="center">
                 <v-col
                   class="d-flex"
@@ -19,16 +19,16 @@
                 >
                   <v-select
                     v-model="item_table"
-                    :label="$t('Company')"
-                    :items="companies"
-                    :item-text="(x) => x.company_code + ' - ' + x.name"
-                    :item-value="(x) => x.item_table"
+                    :label="$t('Item_Table')"
+                    :items="item_tables"
+                    :item-text="(x) => x.item_table_code + ' - ' + x.description"
+                    :item-value="(x) => x.item_table_compound_id"
                   ></v-select>
                 </v-col>
               </v-row>
               <!-- Item Category Code -->
               <v-text-field
-                :label="$t('Item Category Code')"
+                :label="$t('Category code')"
                 v-model="category_code"
                 :error-messages="itemCategoryCodeErrors"
                 required
@@ -45,7 +45,8 @@
                 class="mb-3"
               />
               <!-- Note -->
-              <v-text-field
+              <v-textarea
+                outlined
                 :label="$t('Note')"
                 v-model.trim="note"
                 :error-messages="noteErrors"
@@ -72,10 +73,16 @@
           :items="categories"
           :items-per-page="10"
           item-key="category_compound_id"
-          class="elevation-1"
+          class="elevation-1 mt-3"
         >
+          <template v-slot:item.description="{ item }">
+            <p style="width: 240px;">{{item.description}}</p>
+          </template>
           <template v-slot:item.actions="{ item }">
-            <item-category-edit-menu :category="item" @item-category-deleted="deleteItemCategory(item)" />
+            <item-category-edit-menu :category="item" :item_tables="item_tables" @item-category-deleted="deleteItemCategory(item)" />
+          </template>
+          <template v-slot:item.note="{ item }">
+            <p>{{$getNote(item.note)}}</p>
           </template>
         </v-data-table>
       </div>
@@ -106,11 +113,11 @@ export default {
       description: null,
       note: null,
       categories: [],
-      companies: [],
+      item_tables: [],
       loading: false,
       headers: [
-        { text: this.$t('Description'), value: 'description' },
         { text: this.$t('Category code'), value: 'category_code' },
+        { text: this.$t('Description'), value: 'description' },
         { text: this.$t('Note'), value: 'note' },
         { text: this.$t('Actions'), value: 'actions' },
       ]
@@ -121,9 +128,14 @@ export default {
     let categories = await this.$store.dispatch("item/fetchCategories");
     if (categories){this.categories.push(...categories)}
 
-    // Fetch Companies
-    let companies = await this.$store.dispatch("item/fetchCompaniesToCreateItemOrCategoryOrPriceTable"); 
-    if (companies){this.companies.push(...companies)}
+    // Fetch item_tables
+    let item_tables = await this.$store.dispatch("item/fetchItemTablesToCreateItemOrCategoryOrPriceTable"); 
+    if (item_tables){
+      this.item_tables.push(...item_tables)
+      if (this.item_tables.length > 0){
+        this.item_table = this.item_tables[0].item_table_compound_id
+      }
+    }
   },
 
   methods: {

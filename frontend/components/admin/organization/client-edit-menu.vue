@@ -7,6 +7,22 @@
         <v-card-title>{{$t('Edit')}}</v-card-title>
         <v-card-text>
           <v-container fluid>
+            <!-- Client Table -->
+            <v-row align="center">
+              <v-col
+                class="d-flex"
+                cols="12"
+                sm="6"
+              >
+                <v-select
+                  disabled
+                  v-model="client_table_from_client"
+                  :label="$t('Client_Table')"
+                  :items="client_tables"
+                  :item-text="(x) => x.client_table_code"
+                ></v-select>
+              </v-col>
+            </v-row>
             <!-- Name -->
             <v-text-field
               :label="$t('Name')"
@@ -43,14 +59,6 @@
               v-model="vendor_code"
               :error-messages="vendorCodeErrors"
               @blur="$v.vendor_code.$touch()"
-              class="mb-3"
-            />
-            <!-- Note -->
-            <v-text-field
-              :label="$t('Note')"
-              v-model="note"
-              :error-messages="noteErrors"
-              @blur="$v.note.$touch()"
               class="mb-3"
             />
 
@@ -91,6 +99,16 @@
                   </v-expansion-panel-content>
               </v-expansion-panel>
             </v-expansion-panels>
+
+            <!-- Note -->
+            <v-textarea
+              outlined
+              :label="$t('Note')"
+              v-model="note"
+              :error-messages="noteErrors"
+              @blur="$v.note.$touch()"
+              class="mb-3"
+            />
           </v-container>
         </v-card-text>
         <v-divider></v-divider>
@@ -138,9 +156,10 @@ export default {
     "price-table-v-select": require("@/components/admin/organization/price-table-v-select.vue").default,
   },
   directives: {mask},
-  props: ['client', 'establishment_groups', 'price_table_groups'],
+  props: ['client', 'client_tables','establishment_groups', 'price_table_groups'],
   data() {
     return {
+      client_table_from_client: null,
       show_edit_dialog: false,
       show_delete_confirmation_dialog: false,
       client_establishments: [],
@@ -293,6 +312,8 @@ export default {
             this.client.client_establishments = data.client_establishments
             this.client.vendor_code = data.vendor_code
             this.client.note = data.note
+              // Close dialog
+            this.show_edit_dialog = false
           }
       }
     },
@@ -344,6 +365,9 @@ export default {
     this.status = String(this.client.status)
     this.vendor_code = this.client.vendor_code
     this.note = this.client.note
+    // Default client_table_from_client
+    let cli_tab = this.client_tables.find(el=>el.client_table_compound_id === this.client.client_table)
+    this.client_table_from_client = cli_tab
   }
 }
 </script>

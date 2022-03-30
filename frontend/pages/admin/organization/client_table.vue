@@ -29,7 +29,8 @@
                 class="mb-3"
               />
               <!-- Note -->
-              <v-text-field
+              <v-textarea
+                outlined
                 :label="$t('Note')"
                 v-model="note"
                 :error-messages="noteErrors"
@@ -56,7 +57,7 @@
         :items="client_tables"
         :items-per-page="10"
         item-key="client_table_compound_id"
-        class="elevation-1"
+        class="elevation-1 mt-3"
       >
         <template v-slot:item.actions="{ item }">
           <client-table-edit-menu
@@ -64,6 +65,10 @@
             @client-table-deleted="deleteClientTable(item)" 
           />
         </template>
+        <template v-slot:item.note="{ item }">
+          <p>{{$getNote(item.note)}}</p>
+        </template>
+
       </v-data-table>
     </div>
   </div>
@@ -91,7 +96,6 @@ export default {
       client_table_code: null,
       // If it wasn't a string, the radio button will not be marked
       status: "1",
-      active_users_limit: 5,
       note: "",
       loading: false,
       client_tables: [],
@@ -120,7 +124,7 @@ export default {
     client_table_code: {
       required, 
       slugFieldValidator, 
-      maxLength: maxLength(2)
+      maxLength: maxLength(3)
     },
     note: {
       maxLength: maxLength(800)
@@ -146,7 +150,7 @@ export default {
       if (!this.$v.client_table_code.$dirty) return errors;
       !this.$v.client_table_code.required && errors.push(this.$t("This_field_is_required"));
       !this.$v.client_table_code.slugFieldValidator && errors.push(this.$t("It_must_containing_only_letters_numbers_underscores_or_hyphens"));
-      !this.$v.client_table_code.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 2));
+      !this.$v.client_table_code.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 3));
       return errors;
     },
     noteErrors() {
@@ -171,6 +175,12 @@ export default {
         });
         if (data) {
           this.client_tables.push(data);
+          // Clearing fields
+          this.$v.$reset()
+          // this avoid "This field is required" errors by vuelidate
+          this.description = ""
+          this.client_table_code = ""
+          this.note = ""
         }
         this.loading = false;
       }

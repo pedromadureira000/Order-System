@@ -7,6 +7,23 @@
         <v-card-title>{{$t('Edit')}}</v-card-title>
         <v-card-text>
           <v-container fluid>
+            <!-- Company -->
+            <v-row align="center">
+              <v-col
+                class="d-flex"
+                cols="12"
+                sm="6"
+              >
+                <v-select
+                  disabled
+                  v-model="company_from_estab"
+                  :label="$t('Company')"
+                  :items="companies"
+                  :item-text="(x) => x.company_code + ' - ' + x.name"
+                  :item-value="(x) => x.company_compound_id"
+                ></v-select>
+              </v-col>
+            </v-row>
             <!-- Name -->
             <v-text-field
               :label="$t('Name')"
@@ -38,7 +55,9 @@
               ></v-radio>
             </v-radio-group>
             <!-- Note -->
-            <v-text-field
+            <v-textarea
+              outlined
+              v-model="note"
               :label="$t('Note')"
               :error-messages="noteErrors"
               @blur="$v.note.$touch()"
@@ -89,10 +108,11 @@ export default {
   components: {
     "dots-menu-update-delete": require("@/components/dots-menu-update-delete.vue").default,
   },
-  props: ['establishment'],
+  props: ['establishment', 'companies'],
   directives: {mask},
   data() {
     return {
+      company_from_estab: null,
       show_edit_dialog: false,
       show_delete_confirmation_dialog: false,
       name: null,
@@ -188,6 +208,8 @@ export default {
               this.establishment.cnpj = data.cnpj
               this.establishment.status = data.status
               this.establishment.note = data.note
+                // Close dialog
+              this.show_edit_dialog = false
             }
           }
       },
@@ -207,6 +229,9 @@ export default {
     this.cnpj = this.establishment.cnpj
     this.status = String(this.establishment.status)
     this.note = this.establishment.note
+    /** Defaul value to company_from_estab */
+    let comp = this.companies.find(el=>el.company_compound_id === this.establishment.company)
+    this.company_from_estab = comp
   }
 }
 </script>

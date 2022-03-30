@@ -11,97 +11,110 @@
           <v-expansion-panel-content>
             <form @submit.prevent="createUser">
               <!-- Contracting -->
-              <v-radio-group v-model="contracting" style="width: 25%;" :label="$t('Contracting')">
-                <v-radio 
-                  v-for="(contracting, key) in contracting_companies"
-                  :key="key"
-                  :label="contracting.contracting_code + ' - ' + contracting.name"
-                  :value="contracting.contracting_code"
-                ></v-radio>
-              </v-radio-group>
+              <v-row align="center">
+                <v-col
+                  class="d-flex"
+                  cols="12"
+                  sm="6"
+                >
+                  <v-select
+                    v-model="contracting"
+                    :label="$t('Contracting')"
+                    :items="contracting_companies"
+                    :item-text="(x) =>  x.contracting_code + ' - ' + x.name"
+                    :item-value="(x) => x.contracting_code"
+                  ></v-select>
+                </v-col>
+              </v-row>
               <!-- Username -->
-                <v-text-field
-                  label="Username"
-                  v-model="username"
-                  :error-messages="usernameErrors"
-                  required
-                  @blur="$v.username.$touch()"
-                />
-                <!-- First Name -->
-                <v-text-field
-                  :label="$t('First_name')"
-                  v-model="first_name"
-                  :error-messages="firstNameErrors"
-                  required
-                  @blur="$v.first_name.$touch()"
-                />
-                <!-- Last name -->
-                <v-text-field
-                  :label="$t('Last_name')"
-                  v-model="last_name"
-                  :error-messages="lastNameErrors"
-                  required
-                  @blur="$v.last_name.$touch()"
-                />
-                <!-- Email -->
-                <v-text-field
-                  label="Email"
-                  type="email"
-                  v-model="email"
-                  :error-messages="emailErrors"
-                  required
-                  @blur="$v.email.$touch()"
-                />
-                <!-- Note -->
-                <v-text-field
-                  :label="$t('Note')"
-                  v-model="note"
-                  :error-messages="noteErrors"
-                  @blur="$v.note.$touch()"
-                  class="mb-3"
-                />
-                <!-- Password -->
-                <v-text-field
-                  type="password"
-                  :label="$t('Password')"
-                  v-model="password"
-                  :error-messages="passwordErrors"
-                  required
-                  @blur="$v.password.$touch()"
-                />
-                <!-- Password Confirm -->
-                <v-text-field
-                  type="password"
-                  :label="$t('Password_Confirm')"
-                  v-model="password_confirm"
-                  :error-messages="passConfirmErrors"
-                  required
-                  @blur="$v.password_confirm.$touch()"
-                />
+              <v-text-field
+                label="Username"
+                v-model="username"
+                :error-messages="usernameErrors"
+                required
+                @blur="$v.username.$touch()"
+              />
+              <!-- First Name -->
+              <v-text-field
+                :label="$t('First_name')"
+                v-model="first_name"
+                :error-messages="firstNameErrors"
+                required
+                @blur="$v.first_name.$touch()"
+              />
+              <!-- Last name -->
+              <v-text-field
+                :label="$t('Last_name')"
+                v-model="last_name"
+                :error-messages="lastNameErrors"
+                required
+                @blur="$v.last_name.$touch()"
+              />
+              <!-- Email -->
+              <v-text-field
+                label="Email"
+                type="email"
+                v-model="email"
+                :error-messages="emailErrors"
+                required
+                @blur="$v.email.$touch()"
+              />
+              <!-- Password -->
+              <v-text-field
+                type="password"
+                :label="$t('Password')"
+                v-model="password"
+                :error-messages="passwordErrors"
+                required
+                @blur="$v.password.$touch()"
+              />
+              <!-- Password Confirm -->
+              <v-text-field
+                type="password"
+                :label="$t('Password_Confirm')"
+                v-model="password_confirm"
+                :error-messages="passConfirmErrors"
+                required
+                @blur="$v.password_confirm.$touch()"
+              />
+              <!-- Note -->
+              <v-textarea
+                outlined
+                :label="$t('Note')"
+                v-model="note"
+                :error-messages="noteErrors"
+                @blur="$v.note.$touch()"
+                class="mb-3"
+              />
               <v-btn
                 color="primary"
                 type="submit"
                 :loading="loading"
                 :disabled="loading"
-                >{{$t('Submit')}}</v-btn
-              >
+                >{{$t('Submit')}}</v-btn>
             </form>
           </v-expansion-panel-content>
         </v-expansion-panel>
       </v-expansion-panels>
 
-      <div>
-        <h3 class="mt-6">{{$t('Edit ERP User')}}</h3>
-        <v-data-table
-          :headers="headers"
-          :items="erp_users"
-          :items-per-page="10"
-          item-key="username + contracting"
-          class="elevation-1"
-        >
-          <template v-slot:item.actions="{ item }">
-            <erp-user-edit-menu :erp_user="item" @erp-user-deleted="deleteERPuser(item)" />
-          </template>
+    <div>
+      <h3 class="mt-6">{{$t('Edit ERP User')}}</h3>
+      <v-data-table
+        :headers="headers"
+        :items="erp_users"
+        :items-per-page="10"
+        item-key="user_code"
+        class="elevation-1 mt-3"
+      >
+        <template v-slot:item.actions="{ item }">
+          <erp-user-edit-menu :erp_user="item" :contracting_companies="contracting_companies" @erp-user-deleted="deleteERPuser(item)" />
+        </template>
+        <template v-slot:item.status="{ item }">
+          <p>{{item.status === 1 ? $t('Active') : $t('Disabled')}}</p>
+        </template>
+        <template v-slot:item.note="{ item }">
+          <p>{{$getNote(item.note)}}</p>
+        </template>
         </v-data-table>
       </div>
     </div>
@@ -162,7 +175,12 @@ export default {
     }
     // Fetch Contracting option
     let contracting_companies = await this.$store.dispatch("user/fetchContractingCompaniesToCreateERPuser");
-    if (contracting_companies){this.contracting_companies.push(...contracting_companies)}
+    if (contracting_companies){
+      this.contracting_companies.push(...contracting_companies)
+      if (this.contracting_companies.length > 0){
+        this.contracting = this.contracting_companies[0].contracting_code
+      }
+    }
   },
 
   validations: {
@@ -225,6 +243,18 @@ export default {
         });
         if (data) {
           this.erp_users.push({...data, complete_name: `${data.first_name} ${data.last_name}`})
+          // Clearing fields
+          this.$v.$reset()
+          // this avoid "This field is required" errors by vuelidate
+          this.contracting = this.contracting_companies[0].contracting_code
+          this.username = ""
+          this.first_name = ""
+          this.last_name = ""
+          this.email = ""
+          this.password = ""
+          this.password_confirm = ""
+          this.status = "1"
+          this.note = ""
         }
         this.loading = false;
       }

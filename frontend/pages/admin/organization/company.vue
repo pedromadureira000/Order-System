@@ -39,31 +39,37 @@
                 class="mb-3"
               />
               <!-- Client table -->
-              <v-radio-group v-model="client_table" style="width: 25%;" :label="$t('Client_Table')" class="mb-3">
-                <v-radio
-                  v-for="(client_table, key) in client_tables"
-                  :key="key"
-                  :label="client_table.description"
-                  :value="client_table.client_table_compound_id"
-                ></v-radio>
-                <v-radio
-                  :label="$t('None')"
-                  value=""
-                ></v-radio>
-              </v-radio-group>
+              <v-row align="center">
+                <v-col
+                  class="d-flex"
+                  cols="12"
+                  sm="6"
+                >
+                  <v-select
+                    v-model="client_table"
+                    :label="$t('Client_Table')"
+                    :items="client_tables"
+                    :item-text="(x) => x.client_table_compound_id === null ? $t('Empty') : x.client_table_code + ' - ' + x.description"
+                    :item-value="(x) => x.client_table_compound_id"
+                  ></v-select>
+                </v-col>
+              </v-row>
               <!-- Item table -->
-              <v-radio-group v-model="item_table" style="width: 25%;" :label="$t('Item_Table')" class="mb-3">
-                <v-radio
-                  v-for="(item_table, key) in item_tables"
-                  :key="key"
-                  :label="item_table.description"
-                  :value="item_table.item_table_compound_id"
-                ></v-radio>
-                <v-radio
-                  :label="$t('None')"
-                  value=""
-                ></v-radio>
-              </v-radio-group>
+              <v-row align="center">
+                <v-col
+                  class="d-flex"
+                  cols="12"
+                  sm="6"
+                >
+                  <v-select
+                    v-model="item_table"
+                    :label="$t('Item_Table')"
+                    :items="item_tables"
+                    :item-text="(x) => x.item_table_compound_id === null ? $t('Empty') : x.item_table_code + ' - ' + x.description"
+                    :item-value="(x) => x.item_table_compound_id"
+                  ></v-select>
+                </v-col>
+              </v-row>
               <!-- Company Status -->
               <v-radio-group v-model="status" style="width: 25%;" :label="$t('Company_Status')" class="mb-3">
                 <v-radio
@@ -76,7 +82,8 @@
                 ></v-radio>
               </v-radio-group>
               <!-- Note -->
-              <v-text-field
+              <v-textarea
+                outlined
                 :label="$t('Note')"
                 v-model="note"
                 :error-messages="noteErrors"
@@ -100,13 +107,25 @@
         :items="companies"
         :items-per-page="10"
         item-key="company_compound_id"
-        class="elevation-1"
+        class="elevation-1 mt-3"
       >
         <template v-slot:item.actions="{ item }">
           <company-edit-menu :company="item" :client_tables="client_tables" :item_tables="item_tables" @company-deleted="deleteCompany(item)" />
         </template>
+        <template v-slot:item.item_table="{ item }">
+          <p>{{getTableVerboseName(item.item_table)}}</p>
+        </template>
+        <template v-slot:item.client_table="{ item }">
+          <p>{{getTableVerboseName(item.client_table)}}</p>
+        </template>
         <template v-slot:item.cnpj_root_with_mask="{ item }">
-          <input type="text" v-mask="'##.###.###'" :value="item.cnpj_root" disabled style="color: #000000DE;"/>
+          <input type="text" v-mask="'##.###.###'" :value="item.cnpj_root" disabled style="color: #000000DE; display: flex; width: 90px;"/>
+        </template>
+        <template v-slot:item.status="{ item }">
+          <p>{{item.status === 1 ? $t('Active') : $t('Disabled')}}</p>
+        </template>
+        <template v-slot:item.note="{ item }">
+          <p>{{$getNote(item.note)}}</p>
         </template>
       </v-data-table>
     </div>
@@ -123,6 +142,17 @@ import { validationMixin } from "vuelidate";
 import {slugFieldValidator, raizcnpjFieldValidator} from "~/helpers/validators"
 import {mask} from 'vue-the-mask'
 
+let empty_client_table = {
+  client_table_compound_id: null,
+  description: "Empty",
+  client_table_code: "Empty",
+}
+let empty_item_table = {
+  item_table_compound_id: null,
+  item_table_code: "Empty",
+  description: "Empty",
+}
+
 export default {
   components: {
     "company-edit-menu": require("@/components/admin/organization/company-edit-menu.vue").default,
@@ -136,17 +166,17 @@ export default {
       name: null,
       company_code: null,
       cnpj_root: null,
-      client_table: null,
-      item_table: null,
+      client_table: empty_client_table.client_table_compound_id,
+      item_table: empty_item_table.item_table_compound_id,
       status: "1",
       note: "",
       loading: false,
       companies: [],
-      client_tables: [],
-      item_tables: [],
+      client_tables: [empty_client_table],
+      item_tables: [empty_item_table],
       headers: [
-        { text: this.$t('Name'), value: 'name' },
         { text: this.$t('Company_code'), value: 'company_code' },
+        { text: this.$t('Name'), value: 'name' },
         { text: this.$t('CNPJ_Root'), value: 'cnpj_root_with_mask' },
         { text: this.$t('Client_table'), value: 'client_table' },
         { text: this.$t('Item_Table'), value: 'item_table' },
@@ -245,12 +275,26 @@ export default {
         });
         if (data) {
           this.companies.push(data);
+          // Clearing fields
+          this.$v.$reset()
+          // this avoid "This field is required" errors by vuelidate
+          this.name = ""
+          this.company_code = ""
+          this.cnpj_root = ""
+          this.client_table = empty_client_table.client_table_compound_id
+          this.item_table = empty_item_table.item_table_compound_id
+          this.status = "1"
+          this.note = ""
         }
         this.loading = false;
       }
     },
     deleteCompany(companyToDelete) {
       this.companies = this.companies.filter((company) => company.company_compound_id != companyToDelete.company_compound_id);
+    },
+    // Get text representation for v-data-table slots
+    getTableVerboseName(table_compound_id){
+      if (table_compound_id === null){return this.$t('Empty')} else{return table_compound_id.split("&")[1]} 
     },
   },
 };

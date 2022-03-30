@@ -19,11 +19,6 @@ def get_clients_by_agent(user):
     return Client.objects.filter(client_table__in=client_tables)
 
 #---/ Client
-def get_companies_to_create_client(request_user, req_user_is_agent_without_all_estabs):
-    if req_user_is_agent_without_all_estabs:
-        return get_agent_companies(request_user).exclude(client_table=None)
-    return Company.objects.filter(contracting=request_user.contracting).exclude(client_table=None)
-
 def get_establishments_to_create_client(request_user, client_table_compound_id, req_user_is_agent_without_all_estabs):
     if req_user_is_agent_without_all_estabs:
         return request_user.establishments.filter(company__client_table__client_table_compound_id=client_table_compound_id)

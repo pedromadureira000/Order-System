@@ -10,6 +10,22 @@
           </v-expansion-panel-header>
           <v-expansion-panel-content>
             <form @submit.prevent="createEstablishment">
+              <!-- Company -->
+              <v-row align="center">
+                <v-col
+                  class="d-flex"
+                  cols="12"
+                  sm="6"
+                >
+                  <v-select
+                    v-model="company"
+                    :label="$t('Company')"
+                    :items="companies"
+                    :item-text="(x) => x.company_code + ' - ' + x.name"
+                    :item-value="(x) => x.company_compound_id"
+                  ></v-select>
+                </v-col>
+              </v-row>
               <!-- Name -->
               <v-text-field
                 :label="$t('Name')"
@@ -28,22 +44,6 @@
                 @blur="$v.establishment_code.$touch()"
                 class="mb-3"
               />
-              <!-- Company -->
-              <v-row align="center">
-                <v-col
-                  class="d-flex"
-                  cols="12"
-                  sm="6"
-                >
-                  <v-select
-                    v-model="company"
-                    :label="$t('Company')"
-                    :items="companies"
-                    :item-text="(x) => x.company_code + ' - ' + x.name"
-                    :item-value="(x) => x.company_compound_id"
-                  ></v-select>
-                </v-col>
-              </v-row>
               <!-- CNPJ -->
               <v-text-field
                 label="CNPJ"
@@ -66,7 +66,8 @@
                 ></v-radio>
               </v-radio-group>
               <!-- Note -->
-              <v-text-field
+              <v-textarea
+                outlined
                 :label="$t('Note')"
                 v-model="note"
                 :error-messages="noteErrors"
@@ -90,13 +91,22 @@
         :items="establishments"
         :items-per-page="10"
         item-key="establishment_compound_id"
-        class="elevation-1"
+        class="elevation-1 mt-3"
       >
+        <template v-slot:item.company="{ item }">
+          <p>{{item.company.split('&')[1]}}</p>
+        </template>
         <template v-slot:item.actions="{ item }">
-          <establishment-edit-menu :establishment="item" @establishment-deleted="deleteEstablishment(item)" />
+          <establishment-edit-menu :establishment="item" :companies="companies" @establishment-deleted="deleteEstablishment(item)" />
         </template>
         <template v-slot:item.cnpj_with_mask="{ item }">
-          <input type="text" v-mask="'##.###.###/####-##'" :value="item.cnpj" disabled style="color: #000000DE;"/>
+          <input type="text" v-mask="'##.###.###/####-##'" :value="item.cnpj" disabled style="color: #000000DE; width: 130px"/>
+        </template>
+        <template v-slot:item.status="{ item }">
+          <p>{{item.status === 1 ? $t('Active') : $t('Disabled')}}</p>
+        </template>
+        <template v-slot:item.note="{ item }">
+          <p>{{$getNote(item.note)}}</p>
         </template>
       </v-data-table>
     </div>
@@ -133,8 +143,8 @@ export default {
       establishments: [],
       companies: [],
       headers: [
-        { text: this.$t('Name'), value: 'name' },
         { text: this.$t('Establishment_code'), value: 'establishment_code' },
+        { text: this.$t('Name'), value: 'name' },
         { text: this.$t('Company'), value: 'company' },
         { text: 'CNPJ', value: 'cnpj_with_mask' },
         { text: 'Status', value: 'status' },
@@ -150,7 +160,12 @@ export default {
     if (establishments){this.establishments.push(...establishments)}
     // Fetch company options
     let companies = await this.$store.dispatch("organization/fetchCompaniesToCreateEstablishment");
-    if (companies) {this.companies.push(...companies)}
+    if (companies) {
+      this.companies.push(...companies)
+      if (this.companies.length > 0){
+        this.company = this.companies[0].company_compound_id
+      }
+    }
     
   },
 
@@ -220,15 +235,24 @@ export default {
       } else {
         this.loading = true;
         let data = await this.$store.dispatch("organization/createEstablishment", {
+          company: this.company,
           name: this.name, 
           establishment_code: this.establishment_code,
           cnpj: this.cnpj,
-          company: this.company,
           status: this.status,
           note: this.note
         });
         if (data) {
           this.establishments.push(data);
+          // Clearing fields
+          this.$v.$reset()
+          // this avoid "This field is required" errors by vuelidate
+          this.company = this.companies[0].company_compound_id
+          this.establishment_code = ""
+          this.name = ""
+          this.cnpj = ""
+          this.status = "1"
+          this.note = ""
         }
         this.loading = false;
       }

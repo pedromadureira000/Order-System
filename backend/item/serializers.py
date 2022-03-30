@@ -67,13 +67,6 @@ class CategoryPUTSerializer(serializers.ModelSerializer):
         fields = ['item_table', 'category_compound_id', 'category_code', 'description', 'note']
         read_only_fields =  ['item_table', 'category_code']
 
-    def create(self, validated_data):
-        validated_data['category_compound_id'] =  self.context['request'].user.contracting.contracting_code + \
-                "&" + validated_data['item_table'].item_table_code + "&" + validated_data["category_code"]
-        item_category = ItemCategory.objects.create(**validated_data)
-        item_category.save()
-        return item_category
-
 class ItemPOSTSerializer(serializers.ModelSerializer):
     item_table = serializers.SlugRelatedField(slug_field='item_table_compound_id', queryset=ItemTable.objects.all())
     category = serializers.SlugRelatedField(slug_field='category_compound_id', queryset=ItemCategory.objects.all())
@@ -102,8 +95,7 @@ class ItemPOSTSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data['item_compound_id'] = self.context['request'].user.contracting.contracting_code + \
                 "&" + validated_data['item_table'].item_table_code + "&" + validated_data["item_code"]
-        item = Item.objects.create(**validated_data)
-        return item
+        return super().create(validated_data)
 
 class ItemPUTSerializer(serializers.ModelSerializer):
     item_table = serializers.SlugRelatedField(slug_field='item_table_compound_id', read_only=True)
@@ -192,6 +184,10 @@ class PriceTablePOSTSerializer(serializers.ModelSerializer):
         # User is agent without all estabs and don't have access to this company
         if self.context['req_user_is_agent_without_all_estabs'] and company not in get_agent_companies(request_user):
             raise NotFound(detail={"error": [_("Company not found.")]})
+        # Company has item table
+        if not company.item_table:
+            # TODO translate
+            raise NotFound(detail={"error": [_("The company must have an item table.")]})
         return super().validate(attrs)
 
     def create(self, validated_data):

@@ -10,8 +10,16 @@ const formatStrFunction = function (str, ...args) {
     });
   };
 
+const getNote = (note) => {
+      if (note.length > 150 )
+        return note.substring(0, 150) + " ..."
+      else 
+        return note
+    }
+
 export default (context, inject) =>
   {
     inject('formatStr', formatStrFunction)
+    inject('getNote', getNote)
   }
 

@@ -10,6 +10,23 @@
           </v-expansion-panel-header>
           <v-expansion-panel-content>
             <form @submit.prevent="createClient" class="ml-3">
+              <!-- Client Table -->
+              <v-row align="center">
+                <v-col
+                  class="d-flex"
+                  cols="12"
+                  sm="6"
+                >
+                  <v-select
+                    v-model="client_table"
+                    :label="$t('Client_Table')"
+                    :items="client_tables"
+                    :item-text="(x) => x.client_table_code"
+                    :item-value="(x) => x.client_table_compound_id"
+                    @change="fetchEstablishmentsToCreateClient"
+                  ></v-select>
+                </v-col>
+              </v-row>
               <!-- Name -->
               <v-text-field
                 :label="$t('Name')"
@@ -38,23 +55,6 @@
                 @blur="$v.cnpj.$touch()"
                 class="mb-3"
               />
-              <!-- Company -->
-              <v-row align="center">
-                <v-col
-                  class="d-flex"
-                  cols="12"
-                  sm="6"
-                >
-                  <v-select
-                    v-model="company"
-                    :label="$t('Company')"
-                    :items="companies"
-                    :item-text="(x) => x.company_code + ' - ' + x.name"
-                    :item-value="(x) => x"
-                    @change="fetchEstablishmentsToCreateClient"
-                  ></v-select>
-                </v-col>
-              </v-row>
               <!-- Client Status -->
               <v-radio-group v-model="status" style="width: 25%;" label='Status' class="mb-3">
                 <v-radio
@@ -75,7 +75,8 @@
                 class="mb-3"
               />
               <!-- Note -->
-              <v-text-field
+              <v-textarea
+                outlined
                 :label="$t('Note')"
                 v-model="note"
                 :error-messages="noteErrors"
@@ -84,7 +85,7 @@
               />
               <!-- Client Establishments -->
               <v-expansion-panels class="mb-5">
-                <v-expansion-panel>
+                <v-expansion-panel @change="fetchEstablishmentsToCreateClient">
                   <v-expansion-panel-header>{{$t('Client_Establishments')}}</v-expansion-panel-header>
                     <v-expansion-panel-content v-if="establishments.length > 0">
                       <v-container
@@ -138,19 +139,29 @@
           :items="clients"
           :items-per-page="10"
           item-key="client_compound_id"
-          class="elevation-1"
+          class="elevation-1 mt-3"
         >
           <!-- <template v-slot:item.actions="{ item }"> -->
           <template v-slot:[`item.actions`]="{ item }">
             <client-edit-menu 
               :client="item" 
+              :client_tables="client_tables"
               :establishment_groups="establishment_groups" 
               :price_table_groups="price_table_groups" 
               @client-deleted="deleteClient(item)" 
             />
           </template>
           <template v-slot:item.cnpj_with_mask="{ item }">
-            <input type="text" v-mask="'##.###.###/####-##'" :value="item.cnpj" disabled style="color: #000000DE;"/>
+            <input type="text" v-mask="'##.###.###/####-##'" :value="item.cnpj" disabled style="color: #000000DE; width: 130px"/>
+          </template>
+          <template v-slot:item.client_table="{ item }">
+            <p>{{item.client_table.split("&")[1]}}</p>
+          </template>
+          <template v-slot:item.status="{ item }">
+            <p>{{item.status === 1 ? $t('Active') : $t('Disabled')}}</p>
+          </template>
+          <template v-slot:item.note="{ item }">
+            <p>{{$getNote(item.note)}}</p>
           </template>
         </v-data-table>
       </div>
@@ -178,8 +189,8 @@ export default {
   directives: {mask},
   data() {
     return {
-      company: null,
-      companies: [],
+      client_table: null,
+      client_tables: [],
       establishments: [],
       clients: [],
       client_establishments: [],
@@ -196,8 +207,9 @@ export default {
         { text: this.$t('Client_code'), value: 'client_code' },
         { text: this.$t('Name'), value: 'name' },
         { text: 'CNPJ', value: 'cnpj_with_mask' },
-        { text: 'Status', value: 'status' },
         { text: this.$t('Vendor_Code'), value: 'vendor_code' },
+        { text: this.$t('Client_Table'), value: 'client_table' },
+        { text: 'Status', value: 'status' },
         { text: this.$t('Note'), value: 'note' },
         { text: this.$t('Actions'), value: 'actions' },
       ]
@@ -208,9 +220,14 @@ export default {
     // Fetch Clients to EDIT list
     let clients = await this.$store.dispatch("organization/fetchClients");
     if (clients) {this.clients.push(...clients)}
-    // Fetch company options
-    let companies = await this.$store.dispatch("organization/fetchCompaniesToCreateClient");
-    if (companies) {this.companies.push(...companies)}
+    // Fetch client table options
+    let client_tables = await this.$store.dispatch("organization/fetchClientTablesToCreateClient");
+    if (client_tables) {
+      this.client_tables.push(...client_tables)
+      if (this.client_tables.length > 0){
+        this.client_table = this.client_tables[0].client_table_compound_id
+      }
+    }
   },
 
   validations: {
@@ -222,7 +239,7 @@ export default {
     client_code: {
       required, 
       slugFieldValidator, 
-      maxLength: maxLength(3)
+      maxLength: maxLength(9)
     },
     cnpj: {
       required, 
@@ -257,7 +274,7 @@ export default {
       if (!this.$v.client_code.$dirty) return errors;
       !this.$v.client_code.required && errors.push(this.$t("This_field_is_required"));
       !this.$v.client_code.slugFieldValidator && errors.push(this.$t('SlugFieldErrorMessage'));
-      !this.$v.client_code.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 3));
+      !this.$v.client_code.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 9));
       return errors;
     },
     cnpjError() { 
@@ -289,17 +306,28 @@ export default {
       } else {
         this.loading = true;
         let data = await this.$store.dispatch("organization/createClient", {
-          client_table: this.company.client_table,
+          client_table: this.client_table,
           client_establishments: this.client_establishments,
           client_code: this.client_code,
           name: this.name, 
           cnpj: this.cnpj,
-          status: this.status,
           vendor_code: this.vendor_code,
+          status: this.status,
           note: this.note
         });
         if (data) {
           this.clients.push(data);
+          // Clearing fields
+          this.$v.$reset()
+          // this avoid "This field is required" errors by vuelidate
+          this.client_table = this.client_tables[0].client_table_compound_id
+          this.client_establishments = []
+          this.client_code = ""
+          this.name = ""
+          this.cnpj = ""
+          this.vendor_code = ""
+          this.status = "1"
+          this.note = ""
         }
         this.loading = false;
       }
@@ -310,17 +338,21 @@ export default {
     },
 
     async fetchEstablishmentsToCreateClient(){
-      if (this.establishments.length > 0) {this.establishments = []}
-      let establishments = await this.$store.dispatch("organization/fetchEstablishmentsToCreateClient", this.company.client_table);
-      if (establishments) {
-        for (const establishment_index in establishments){
-          let establishment = establishments[establishment_index]
-          // This will be necessary for update clie_estab.price_table(added from a checkbox) from a v-select.
-          establishment.AUX_cli_estab = {establishment: establishment.establishment_compound_id, price_table: null}
-          this.establishments.push(establishment)
+      let establishment_group = this.establishment_groups.find(el=>el.group_id==this.client_table)
+      if (establishment_group){
+        this.establishments = establishment_group.establishments
+      }
+      else{
+        let establishments = await this.$store.dispatch("organization/fetchEstablishmentsToCreateClient", this.client_table)
+        if (establishments) {
+          for (const establishment_index in establishments){
+            let establishment = establishments[establishment_index]
+            // This will be necessary for update clie_estab.price_table(added from a checkbox) from a v-select.
+            establishment.AUX_cli_estab = {establishment: establishment.establishment_compound_id, price_table: null}
+            this.establishments.push(establishment)
+          }
+          this.establishment_groups = [{group_id: this.client_table, establishments: [...establishments]}]
         }
-        this.establishment_groups = [{group_id: this.company.client_table, establishments: [...establishments]}]
-
       }
     },
 

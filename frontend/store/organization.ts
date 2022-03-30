@@ -220,13 +220,13 @@ export const actions: ActionTree<UserState, RootState> = {
 		}
 	},
 
-	async fetchCompaniesToCreateClient({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
+	async fetchClientTablesToCreateClient({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
     try {
-      let companies = await api.fetchCompaniesToCreateClient()
+      let companies = await api.fetchClientTablesToCreateClient()
       return companies
     }
     catch(error){
-      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchCompaniesToCreateClient_error_msg'))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchClientTablesToCreateClient_error_msg'))
 		}
 	},
 

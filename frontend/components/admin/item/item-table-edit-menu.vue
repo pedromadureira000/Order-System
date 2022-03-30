@@ -17,7 +17,8 @@
               class="mb-3"
             />
             <!-- Note -->
-            <v-text-field
+            <v-textarea
+              outlined
               :label="$t('Note')"
               v-model="note"
               :error-messages="noteErrors"
@@ -148,6 +149,8 @@ export default {
           this.item_table.active_users_limit = data.active_users_limit
           this.item_table.status = data.status
           this.item_table.note = data.note
+            // Close dialog
+          this.show_edit_dialog = false
         }
 		  }
     },

@@ -5,7 +5,9 @@ export interface RootState {
     showAlert: boolean;
     alertID: number
   },
-  connectionError: boolean
+  connectionError: boolean,
+  CDNBaseUrl: string
+
 }
 
 export const state = (): RootState => ({
@@ -15,7 +17,8 @@ export const state = (): RootState => ({
     showAlert: false,
     alertID: 0
   },
-  connectionError: false
+  connectionError: false,
+  CDNBaseUrl: process.env.DEV ? 'http://localhost:8000' : 'https://amazoncdn.com' //TODO CDN
 });
 
 import { MutationTree } from "vuex";

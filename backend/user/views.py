@@ -11,7 +11,7 @@ from organization.facade import get_clients_by_agent
 from organization.models import Client, Contracting, Establishment
 from organization.serializers import ClientSerializerPOST, ContractingSerializer, EstablishmentPOSTSerializer
 from .facade import get_all_client_users_by_agent
-from .serializers import AdminAgentSerializer, AgentSerializer, ClientUserSerializer, ERPUserSerializer, OwnProfileSerializer, SwaggerLoginSerializer, SwaggerProfilePasswordSerializer
+from .serializers import AdminAgentSerializer, AgentPOSTSerializer, AgentPUTSerializer, ClientUserSerializer, ERPUserSerializer, OwnProfileSerializer, SwaggerLoginSerializer, SwaggerProfilePasswordSerializer
 from .models import User
 from rolepermissions.checkers import has_permission, has_role
 from django.db import transaction
@@ -241,13 +241,13 @@ class AgentView(APIView):
         if has_permission(request.user, 'get_agents'):
             user = request.user
             agents = User.objects.filter(Q(contracting=user.contracting), Q(groups__name='agent'))
-            return Response(AgentSerializer(agents, many=True).data)
+            return Response(AgentPOSTSerializer(agents, many=True).data)
         return unauthorized_response
-    @swagger_auto_schema(request_body=AgentSerializer) 
+    @swagger_auto_schema(request_body=AgentPOSTSerializer) 
     @transaction.atomic
     def post(self, request):
         if has_permission(request.user, 'create_agent'):
-            serializer = AgentSerializer(data=request.data, context={"request":request})
+            serializer = AgentPOSTSerializer(data=request.data, context={"request":request})
             if serializer.is_valid():
                 try:
                     serializer.save()
@@ -260,7 +260,7 @@ class AgentView(APIView):
         return unauthorized_response
 
 class SpecificAgent(APIView):
-    @swagger_auto_schema(request_body=AgentSerializer) 
+    @swagger_auto_schema(request_body=AgentPUTSerializer) 
     @transaction.atomic
     def put(self, request, contracting_code, username):
         if has_permission(request.user, 'update_agent'):
@@ -271,7 +271,7 @@ class SpecificAgent(APIView):
                 user = User.objects.get(user_code=user_code, groups__name='agent')
             except User.DoesNotExist:
                 return not_found_response(object_name=_('The agent'))
-            serializer = AgentSerializer(user, data=request.data, partial=True,
+            serializer = AgentPUTSerializer(user, data=request.data,
                     context={"request": request})
             if serializer.is_valid():
                 try:

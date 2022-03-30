@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="visible" max-width="500px">
+  <v-dialog v-model="visible" :retain-focus="false" max-width="500px">
     <v-card>
       <v-card-title>Login</v-card-title>
       <v-card-text>
@@ -11,16 +11,6 @@
             required
             @blur="$v.username.$touch()"
           ></v-text-field>
-
-          <!-- <v-text-field -->
-            <!-- v-model="username" -->
-            <!-- :error-messages="usernameErrors" -->
-            <!-- :label="$t('Username')" -->
-            <!-- required -->
-            <!-- @blur="$v.username.$touch()" -->
-            <!-- @focus.self="wtf($event)"   VERY SAD! -->
-            <!-- @click.self="wtf($event)" -->
-          <!-- ></v-text-field> -->
 					<v-text-field
 						v-model="contracting_code"
 						:error-messages="contracting_codeErrors"

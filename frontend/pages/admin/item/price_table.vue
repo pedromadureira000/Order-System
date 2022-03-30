@@ -1,6 +1,6 @@
 <template>
-  <p v-if="$fetchState.pending">Fetching data ...</p>
-  <p v-else-if="$fetchState.error">An error occurred :(</p>
+  <p v-if="$fetchState.pending">{{$t('Fetching_data')}}</p>
+  <p v-else-if="$fetchState.error">{{$t('Error_fetching_data')}}</p>
   <div v-else>
     <div class="ma-3">
       <v-expansion-panels v-if="hasCreatePriceTablePermission()">
@@ -46,7 +46,8 @@
                 class="mb-3"
               />
               <!-- Note -->
-              <v-text-field
+              <v-textarea
+                outlined
                 :label="$t('Note')"
                 v-model.trim="note"
                 :error-messages="noteErrors"
@@ -65,12 +66,20 @@
                       <v-card-title style="font-size: 1rem; font-weight: 400; line-height: 1rem">{{$t('Remove Items')}}</v-card-title>
                       <v-card-text>
                         <v-container fluid>
+                          <!-- <v-text-field -->
+                            <!-- v-for="(price_item, key) in price_items" -->
+                            <!-- :key="key" -->
+                            <!-- v-model="price_item.unit_price" -->
+                            <!-- :label="itemDescription(price_item.item)" -->
+                            <!-- @keydown.enter.prevent="" -->
+                            <!-- :error-messages="priceErrors" -->
+                            <!-- @blur="$v.price.$touch()" -->
+                          <!-- > -->
                           <v-text-field
                             v-for="(price_item, key) in price_items"
                             :key="key"
                             v-model="price_item.unit_price"
                             :label="itemDescription(price_item.item)"
-                            type="number"
                             @keydown.enter.prevent=""
                           >
                             <template v-slot:append>
@@ -92,9 +101,8 @@
                             v-for="(item, key) in itemsToAdd"
                             :key="key"
                             v-model="item.unit_price"
-                            :label="item.item_code + ' - ' + item.description"
+                            :label="item.item_code + ' - ' + item.description + ' ( ' + item.unit + ' )'"
                             @keydown.enter.prevent="addItem(item)"
-                            type="number"
                           >
                             <template v-slot:append>
                               <v-icon @click="addItem(item)" :disabled="item.unit_price == null">
@@ -129,11 +137,20 @@
           :items="price_tables"
           :items-per-page="10"
           item-key="price_table_compound_id"
-          class="elevation-1"
+          class="elevation-1 mt-3"
         >
+          <template v-slot:item.description="{ item }">
+            <p style="width: 240px;">{{item.description}}</p>
+          </template>
           <template v-slot:item.actions="{ item }">
             <price-table-edit-menu :price_table="item" :item_group="item_group" @price-table-deleted="deletePriceTable(item)" />
           </template>
+          <template v-slot:item.company="{ item }">
+            <p>{{item.company.split('&')[1]}}</p>
+          </template>
+        <template v-slot:item.note="{ item }">
+          <p>{{$getNote(item.note)}}</p>
+        </template>
         </v-data-table>
       </div>
     </div>
@@ -145,6 +162,9 @@ import {
   required,
   maxLength,
   minLength,
+  minValue,
+  maxValue,
+  decimal
 } from "vuelidate/lib/validators";
 import { validationMixin } from "vuelidate";
 import {slugFieldValidator} from "~/helpers/validators"
@@ -170,9 +190,9 @@ export default {
       price_tables: [],
       loading: false,
       headers: [
-        { text: this.$t('Company'), value: 'company' },
+        { text: this.$t('Table_code'), value: 'table_code' },
         { text: this.$t('Description'), value: 'description' },
-        { text: this.$t('Price table code'), value: 'table_code' },
+        { text: this.$t('Company'), value: 'company' },
         { text: this.$t('Note'), value: 'note' },
         { text: this.$t('Actions'), value: 'actions' },
       ]
@@ -184,8 +204,14 @@ export default {
     if (price_tables){this.price_tables.push(...price_tables)}
 
     // Fetch Companies
-    let companies = await this.$store.dispatch("item/fetchCompaniesToCreateItemOrCategoryOrPriceTable"); 
-    if (companies){this.companies.push(...companies)}
+    let companies = await this.$store.dispatch("item/fetchCompaniesToCreatePriceTable"); 
+    if (companies){
+      this.companies.push(...companies)
+      if (this.companies.length > 0){
+        this.company = this.companies[0]
+        await this.fetchItemsToCreatePriceTable()
+      }
+    }
   },
 
   methods: {
@@ -236,7 +262,7 @@ export default {
     },
     itemDescription(item_compound_id){
       let item = this.items.filter((item)=> item.item_compound_id === item_compound_id)[0]
-      return item.item_code + " - " + item.description 
+      return item.item_code + " - " + item.description + " ( " + item.unit + " )" 
     },
 
     // Permission Functions
@@ -265,6 +291,15 @@ export default {
     note: {
       maxLength: maxLength(800)
     },
+    /** price_items: { */
+      /** $each: { */
+        /** unit_price: { */
+          /** maxValue: maxValue(11), */
+          /** minValue: minValue(0), */
+          /** decimal */
+        /** } */
+      /** } */
+    /** }, */
     priceTableInfoGroup: [
       "table_code",
       "description",
@@ -295,6 +330,14 @@ export default {
       !this.$v.note.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 800));
       return errors;
     },
+    /** priceErrors() { */
+      /** const errors = []; */
+      /** if (!this.$v.price.$dirty) return errors; */
+      /** !this.$v.price.minValue && errors.push(this.$formatStr(this.$t("This_value_must_be_greater_than_X"), 0)); */
+      /** !this.$v.price.maxValue && errors.push(this.$formatStr(this.$t("This_value_must_be_less_than_X"), 10000000000)); */
+      /** !this.$v.price.decimal && errors.push(this.$t('DecimalErrorMessage')); */
+      /** return errors; */
+    /** }, */
     // Item Price
     itemsToAdd(){
       return this.items.filter((item)=> {

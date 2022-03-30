@@ -105,13 +105,13 @@ export const actions: ActionTree<ItemState, RootState> = {
   },
   // ---------- Item
   
-  async fetchCompaniesToCreateItemOrCategoryOrPriceTable({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
+  async fetchItemTablesToCreateItemOrCategoryOrPriceTable({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
     try{
-      let companies = await api.fetchCompaniesToCreateItemOrCategoryOrPriceTable()
-      return companies
+      let item_tables = await api.fetchItemTablesToCreateItemOrCategoryOrPriceTable()
+      return item_tables
     }
     catch(error){
-      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("fetchCompaniesToCreateItemOrCategoryOrPriceTable_error_msg"))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("fetchItemTablesToCreateItemOrCategoryOrPriceTable_error_msg"))
     }
   },
 
@@ -169,6 +169,16 @@ export const actions: ActionTree<ItemState, RootState> = {
   },
 
   // -------- PriceTable
+  async fetchCompaniesToCreatePriceTable({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
+    try {
+      let companies = await api.fetchCompaniesToCreatePriceTable()
+      return companies
+    }
+    catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("fetchCompaniesToCreatePriceTable_error_msg"))
+    }
+  },
+
   
   async fetchItemsToCreatePriceTable({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, item_table_compound_id: string){
     try {

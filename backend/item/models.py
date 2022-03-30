@@ -1,8 +1,8 @@
 from django.db import models
 from django.db.models.constraints import UniqueConstraint
-from .utils import image_resize
 from settings.utils import status_choices
 from django.utils.translation import gettext_lazy as _
+from django_resized import ResizedImageField
 
 class ItemTable(models.Model):
     # Company_set
@@ -49,14 +49,10 @@ class Item(models.Model):
     unit = models.CharField(max_length=10, verbose_name=_('unit'))
     barcode = models.CharField(max_length=13,blank=True, verbose_name=_('barcode'))
     status = models.IntegerField(choices=status_choices, default=1)
-    image = models.ImageField(default="images/items/defaultimage.jpeg", upload_to='images/items/', verbose_name=_('image'))
-    technical_description = models.CharField(blank=True, verbose_name=_('technical description'), max_length=800)
+    image = ResizedImageField(size=[115, 87], quality=90, upload_to='images/items/', blank=True, null=True, verbose_name=_('image'))
+    technical_description = models.CharField(blank=True, verbose_name=_('technical description'), max_length=800,)
     def __str__(self):
         return f'{self.item_code}'
-    def save(self, *args, **kwargs):
-        if self.image:
-            image_resize(self.image, 115, 76.24)
-        super().save(*args, **kwargs)
 
 class PriceTable(models.Model):
     #Order_set

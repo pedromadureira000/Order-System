@@ -7,6 +7,22 @@
         <v-card-title>{{$t('Edit')}}</v-card-title>
         <v-card-text>
           <v-container fluid>
+              <!-- Contracting -->
+              <v-row align="center">
+                <v-col
+                  class="d-flex"
+                  cols="12"
+                  sm="6"
+                >
+                  <v-select
+                    disabled
+                    v-model="contracting_from_erpuser"
+                    :label="$t('Contracting')"
+                    :items="contracting_companies"
+                    :item-text="(x) =>  x.contracting_code + ' - ' + x.name"
+                  ></v-select>
+                </v-col>
+              </v-row>
               <!-- First Name -->
               <v-text-field
                 :label="$t('First_name')"
@@ -44,7 +60,8 @@
                 ></v-radio>
               </v-radio-group>
               <!-- Note -->
-              <v-text-field
+              <v-textarea
+                outlined
                 :label="$t('Note')"
                 v-model="note"
                 :error-messages="noteErrors"
@@ -113,9 +130,10 @@ export default {
   /** components: { */   // TODO: Why this work even without import it?
     /** "dots-menu-update-delete": require("@/components/dots-menu-update-delete.vue").default, */
   /** }, */
-  props: ['erp_user'],
+  props: ['erp_user', 'contracting_companies'],
   data() {
     return {
+      contracting_from_erpuser: null,
       show_edit_dialog: false,
       show_delete_confirmation_dialog: false,
       first_name: null,
@@ -255,6 +273,8 @@ export default {
           this.erp_user.email = data.email
           this.erp_user.note = data.note
           this.erp_user.complete_name =  `${data.first_name} ${data.last_name}`
+            // Close dialog
+          this.show_edit_dialog = false
         }
       }
     },
@@ -279,6 +299,9 @@ export default {
     this.email = this.erp_user.email
     this.status = String(this.erp_user.status)
     this.note = this.erp_user.note
+    // Default value for contracting_from_erpuser
+    let contracting = this.contracting_companies.find(el=>el.contracting_code === this.erp_user.contracting)
+    this.contracting_from_erpuser = contracting
   }
 }
 </script>

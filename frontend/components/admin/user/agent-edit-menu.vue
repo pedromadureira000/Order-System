@@ -44,14 +44,6 @@
                   value=0
                 ></v-radio>
               </v-radio-group>
-              <!-- Note -->
-              <v-text-field
-                :label="$t('Note')"
-                v-model="note"
-                :error-messages="noteErrors"
-                @blur="$v.note.$touch()"
-                class="mb-3"
-              />
               <!-- Password -->
               <!-- <v-text-field -->
                 <!-- type="password" -->
@@ -78,20 +70,26 @@
                   <v-expansion-panel-content
                     class="px-0 mb-2"
                     fluid
-                    style="width: 85%; display: flex; justify-content: space-between;"
+                    style="display: flex; justify-content: space-between;"
                   >
+                    <v-checkbox 
+                      :label="$t('Select all')"
+                      style="margin-right: 27px;"
+                      @change="selectAllPermissions"
+                      v-model="select_all_permissions"
+                    ></v-checkbox>
+                    <v-divider class="mt-2 mb-4"></v-divider>
                     <v-row
                       class="px-0 mb-2"
                       fluid
-                      style="width: 85%; display: flex; justify-content: space-between;"
+                      style="display: flex; justify-content: space-around;"
                     >
                       <v-checkbox 
                         v-for="(value, key) in agentPermissions"
                         :key="key"
                         v-model="permissions"
                         :value="value"
-                        :label="value"
-                        style="margin-right: 27px;"
+                        :label="$t(value)"
                       ></v-checkbox>
                     </v-row>
                   </v-expansion-panel-content>
@@ -102,6 +100,13 @@
                 <v-expansion-panel>
                   <v-expansion-panel-header>{{$t('Agent Establishments')}}</v-expansion-panel-header>
                     <v-expansion-panel-content>
+                      <v-checkbox 
+                        :label="$t('Select all')"
+                        style="margin-right: 27px;"
+                        @change="selectAllEstablishments"
+                        v-model="select_all_establishments"
+                      ></v-checkbox>
+                      <v-divider class="mt-2 mb-4"></v-divider>
                       <v-container
                         v-for="establishment in establishments"
                         :key="establishment.establishment_compound_id"
@@ -122,6 +127,15 @@
                     </v-expansion-panel-content>
                 </v-expansion-panel>
               </v-expansion-panels>
+              <!-- Note -->
+              <v-textarea
+                outlined
+                :label="$t('Note')"
+                v-model="note"
+                :error-messages="noteErrors"
+                @blur="$v.note.$touch()"
+                class="mb-3"
+              />
           </v-container>
         </v-card-text>
         <v-divider></v-divider>
@@ -169,6 +183,8 @@ export default {
   props: ['agent', 'establishments'],
   data() {
     return {
+      select_all_permissions: false,
+      select_all_establishments: false,
       show_edit_dialog: false,
       show_delete_confirmation_dialog: false,
       first_name: null,
@@ -337,6 +353,8 @@ export default {
           this.agent.email = data.email
           this.agent.note = data.note
           this.agent.complete_name =  `${data.first_name} ${data.last_name}`
+            // Close dialog
+          this.show_edit_dialog = false
         }
       }
     },
@@ -352,6 +370,34 @@ export default {
         this.$emit('agent-deleted')
       }
     },
+
+    defaultSelectAllPermissions(){
+      if (this.permissions.length === this.agentPermissions.length){
+        return true
+      }
+      else {
+        return false
+      }
+    },
+
+    selectAllPermissions(){
+      if (this.permissions.length === this.agentPermissions.length){
+        this.permissions = []
+      }
+      else {
+        this.permissions = this.agentPermissions
+      }
+    },
+
+    selectAllEstablishments(){
+      let all_agent_estabs = this.establishments.map(el=>el.AUX_agent_estab)
+      if (this.agent_establishments.length === all_agent_estabs.length){
+        this.agent_establishments = []
+      }
+      else{
+        this.agent_establishments = all_agent_estabs
+      }
+    }
   },
 
   mounted() {
@@ -369,6 +415,13 @@ export default {
     this.email = this.agent.email
     this.status = String(this.agent.status)
     this.note = this.agent.note
+
+    // Default value for access_all_permissions
+    this.select_all_permissions = this.permissions.length === this.agentPermissions.length ? true : false
+
+    // Default value for select_all_establishments
+    let all_agent_estabs = this.establishments.map(el=>el.AUX_agent_estab)
+    this.select_all_establishments = this.agent_establishments.length === all_agent_estabs.length ? true : false
   }
 }
 </script>

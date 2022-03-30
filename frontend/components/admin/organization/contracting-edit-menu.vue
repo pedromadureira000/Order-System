@@ -37,7 +37,8 @@
               ></v-radio>
             </v-radio-group>
             <!-- Note -->
-            <v-text-field
+            <v-textarea
+              outlined
               :label="$t('Note')"
               v-model="note"
               :error-messages="noteErrors"
@@ -191,6 +192,8 @@ export default {
           this.contracting.active_users_limit = data.active_users_limit
           this.contracting.status = data.status
           this.contracting.note = data.note
+            // Close dialog
+          this.show_edit_dialog = false
         }
 		  }
     },

@@ -11,14 +11,21 @@
           <v-expansion-panel-content>
             <form @submit.prevent="createUser">
               <!-- Client -->
-              <v-radio-group v-model="client" style="width: 25%;" :label="$t('Client')">
-                <v-radio 
-                  v-for="(client, key) in clients"
-                  :key="key"
-                  :label="client.client_code + ' - ' + client.name"
-                  :value="client.client_compound_id"
-                ></v-radio>
-              </v-radio-group>
+              <v-row align="center">
+                <v-col
+                  class="d-flex"
+                  cols="12"
+                  sm="6"
+                >
+                  <v-select
+                    v-model="client"
+                    :label="$t('Client')"
+                    :items="clients"
+                    :item-text="(x) =>  x.client_code + ' - ' + x.name"
+                    :item-value="(x) => x.client_compound_id"
+                  ></v-select>
+                </v-col>
+              </v-row>
               <!-- Username -->
                 <v-text-field
                   label="Username"
@@ -52,14 +59,6 @@
                   required
                   @blur="$v.email.$touch()"
                 />
-                <!-- Note -->
-                <v-text-field
-                  :label="$t('Note')"
-                  v-model="note"
-                  :error-messages="noteErrors"
-                  @blur="$v.note.$touch()"
-                  class="mb-3"
-                />
                 <!-- Password -->
                 <v-text-field
                   type="password"
@@ -77,6 +76,15 @@
                   :error-messages="passConfirmErrors"
                   required
                   @blur="$v.password_confirm.$touch()"
+                />
+                <!-- Note -->
+                <v-textarea
+                  outlined
+                  :label="$t('Note')"
+                  v-model="note"
+                  :error-messages="noteErrors"
+                  @blur="$v.note.$touch()"
+                  class="mb-3"
                 />
               <v-btn
                 color="primary"
@@ -97,10 +105,19 @@
           :items="client_users"
           :items-per-page="10"
           item-key="username"
-          class="elevation-1"
+          class="elevation-1 mt-3"
         >
           <template v-slot:item.actions="{ item }">
-            <client-user-edit-menu :client_user="item" @client-user-deleted="deleteClientUser(item)" />
+            <client-user-edit-menu :client_user="item" :clients='clients' @client-user-deleted="deleteClientUser(item)" />
+          </template>
+          <template v-slot:item.status="{ item }">
+            <p>{{item.status === 1 ? $t('Active') : $t('Disabled')}}</p>
+          </template>
+          <template v-slot:item.note="{ item }">
+            <p>{{$getNote(item.note)}}</p>
+          </template>
+          <template v-slot:item.client="{ item }">
+            <p>{{item.client.split('&')[2]}}</p>
           </template>
         </v-data-table>
       </div>
@@ -162,7 +179,12 @@ export default {
     }
     // Fetch client option
     let clients = await this.$store.dispatch("user/fetchClientsToCreateClientUser");
-    if (clients){this.clients.push(...clients)}
+    if (clients){
+      this.clients.push(...clients)
+      if (this.clients.length > 0){
+        this.client = this.clients[0].client_compound_id
+      }
+    }
   },
 
   validations: {
@@ -225,6 +247,18 @@ export default {
         });
         if (data) {
           this.client_users.push({...data, complete_name: `${data.first_name} ${data.last_name}`})
+          // Clearing fields
+          this.$v.$reset()
+          // this avoid "This field is required" errors by vuelidate
+          this.client = this.clients[0].client_compound_id
+          this.username = ""
+          this.first_name = ""
+          this.last_name = ""
+          this.email = ""
+          this.password = ""
+          this.password_confirm = ""
+          this.status = "1"
+          this.note = ""
         }
         this.loading = false;
       }

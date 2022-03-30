@@ -5,10 +5,10 @@ from rest_framework.response import Response
 from item.facade import get_agent_item_tables
 
 from organization.models import Company
-from organization.serializers import CompanySerializer
+from rest_framework.parsers import FormParser, MultiPartParser
 from .validators import agent_has_access_to_this_item_table, agent_has_access_to_this_price_table 
 from user.validators import req_user_is_agent_without_all_estabs
-from .facade import get_categories_by_agent, get_categories_to_create_item_by_agent_without_all_estabs, get_companies_to_create_item_category_or_pricetabe_by_agent, get_items_by_agent, get_price_tables_by_agent
+from .facade import get_categories_by_agent, get_categories_to_create_item_by_agent_without_all_estabs, get_companies_to_create_pricetabe_by_agent, get_items_by_agent, get_price_tables_by_agent
 from .serializers import ForTablePriceItemSerializer, ItemPOSTSerializer, ItemPUTSerializer, CategoryPOSTSerializer, CategoryPUTSerializer, ItemTablePOSTSerializer, ItemTablePUTSerializer, PriceTableGetSerializer, PriceTablePOSTSerializer, SpecificPriceTablePUTSerializer, SpecificPriceItemSerializer
 from .models import ItemTable, Item, ItemCategory, PriceTable, PriceItem
 from rest_framework.views import APIView
@@ -17,6 +17,7 @@ from drf_yasg.utils import swagger_auto_schema
 from settings.response_templates import error_response, not_found_response, protected_error_response, serializer_invalid_response,  unauthorized_response, unknown_exception_response
 from django.utils.translation import gettext_lazy as _
 from decimal import Decimal
+from organization.serializers import CompanySerializer
 
 class ItemTableView(APIView):
     def get(self, request):
@@ -86,15 +87,15 @@ class SpecificItemTable(APIView):
                 return unknown_exception_response(action=_('delete item table'))
         return unauthorized_response
 
-class fetchCompaniesToCreateItemOrCategoryOrPriceTable(APIView):
+class fetchItemTablesToCreateItemOrCategoryOrPriceTable(APIView):
     def get(self, request):
         if has_permission(request.user, 'create_item') or has_permission(request.user,  'create_item_category') or \
                 has_permission(request.user, 'create_price_table'):
             if req_user_is_agent_without_all_estabs(request.user):
-                companies = get_companies_to_create_item_category_or_pricetabe_by_agent(request.user)
-                return Response(CompanySerializer(companies, many=True).data)
-            companies = Company.objects.filter(status=1).exclude(item_table=None)
-            serializer = CompanySerializer(companies, many=True)
+                item_tables = get_agent_item_tables(request.user)
+                return Response(ItemTablePOSTSerializer(item_tables, many=True).data)
+            item_tables = ItemTable.objects.filter(contracting=request.user.contracting)
+            serializer = ItemTablePOSTSerializer(item_tables, many=True)
             return Response(serializer.data)
         return unauthorized_response
 
@@ -193,6 +194,7 @@ class fetchCategoriesToCreateItem(APIView):
         return unauthorized_response
 
 class ItemView(APIView):
+    parser_classes = [MultiPartParser, FormParser]
     def get(self, request):
         if has_permission(request.user, 'get_items'):
             if has_role(request.user, 'agent'):
@@ -203,7 +205,7 @@ class ItemView(APIView):
         return unauthorized_response
     @transaction.atomic
     @swagger_auto_schema(request_body=ItemPOSTSerializer) 
-    def post(self, request):
+    def post(self, request, format=None):
         if has_permission(request.user, 'create_item'):
             serializer = ItemPOSTSerializer(data=request.data, context={"request": request, 
                 "request_user_is_agent_without_all_estabs": req_user_is_agent_without_all_estabs(request.user)})
@@ -219,6 +221,8 @@ class ItemView(APIView):
         return unauthorized_response
 
 class SpecificItemView(APIView):
+    parser_classes = [MultiPartParser, FormParser]
+
     @transaction.atomic
     @swagger_auto_schema(request_body=ItemPUTSerializer) 
     def put(self, request, item_compound_id):
@@ -268,6 +272,17 @@ class SpecificItemView(APIView):
                 print(error)
                 return unknown_exception_response(action=_('delete item'))
         return unauthorized_response
+
+class fetchCompaniesToCreatePriceTable(APIView):
+    def get(self, request):
+        if has_permission(request.user, 'create_price_table'):
+            if req_user_is_agent_without_all_estabs(request.user):
+                companies = get_companies_to_create_pricetabe_by_agent(request.user)
+                return Response(CompanySerializer(companies, many=True).data)
+            companies = Company.objects.filter(status=1, contracting=request.user.contracting).exclude(item_table=None)
+            serializer = CompanySerializer(companies, many=True)
+            return Response(serializer.data)
+        return
 
 class fetchItemsToCreatePriceTable(APIView):
     def get(self, request, item_table_compound_id):

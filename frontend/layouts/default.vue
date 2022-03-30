@@ -64,7 +64,9 @@
 							</v-list-item-avatar>
 							<v-list-item-content>
 								<v-list-item-title>{{logged_user.first_name}} {{logged_user.last_name}}</v-list-item-title>
-								<v-list-item-subtitle>{{logged_user.email}}</v-list-item-subtitle>
+								<v-list-item-subtitle>Email: {{logged_user.email}}</v-list-item-subtitle>
+								<v-list-item-subtitle>Username: {{logged_user.username}}</v-list-item-subtitle>
+                <v-list-item-subtitle v-if="hasRoleOtherThenClientUser">{{$t('Role')}}: {{$t(logged_user.roles[0])}}</v-list-item-subtitle>
 							</v-list-item-content>
 						</v-list-item>
 					</v-list>
@@ -104,14 +106,8 @@
       >
         <!-- ## dismissible get the same error as my custom v-btn ## -->
         <v-btn 
-          @focus.prevent.self="$store.dispatch('removeAlert')"
-          @click.prevent.self="" 
+          @click="$store.dispatch('removeAlert')"
         >Close</v-btn>
-
-        <!-- <v-btn  -->
-          <!-- @focus.prevent.self="wtf" -->
-          <!-- @click.prevent.self="wtf"  -->
-        <!-- >Close</v-btn>  -->
         {{$store.state.alert.alertMessage}}
       </v-alert>
     </div>
@@ -169,10 +165,12 @@ export default {
 			this.$store.dispatch('user/logout')
     },
 
-    /** wtf(event){ */
+    wtf(event){
+      console.log(">>>>>>>JESUS!!!!!!: ", event)
+      /** event.preventDefault() */
       /** event.stopPropagation() */
-      /** console.log(">>>>>>>JESUS!!!!!!: ", event) */
-    /** }, */
+      /** event.stopImmediatePropagation() */
+    },
 
     async testF(){
       /** this.$store.dispatch("setAlert", {message: "User deleted", alertType: "success"}, { root: true }) */
@@ -222,6 +220,12 @@ export default {
 				return this.defaultMenuItems;
 			}
 		},
+    // Role
+    hasRoleOtherThenClientUser(){
+      let user = this.$store.state.user.currentUser;
+      return !user.roles.includes("client_user")
+    },
+
   },
   /** mounted() { */
     /** console.log('>>>>>>>>>>>>>>>>>>', this.localeRoute('/about')) */
