@@ -184,9 +184,8 @@ class PriceTablePOSTSerializer(serializers.ModelSerializer):
         # User is agent without all estabs and don't have access to this company
         if self.context['req_user_is_agent_without_all_estabs'] and company not in get_agent_companies(request_user):
             raise NotFound(detail={"error": [_("Company not found.")]})
-        # Company has item table
+        # Company has an item table
         if not company.item_table:
-            # TODO translate
             raise NotFound(detail={"error": [_("The company must have an item table.")]})
         return super().validate(attrs)
 

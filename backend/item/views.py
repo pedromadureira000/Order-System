@@ -50,11 +50,11 @@ class SpecificItemTable(APIView):
     def put(self, request, item_table_compound_id):
         if has_permission(request.user, 'update_item_table'):
             if item_table_compound_id.split("&")[0] != request.user.contracting.contracting_code:
-                return not_found_response(object_name=_('Item table'))
+                return Response({"error":[_( "The item table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 item_table = ItemTable.objects.get(item_table_compound_id=item_table_compound_id)
             except ItemTable.DoesNotExist:
-                return not_found_response(object_name=_('Item table'))
+                return Response({"error":[_( "The item table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             serializer = ItemTablePUTSerializer(item_table, data=request.data, partial=True)
             if serializer.is_valid():
                 try:
@@ -70,17 +70,17 @@ class SpecificItemTable(APIView):
     def delete(self, request, item_table_compound_id):
         if has_permission(request.user, 'delete_item_table'):
             if item_table_compound_id.split("&")[0] != request.user.contracting.contracting_code:
-                return not_found_response(object_name=_('Item table'))
+                return Response({"error":[_( "The item table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 item_table = ItemTable.objects.get(item_table_compound_id=item_table_compound_id)
             except ItemTable.DoesNotExist:
-                return not_found_response(object_name=_('Item table'))
+                return Response({"error":[_( "The item table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 item_table.delete()
-                return Response("Item table deleted")
+                return Response(_("Item table deleted"))
             except ProtectedError:
-                return protected_error_response(object_name=_('item table'))
-            #  "Você não pode deletar esse tabela de itens pois ele possui registro ligados a ele." #TODO wrong translation
+                return Response({"error":[_("You cannot delete this item table because it has records linked to it.")]}, 
+                        status=status.HTTP_400_BAD_REQUEST) 
             except Exception as error:
                 transaction.rollback()
                 print(error)
@@ -132,16 +132,16 @@ class SpecificCategoryView(APIView):
         user = request.user
         if has_permission(user, 'update_item_category'):
             if category_compound_id.split("&")[0] != request.user.contracting.contracting_code:
-                return not_found_response(object_name=_('The item category')) 
+                return Response({"error":[_( "The item category was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 item_category = ItemCategory.objects.get(category_compound_id=category_compound_id)
             except ItemCategory.DoesNotExist:
-                return not_found_response(object_name=_('The item category')) 
+                return Response({"error":[_( "The item category was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             # Check if agent without all estabs have access to this item category
             request_user_is_agent_without_all_estabs = req_user_is_agent_without_all_estabs(request.user)
             if request_user_is_agent_without_all_estabs and not \
                     agent_has_access_to_this_item_table(request.user, item_category.item_table):
-                return not_found_response(object_name=_('The item category')) 
+                return Response({"error":[_( "The item category was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             serializer = CategoryPUTSerializer(item_category, data=request.data, partial=True, context={"request":request,
                 "request_user_is_agent_without_all_estabs": request_user_is_agent_without_all_estabs})
             if serializer.is_valid():
@@ -158,19 +158,20 @@ class SpecificCategoryView(APIView):
     def delete(self, request, category_compound_id):
         if has_permission(request.user, 'delete_item_category'):
             if category_compound_id.split("&")[0] != request.user.contracting.contracting_code:
-                return not_found_response(object_name=_('The category'))
+                return Response({"error":[_( "The item category was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 item_category = ItemCategory.objects.get(category_compound_id=category_compound_id)
             except ItemCategory.DoesNotExist:
-                return not_found_response(object_name=_('The item category')) 
+                return Response({"error":[_( "The item category was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             if req_user_is_agent_without_all_estabs(request.user) and \
                     not agent_has_access_to_this_item_table(request.user, item_category.item_table):
                 return unauthorized_response
             try:
                 item_category.delete()
-                return Response("Item category deleted")
+                return Response(_("Item category deleted"))
             except ProtectedError as er:
-                return protected_error_response(object_name=_('item category'))
+                return Response({"error":[_("You cannot delete this item category because it has records linked to it.")]}, 
+                        status=status.HTTP_400_BAD_REQUEST) 
             except Exception as error:
                 transaction.rollback()
                 print(error)
@@ -181,11 +182,11 @@ class fetchCategoriesToCreateItem(APIView):
     def get(self, request, item_table_compound_id):
         if has_permission(request.user, 'create_item'):
             if item_table_compound_id.split("&")[0] != request.user.contracting.contracting_code:
-                return not_found_response(object_name=_('The item table')) #TODO check translation
+                return Response({"error":[_( "The item table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
-                item_table = ItemTable.objects.get(item_table_compound_id=item_table_compound_id)
+                ItemTable.objects.get(item_table_compound_id=item_table_compound_id)
             except ItemTable.DoesNotExist:
-                return not_found_response(object_name=_('The item table')) 
+                return Response({"error":[_( "The item table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             if req_user_is_agent_without_all_estabs(request.user):
                 categories = get_categories_to_create_item_by_agent_without_all_estabs(request.user, item_table_compound_id)
                 return Response(CategoryPOSTSerializer(categories, many=True).data)
@@ -264,7 +265,7 @@ class SpecificItemView(APIView):
                 return unauthorized_response
             try:
                 item.delete()
-                return Response("Item deleted")
+                return Response(_("Item deleted"))
             except ProtectedError:
                 return protected_error_response(object_name=_('item'))
             except Exception as error:
@@ -288,17 +289,17 @@ class fetchItemsToCreatePriceTable(APIView):
     def get(self, request, item_table_compound_id):
         if has_permission(request.user, 'create_price_table'):
             if item_table_compound_id.split("&")[0] != request.user.contracting.contracting_code:
-                return not_found_response(object_name=_('The item table')) # TODO Translate it
+                return Response({"error":[_( "The item table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 item_table = ItemTable.objects.get(item_table_compound_id=item_table_compound_id)
             except Company.DoesNotExist:
-                return not_found_response(object_name=_('The item table'))
+                return Response({"error":[_( "The item table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             if req_user_is_agent_without_all_estabs(request.user):
                 agent_item_tables = get_agent_item_tables(request.user)
                 if item_table in agent_item_tables:
                     items = Item.objects.filter(item_table=item_table, status=1)
                     return Response(ItemPOSTSerializer(items, many=True).data)
-                return not_found_response(object_name=_('The item table'))
+                return Response({"error":[_( "The item table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             items = Item.objects.filter(item_table=item_table, status=1)
             return Response(ItemPOSTSerializer(items, many=True).data)
         return unauthorized_response
@@ -335,15 +336,15 @@ class SpecificPriceTableView(APIView):
     def put(self, request, price_table_compound_id):
         if has_permission(request.user, 'update_price_table'):
             if price_table_compound_id.split("&")[0] != request.user.contracting.contracting_code:
-                return not_found_response(object_name=_('The price table'))
+                return Response({"error":[_( "The price table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 instance = PriceTable.objects.get(price_table_compound_id=price_table_compound_id)
             except PriceTable.DoesNotExist:
-                return not_found_response(object_name=_('The price table'))
+                return Response({"error":[_( "The price table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             # Agent without access to all establishments should not access some price_tables
             request_user_is_agent_without_all_estabs = req_user_is_agent_without_all_estabs(request.user)
             if request_user_is_agent_without_all_estabs and not agent_has_access_to_this_price_table(request.user, instance):
-                return not_found_response(object_name=_('The price table'))
+                return Response({"error":[_( "The price table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             serializer = SpecificPriceTablePUTSerializer(instance, data=request.data, 
                     context={"request": request,"req_user_is_agent_without_all_estabs": request_user_is_agent_without_all_estabs})
             if serializer.is_valid():
@@ -360,19 +361,20 @@ class SpecificPriceTableView(APIView):
     def delete(self, request, price_table_compound_id):
         if has_permission(request.user, 'delete_price_table'):
             if price_table_compound_id.split("&")[0] != request.user.contracting.contracting_code:
-                return not_found_response(object_name=_('The price table'))
+                return Response({"error":[_( "The price table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 instance = PriceTable.objects.get(price_table_compound_id=price_table_compound_id)
             except PriceTable.DoesNotExist:
-                return not_found_response(object_name=_('The price table'))
+                return Response({"error":[_( "The price table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             if req_user_is_agent_without_all_estabs(request.user) and \
                     not agent_has_access_to_this_price_table(request.user, instance):
                 return unauthorized_response
             try:
                 instance.delete()
-                return Response("Price table deleted successfully")
+                return Response(_("Price table deleted successfully"))
             except ProtectedError:
-                return protected_error_response(object_name=_('price table'))
+                return Response({"error":[_("You cannot delete this price table because it has records linked to it.")]}, 
+                        status=status.HTTP_400_BAD_REQUEST) 
             except Exception as error:
                 print(error)
                 return unknown_exception_response(action=_('delete price table'))
@@ -384,11 +386,11 @@ class GetPriceItemByClientUserView(APIView):
             try:
                 price_table = PriceTable.objects.get(clientestablishment__client__client_compound_id=request.user.client.client_compound_id, clientestablishment__establishment__establishment_compound_id=establishment_compound_id)
             except PriceTable.DoesNotExist:
-                return not_found_response(object_name=_('The price table'))
+                return Response({"error":[_( "The price table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 price_items = PriceItem.objects.filter(price_table=price_table)
             except PriceItem.DoesNotExist:
-                return not_found_response(object_name=_('The price items'))
+                return Response({"error":[_("The price items were not found.")]}, status=status.HTTP_404_NOT_FOUND)
             return Response(ForTablePriceItemSerializer(price_items, many=True).data)
         return unauthorized_response
 
@@ -398,15 +400,15 @@ class PriceItemForAgentsView(APIView):
             try:
                 price_table = PriceTable.objects.get(price_table_compound_id=price_table_compound_id)
             except PriceTable.DoesNotExist:
-                return not_found_response(object_name=_('The price table'))
+                return Response({"error":[_( "The price table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 price_items = PriceItem.objects.filter(price_table=price_table)
             except PriceItem.DoesNotExist:
-                return not_found_response(object_name=_('The price items'))
+                return Response({"error":[_("The price items were not found.")]}, status=status.HTTP_404_NOT_FOUND)
             if req_user_is_agent_without_all_estabs(request.user):
                 agent_price_tables = get_price_tables_by_agent(request.user)
                 if not price_table in agent_price_tables:
-                    return not_found_response(object_name=_('The price table'))
+                    return Response({"error":[_( "The price table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             return Response(ForTablePriceItemSerializer(price_items, many=True).data)
         return unauthorized_response
 
@@ -422,7 +424,7 @@ class SpecificPriceItemView(APIView):
             try:
                 price_table = PriceTable.objects.get(price_table_compound_id=price_table_compound_id)
             except PriceTable.DoesNotExist:
-                return not_found_response(object_name=_('The price table'))
+                return Response({"error":[_( "The price table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 item = Item.objects.get(item_compound_id=item_compound_id)
             except Item.DoesNotExist:
@@ -463,7 +465,7 @@ class SpecificPriceItemView(APIView):
     def delete(self, request, price_table_compound_id, item_compound_id):
         if has_permission(request.user, 'create_or_update_price_item'):
             if price_table_compound_id.split("&")[0] != request.user.contracting.contracting_code:
-                return not_found_response(object_name=_('The price table'))
+                return Response({"error":[_( "The price table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             if item_compound_id.split("&")[0] != request.user.contracting.contracting_code:
                 return not_found_response(object_name=_('The item'))
             try:
@@ -473,7 +475,7 @@ class SpecificPriceItemView(APIView):
                 return not_found_response(object_name=_('The price item'))
             try:
                 instance.delete()
-                return Response("Price item deleted successfully")
+                return Response(_("Price item deleted successfully"))
             except ProtectedError:
                 return protected_error_response(object_name=_('price item'))
             except Exception as error:

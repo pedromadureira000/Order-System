@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-03 11:45-0300\n"
+"POT-Creation-Date: 2022-04-01 13:26-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,934 +17,566 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: core/middleware.py:23
-msgid "Invalid session. Try to login again."
-msgstr "Sessão invalida. Tente logar novamente."
-
-#: core/middleware.py:30
-msgid "Session already open."
-msgstr "A Sessão já esta aberta."
-
-#: core/models.py:15
-msgid "Disabled"
-msgstr "Desabilitado"
-
-#: core/models.py:16
-msgid "Active"
-msgstr "Ativo"
-
-#: core/models.py:25 core/models.py:43 core/models.py:80 core/models.py:165
-#: core/views.py:102 orders/models.py:17
-msgid "contracting"
-msgstr "contratante"
-
-#: core/models.py:26
-msgid "contractings"
-msgstr "contratantes"
-
-#: core/models.py:27
-msgid "contracting code"
-msgstr "código da contratante"
-
-#: core/models.py:28 core/models.py:47 core/models.py:65 core/models.py:96
-msgid "name"
-msgstr "nome"
-
-#: core/models.py:30
-msgid "active users limit"
-msgstr "limite de usuários ativos"
-
-#: core/models.py:31 core/models.py:50 core/models.py:68 core/models.py:83
-#: core/models.py:100 core/models.py:175 orders/models.py:20
-#: orders/models.py:34 orders/models.py:76 orders/models.py:119
-msgid "note"
-msgstr "observação"
-
-#: core/models.py:39 core/models.py:63 core/views.py:169 orders/models.py:72
-#: orders/models.py:110
-msgid "company"
-msgstr "empresa"
-
-#: core/models.py:40
-msgid "companies"
-msgstr "empresas"
-
-#: core/models.py:42
-msgid "company compound id"
-msgstr "id composto da empresa"
-
-#: core/models.py:44
-msgid "company code"
-msgstr "código da empresa"
-
-#: core/models.py:45 orders/models.py:13 orders/models.py:45 orders/views.py:76
+#: item/models.py:12 item/models.py:44 organization/models.py:33
 msgid "item table"
 msgstr "tabela de itens"
 
-#: core/models.py:46 core/models.py:76 core/models.py:93 core/views.py:303
-msgid "client table"
-msgstr "tabela de clientes"
-
-#: core/models.py:48
-msgid "CNPJ root"
-msgstr "Raiz do CNPJ"
-
-#: core/models.py:59 core/models.py:109 core/models.py:118 core/views.py:236
-#: orders/models.py:111
-msgid "establishment"
-msgstr "estabelecimento"
-
-#: core/models.py:60 core/models.py:99
-msgid "establishments"
-msgstr "estabelecimentos"
-
-#: core/models.py:62
-msgid "establishment compound id"
-msgstr "id composto do estabelecimento"
-
-#: core/models.py:64
-msgid "establishment code"
-msgstr "código do estabelecimento"
-
-#: core/models.py:77
-msgid "client tables"
-msgstr "tabelas de clientes"
-
-#: core/models.py:79
-msgid "client table compound id"
-msgstr "id composto da tabela de clientes"
-
-#: core/models.py:81
-msgid "client table code"
-msgstr "código da tabela de cliente"
-
-#: core/models.py:82 orders/models.py:19 orders/models.py:33
-#: orders/models.py:49 orders/models.py:74
-msgid "description"
-msgstr "descrição"
-
-#: core/models.py:92
-msgid "client compound id"
-msgstr "id composto do cliente"
-
-#: core/models.py:94
-msgid "client code"
-msgstr "código do cliente"
-
-#: core/models.py:95
-msgid "vendor code"
-msgstr "código do vendedor"
-
-#: core/models.py:106
-msgid "client establishment"
-msgstr "estabelecimento do cliente"
-
-#: core/models.py:107
-msgid "client establishments"
-msgstr "estabelecimentos do cliente"
-
-#: core/models.py:110 core/views.py:387 orders/models.py:109
-msgid "client"
-msgstr "cliente"
-
-#: core/models.py:111 orders/models.py:67 orders/models.py:86
-#: orders/models.py:112 orders/views.py:306
-msgid "price table"
-msgstr "tabela de preço"
-
-#: core/models.py:115
-msgid "agent establishment"
-msgstr "estabelecimento do agente"
-
-#: core/models.py:116 core/models.py:167
-msgid "agent establishments"
-msgstr "estabelecimentos do agente"
-
-#: core/models.py:119 core/views.py:655
-msgid "agent"
-msgstr "agente"
-
-#: core/models.py:162 core/models.py:199 orders/models.py:149
-msgid "user"
-msgstr "usuário"
-
-#: core/models.py:163
-msgid "users"
-msgstr "usuários"
-
-#: core/models.py:166
-msgid "client company"
-msgstr "empresa do cliente"
-
-#: core/models.py:168
-msgid "user code"
-msgstr "código do usuário"
-
-#: core/models.py:169
-msgid "username"
-msgstr "username"
-
-#: core/models.py:170
-msgid "first name"
-msgstr "nome"
-
-#: core/models.py:171
-msgid "last name"
-msgstr "sobrenome"
-
-#: core/models.py:174
-msgid "date joined"
-msgstr "data de entrada"
-
-#: core/models.py:201
-msgid "sesssion key"
-msgstr "chave da sessão"
-
-#: core/serializers.py:39
-msgid "The 'company_code' field must be unique."
-msgstr "O campo 'company_code' deve ser único"
-
-#: core/serializers.py:45 core/serializers.py:180 core/serializers.py:435
-msgid "Client table not found."
-msgstr "Tabela de cliente não encontrada."
-
-#: core/serializers.py:53 orders/serializers.py:48 orders/serializers.py:52
-#: orders/serializers.py:85 orders/serializers.py:91
-msgid "Item table not found."
-msgstr "Tabela de itens não encontrada."
-
-#: core/serializers.py:74
-msgid "The 'establishment_code' field must be unique by company."
-msgstr "O campo 'establishment_code' deve ser único por empresa."
-
-#: core/serializers.py:79 orders/serializers.py:169 orders/serializers.py:172
-msgid "Company not found."
-msgstr "Empresa não encontrada."
-
-#: core/serializers.py:103
-msgid "The 'client_table_code' field must be unique."
-msgstr "O campo 'client_table_code' deve ser único."
-
-#: core/serializers.py:127 core/serializers.py:308 orders/serializers.py:259
-#: orders/serializers.py:277 orders/serializers.py:415
-msgid "Establishment not found."
-msgstr "Estabelecimento não encontrado."
-
-#: core/serializers.py:136
-msgid "You can't add this price table to this 'client_establishment'."
-msgstr "Você não pode adicionar essa tabela de preço a esse 'client_establishment'."
-
-#: core/serializers.py:148
-msgid "The 'client_code' field must be unique by client table."
-msgstr "O campo 'client_code' deve ser único por tabela de cliente."
-
-#: core/serializers.py:160
-msgid "There is a duplicate establishment in 'client_establishments'"
-msgstr "Existe um estabelecimento duplicado em 'client_establishments'"
-
-#: core/serializers.py:166 core/serializers.py:171
-#, python-brace-format
-msgid ""
-"The 'client_table' field from the company which owns the establishment "
-"{estab} does not correspond with the 'client_table' to which this client "
-"belongs."
-msgstr ""
-"O campo 'client_table' da empresa que possui o estabelecimento "
-"{estab} não corresponde com o 'client_table' da qual esse cliente "
-"pertence."
-
-#: core/serializers.py:175
-msgid "You can't add this establishment to this client."
-msgstr "Você não pode adicionar esse estabelecimento nesse cliente."
-
-#: core/serializers.py:184
-msgid "Can't access this client_table."
-msgstr "Não pode acessar essa tabela de cliente."
-
-#: core/serializers.py:244
-msgid "The 'username' field must be unique."
-msgstr "O campo 'username' deve ser único."
-
-#: core/serializers.py:256
-msgid ""
-"You cannot create more users. Your contracting company already reach the "
-"active users limit."
-msgstr ""
-"Você não pode criar mais usuários. Sua contratante já alcançou o limite de "
-"usuários ativos."
-
-#: core/serializers.py:260
-msgid "User not found."
-msgstr "Usuário não encontrado."
-
-#: core/serializers.py:379
-msgid "There are duplicate values for agent_establishments."
-msgstr "Existem valores duplicados para 'agent_establishments'"
-
-#: core/serializers.py:438
-msgid "You have no permission to assign this client to this client user."
-msgstr ""
-"Você não possui permissão para atribuir esse cliente a esse usuário cliente."
-
-#: core/serializers.py:441
-msgid ""
-"You cannot create a client user for this client, because it already exists."
-msgstr ""
-"Você não pode criar um usuário cliente para esse cliente, pois já existe um usuário."
-
-#: core/templates/password_reset.html:4
-#, python-format
-msgid "Password reset on %(site_name)s"
-msgstr "Redefinição de senha em %(site_name)s"
-
-#: core/templates/password_reset.html:9 core/templates/password_reset.html:22
-#, python-format
-msgid ""
-"You're receiving this email because you requested a password reset for your "
-"user account at %(site_name)s."
-msgstr ""
-"Você está recebendo esse email por que requisitou uma redefinição de senha "
-"em sua conta de usuário em %(site_name)s."
-
-#: core/templates/password_reset.html:11 core/templates/password_reset.html:24
-msgid "Please go to the following page and choose a new password:"
-msgstr "Por favor vá para a seguinte página e crie uma nova senha:"
-
-#: core/templates/password_reset.html:13 core/templates/password_reset.html:26
-msgid "Your email, in case you've forgotten:"
-msgstr "Seu email, caso você tenha esquecido:"
-
-#: core/templates/password_reset.html:15 core/templates/password_reset.html:28
-msgid "Thanks for using our site!"
-msgstr "Obrigado por usar nosso site!"
-
-#: core/templates/password_reset.html:17 core/templates/password_reset.html:30
-#, python-format
-msgid "The %(site_name)s team"
-msgstr "Equipe %(site_name)s "
-
-#: core/validators.py:46
-msgid "There are duplicate values for agent_permissions"
-msgstr "Existem valores duplicados para 'agent_permissions'"
-
-#: core/validators.py:49
-#, python-brace-format
-msgid "You can't assign '{permission}' permission to an agent."
-msgstr "Você não pode atribuir a permissão '{permission}' para um agente."
-
-#: core/views.py:19
-msgid "You don't have permission to access this resource."
-msgstr "Você não tem permissão para acessar esse recurso."
-
-#: core/views.py:29
-#, python-brace-format
-msgid "{object_name} was not found."
-msgstr "{object_name} não foi encontrado."
-
-#: core/views.py:35
-#, python-brace-format
-msgid ""
-"You cannot delete this {object_name} because it has records linked to it."
-msgstr ""
-"Você não pode deletar esse {object_name} pois ele possui registro ligados a "
-"ele."
-
-#: core/views.py:38
-#, python-brace-format
-msgid "Something went wrong when trying to {action}."
-msgstr "Algo deu errado ao tentar {action}."
-
-#: core/views.py:65
-msgid "create contracting"
-msgstr "criar contratante"
-
-#: core/views.py:79 core/views.py:97
-msgid "The contracting"
-msgstr "A contratante"
-
-#: core/views.py:88
-msgid "update contracting"
-msgstr "atualizar contratante"
-
-#: core/views.py:100
-msgid "Contracting deleted."
-msgstr "Contratante excluída."
-
-#: core/views.py:106
-msgid "delete contracting"
-msgstr "excluir contratante"
-
-#: core/views.py:130
-msgid "create company"
-msgstr "criar empresa"
-
-#: core/views.py:140 core/views.py:144 core/views.py:160 core/views.py:164
-msgid "The company"
-msgstr "A empresa"
-
-#: core/views.py:153
-msgid "update company"
-msgstr "atualizar empresa"
-
-#: core/views.py:167
-msgid "Company deleted"
-msgstr "Empresa excluída"
-
-#: core/views.py:173
-msgid "delete company"
-msgstr "empresa excluída"
-
-#: core/views.py:197
-msgid "create establishment"
-msgstr "criar estabelecimento"
-
-#: core/views.py:207 core/views.py:211 core/views.py:227 core/views.py:231
-msgid "The establishment"
-msgstr "O estabelecimento"
-
-#: core/views.py:220
-msgid "update establishment"
-msgstr "atualizar estabelecimento"
-
-#: core/views.py:234
-msgid "Establishment deleted"
-msgstr "Estabelecimento excluído"
-
-#: core/views.py:240
-msgid "delete establishment"
-msgstr "excluir estabelecimento"
-
-#: core/views.py:264
-msgid "create client table"
-msgstr "criar tabela de clientes"
-
-#: core/views.py:274 core/views.py:278 core/views.py:294 core/views.py:298
-msgid "The client table"
-msgstr "A tabela de clientes"
-
-#: core/views.py:287
-msgid "update client table"
-msgstr "atualizar tabela de clientes"
-
-#: core/views.py:301
-msgid "Client table deleted"
-msgstr "Tabela de clientes excluída"
-
-#: core/views.py:307
-msgid "delete client table"
-msgstr "tabela de clientes"
-
-#: core/views.py:337
-msgid "create client"
-msgstr "criar cliente"
-
-#: core/views.py:349 core/views.py:353 core/views.py:357 core/views.py:375
-#: core/views.py:379 orders/views.py:350
-msgid "The client"
-msgstr "O cliente"
-
-#: core/views.py:367
-msgid "update client"
-msgstr "atualizar cliente"
-
-#: core/views.py:385
-msgid "Client deleted"
-msgstr "Cliente excluído"
-
-#: core/views.py:391
-msgid "delete client"
-msgstr "cliente excluído"
-
-#: core/views.py:400
-msgid "csrf cookie set"
-msgstr "cookie csrf enviado"
-
-#: core/views.py:407
-msgid "User is already authenticated"
-msgstr "O usuário já está autenticado"
-
-#: core/views.py:414 orders/serializers.py:269 orders/serializers.py:395
-msgid "Your account is disabled."
-msgstr "Sua conta está desabilitada"
-
-#: core/views.py:417
-msgid "The login is disabled"
-msgstr "O login está desabilitado"
-
-#: core/views.py:421
-msgid "The login failed"
-msgstr "O login falhou"
-
-#: core/views.py:429
-msgid "Logged out"
-msgstr "Deslogado"
-
-#: core/views.py:432
-msgid "log out"
-msgstr "deslogar"
-
-#: core/views.py:444
-msgid "get request user profile"
-msgstr "obter perfil do usuário da requisição"
-
-#: core/views.py:455
-msgid "update request user profile"
-msgstr "atualizar perfil do usuário da requisição"
-
-#: core/views.py:476
-msgid "create erp user"
-msgstr "criar usuário ERP"
-
-#: core/views.py:500
-msgid "update erp user"
-msgstr "atualizar usuário ERP"
-
-#: core/views.py:510
-msgid "The erp user"
-msgstr "O usuário ERP"
-
-#: core/views.py:513
-msgid "ERP user deleted successfully."
-msgstr "Usuário ERP excluído com sucesso"
-
-#: core/views.py:515
-msgid "erp user"
-msgstr "usuário ERP"
-
-#: core/views.py:519
-msgid "delete erp user"
-msgstr "excluir usuário ERP"
-
-#: core/views.py:541
-msgid "create admin agent"
-msgstr "criar agente administrador"
-
-#: core/views.py:551 core/views.py:556 core/views.py:575 core/views.py:580
-msgid "The admin agent"
-msgstr "O agente administrador"
-
-#: core/views.py:567
-msgid "update admin agent"
-msgstr "atualizar agente administrador"
-
-#: core/views.py:583
-msgid "Admin agent deleted successfully"
-msgstr "Agente administrador excluído com sucesso."
-
-#: core/views.py:585
-msgid "admin agent"
-msgstr "agente administrador"
-
-#: core/views.py:589
-msgid "delete admin agent"
-msgstr "excluir agente administrador"
-
-#: core/views.py:611
-msgid "create agent"
-msgstr "criar agente"
-
-#: core/views.py:621 core/views.py:626 core/views.py:645 core/views.py:650
-msgid "The agent"
-msgstr "O agente"
-
-#: core/views.py:637
-msgid "update agent"
-msgstr "atualizar agente"
-
-#: core/views.py:653
-msgid "Agent deleted successfully"
-msgstr "Agente excluído com sucesso"
-
-#: core/views.py:659
-msgid "delete agent"
-msgstr "excluir agente"
-
-#: core/views.py:687
-msgid "create client user"
-msgstr "criar usuário cliente"
-
-#: core/views.py:697 core/views.py:702 core/views.py:705 core/views.py:723
-#: core/views.py:728
-msgid "The client user"
-msgstr "O usuário cliente"
-
-#: core/views.py:716
-msgid "update client user"
-msgstr "atualizar usuário cliente"
-
-#: core/views.py:735
-msgid "Client user deleted successfully"
-msgstr "Usuário cliente excluído com sucesso"
-
-#: core/views.py:737 orders/models.py:108
-msgid "client user"
-msgstr "usuário cliente"
-
-#: core/views.py:741
-msgid "delete client user"
-msgstr "excluir usuário cliente"
-
-#: core/views.py:751
-msgid "Password field not sent"
-msgstr "Senha não enviada"
-
-#: core/views.py:753
-msgid "Current Password field not sent"
-msgstr "A senha atual não foi enviada"
-
-#: core/views.py:757
-msgid "Password updated"
-msgstr "Senha atualizada"
-
-#: core/views.py:758
-msgid "passwords don't match"
-msgstr "senhas não coincidem"
-
-#: orders/models.py:14
+#: item/models.py:13
 msgid "item tables"
 msgstr "tabelas de itens"
 
-#: orders/models.py:16
+#: item/models.py:15
 msgid "item table compound id"
 msgstr "id composto da tabela de itens"
 
-#: orders/models.py:18
+#: item/models.py:16 organization/models.py:13 organization/models.py:31
+#: organization/models.py:68 user/models.py:66
+msgid "contracting"
+msgstr "contratante"
+
+#: item/models.py:17
 msgid "item table code"
 msgstr "código da tabela de itens"
 
-#: orders/models.py:27 orders/views.py:154
+#: item/models.py:18 item/models.py:32 item/models.py:48 item/models.py:69
+#: organization/models.py:70
+msgid "description"
+msgstr "descrição"
+
+#: item/models.py:19 item/models.py:33 item/models.py:71 order/models.py:33
+#: organization/models.py:19 organization/models.py:38
+#: organization/models.py:56 organization/models.py:71
+#: organization/models.py:88 user/models.py:76
+msgid "note"
+msgstr "observação"
+
+#: item/models.py:26
 msgid "item category"
 msgstr "categoria de item"
 
-#: orders/models.py:28
+#: item/models.py:27
 msgid "item categories"
 msgstr "categorias de item"
 
-#: orders/models.py:31
+#: item/models.py:30
 msgid "item category compound id"
 msgstr "id composto da categoria de item"
 
-#: orders/models.py:32
+#: item/models.py:31
 msgid "category code"
 msgstr "código da categoria"
 
-#: orders/models.py:42 orders/models.py:87 orders/models.py:133
-#: orders/views.py:230
+#: item/models.py:41 item/models.py:82 item/views.py:270 order/models.py:47
 msgid "item"
 msgstr "item"
 
-#: orders/models.py:43 orders/models.py:75 orders/models.py:113
+#: item/models.py:42 item/models.py:70 order/models.py:27
 msgid "items"
 msgstr "itens"
 
-#: orders/models.py:46
+#: item/models.py:45
 msgid "item compound id"
 msgstr "id composto do item"
 
-#: orders/models.py:47
+#: item/models.py:46
 msgid "item code"
 msgstr "código do item"
 
-#: orders/models.py:48
+#: item/models.py:47
 msgid "category"
 msgstr "categoria"
 
-#: orders/models.py:50
+#: item/models.py:49
 msgid "unit"
 msgstr "unidade"
 
-#: orders/models.py:51
+#: item/models.py:50
 msgid "barcode"
 msgstr "código de barra"
 
-#: orders/models.py:53
+#: item/models.py:52
 msgid "image"
 msgstr "imagem"
 
-#: orders/models.py:54
+#: item/models.py:53
 msgid "technical description"
 msgstr "descrição técnica"
 
-#: orders/models.py:68
+#: item/models.py:62 item/models.py:81 order/models.py:26
+#: organization/models.py:99
+msgid "price table"
+msgstr "tabela de preço"
+
+#: item/models.py:63
 msgid "price tables"
 msgstr "tabelas de preço"
 
-#: orders/models.py:70
+#: item/models.py:65
 msgid "price table compound id"
 msgstr "id composto da tabela de preço"
 
-#: orders/models.py:73
+#: item/models.py:67 order/models.py:24 organization/models.py:27
+#: organization/models.py:51
+msgid "company"
+msgstr "empresa"
+
+#: item/models.py:68
 msgid "table_code"
 msgstr "código da tabela"
 
-#: orders/models.py:82 orders/views.py:409
+#: item/models.py:77 item/views.py:480
 msgid "price item"
 msgstr "item preço"
 
-#: orders/models.py:83
+#: item/models.py:78
 msgid "price items"
 msgstr "itens preço"
 
-#: orders/models.py:88 orders/models.py:135
+#: item/models.py:83 order/models.py:49
 msgid "unit price"
 msgstr "preço unitário"
 
-#: orders/models.py:89
+#: item/models.py:84
 msgid "last modified"
 msgstr "última modificação"
 
-#: orders/models.py:90
+#: item/models.py:85
 msgid "creation date"
 msgstr "data de criação"
 
-#: orders/models.py:94
-msgid "Typing"
-msgstr "Digitação"
-
-#: orders/models.py:95
-msgid "Transferred"
-msgstr "Transferido"
-
-#: orders/models.py:96
-msgid "Registered"
-msgstr "Registrado"
-
-#: orders/models.py:97
-msgid "Invoiced"
-msgstr ""
-
-#: orders/models.py:98
-msgid "Delivered"
-msgstr "Entregue"
-
-#: orders/models.py:99
-msgid "Canceled"
-msgstr "Cancelado"
-
-#: orders/models.py:104 orders/models.py:132 orders/models.py:148
-msgid "order"
-msgstr "pedido"
-
-#: orders/models.py:105
-msgid "orders"
-msgstr "pedidos"
-
-#: orders/models.py:107
-msgid "order number"
-msgstr "número do pedido"
-
-#: orders/models.py:115
-msgid "order date"
-msgstr "data do pedido"
-
-#: orders/models.py:116
-msgid "invoicing date"
-msgstr "data do faturamento"
-
-#: orders/models.py:117
-msgid "invoice number"
-msgstr "numero da nota"
-
-#: orders/models.py:118
-msgid "order amount"
-msgstr "valor total do pedido"
-
-#: orders/models.py:120 orders/models.py:152
-msgid "agent note"
-msgstr "observação do agente"
-
-#: orders/models.py:129
-msgid "ordered Item"
-msgstr "item pedido"
-
-#: orders/models.py:130
-msgid "ordered Items"
-msgstr "itens pedidos"
-
-#: orders/models.py:134
-msgid "quantity"
-msgstr "quantidade"
-
-#: orders/models.py:136 orders/models.py:153
-msgid "date"
-msgstr "data"
-
-#: orders/models.py:140 orders/models.py:141
-msgid "order history"
-msgstr "histórico do pedido"
-
-#: orders/models.py:144
-msgid "Inclusion"
-msgstr "Inclusão"
-
-#: orders/models.py:145
-msgid "Alteration"
-msgstr "Alteração"
-
-#: orders/models.py:146
-msgid "Note"
-msgstr "Observação"
-
-#: orders/models.py:150
-msgid "history type"
-msgstr "tipo do histórico"
-
-#: orders/models.py:151
-msgid "history description"
-msgstr "descrição do histórico"
-
-#: orders/serializers.py:21
+#: item/serializers.py:21
 msgid "The 'item_table_code' field must be unique."
 msgstr "O campo 'item_table_code' deve ser único."
 
-#: orders/serializers.py:40
+#: item/serializers.py:42
 msgid "The 'category_code' field must be unique by 'item_table'."
 msgstr "O campo 'category_code' deve ser único por tabela de item."
 
-#: orders/serializers.py:76
+#: item/serializers.py:49 item/serializers.py:53 item/serializers.py:86
+#: item/serializers.py:92 organization/serializers.py:46
+msgid "Item table not found."
+msgstr "Tabela de itens não encontrada."
+
+#: item/serializers.py:78
 msgid "The 'item_code' field  must be unique by 'item_table'."
 msgstr "O campo 'item_code' deve ser único por tabela de itens."
 
-#: orders/serializers.py:88 orders/serializers.py:101
+#: item/serializers.py:89 item/serializers.py:119
 msgid "You cannot choose this category because it is from another item table."
 msgstr ""
-"Você não pode escolher essa categoria, pois ela pertence a outra tabela de item. "
+"Você não pode escolher essa categoria, pois ela pertence a outra tabela de "
+"item. "
 
-#: orders/serializers.py:98
+#: item/serializers.py:116
 msgid "Item category not found."
 msgstr "Categoria de itens não encontrada."
 
-#: orders/serializers.py:129
+#: item/serializers.py:135
 #, python-brace-format
 msgid "Item with id '{item_id}' was not found."
 msgstr "Item com id '{item_id}' não foi encontrado."
 
-#: orders/serializers.py:149
+#: item/serializers.py:163
 msgid "The 'table_code' field must be unique by 'company'."
 msgstr "O campo 'table_code' deve ser único por empresa."
 
-#: orders/serializers.py:160 orders/serializers.py:203 orders/views.py:363
+#: item/serializers.py:174 item/serializers.py:223 item/views.py:434
 msgid "The item must belong to the company that owns the price table."
 msgstr "O item deve pertencer a empresa que possui a tabela de preço."
 
-#: orders/serializers.py:163 orders/serializers.py:206
+#: item/serializers.py:177 item/serializers.py:226
 msgid "There are duplicate price items."
 msgstr "Existem valores duplicados para itens/preço."
 
-#: orders/serializers.py:253
+#: item/serializers.py:183 item/serializers.py:186
+#: organization/serializers.py:72
+msgid "Company not found."
+msgstr "Empresa não encontrada."
+
+#: item/serializers.py:189
+msgid "The company must have an item table."
+msgstr "A empresa deve possuir uma tabela de itens"
+
+#: item/views.py:43
+msgid "create item table"
+msgstr "criar tabela de itens"
+
+#: item/views.py:53 item/views.py:57 item/views.py:73 item/views.py:77
+#: item/views.py:185 item/views.py:189 item/views.py:292 item/views.py:296
+#: item/views.py:302
+msgid "The item table was not found."
+msgstr "A tabela de itens não foi encontrada."
+
+#: item/views.py:66
+msgid "update item table"
+msgstr "atualizar tabela de itens"
+
+#: item/views.py:80
+msgid "Item table deleted"
+msgstr "Tabela de itens excluída"
+
+#: item/views.py:82
+msgid "You cannot delete this item table because it has records linked to it."
+msgstr ""
+"Você não pode excluir essa tabela de itens pois ela possui registros ligados a "
+"ela."
+
+#: item/views.py:87
+msgid "delete item table"
+msgstr "excluir tabela de itens"
+
+#: item/views.py:124
+msgid "create item category"
+msgstr "criar categoria de itens"
+
+#: item/views.py:135 item/views.py:139 item/views.py:144 item/views.py:161
+#: item/views.py:165
+msgid "The item category was not found."
+msgstr "A categoria de itens não encontrada."
+
+#: item/views.py:154
+msgid "update item category"
+msgstr "atualizar categoria de itens"
+
+#: item/views.py:171
+msgid "Item category deleted"
+msgstr "Categoria de itens excluída"
+
+#: item/views.py:173
+msgid ""
+"You cannot delete this item category because it has records linked to it."
+msgstr ""
+"Você não pode excluir essa categoria de itens pois ela possui registros ligados a "
+"ela."
+
+#: item/views.py:178
+msgid "delete item category"
+msgstr "excluir categoria de itens"
+
+#: item/views.py:220
+msgid "create item"
+msgstr "criar item"
+
+#: item/views.py:232 item/views.py:236 item/views.py:241 item/views.py:258
+#: item/views.py:262 item/views.py:423 item/views.py:431 item/views.py:470
+msgid "The item"
+msgstr "O item"
+
+#: item/views.py:251
+msgid "update item"
+msgstr "atualizar item"
+
+#: item/views.py:268
+msgid "Item deleted"
+msgstr "Item excluído"
+
+#: item/views.py:274
+msgid "delete item"
+msgstr "excluir item"
+
+#: item/views.py:329 order/views.py:39
+msgid "create price table"
+msgstr "criar tabela de preço"
+
+#: item/views.py:339 item/views.py:343 item/views.py:347 item/views.py:364
+#: item/views.py:368 item/views.py:389 item/views.py:403 item/views.py:411
+#: item/views.py:427 item/views.py:468
+msgid "The price table was not found."
+msgstr "A tabela de preço não foi encontrada."
+
+#: item/views.py:357
+msgid "update price table"
+msgstr "atualizar tabela de preço"
+
+#: item/views.py:374
+msgid "Price table deleted successfully"
+msgstr "Tabela de preço excluída com sucesso"
+
+#: item/views.py:376
+msgid "You cannot delete this price table because it has records linked to it."
+msgstr ""
+"Você não pode excluir essa tabela de preço pois ela possui registros ligados a "
+"ela."
+
+#: item/views.py:380
+msgid "delete price table"
+msgstr "excluir tabela de preço"
+
+#: item/views.py:393 item/views.py:407
+msgid "The price items were not found."
+msgstr "Os itens preço não foram encontrados."
+
+#: item/views.py:421 organization/views.py:358 organization/views.py:362
+#: organization/views.py:366 organization/views.py:384
+#: organization/views.py:388
+msgid "The client"
+msgstr "O cliente"
+
+#: item/views.py:445
+msgid "get or create price item"
+msgstr "obter ou criar item preço"
+
+#: item/views.py:457
+msgid "Price item updated successfully."
+msgstr "Item preço atualizado com sucesso"
+
+#: item/views.py:461
+msgid "create or update price item"
+msgstr "criar ou atualizar item preço"
+
+#: item/views.py:475
+msgid "The price item"
+msgstr "O item preço"
+
+#: item/views.py:478
+msgid "Price item deleted successfully"
+msgstr "Item preço excluído com sucesso"
+
+#: item/views.py:483
+msgid "delete price item"
+msgstr "excluir item preço"
+
+#: order/models.py:8
+msgid "Typing"
+msgstr "Digitação"
+
+#: order/models.py:9
+msgid "Transferred"
+msgstr "Transferido"
+
+#: order/models.py:10
+msgid "Registered"
+msgstr "Registrado"
+
+#: order/models.py:11
+msgid "Invoiced"
+msgstr "Faturado"
+
+#: order/models.py:12
+msgid "Delivered"
+msgstr "Entregue"
+
+#: order/models.py:13
+msgid "Canceled"
+msgstr "Cancelado"
+
+#: order/models.py:18 order/models.py:46 order/models.py:62
+msgid "order"
+msgstr "pedido"
+
+#: order/models.py:19
+msgid "orders"
+msgstr "pedidos"
+
+#: order/models.py:21
+msgid "order number"
+msgstr "número do pedido"
+
+#: order/models.py:22 user/views.py:400
+msgid "client user"
+msgstr "usuário cliente"
+
+#: order/models.py:23 organization/models.py:98 organization/views.py:396
+msgid "client"
+msgstr "cliente"
+
+#: order/models.py:25 organization/models.py:47 organization/models.py:97
+#: organization/views.py:216 user/models.py:19
+msgid "establishment"
+msgstr "estabelecimento"
+
+#: order/models.py:29
+msgid "order date"
+msgstr "data do pedido"
+
+#: order/models.py:30
+msgid "invoicing date"
+msgstr "data do faturamento"
+
+#: order/models.py:31
+msgid "invoice number"
+msgstr "numero da nota"
+
+#: order/models.py:32
+msgid "order amount"
+msgstr "valor total do pedido"
+
+#: order/models.py:34 order/models.py:66
+msgid "agent note"
+msgstr "observação do agente"
+
+#: order/models.py:43
+msgid "ordered Item"
+msgstr "item pedido"
+
+#: order/models.py:44
+msgid "ordered Items"
+msgstr "itens pedidos"
+
+#: order/models.py:48
+msgid "quantity"
+msgstr "quantidade"
+
+#: order/models.py:50 order/models.py:67
+msgid "date"
+msgstr "data"
+
+#: order/models.py:54 order/models.py:55
+msgid "order history"
+msgstr "histórico do pedido"
+
+#: order/models.py:58
+msgid "Inclusion"
+msgstr "Inclusão"
+
+#: order/models.py:59
+msgid "Alteration"
+msgstr "Alteração"
+
+#: order/models.py:60
+msgid "Note"
+msgstr "Observação"
+
+#: order/models.py:63 user/models.py:63 user/models.py:100
+msgid "user"
+msgstr "usuário"
+
+#: order/models.py:64
+msgid "history type"
+msgstr "tipo do histórico"
+
+#: order/models.py:65
+msgid "history description"
+msgstr "descrição do histórico"
+
+#: order/serializers.py:38
 msgid ""
 "Client user cannot choose a status other then 'Typing' and 'Transferred' "
 "when creating an order."
 msgstr ""
-"Usuário cliente não pode escolher um status diferente de 'Digitação' e 'Transferido' "
-"ao criar um pedido."
+"Usuário cliente não pode escolher um status diferente de 'Digitação' e "
+"'Transferido' ao criar um pedido."
 
-#: orders/serializers.py:272 orders/serializers.py:398
+#: order/serializers.py:44 order/serializers.py:62 order/serializers.py:200
+#: organization/serializers.py:123 user/serializers.py:112
+msgid "Establishment not found."
+msgstr "Estabelecimento não encontrado."
+
+#: order/serializers.py:54 order/serializers.py:180 user/views.py:47
+msgid "Your account is disabled."
+msgstr "Sua conta está desabilitada"
+
+#: order/serializers.py:57 order/serializers.py:183
 msgid "Your contracting is disabled."
 msgstr "Sua contratante está desabilitada"
 
-#: orders/serializers.py:280
+#: order/serializers.py:65
 msgid "You cannot buy from this establishment."
 msgstr "Você não pode comprar desse estabelecimento."
 
-#: orders/serializers.py:283
+#: order/serializers.py:68
 msgid "The client company is disabled."
 msgstr "A empresa cliente está desabilitada"
 
-#: orders/serializers.py:286
+#: order/serializers.py:71
 msgid "The company is disabled."
 msgstr "A empresa está desabilitada"
 
-#: orders/serializers.py:289
+#: order/serializers.py:74
 msgid "The establishment is disabled."
 msgstr "O estabelecimento está desabilitado"
 
-#: orders/serializers.py:296 orders/serializers.py:422
+#: order/serializers.py:81 order/serializers.py:207
 msgid "You must add at least one item to the order."
 msgstr "Você deve adicionar ao menos um item ao pedido."
 
-#: orders/serializers.py:299 orders/serializers.py:427
+#: order/serializers.py:84 order/serializers.py:212
 msgid "You cannot add this item to the order."
 msgstr "Você não pode adicionar esse item ao estabelecimento."
 
-#: orders/serializers.py:302 orders/serializers.py:430
+#: order/serializers.py:87 order/serializers.py:215
 msgid "There are duplicate items."
 msgstr "Existem valores duplicados."
 
-#: orders/serializers.py:344
+#: order/serializers.py:129
 msgid "You cannot update 'note' field."
 msgstr "Você não pode atualizar o campo 'note'."
 
-#: orders/serializers.py:351
+#: order/serializers.py:136
 msgid ""
 "Client user cannot choose a status other then 'Typing' and 'Transferred' "
 "when updating an order."
 msgstr ""
-"Usuário cliente não pode escolher um status diferente de 'Digitação' e 'Transferido' "
-"ao atualizar um pedido."
+"Usuário cliente não pode escolher um status diferente de 'Digitação' e "
+"'Transferido' ao atualizar um pedido."
 
-#: orders/serializers.py:354 orders/serializers.py:419
+#: order/serializers.py:139 order/serializers.py:204
 msgid "You cannot update this order."
 msgstr "Você não pode atualizar esse pedido."
 
-#: orders/serializers.py:357 orders/serializers.py:360
-#: orders/serializers.py:363 orders/serializers.py:366
-#: orders/serializers.py:369 orders/serializers.py:372
+#: order/serializers.py:142 order/serializers.py:145 order/serializers.py:148
+#: order/serializers.py:151 order/serializers.py:154 order/serializers.py:157
 msgid "You cannot choose this option as status."
 msgstr "Você não pode escolher essa opção como status."
 
-#: orders/serializers.py:377
+#: order/serializers.py:162
 msgid "You cannot send the 'invoice number' field."
 msgstr "Você não pode enviar o campo 'invoice number'"
 
-#: orders/serializers.py:382
+#: order/serializers.py:167
 msgid "You cannot send the 'invoicing date' field."
 msgstr "Você não pode enviar o campo 'invoicing date'. "
 
-#: orders/serializers.py:401
+#: order/serializers.py:186
 msgid ""
 "You can only add invoice number when order status has changed from "
 "'Registered' to 'Invoiced'."
 msgstr ""
-"Você pode enviar o numero da nota apenas quando o status do pedido estiver mudando de 'Registrado' para 'Faturado'. "
+"Você pode enviar o numero da nota apenas quando o status do pedido estiver "
+"mudando de 'Registrado' para 'Faturado'. "
 
-#: orders/serializers.py:404
+#: order/serializers.py:189
 msgid ""
 "You can only add invoicing date when order status has changed from "
 "'Registered 'to 'Invoiced'."
 msgstr ""
-"Você pode enviar a data de faturamento apenas quando o status do pedido estiver mudando de 'Registrado' para 'Faturado'. "
+"Você pode enviar a data de faturamento apenas quando o status do pedido "
+"estiver mudando de 'Registrado' para 'Faturado'. "
 
-#: orders/serializers.py:407
+#: order/serializers.py:192
 msgid ""
 "You need send invoice number when order status has changed from 'Registered' "
 "to 'Invoiced'."
-msgstr "Você deve enviar o numero da nota quando o status do pedido estiver mudando de 'Registrado' para 'Faturado'."
+msgstr ""
+"Você deve enviar o numero da nota quando o status do pedido estiver mudando "
+"de 'Registrado' para 'Faturado'."
 
-#: orders/serializers.py:410
+#: order/serializers.py:195
 msgid ""
 "You need send invoicing date when order status has changed from 'Registered "
 "'to 'Invoiced'."
-msgstr "Você deve enviar a data do faturamento quando o status do pedido estiver mudando de 'Registrado' para 'Faturado'."
+msgstr ""
+"Você deve enviar a data do faturamento quando o status do pedido estiver "
+"mudando de 'Registrado' para 'Faturado'."
 
-#: orders/serializers.py:438
+#: order/serializers.py:223
 msgid "You have not changed any fields."
 msgstr "Você não alterou nenhum campo."
 
-#: orders/signals.py:25
+#: order/signals.py:25
 msgid "Order created with 'Typing' status."
 msgstr "Pedido criado com status 'Digitação'"
 
-#: orders/signals.py:27
+#: order/signals.py:27
 msgid "Order created with 'Transferred' status."
 msgstr "Pedido criado com status 'Transferido'"
 
-#: orders/signals.py:36
+#: order/signals.py:36
 #, python-brace-format
 msgid "- Order status changed from '{old_status}' to '{new_status}'."
 msgstr "- Status do pedido alterado de '{old_status}' para '{new_status}'."
 
-#: orders/signals.py:45
+#: order/signals.py:45
 #, python-brace-format
 msgid ""
 "\n"
@@ -953,7 +585,7 @@ msgstr ""
 "\n"
 "- Valor total do pedido alterado de '{old_amount}' para '{new_amount}'."
 
-#: orders/signals.py:48
+#: order/signals.py:48
 msgid ""
 "\n"
 "- Order note changed."
@@ -961,7 +593,7 @@ msgstr ""
 "\n"
 "- Observação do pedido alterada."
 
-#: orders/signals.py:54
+#: order/signals.py:54
 msgid ""
 "\n"
 " - Agent note added."
@@ -969,137 +601,528 @@ msgstr ""
 "\n"
 " - Observação do agente adicionada."
 
-#: orders/validators.py:6
-msgid "This field cannot be an negative number."
-msgstr "Esse campo não pode ser um número negativo"
-
-#: orders/validators.py:10
-msgid "This field must be an positive number."
-msgstr "Esse campo pode ser um número positivo"
-
-#: orders/views.py:37
-msgid "create item table"
-msgstr "criar tabela de itens"
-
-#: orders/views.py:47 orders/views.py:51 orders/views.py:67 orders/views.py:71
-msgid "Item table"
-msgstr "Tabela de itens"
-
-#: orders/views.py:60
-msgid "update item table"
-msgstr "atualizar tabela de itens"
-
-#: orders/views.py:74
-msgid "Item table deleted"
-msgstr "Tabela de itens excluída"
-
-#: orders/views.py:80
-msgid "delete item table"
-msgstr "excluir tabela de itens"
-
-#: orders/views.py:105
-msgid "create item category"
-msgstr "criar categoria de itens"
-
-#: orders/views.py:116 orders/views.py:120 orders/views.py:125
-#: orders/views.py:146
-msgid "The item category"
-msgstr "A categoria de itens"
-
-#: orders/views.py:135
-msgid "update item category"
-msgstr "atualizar categoria de itens"
-
-#: orders/views.py:142
-msgid "The category"
-msgstr "A categoria"
-
-#: orders/views.py:152
-msgid "Item category deleted"
-msgstr "Categoria de itens excluída"
-
-#: orders/views.py:158
-msgid "delete item category"
-msgstr "excluir categoria de itens"
-
-#: orders/views.py:182
-msgid "create item"
-msgstr "criar item"
-
-#: orders/views.py:192 orders/views.py:196 orders/views.py:201
-#: orders/views.py:218 orders/views.py:222 orders/views.py:352
-#: orders/views.py:360 orders/views.py:399
-msgid "The item"
-msgstr "O item"
-
-#: orders/views.py:211
-msgid "update item"
-msgstr "atualizar item"
-
-#: orders/views.py:228
-msgid "Item deleted"
-msgstr "Item excluído"
-
-#: orders/views.py:234
-msgid "delete item"
-msgstr "excluir item"
-
-#: orders/views.py:259 orders/views.py:440
-msgid "create price table"
-msgstr "criar tabela de preço"
-
-#: orders/views.py:269 orders/views.py:273 orders/views.py:277
-#: orders/views.py:294 orders/views.py:298 orders/views.py:318
-#: orders/views.py:332 orders/views.py:340 orders/views.py:356
-#: orders/views.py:397
-msgid "The price table"
-msgstr "A tabela de preço"
-
-#: orders/views.py:287
-msgid "update price table"
-msgstr "atualizar tabela de preço"
-
-#: orders/views.py:304
-msgid "Price table deleted successfully"
-msgstr "Tabela de preço excluída com sucesso"
-
-#: orders/views.py:309
-msgid "delete price table"
-msgstr "excluir tabela de preço"
-
-#: orders/views.py:322 orders/views.py:336
-msgid "The price items"
-msgstr "Os itens preço"
-
-#: orders/views.py:374
-msgid "get or create price item"
-msgstr "obter ou criar item preço"
-
-#: orders/views.py:386
-msgid "Price item updated successfully."
-msgstr "Item preço atualizado com sucesso"
-
-#: orders/views.py:390
-msgid "create or update price item"
-msgstr "criar ou atualizar item preço"
-
-#: orders/views.py:404
-msgid "The price item"
-msgstr "O item preço"
-
-#: orders/views.py:407
-msgid "Price item deleted successfully"
-msgstr "Item preço excluído com sucesso"
-
-#: orders/views.py:412
-msgid "delete price item"
-msgstr "excluir item preço"
-
-#: orders/views.py:450 orders/views.py:453 orders/views.py:461
-#: orders/views.py:465 orders/views.py:468 orders/views.py:471
+#: order/views.py:49 order/views.py:52 order/views.py:60 order/views.py:64
+#: order/views.py:67 order/views.py:70
 msgid "The order"
 msgstr "O pedido"
 
-#: orders/views.py:480
+#: order/views.py:79
 msgid "update order by client user"
 msgstr "atualizar pedido pelo usuário cliente"
+
+#: organization/models.py:14
+msgid "contractings"
+msgstr "contratantes"
+
+#: organization/models.py:15
+msgid "contracting code"
+msgstr "código da contratante"
+
+#: organization/models.py:16 organization/models.py:35
+#: organization/models.py:53 organization/models.py:84
+msgid "name"
+msgstr "nome"
+
+#: organization/models.py:18
+msgid "active users limit"
+msgstr "limite de usuários ativos"
+
+#: organization/models.py:28
+msgid "companies"
+msgstr "empresas"
+
+#: organization/models.py:30
+msgid "company compound id"
+msgstr "id composto da empresa"
+
+#: organization/models.py:32
+msgid "company code"
+msgstr "código da empresa"
+
+#: organization/models.py:34 organization/models.py:64
+#: organization/models.py:81
+msgid "client table"
+msgstr "tabela de clientes"
+
+#: organization/models.py:36
+msgid "CNPJ root"
+msgstr "Raiz do CNPJ"
+
+#: organization/models.py:48 organization/models.py:87
+msgid "establishments"
+msgstr "estabelecimentos"
+
+#: organization/models.py:50
+msgid "establishment compound id"
+msgstr "id composto do estabelecimento"
+
+#: organization/models.py:52
+msgid "establishment code"
+msgstr "código do estabelecimento"
+
+#: organization/models.py:65
+msgid "client tables"
+msgstr "tabelas de clientes"
+
+#: organization/models.py:67
+msgid "client table compound id"
+msgstr "id composto da tabela de clientes"
+
+#: organization/models.py:69
+msgid "client table code"
+msgstr "código da tabela de cliente"
+
+#: organization/models.py:80
+msgid "client compound id"
+msgstr "id composto do cliente"
+
+#: organization/models.py:82
+msgid "client code"
+msgstr "código do cliente"
+
+#: organization/models.py:83
+msgid "vendor code"
+msgstr "código do vendedor"
+
+#: organization/models.py:94
+msgid "client establishment"
+msgstr "estabelecimento do cliente"
+
+#: organization/models.py:95
+msgid "client establishments"
+msgstr "estabelecimentos do cliente"
+
+#: organization/serializers.py:32
+msgid "The 'company_code' field must be unique."
+msgstr "O campo 'company_code' deve ser único"
+
+#: organization/serializers.py:38 organization/serializers.py:169
+#: user/serializers.py:274
+msgid "Client table not found."
+msgstr "Tabela de cliente não encontrada."
+
+#: organization/serializers.py:67
+msgid "The 'establishment_code' field must be unique by company."
+msgstr "O campo 'establishment_code' deve ser único por empresa."
+
+#: organization/serializers.py:74
+msgid "The company must be active."
+msgstr "A empresa deve estar ativa."
+
+#: organization/serializers.py:99
+msgid "The 'client_table_code' field must be unique."
+msgstr "O campo 'client_table_code' deve ser único."
+
+#: organization/serializers.py:132
+msgid "You can't add this price table to this 'client_establishment'."
+msgstr ""
+"Você não pode adicionar essa tabela de preço a esse 'client_establishment'."
+
+#: organization/serializers.py:144
+msgid "The 'client_code' field must be unique by client table."
+msgstr "O campo 'client_code' deve ser único por tabela de cliente."
+
+#: organization/serializers.py:156 organization/serializers.py:214
+msgid "There is a duplicate establishment in 'client_establishments'"
+msgstr "Existe um estabelecimento duplicado em 'client_establishments'"
+
+#: organization/serializers.py:161 organization/serializers.py:219
+#, python-brace-format
+msgid ""
+"The 'client_table' field from the company which owns the establishment "
+"{estab} does not correspond with the 'client_table' to which this client "
+"belongs."
+msgstr ""
+"O campo 'client_table' da empresa que possui o estabelecimento {estab} não "
+"corresponde com o 'client_table' da qual esse cliente pertence."
+
+#: organization/serializers.py:165 organization/serializers.py:223
+msgid "You can't add this establishment to this client."
+msgstr "Você não pode adicionar esse estabelecimento nesse cliente."
+
+#: organization/serializers.py:173
+msgid "Can't access this client_table."
+msgstr "Não pode acessar essa tabela de cliente."
+
+#: organization/views.py:37
+msgid "create contracting"
+msgstr "criar contratante"
+
+#: organization/views.py:49 organization/views.py:67
+msgid "The contracting company was not found."
+msgstr "A contratante não foi encontrada."
+
+#: organization/views.py:58
+msgid "update contracting"
+msgstr "atualizar contratante"
+
+#: organization/views.py:70
+msgid "Contracting deleted."
+msgstr "Contratante excluída."
+
+#: organization/views.py:72
+msgid ""
+"You cannot delete this contracting company because it has records linked to "
+"it."
+msgstr ""
+"Você não pode excluir essa contratante pois ela possui registros ligados a "
+"ela."
+
+#: organization/views.py:77
+msgid "delete contracting"
+msgstr "excluir contratante"
+
+#: organization/views.py:101
+msgid "create company"
+msgstr "criar empresa"
+
+#: organization/views.py:112 organization/views.py:116
+#: organization/views.py:132 organization/views.py:136
+msgid "The company was not found."
+msgstr "A empresa não foi encontrada."
+
+#: organization/views.py:125
+msgid "update company"
+msgstr "atualizar empresa"
+
+#: organization/views.py:139
+msgid "Company deleted"
+msgstr "Empresa excluída"
+
+#: organization/views.py:141
+msgid "You cannot delete this company because it has records linked to it."
+msgstr ""
+"Você não pode excluir essa empresa pois ela possui registros ligados a "
+"ela."
+
+#: organization/views.py:146
+msgid "delete company"
+msgstr "empresa excluída"
+
+#: organization/views.py:177
+msgid "create establishment"
+msgstr "criar estabelecimento"
+
+#: organization/views.py:187 organization/views.py:191
+#: organization/views.py:207 organization/views.py:211
+msgid "The establishment"
+msgstr "O estabelecimento"
+
+#: organization/views.py:200
+msgid "update establishment"
+msgstr "atualizar estabelecimento"
+
+#: organization/views.py:214
+msgid "Establishment deleted"
+msgstr "Estabelecimento excluído"
+
+#: organization/views.py:220
+msgid "delete establishment"
+msgstr "excluir estabelecimento"
+
+#: organization/views.py:244
+msgid "create client table"
+msgstr "criar tabela de clientes"
+
+#: organization/views.py:254 organization/views.py:258
+#: organization/views.py:274 organization/views.py:278
+msgid "The client table was not found."
+msgstr "A tabela de clientes não foi encontrada."
+
+#: organization/views.py:267
+msgid "update client table"
+msgstr "atualizar tabela de clientes"
+
+#: organization/views.py:281
+msgid "Client table deleted"
+msgstr "Tabela de clientes excluída"
+
+#: organization/views.py:283
+msgid ""
+"You cannot delete this client table because it has records linked to it."
+msgstr ""
+"Você não pode excluir essa tabela de clientes pois ela possui registros ligados a "
+"ela."
+
+#: organization/views.py:288
+msgid "delete client table"
+msgstr "tabela de clientes"
+
+#: organization/views.py:346
+msgid "create client"
+msgstr "criar cliente"
+
+#: organization/views.py:376
+msgid "update client"
+msgstr "atualizar cliente"
+
+#: organization/views.py:394
+msgid "Client deleted"
+msgstr "Cliente excluído"
+
+#: organization/views.py:400
+msgid "delete client"
+msgstr "cliente excluído"
+
+#: settings/response_templates.py:5
+msgid "You don't have permission to access this resource."
+msgstr "Você não tem permissão para acessar esse recurso."
+
+#: settings/response_templates.py:12
+#, python-brace-format
+msgid "{object_name} was not found."
+msgstr "{object_name} não foi encontrado."
+
+#: settings/response_templates.py:18
+#, python-brace-format
+msgid ""
+"You cannot delete this {object_name} because it has records linked to it."
+msgstr ""
+"Você não pode deletar esse {object_name} pois ele possui registros ligados a "
+"ele."
+
+#: settings/response_templates.py:21
+#, python-brace-format
+msgid "Something went wrong when trying to {action}."
+msgstr "Algo deu errado ao tentar {action}."
+
+#: settings/utils.py:5
+msgid "Disabled"
+msgstr "Desabilitado"
+
+#: settings/utils.py:6
+msgid "Active"
+msgstr "Ativo"
+
+#: settings/utils.py:12
+msgid "This field cannot be an negative number."
+msgstr "Esse campo não pode ser um número negativo"
+
+#: settings/utils.py:16
+msgid "This field must be an positive number."
+msgstr "Esse campo pode ser um número positivo"
+
+#: user/middleware.py:20
+msgid "Invalid session. Try to login again."
+msgstr "Sessão invalida. Tente logar novamente."
+
+#: user/middleware.py:27
+msgid "Session already open."
+msgstr "A Sessão já esta aberta."
+
+#: user/models.py:16
+msgid "agent establishment"
+msgstr "estabelecimento do agente"
+
+#: user/models.py:17 user/models.py:68
+msgid "agent establishments"
+msgstr "estabelecimentos do agente"
+
+#: user/models.py:20 user/views.py:303
+msgid "agent"
+msgstr "agente"
+
+#: user/models.py:64
+msgid "users"
+msgstr "usuários"
+
+#: user/models.py:67
+msgid "client company"
+msgstr "empresa do cliente"
+
+#: user/models.py:69
+msgid "user code"
+msgstr "código do usuário"
+
+#: user/models.py:70
+msgid "username"
+msgstr "username"
+
+#: user/models.py:71
+msgid "first name"
+msgstr "nome"
+
+#: user/models.py:72
+msgid "last name"
+msgstr "sobrenome"
+
+#: user/models.py:75
+msgid "date joined"
+msgstr "data de entrada"
+
+#: user/models.py:102
+msgid "sesssion key"
+msgstr "chave da sessão"
+
+#: user/serializers.py:45
+msgid "The 'username' field must be unique."
+msgstr "O campo 'username' deve ser único."
+
+#: user/serializers.py:57
+msgid ""
+"You cannot create more users. Your contracting company already reach the "
+"active users limit."
+msgstr ""
+"Você não pode criar mais usuários. Sua contratante já alcançou o limite de "
+"usuários ativos."
+
+#: user/serializers.py:61
+msgid "User not found."
+msgstr "Usuário não encontrado."
+
+#: user/serializers.py:198 user/serializers.py:246
+msgid "There are duplicate values for agent_establishments."
+msgstr "Existem valores duplicados para 'agent_establishments'"
+
+#: user/serializers.py:277
+msgid "You have no permission to assign this client to this client user."
+msgstr ""
+"Você não possui permissão para atribuir esse cliente a esse usuário cliente."
+
+#: user/serializers.py:280
+msgid ""
+"You cannot create a client user for this client, because it already exists."
+msgstr ""
+"Você não pode criar um usuário cliente para esse cliente, pois já existe um "
+"usuário."
+
+#: user/validators.py:26
+msgid "There are duplicate values for agent_permissions"
+msgstr "Existem valores duplicados para 'agent_permissions'"
+
+#: user/validators.py:29
+#, python-brace-format
+msgid "You can't assign '{permission}' permission to an agent."
+msgstr "Você não pode atribuir a permissão '{permission}' para um agente."
+
+#: user/views.py:40
+msgid "User is already authenticated"
+msgstr "O usuário já está autenticado"
+
+#: user/views.py:50
+msgid "The login is disabled"
+msgstr "O login está desabilitado"
+
+#: user/views.py:54
+msgid "The login failed"
+msgstr "O login falhou"
+
+#: user/views.py:62
+msgid "Logged out"
+msgstr "Deslogado"
+
+#: user/views.py:65
+msgid "log out"
+msgstr "deslogar"
+
+#: user/views.py:76
+msgid "get request user profile"
+msgstr "obter perfil do usuário da requisição"
+
+#: user/views.py:88
+msgid "update request user profile"
+msgstr "atualizar perfil do usuário da requisição"
+
+#: user/views.py:117
+msgid "create erp user"
+msgstr "criar usuário ERP"
+
+#: user/views.py:141
+msgid "update erp user"
+msgstr "atualizar usuário ERP"
+
+#: user/views.py:151
+msgid "The erp user"
+msgstr "O usuário ERP"
+
+#: user/views.py:154
+msgid "ERP user deleted successfully."
+msgstr "Usuário ERP excluído com sucesso"
+
+#: user/views.py:156
+msgid "erp user"
+msgstr "usuário ERP"
+
+#: user/views.py:160
+msgid "delete erp user"
+msgstr "excluir usuário ERP"
+
+#: user/views.py:182
+msgid "create admin agent"
+msgstr "criar agente administrador"
+
+#: user/views.py:192 user/views.py:197 user/views.py:216 user/views.py:221
+msgid "The admin agent"
+msgstr "O agente administrador"
+
+#: user/views.py:208
+msgid "update admin agent"
+msgstr "atualizar agente administrador"
+
+#: user/views.py:224
+msgid "Admin agent deleted successfully"
+msgstr "Agente administrador excluído com sucesso."
+
+#: user/views.py:226
+msgid "admin agent"
+msgstr "agente administrador"
+
+#: user/views.py:230
+msgid "delete admin agent"
+msgstr "excluir agente administrador"
+
+#: user/views.py:259
+msgid "create agent"
+msgstr "criar agente"
+
+#: user/views.py:269 user/views.py:274 user/views.py:293 user/views.py:298
+msgid "The agent"
+msgstr "O agente"
+
+#: user/views.py:285
+msgid "update agent"
+msgstr "atualizar agente"
+
+#: user/views.py:301
+msgid "Agent deleted successfully"
+msgstr "Agente excluído com sucesso"
+
+#: user/views.py:307
+msgid "delete agent"
+msgstr "excluir agente"
+
+#: user/views.py:350
+msgid "create client user"
+msgstr "criar usuário cliente"
+
+#: user/views.py:360 user/views.py:365 user/views.py:368 user/views.py:386
+#: user/views.py:391
+msgid "The client user"
+msgstr "O usuário cliente"
+
+#: user/views.py:379
+msgid "update client user"
+msgstr "atualizar usuário cliente"
+
+#: user/views.py:398
+msgid "Client user deleted successfully"
+msgstr "Usuário cliente excluído com sucesso"
+
+#: user/views.py:404
+msgid "delete client user"
+msgstr "excluir usuário cliente"
+
+#: user/views.py:414
+msgid "Password field not sent"
+msgstr "Senha não enviada"
+
+#: user/views.py:416
+msgid "Current Password field not sent"
+msgstr "A senha atual não foi enviada"
+
+#: user/views.py:421
+msgid "passwords don't match"
+msgstr "senhas não coincidem"
+
+msgid "Password updated"
+msgstr "Senha atualizada"

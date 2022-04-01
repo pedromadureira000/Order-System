@@ -46,9 +46,7 @@ class SpecificContracting(APIView):
             try:
                 contracting = Contracting.objects.get(contracting_code=contracting_code)
             except Contracting.DoesNotExist:
-                # I write 'The contracting' becouse in portuguese it need to be translated according to the noun gender. 
-                # Ex: "A contratante", "O estabelecimento"
-                return not_found_response(object_name=_('The contracting'))
+                return Response({"error":[_( "The contracting company was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             serializer = ContractingSerializer(contracting, data=request.data, partial=True)
             if serializer.is_valid():
                 try:
@@ -66,12 +64,13 @@ class SpecificContracting(APIView):
             try:
                 contracting = Contracting.objects.get(contracting_code=contracting_code)
             except Contracting.DoesNotExist:
-                return not_found_response(object_name=_('The contracting'))
+                return Response({"error":[_( "The contracting company was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 contracting.delete()
-                return Response("Contracting deleted.")
+                return Response(_("Contracting deleted."))
             except ProtectedError:
-                return protected_error_response(object_name=_('contracting'))
+                return Response({"error":[_("You cannot delete this contracting company because it has records linked to it.")]}, 
+                        status=status.HTTP_400_BAD_REQUEST) 
             except Exception as error:
                 transaction.rollback()
                 print(error)
@@ -107,14 +106,14 @@ class SpecificCompany(APIView):
     @transaction.atomic
     @swagger_auto_schema(request_body=CompanySerializer) 
     def put(self, request, company_compound_id):
-        print('========================> : ',company_compound_id )
+        #  print('========================> : ',company_compound_id )
         if has_permission(request.user, 'update_company'):
             if company_compound_id.split("&")[0] != request.user.contracting.contracting_code:
-                return not_found_response(object_name=_('The company'))
+                return Response({"error":[_( "The company was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 company = Company.objects.get(company_compound_id=company_compound_id)
             except Company.DoesNotExist:
-                return not_found_response(object_name=_('The company'))
+                return Response({"error":[_( "The company was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             serializer = CompanySerializer(company, data=request.data, partial=True, context={"request": request})
             if serializer.is_valid():
                 try:
@@ -130,16 +129,17 @@ class SpecificCompany(APIView):
     def delete(self, request, company_compound_id):
         if has_permission(request.user, 'delete_company'):
             if company_compound_id.split("&")[0] != request.user.contracting.contracting_code:
-                return not_found_response(object_name=_('The company'))
+                return Response({"error":[_( "The company was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 company = Company.objects.get(company_compound_id=company_compound_id)
             except Company.DoesNotExist:
-                return not_found_response(object_name=_('The company'))
+                return Response({"error":[_( "The company was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 company.delete()
-                return Response("Company deleted")
+                return Response(_("Company deleted"))
             except ProtectedError:
-                return protected_error_response(object_name=_('company'))
+                return Response({"error":[_("You cannot delete this company because it has records linked to it.")]}, 
+                        status=status.HTTP_400_BAD_REQUEST) 
             except Exception as error:
                 transaction.rollback()
                 print(error)
@@ -211,7 +211,7 @@ class SpecificEstablishment(APIView):
                 return not_found_response(object_name=_('The establishment'))
             try:
                 establishment.delete()
-                return Response("Establishment deleted")
+                return Response(_("Establishment deleted"))
             except ProtectedError:
                 return protected_error_response(object_name=_('establishment'))
             except Exception as error:
@@ -251,11 +251,11 @@ class SpecificClientTable(APIView):
     def put(self, request, client_table_compound_id):
         if has_permission(request.user, 'update_client_table'):
             if client_table_compound_id.split("&")[0] != request.user.contracting.contracting_code:
-                return not_found_response(object_name=_('The client table'))
+                return Response({"error":[_( "The client table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 client_table = ClientTable.objects.get(client_table_compound_id=client_table_compound_id)
             except ClientTable.DoesNotExist:
-                return not_found_response(object_name=_('The client table'))
+                return Response({"error":[_( "The client table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             serializer = ClientTableSerializer(client_table, data=request.data, partial=True)
             if serializer.is_valid():
                 try:
@@ -271,16 +271,17 @@ class SpecificClientTable(APIView):
     def delete(self, request, client_table_compound_id):
         if has_permission(request.user, 'delete_client_table'):
             if client_table_compound_id.split("&")[0] != request.user.contracting.contracting_code:
-                return not_found_response(object_name=_('The client table'))
+                return Response({"error":[_( "The client table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 client_table = ClientTable.objects.get(client_table_compound_id=client_table_compound_id)
             except ClientTable.DoesNotExist:
-                return not_found_response(object_name=_('The client table'))
+                return Response({"error":[_( "The client table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 client_table.delete()
-                return Response("Client table deleted")
+                return Response(_("Client table deleted"))
             except ProtectedError:
-                return protected_error_response(object_name=_('client table'))
+                return Response({"error":[_("You cannot delete this client table because it has records linked to it.")]}, 
+                        status=status.HTTP_400_BAD_REQUEST) 
             except Exception as error:
                 transaction.rollback()
                 print(error)
@@ -390,7 +391,7 @@ class SpecificClient(APIView):
                 return unauthorized_response
             try:
                 client.delete()
-                return Response("Client deleted")
+                return Response(_("Client deleted"))
             except ProtectedError as er:
                 return protected_error_response(object_name=_('client'))
             except Exception as error:

@@ -346,7 +346,7 @@ export default {
       maxLength: maxLength(10)
     },
     barcode: { 
-      maxLength: maxLength(13)
+      maxLength: maxLength(15)
     },
     technical_description: {
       maxLength: maxLength(800)
@@ -387,7 +387,7 @@ export default {
     barcodeErrors() {
       const errors = [];
       if (!this.$v.barcode.$dirty) return errors;
-      !this.$v.barcode.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 13));
+      !this.$v.barcode.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 15));
       return errors;
     },
     technicalDescriptionErrors() {

@@ -29,14 +29,14 @@ from settings.response_templates import error_response, not_found_response, seri
 class GetCSRFToken(APIView):
     permission_classes = (permissions.AllowAny,)
     def get(self, request):
-        return Response("csrf cookie set")
+        return Response("The CSRF cookie was sent")
 # If the user has status != 1, it will be considered disabled and the user can't log in.
 class Login(APIView):
     permission_classes = (permissions.AllowAny,)
     @swagger_auto_schema(request_body=SwaggerLoginSerializer) 
     def post(self, request):
         if request.user.is_authenticated:
-            return Response("User is already authenticated")
+            return Response(_("User is already authenticated"))
         serializer = SwaggerLoginSerializer(data=request.data)
         if serializer.is_valid():
             user_code = serializer.validated_data["contracting_code"] + "&" + serializer.validated_data["username" ]
@@ -58,7 +58,7 @@ class Logout(APIView):
     def post(self, request):
         try:
             logout(request)
-            return Response('Logged out')
+            return Response(_('Logged out'))
         except Exception as error:
             print(error)
             unknown_exception_response(action=_('log out'))
@@ -150,7 +150,7 @@ class SpecificERPUser(APIView):
                 return not_found_response(object_name=_('The erp user'))
             try:
                 user.delete()
-                return Response("ERP user deleted successfully.")
+                return Response(_("ERP user deleted successfully."))
             except ProtectedError as er:
                 return protected_error_response(object_name=_('erp user'))
             except Exception as error:
@@ -220,7 +220,7 @@ class SpecificAdminAgent(APIView):
                 return not_found_response(object_name=_('The admin agent'))
             try:
                 user.delete()
-                return Response("Admin agent deleted successfully")
+                return Response(_("Admin agent deleted successfully"))
             except ProtectedError as er:
                 return protected_error_response(object_name=_('admin agent'))
             except Exception as error:
@@ -297,7 +297,7 @@ class SpecificAgent(APIView):
                 return not_found_response(object_name=_('The agent'))
             try:
                 user.delete()
-                return Response( "Agent deleted successfully")
+                return Response(_("Agent deleted successfully"))
             except ProtectedError as er:
                 return protected_error_response(object_name=_('agent'))
             except Exception as error:
@@ -394,7 +394,7 @@ class SpecificClientUser(APIView):
                 return unauthorized_response
             try:
                 client_user.delete()
-                return Response("Client user deleted successfully")
+                return Response(_("Client user deleted successfully"))
             except ProtectedError as er:
                 return protected_error_response(object_name=_('client user'))
             except Exception as error:
@@ -416,5 +416,5 @@ class UpdateUserPassword(APIView):
         if user.check_password(data.get('current_password')):
             user.set_password(data['password'])
             user.save()
-            return Response( "Password updated")
+            return Response(_("Password updated"))
         return error_response(detail=_("passwords don't match"), status=status.HTTP_400_BAD_REQUEST )

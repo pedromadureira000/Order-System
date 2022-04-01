@@ -47,7 +47,7 @@ class Item(models.Model):
     category = models.ForeignKey('ItemCategory', on_delete=models.CASCADE, verbose_name=_('category'))
     description = models.CharField(max_length=60, verbose_name=_('description'))
     unit = models.CharField(max_length=10, verbose_name=_('unit'))
-    barcode = models.CharField(max_length=13,blank=True, verbose_name=_('barcode'))
+    barcode = models.CharField(max_length=15,blank=True, verbose_name=_('barcode'))
     status = models.IntegerField(choices=status_choices, default=1)
     image = ResizedImageField(size=[115, 87], quality=90, upload_to='images/items/', blank=True, null=True, verbose_name=_('image'))
     technical_description = models.CharField(blank=True, verbose_name=_('technical description'), max_length=800,)
