@@ -1,5 +1,5 @@
 <template>
-  <v-dialog :value="session_error" max-width="500px" persistent>
+  <v-dialog :retain-focus="false" :value="session_error" max-width="500px" persistent>
     <v-card>
       <v-card-text>
         <v-container fluid>

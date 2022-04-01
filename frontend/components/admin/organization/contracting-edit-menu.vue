@@ -2,7 +2,7 @@
   <div>
     <dots-menu-update-delete :menu_items="menu_items" :handleClick="handleClick"/>
 
-    <v-dialog v-model="show_edit_dialog" max-width="50%">
+    <v-dialog :retain-focus="false" v-model="show_edit_dialog" max-width="50%">
       <v-card>
         <v-card-title>{{$t('Edit')}}</v-card-title>
         <v-card-text>
@@ -61,7 +61,7 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="show_delete_confirmation_dialog" max-width="30%">
+    <v-dialog :retain-focus="false" v-model="show_delete_confirmation_dialog" max-width="30%">
       <v-card>
         <v-card-title>{{$t('Are_you_sure_you_want_to_delete')}}</v-card-title>
         <v-card-text>

@@ -65,7 +65,7 @@ export const actions: ActionTree<UserState, RootState> = {
 	
 	async logout({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
 		try {
-		let data = await api.logout()
+		await api.logout()
 		commit("deleteUser");
 		dispatch("setAlert", {message: this.app.i18n.t('logout_success_msg'), alertType: "success"}, { root: true })
 		this.$router.push("/")

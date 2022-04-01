@@ -331,9 +331,11 @@ export const messages = {
     "Price table code": "Price table code",
     "Price Table Code": "Price Table Code",
     "Add Price Items": "Add Prices",
-    "Remove Items": "Remove Items",
+    "Table Items": "Table Items",
     "Add Items": "Add Items",
+    "Available Items": "Available Items",
     "DecimalErrorMessage": "This field must be a decimal number.",
+    "Edit Items": "Edit Items",
     // -------------------------------------------------------------------/ Components
     // -------------------------------/Problem Connecting Error dialog
     ProblemConnectingTitle: "Problema de conexão",
@@ -686,10 +688,11 @@ export const messages = {
     "Edit Price Table": "Editar Tabela de Preço",
     "Price table code": "Código da tabela de preço",
     "Price Table Code": "Código da Tabela de Preço",
-    "Add Price Items": "Adicionar Preços",
-    "Remove Items": "Remover Itens",
+    "Table Items": "Itens da Tabela",
     "Add Items": "Adicionar Itens",
+    "Available Items": "Itens Disponíveis",
     "DecimalErrorMessage": "Esse campo deve ser um número decimal.",
+    "Edit Items": "Editar Itens",
 
     // -------------------------------------------------------------------/ Components
     // -------------------------------/Problem Connecting Error dialog

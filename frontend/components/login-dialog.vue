@@ -1,41 +1,45 @@
 <template>
   <v-dialog v-model="visible" :retain-focus="false" max-width="500px">
-    <v-card>
-      <v-card-title>Login</v-card-title>
-      <v-card-text>
-        <v-container fluid>
-          <v-text-field
-            v-model="username"
-            :error-messages="usernameErrors"
-            :label="$t('Username')"
-            required
-            @blur="$v.username.$touch()"
-          ></v-text-field>
-					<v-text-field
-						v-model="contracting_code"
-						:error-messages="contracting_codeErrors"
-						:label="$t('Contracting_code')"
-						required
-						@blur="$v.contracting_code.$touch()"
-					></v-text-field>
-					<v-text-field
-						v-model="password"
-						:error-messages="passwordErrors"
-						:label="$t('Password')"
-						required
-						@blur="$v.password.$touch()"
-						type="password"
-						@keyup.enter="login"
-					></v-text-field>
-        </v-container>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer />
-				<!--<v-btn class="mr-4 mt-3" @click="login()"> submit </v-btn> -->
-        <v-btn class="blue--text darken-1" text @click="close()">{{$t('Cancel')}}</v-btn>
-        <v-btn class="blue--text darken-1" text @click="login()" :loading="loading" :disabled="loading">Login</v-btn>
-      </v-card-actions>
-    </v-card>
+      <v-card>
+        <v-card-title>Login</v-card-title>
+        <v-card-text>
+          <v-container fluid>
+              <v-text-field 
+                required
+                v-model="username"
+                :error-messages="usernameErrors"
+                :label="$t('Username')"
+                @blur="$v.username.$touch()"
+                type="text"
+                name="username"
+                autocomplete="username"
+              ></v-text-field>
+              <v-text-field
+                required
+                v-model="contracting_code"
+                :error-messages="contracting_codeErrors"
+                :label="$t('Contracting_code')"
+                @blur="$v.contracting_code.$touch()"
+                type="text"
+                autocomplete="off"
+              ></v-text-field>
+              <v-text-field
+                required
+                v-model="password"
+                :error-messages="passwordErrors"
+                :label="$t('Password')"
+                @blur="$v.password.$touch()"
+                @keyup.enter="login"
+                type="password"
+              ></v-text-field>
+          </v-container>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn class="blue--text darken-1" text @click="close()">{{$t('Cancel')}}</v-btn>
+          <v-btn class="blue--text darken-1" text @click="login()" :loading="loading" :disabled="loading">Login</v-btn>
+        </v-card-actions>
+      </v-card>
   </v-dialog>
 </template>
 
@@ -65,14 +69,16 @@ export default {
   },
 
   methods: {
-    /** wtf(event){ */
-      /** console.log(">>>>>>>WTF!!!!!!!!!: ", event) */
-    /** }, */
     open() {
       this.visible = true
     },
     close () {
       this.visible = false
+      // clear form fields
+      this.username = ""
+      this.contracting_code = ""
+      this.password = ""
+      this.$v.$reset()
     },
     async login() {
       this.$v.login_group.$touch();
@@ -87,6 +93,7 @@ export default {
           this.username = ""
           this.contracting_code = ""
           this.password = ""
+          this.$v.$reset()
         }      
         this.loading = false
       }
@@ -125,3 +132,5 @@ export default {
 	},
 }
 </script>
+<style scoped>
+</style>

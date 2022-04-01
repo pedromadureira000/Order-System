@@ -52,38 +52,32 @@
                 v-model.trim="note"
                 :error-messages="noteErrors"
                 @blur="$v.note.$touch()"
-                required
                 class="mb-3"
               />
               <!-- Price Items -->
               <v-expansion-panels>
                 <v-expansion-panel>
                   <v-expansion-panel-header>
-                    <h3>{{$t('Add Price Items')}}</h3>
+                    <h3>{{$t('Add Items')}}</h3>
                   </v-expansion-panel-header>
                   <v-expansion-panel-content>
-                    <v-card>
-                      <v-card-title style="font-size: 1rem; font-weight: 400; line-height: 1rem">{{$t('Remove Items')}}</v-card-title>
+                    <v-card outlined>
+                      <v-card-title style="font-size: 1rem; font-weight: 400; line-height: 1rem">{{$t('Table Items')}}</v-card-title>
                       <v-card-text>
                         <v-container fluid>
-                          <!-- <v-text-field -->
-                            <!-- v-for="(price_item, key) in price_items" -->
-                            <!-- :key="key" -->
-                            <!-- v-model="price_item.unit_price" -->
-                            <!-- :label="itemDescription(price_item.item)" -->
-                            <!-- @keydown.enter.prevent="" -->
-                            <!-- :error-messages="priceErrors" -->
-                            <!-- @blur="$v.price.$touch()" -->
-                          <!-- > -->
                           <v-text-field
-                            v-for="(price_item, key) in price_items"
+                            v-for="(v, key) in $v.price_items.$each.$iter"
                             :key="key"
-                            v-model="price_item.unit_price"
-                            :label="itemDescription(price_item.item)"
+                            :error-messages="v.errors.$model"
+                            :label="itemDescription(v.item.$model)"
+                            v-model="v.masked_price.$model"
                             @keydown.enter.prevent=""
+                            @blur="priceErrors(v)"
+                            @input="writeUnmaskedValue($event, v)"
+                            v-money="money"
                           >
                             <template v-slot:append>
-                              <v-icon @click="removeItem(price_item)">
+                              <v-icon @click="removeItem(v.item.$model)">
                                 mdi-minus
                               </v-icon >
                             </template>
@@ -93,23 +87,31 @@
 
                       <v-divider></v-divider>
 
-                      <v-card-title style="font-size: 1rem; font-weight: 400; line-height: 1rem">{{$t('Add Items')}}</v-card-title>
+                      <v-card-title style="font-size: 1rem; font-weight: 400; line-height: 1rem">{{$t('Available Items')}}</v-card-title>
                       <v-card-text>
                         <v-container fluid>
-                            <!-- @input="item.unit_price = $event" -->
-                          <v-text-field
-                            v-for="(item, key) in itemsToAdd"
-                            :key="key"
-                            v-model="item.unit_price"
-                            :label="item.item_code + ' - ' + item.description + ' ( ' + item.unit + ' )'"
-                            @keydown.enter.prevent="addItem(item)"
-                          >
-                            <template v-slot:append>
-                              <v-icon @click="addItem(item)" :disabled="item.unit_price == null">
-                                mdi-plus
-                              </v-icon >
-                            </template>
-                          </v-text-field>
+                          <v-list-item-group>
+                            <div
+                              v-for="(item, key) in itemsToAdd"
+                              :key="key"
+                            >
+                              <v-list-item>
+                                <v-list-item-content>
+                                  <v-list-item-title>{{item.item_code + ' - ' + item.description + ' ( ' + item.unit + ' )'}}</v-list-item-title>
+                                </v-list-item-content>
+
+                                <v-list-item-action>
+                                  <v-icon @click="addItem(item)">
+                                    mdi-plus
+                                  </v-icon >
+                                </v-list-item-action>
+                              </v-list-item>
+                              <v-divider
+                                v-if="key < itemsToAdd.length - 1"
+                                :key="key"
+                              ></v-divider>
+                            </div>
+                          </v-list-item-group>
                         </v-container>
                       </v-card-text>
                     </v-card>
@@ -143,7 +145,7 @@
             <p style="width: 240px;">{{item.description}}</p>
           </template>
           <template v-slot:item.actions="{ item }">
-            <price-table-edit-menu :price_table="item" :item_group="item_group" @price-table-deleted="deletePriceTable(item)" />
+            <price-table-edit-menu :price_table="item" :companies="companies" :item_group="item_group" @price-table-deleted="deletePriceTable(item)" />
           </template>
           <template v-slot:item.company="{ item }">
             <p>{{item.company.split('&')[1]}}</p>
@@ -164,10 +166,10 @@ import {
   minLength,
   minValue,
   maxValue,
-  decimal
 } from "vuelidate/lib/validators";
 import { validationMixin } from "vuelidate";
-import {slugFieldValidator} from "~/helpers/validators"
+import {slugFieldValidator, money} from "~/helpers/validators"
+import {VMoney} from 'v-money'
 
 export default {
   middleware: ["authenticated"],
@@ -175,7 +177,7 @@ export default {
     "price-table-edit-menu": require("@/components/admin/item/price-table-edit-menu.vue").default,
   },
   mixins: [validationMixin],
-
+  directives: {money: VMoney},
   data() {
     return {
       company: null,
@@ -183,12 +185,14 @@ export default {
       description: null,
       note: "",
       price_items: [],
+      /**EX: [{item: '123$123$111111', unit_price: 1055.55}, masked_price: "R$ 1.055,55" , errors: []] */
       items: [],
       companies: [],
-      /**EX:  item_group: [{item_table: '123$123', items: [{categoryObj, categoryObj2 }]}] */
       item_group: [],
+      /**EX:  item_group: [{item_table: '123$123', items: [{categoryObj, categoryObj2 }]}] */
       price_tables: [],
       loading: false,
+      money: money,
       headers: [
         { text: this.$t('Table_code'), value: 'table_code' },
         { text: this.$t('Description'), value: 'description' },
@@ -253,12 +257,11 @@ export default {
     },
 
     // Price Item Functions
-    removeItem(item){
-      this.price_items = this.price_items.filter((obj)=> obj !== item)
+    removeItem(item_compound_id){
+      this.price_items = this.price_items.filter((obj)=> obj.item !== item_compound_id)
     },
     addItem(item){
-      this.price_items = this.price_items.concat([{item: item.item_compound_id, unit_price: item.unit_price}])
-      item.unit_price = null
+      this.price_items = this.price_items.concat([{item: item.item_compound_id, unit_price: 0, masked_price: '', errors: []}])
     },
     itemDescription(item_compound_id){
       let item = this.items.filter((item)=> item.item_compound_id === item_compound_id)[0]
@@ -275,6 +278,22 @@ export default {
       let user = this.$store.state.user.currentUser;
       return user.permissions.includes("get_price_tables")
     },
+
+    // Validate item
+    priceErrors(v) {
+      const errors = [];
+      /** if (!v.unit_price.$dirty){ */
+      /** } */
+      !v.unit_price.minValue && errors.push(this.$formatStr(this.$t("This_value_must_be_greater_than_X"), 'R$ 0,00'));
+      !v.unit_price.maxValue && errors.push(this.$formatStr(this.$t("This_value_must_be_less_than_X"), 'R$ 999.999.999,99'));
+      v.errors.$model = errors;
+    },
+
+    // masked_price: "R$ 1.000,00" is written over unit_price as "1000.00"
+    writeUnmaskedValue(event, v){
+      v.unit_price.$model = event.replace('R$ ', '').replace(/\./gi,'').replace(',','.')
+      /** console.log(">>>>>>> unmasked value: ", v.unit_price.$model) */
+    }
   },
 
   validations: {
@@ -291,19 +310,22 @@ export default {
     note: {
       maxLength: maxLength(800)
     },
-    /** price_items: { */
-      /** $each: { */
-        /** unit_price: { */
-          /** maxValue: maxValue(11), */
-          /** minValue: minValue(0), */
-          /** decimal */
-        /** } */
-      /** } */
-    /** }, */
+    price_items: {
+      $each: {
+        unit_price: {
+          maxValue: maxValue(999999999.99),
+          minValue: minValue(0.01),
+        },
+        item: {},
+        errors: {},
+        masked_price: {}
+      }
+    },
     priceTableInfoGroup: [
       "table_code",
       "description",
       "note",
+      "price_items"
     ],
   },
 
@@ -330,14 +352,6 @@ export default {
       !this.$v.note.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 800));
       return errors;
     },
-    /** priceErrors() { */
-      /** const errors = []; */
-      /** if (!this.$v.price.$dirty) return errors; */
-      /** !this.$v.price.minValue && errors.push(this.$formatStr(this.$t("This_value_must_be_greater_than_X"), 0)); */
-      /** !this.$v.price.maxValue && errors.push(this.$formatStr(this.$t("This_value_must_be_less_than_X"), 10000000000)); */
-      /** !this.$v.price.decimal && errors.push(this.$t('DecimalErrorMessage')); */
-      /** return errors; */
-    /** }, */
     // Item Price
     itemsToAdd(){
       return this.items.filter((item)=> {

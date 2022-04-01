@@ -1,13 +1,18 @@
 <template>
   <v-app>
 		<v-navigation-drawer v-model="drawer" app> 
-      <!-- Test Button -->
-      <v-card class="pa-3" color="blue-grey darken-4" tile>
-        <nuxt-link :to="switchLocalePath('en')">English</nuxt-link>
-        <nuxt-link :to="switchLocalePath('pt-BR')">Português</nuxt-link>
-        <nuxt-link :to="localePath('admin-organization-company')">TEST</nuxt-link>
-        <v-btn label="testF" @click="testF"/>
-      </v-card>
+      <v-list two-line v-if="logged_user">
+        <v-list-item>
+          <v-list-item-content>
+            <v-list-item-title>{{logged_user.first_name}} {{logged_user.last_name}}</v-list-item-title>
+            <v-list-item-subtitle>Username: {{logged_user.username}}</v-list-item-subtitle>
+            <v-list-item-subtitle v-if="hasRoleOtherThenClientUser">{{$t('Role')}}: {{$t(logged_user.roles[0])}}</v-list-item-subtitle>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
+
+			<v-divider style="margin-top: -8px; margin-bottom: 8px;" />
+
       <!-- MenuItems composition -->
       <v-list nav dense>
         <v-list-item
@@ -24,6 +29,17 @@
           </v-list-item-content>
         </v-list-item>
       </v-list>
+
+      <!-- Test Button -->
+      <v-card class="pa-3" color="blue-grey darken-4" tile>
+        <nuxt-link :to="switchLocalePath('en')">English</nuxt-link>
+        <nuxt-link :to="switchLocalePath('pt-BR')">Português</nuxt-link>
+        <nuxt-link :to="localePath('admin-organization-company')">TEST</nuxt-link>
+        <v-btn label="testF" @click="testF"/>
+        <v-btn label="testFF" @click="testFF"/>
+      </v-card>
+      <!-- Test Button -->
+
     </v-navigation-drawer>
     <!-- App bar -->
     <v-app-bar color="blue-grey darken-4" dark app>
@@ -54,25 +70,7 @@
 						</v-avatar>
 					</v-btn>
 				</template>
-				<v-card class="no-padding">
-					<v-list two-line>
-						<v-list-item>
-							<v-list-item-avatar>
-								<v-avatar>
-									<img src="~assets/images/default_user.jpg">
-								</v-avatar>
-							</v-list-item-avatar>
-							<v-list-item-content>
-								<v-list-item-title>{{logged_user.first_name}} {{logged_user.last_name}}</v-list-item-title>
-								<v-list-item-subtitle>Email: {{logged_user.email}}</v-list-item-subtitle>
-								<v-list-item-subtitle>Username: {{logged_user.username}}</v-list-item-subtitle>
-                <v-list-item-subtitle v-if="hasRoleOtherThenClientUser">{{$t('Role')}}: {{$t(logged_user.roles[0])}}</v-list-item-subtitle>
-							</v-list-item-content>
-						</v-list-item>
-					</v-list>
-
-					<v-divider />
-					
+				<v-card class="no-padding">					
 					<v-list>
             <v-list-item :to="localePath('myaccount')">
               <v-list-item-title>{{$t('My_Account')}}</v-list-item-title>
@@ -103,11 +101,11 @@
         :type='$store.state.alert.alertType' 
         style="width: 50%;" 
         class="alert_message" 
+        dismissible
       >
-        <!-- ## dismissible get the same error as my custom v-btn ## -->
-        <v-btn 
-          @click="$store.dispatch('removeAlert')"
-        >Close</v-btn>
+        <!-- <v-btn  -->
+          <!-- @click="$store.dispatch('removeAlert')" -->
+        <!-- >Close</v-btn> -->
         {{$store.state.alert.alertMessage}}
       </v-alert>
     </div>
@@ -171,10 +169,13 @@ export default {
       /** event.stopPropagation() */
       /** event.stopImmediatePropagation() */
     },
-
+    async testFF(){
+      this.$store.dispatch("setAlert", {message: "erro rah rr erro rah rr erro rah rr erro rah rrerro rah rr erro rah rrerro rah rr erro rah rrerro rah rr erro rah rr erro rah rr erro rah rr erro rah rr erro rah rr erro rah rr erro rah rr erro rah rr erro rah rrerro rah rr erro rah rrerro rah rr erro rah rrerro rah rr erro rah rr erro rah rr erro rah rr erro rah rr erro rah rr", alertType: "error"}, { root: true })
+    },
     async testF(){
       /** this.$store.dispatch("setAlert", {message: "User deleted", alertType: "success"}, { root: true }) */
-      this.$store.dispatch("setAlert", {message: "errorrr", alertType: "error"}, { root: true })
+      /** this.$store.dispatch("setAlert", {message: "erro rah rr erro rah rr erro rah rr erro rah rrerro rah rr erro rah rrerro rah rr erro rah rrerro rah rr erro rah rr erro rah rr erro rah rr erro rah rr erro rah rr erro rah rr erro rah rr erro rah rr erro rah rrerro rah rr erro rah rrerro rah rr erro rah rrerro rah rr erro rah rr erro rah rr erro rah rr erro rah rr erro rah rr", alertType: "error"}, { root: true }) */
+      this.$store.dispatch("setAlert", {message: "erro rah rr erro rah rr erro rah rr erro rah rrerro rah rr erro rah rrerro rah rr error", alertType: "error"}, { root: true })
 
       /** this.$store.dispatch("switchConnectionError") */
 
@@ -237,12 +238,19 @@ export default {
 
 <style scoped>
 .alert_message{
-	position: fixed;
-	left: 50%;
-	top: 93%;
-	transform: translate(-50%, -50%);
-	z-index: 999;
+  position: fixed;
+  left: 50%;
+  bottom: 0px;
+  transform: translate(-50%, -50%);
+  z-index: 999;
 }
+/** .alert_message{ */
+	/** position: fixed; */
+	/** left: 50%; */
+	/** top: 85%; */
+	/** transform: translate(-50%, -50%); */
+	/** z-index: 999; */
+/** } */
 .v-application .pa-3 {
 	padding: 14px !important;
 }

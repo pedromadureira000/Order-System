@@ -1,5 +1,5 @@
 <template>
-  <v-dialog :value="connection_error" max-width="35%" persistent>
+  <v-dialog :retain-focus="false" :value="connection_error" max-width="35%" persistent>
     <v-card>
       <v-card-text>
         <v-container fluid>
