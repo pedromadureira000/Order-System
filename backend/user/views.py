@@ -10,8 +10,8 @@ from organization.facade import get_clients_by_agent
 
 from organization.models import Client, Contracting, Establishment
 from organization.serializers import ClientSerializerPOST, ContractingSerializer, EstablishmentPOSTSerializer
-from .facade import get_all_client_users_by_agent
-from .serializers import AdminAgentSerializer, AgentPOSTSerializer, AgentPUTSerializer, ClientUserSerializer, ERPUserSerializer, OwnProfileSerializer, SwaggerLoginSerializer, SwaggerProfilePasswordSerializer
+from .facade import get_all_client_users_by_agent, get_update_permission
+from .serializers import AdminAgentSerializer, AgentPOSTSerializer, AgentPUTSerializer, ClientUserSerializer, ERPUserSerializer, OwnProfileSerializer, SwaggerLoginSerializer, SwaggerProfilePasswordSerializer, UpdateUserPasswordSerializer
 from .models import User
 from rolepermissions.checkers import has_permission, has_role
 from django.db import transaction
@@ -29,7 +29,7 @@ from settings.response_templates import error_response, not_found_response, seri
 class GetCSRFToken(APIView):
     permission_classes = (permissions.AllowAny,)
     def get(self, request):
-        return Response("The CSRF cookie was sent")
+        return Response(_("The CSRF cookie was sent"))
 # If the user has status != 1, it will be considered disabled and the user can't log in.
 class Login(APIView):
     permission_classes = (permissions.AllowAny,)
@@ -403,7 +403,7 @@ class SpecificClientUser(APIView):
                 return unknown_exception_response(action=_('delete client user'))
         return unauthorized_response
 
-class UpdateUserPassword(APIView):
+class UpdateOwnPassword(APIView):
     @swagger_auto_schema(request_body=SwaggerProfilePasswordSerializer) 
     @transaction.atomic
     def put(self, request):
@@ -418,3 +418,33 @@ class UpdateUserPassword(APIView):
             user.save()
             return Response(_("Password updated"))
         return error_response(detail=_("passwords don't match"), status=status.HTTP_400_BAD_REQUEST )
+
+class UpdateUserPassword(APIView):
+    @swagger_auto_schema(request_body=UpdateUserPasswordSerializer) 
+    @transaction.atomic
+    def put(self, request, contracting_code, username):
+        if contracting_code != request.user.contracting.contracting_code:
+            return not_found_response(object_name=_('The user'))
+        user_code = contracting_code + "&" + username
+        try:
+            user = User.objects.get(user_code=user_code)
+        except User.DoesNotExist:
+            return not_found_response(object_name=_('The user'))
+        try:
+            permission = get_update_permission(user)
+        except Exception as error:
+            print(error)  #TODO send log. (user probably don't have role)
+            return unknown_exception_response(action=_("update user's password"))
+
+        if has_permission(request.user, permission):
+            serializer = UpdateUserPasswordSerializer(user, data=request.data, context={"request": request})
+            if serializer.is_valid():
+                try:
+                    serializer.save()
+                    return Response(_('Password updated'))
+                except Exception as error:
+                    transaction.rollback()
+                    print(error)
+                    #  raise error
+                    return unknown_exception_response(action=_("update user's password"))
+        return unauthorized_response

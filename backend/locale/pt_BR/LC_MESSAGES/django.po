@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-01 13:26-0300\n"
+"POT-Creation-Date: 2022-04-01 14:32-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -218,8 +218,8 @@ msgstr "Tabela de itens excluída"
 #: item/views.py:82
 msgid "You cannot delete this item table because it has records linked to it."
 msgstr ""
-"Você não pode excluir essa tabela de itens pois ela possui registros ligados a "
-"ela."
+"Você não pode excluir essa tabela de itens pois ela possui registros ligados "
+"a ela."
 
 #: item/views.py:87
 msgid "delete item table"
@@ -246,8 +246,8 @@ msgstr "Categoria de itens excluída"
 msgid ""
 "You cannot delete this item category because it has records linked to it."
 msgstr ""
-"Você não pode excluir essa categoria de itens pois ela possui registros ligados a "
-"ela."
+"Você não pode excluir essa categoria de itens pois ela possui registros "
+"ligados a ela."
 
 #: item/views.py:178
 msgid "delete item category"
@@ -295,8 +295,8 @@ msgstr "Tabela de preço excluída com sucesso"
 #: item/views.py:376
 msgid "You cannot delete this price table because it has records linked to it."
 msgstr ""
-"Você não pode excluir essa tabela de preço pois ela possui registros ligados a "
-"ela."
+"Você não pode excluir essa tabela de preço pois ela possui registros ligados "
+"a ela."
 
 #: item/views.py:380
 msgid "delete price table"
@@ -372,7 +372,7 @@ msgstr "pedidos"
 msgid "order number"
 msgstr "número do pedido"
 
-#: order/models.py:22 user/views.py:400
+#: order/models.py:22 user/views.py:399
 msgid "client user"
 msgstr "usuário cliente"
 
@@ -462,7 +462,7 @@ msgstr ""
 msgid "Establishment not found."
 msgstr "Estabelecimento não encontrado."
 
-#: order/serializers.py:54 order/serializers.py:180 user/views.py:47
+#: order/serializers.py:54 order/serializers.py:180 user/views.py:46
 msgid "Your account is disabled."
 msgstr "Sua conta está desabilitada"
 
@@ -792,8 +792,7 @@ msgstr "Empresa excluída"
 #: organization/views.py:141
 msgid "You cannot delete this company because it has records linked to it."
 msgstr ""
-"Você não pode excluir essa empresa pois ela possui registros ligados a "
-"ela."
+"Você não pode excluir essa empresa pois ela possui registros ligados a ela."
 
 #: organization/views.py:146
 msgid "delete company"
@@ -841,8 +840,8 @@ msgstr "Tabela de clientes excluída"
 msgid ""
 "You cannot delete this client table because it has records linked to it."
 msgstr ""
-"Você não pode excluir essa tabela de clientes pois ela possui registros ligados a "
-"ela."
+"Você não pode excluir essa tabela de clientes pois ela possui registros "
+"ligados a ela."
 
 #: organization/views.py:288
 msgid "delete client table"
@@ -907,8 +906,9 @@ msgid "Invalid session. Try to login again."
 msgstr "Sessão invalida. Tente logar novamente."
 
 #: user/middleware.py:27
-msgid "Session already open."
-msgstr "A Sessão já esta aberta."
+msgid ""
+"A session was opened in another browser. Reload the page to access here."
+msgstr "Uma sessão foi aberta em outro navegador. Recarregue a pagina para acessar aqui."
 
 #: user/models.py:16
 msgid "agent establishment"
@@ -918,7 +918,7 @@ msgstr "estabelecimento do agente"
 msgid "agent establishments"
 msgstr "estabelecimentos do agente"
 
-#: user/models.py:20 user/views.py:303
+#: user/models.py:20 user/views.py:302
 msgid "agent"
 msgstr "agente"
 
@@ -995,134 +995,142 @@ msgstr "Existem valores duplicados para 'agent_permissions'"
 msgid "You can't assign '{permission}' permission to an agent."
 msgstr "Você não pode atribuir a permissão '{permission}' para um agente."
 
-#: user/views.py:40
+#: user/views.py:32
+msgid "The CSRF cookie was sent"
+msgstr "O cookie CSRF foi enviado."
+
+#: user/views.py:39
 msgid "User is already authenticated"
 msgstr "O usuário já está autenticado"
 
-#: user/views.py:50
+#: user/views.py:49
 msgid "The login is disabled"
 msgstr "O login está desabilitado"
 
-#: user/views.py:54
+#: user/views.py:53
 msgid "The login failed"
 msgstr "O login falhou"
 
-#: user/views.py:62
+#: user/views.py:61
 msgid "Logged out"
 msgstr "Deslogado"
 
-#: user/views.py:65
+#: user/views.py:64
 msgid "log out"
 msgstr "deslogar"
 
-#: user/views.py:76
+#: user/views.py:75
 msgid "get request user profile"
 msgstr "obter perfil do usuário da requisição"
 
-#: user/views.py:88
+#: user/views.py:87
 msgid "update request user profile"
 msgstr "atualizar perfil do usuário da requisição"
 
-#: user/views.py:117
+#: user/views.py:116
 msgid "create erp user"
 msgstr "criar usuário ERP"
 
-#: user/views.py:141
+#: user/views.py:140
 msgid "update erp user"
 msgstr "atualizar usuário ERP"
 
-#: user/views.py:151
+#: user/views.py:150
 msgid "The erp user"
 msgstr "O usuário ERP"
 
-#: user/views.py:154
+#: user/views.py:153
 msgid "ERP user deleted successfully."
 msgstr "Usuário ERP excluído com sucesso"
 
-#: user/views.py:156
+#: user/views.py:155
 msgid "erp user"
 msgstr "usuário ERP"
 
-#: user/views.py:160
+#: user/views.py:159
 msgid "delete erp user"
 msgstr "excluir usuário ERP"
 
-#: user/views.py:182
+#: user/views.py:181
 msgid "create admin agent"
 msgstr "criar agente administrador"
 
-#: user/views.py:192 user/views.py:197 user/views.py:216 user/views.py:221
+#: user/views.py:191 user/views.py:196 user/views.py:215 user/views.py:220
 msgid "The admin agent"
 msgstr "O agente administrador"
 
-#: user/views.py:208
+#: user/views.py:207
 msgid "update admin agent"
 msgstr "atualizar agente administrador"
 
-#: user/views.py:224
+#: user/views.py:223
 msgid "Admin agent deleted successfully"
 msgstr "Agente administrador excluído com sucesso."
 
-#: user/views.py:226
+#: user/views.py:225
 msgid "admin agent"
 msgstr "agente administrador"
 
-#: user/views.py:230
+#: user/views.py:229
 msgid "delete admin agent"
 msgstr "excluir agente administrador"
 
-#: user/views.py:259
+#: user/views.py:258
 msgid "create agent"
 msgstr "criar agente"
 
-#: user/views.py:269 user/views.py:274 user/views.py:293 user/views.py:298
+#: user/views.py:268 user/views.py:273 user/views.py:292 user/views.py:297
 msgid "The agent"
 msgstr "O agente"
 
-#: user/views.py:285
+#: user/views.py:284
 msgid "update agent"
 msgstr "atualizar agente"
 
-#: user/views.py:301
+#: user/views.py:300
 msgid "Agent deleted successfully"
 msgstr "Agente excluído com sucesso"
 
-#: user/views.py:307
+#: user/views.py:306
 msgid "delete agent"
 msgstr "excluir agente"
 
-#: user/views.py:350
+#: user/views.py:349
 msgid "create client user"
 msgstr "criar usuário cliente"
 
-#: user/views.py:360 user/views.py:365 user/views.py:368 user/views.py:386
-#: user/views.py:391
+#: user/views.py:359 user/views.py:364 user/views.py:367 user/views.py:385
+#: user/views.py:390
 msgid "The client user"
 msgstr "O usuário cliente"
 
-#: user/views.py:379
+#: user/views.py:378
 msgid "update client user"
 msgstr "atualizar usuário cliente"
 
-#: user/views.py:398
+#: user/views.py:397
 msgid "Client user deleted successfully"
 msgstr "Usuário cliente excluído com sucesso"
 
-#: user/views.py:404
+#: user/views.py:403
 msgid "delete client user"
 msgstr "excluir usuário cliente"
 
-#: user/views.py:414
+#: user/views.py:413
 msgid "Password field not sent"
 msgstr "Senha não enviada"
 
-#: user/views.py:416
+#: user/views.py:415
 msgid "Current Password field not sent"
 msgstr "A senha atual não foi enviada"
 
-#: user/views.py:421
+#: user/views.py:419
+msgid "Password updated"
+msgstr "Senha atualizada"
+
+#: user/views.py:420
 msgid "passwords don't match"
 msgstr "senhas não coincidem"
 
-msgid "Password updated"
-msgstr "Senha atualizada"
+#~ msgid "Session already open."
+#~ msgstr "A Sessão já esta aberta."

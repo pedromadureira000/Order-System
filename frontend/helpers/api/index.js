@@ -346,10 +346,10 @@ export default {
 				})
 	},
 
-	async updatePassword(payload){
+	async updateOwnPassword(payload){
 		return await axios({ 
 		method: "put",
-		url: "/api/user/update_user_password",
+		url: "/api/user/update_own_password",
 		data:{
 			current_password: payload.current_password,
 			password: payload.password,
@@ -362,6 +362,18 @@ export default {
 
 
   // --------------------------------------/ CRUD User APIs /----------------------------------------
+    async updateUserPassword(payload){
+		return await axios({ 
+		method: "put",
+		url: `/api/user/update_user_password/${payload.contracting_code}/${payload.username}`,
+		data:{
+			password: payload.password,
+		}
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
   // -----/ERP user
 	async fetchContractingCompaniesToCreateERPuser(){
 		return await axios({ 

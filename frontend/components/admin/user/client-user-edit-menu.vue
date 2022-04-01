@@ -68,24 +68,6 @@
                 @blur="$v.note.$touch()"
                 class="mb-3"
               />
-              <!-- Password -->
-              <!-- <v-text-field -->
-                <!-- type="password" -->
-                <!-- :label="$t('Password')" -->
-                <!-- v-model="password" -->
-                <!-- :error-messages="passwordErrors" -->
-                <!-- required -->
-                <!-- @blur="$v.password.$touch()" -->
-              <!-- /> -->
-              <!-- Password Confirm -->
-              <!-- <v-text-field -->
-                <!-- type="password" -->
-                <!-- :label="$t('Password_Confirm')" -->
-                <!-- v-model="password_confirm" -->
-                <!-- :error-messages="passConfirmErrors" -->
-                <!-- required -->
-                <!-- @blur="$v.password_confirm.$touch()" -->
-              <!-- /> -->
           </v-container>
         </v-card-text>
         <v-divider></v-divider>
@@ -114,6 +96,12 @@
         </v-card-text>
       </v-card>
     </v-dialog>
+     <!-- Change Password Dialog -->
+    <change-users-password 
+      :user="client_user" 
+      :show_change_password_dialog="show_change_password_dialog" 
+      @hide-change-password-dialog="show_change_password_dialog = false"
+    />
   </div>
 </template>
 
@@ -127,9 +115,10 @@ import {
 import { validationMixin } from "vuelidate";
 export default {
   mixins: [validationMixin],
-  /** components: { */
-    /** "dots-menu-update-delete": require("@/components/dots-menu-update-delete.vue").default, */
-  /** }, */
+  components: {
+    "dots-menu-update-delete": require("@/components/dots-menu-update-delete.vue").default,
+    "change-users-password": require("@/components/admin/user/change-users-password.vue").default,
+  },
   props: ['client_user', 'clients'],
   data() {
     return {
@@ -139,11 +128,10 @@ export default {
       first_name: null,
       last_name: null,
       email: null,
-      /** password: null, */
-      /** password_confirm: null, */
       status: null,
       note: "",
       loading: false,
+      show_change_password_dialog: false,
       menu_items: [
       ...(this.hasUpdateClientUserPermission() ? [{ 
           title: this.$t('Edit'),
@@ -159,6 +147,13 @@ export default {
             this.show_delete_confirmation_dialog = true
           }
         }] : []),
+      ...(this.hasUpdateClientUserPermission() ? [{ 
+          title: this.$t('Change_Password'),
+          icon: 'mdi-lock',
+          async click(){
+            this.show_change_password_dialog = true
+          }
+        }] : [] ),
       ]
     }
   },
@@ -179,21 +174,11 @@ export default {
     note: {
       maxLength: maxLength(800)
     },
-    /** password: { */
-      /** required, */
-      /** minLength: minLength(6), */
-      /** maxLength: maxLength(20), */
-    /** }, */
-    /** password_confirm: { */
-      /** password_confirm: sameAs("password"), */
-    /** }, */
     clientUserInfoGroup: [
       "first_name",
       "last_name",
       "email",
       "note",
-      /** "password", */
-      /** "password_confirm", */
     ],
   },
 
@@ -225,22 +210,6 @@ export default {
       !this.$v.note.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 800));
       return errors;
     },
-    /** passwordErrors() { */
-      /** const errors = []; */
-      /** if (!this.$v.password.$dirty) return errors; */
-      /** !this.$v.password.required && errors.push(this.$t("This_field_is_required")); */
-      /** !this.$v.password.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 20)); */
-      /** !this.$v.password.minLength && errors.push(this.$formatStr(this.$t("This_field_must_have_at_least_X_characters"), 6)); */
-      /** this.password === this.current_password && errors.push(this.$t("Password_must_be_different_from_current_password")) */
-      /** return errors; */
-    /** }, */
-    /** passConfirmErrors() { */
-      /** const errors = []; */
-      /** if (!this.$v.password_confirm.$dirty) return errors; */
-      /** /* !this.$v.password_confirm.required && errors.push("Password is required."); */ 
-      /** !this.$v.password_confirm.password_confirm && errors.push(this.$t('password_confirm_does_not_match')); */
-      /** return errors; */
-    /** }, */
   },
 
   methods: {

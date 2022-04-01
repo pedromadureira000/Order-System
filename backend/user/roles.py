@@ -12,7 +12,7 @@ class SuperUser(AbstractUserRole):
         "delete_erp_user": True,
     }
 
-class Erp(AbstractUserRole):
+class ErpUser(AbstractUserRole):
     available_permissions = {
         #ERP
         "create_company": True,

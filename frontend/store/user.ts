@@ -85,9 +85,9 @@ export const actions: ActionTree<UserState, RootState> = {
 		}
 	},
 
-	async updatePassword({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
+	async updateOwnPassword({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
 		try {
-			await api.updatePassword(payload)
+			await api.updateOwnPassword(payload)
 			commit("deleteUser")
 			dispatch("setAlert", {message: this.app.i18n.t('updatePassword_success_msg'), alertType: "success"}, { root: true })
 			setTimeout(() => {
@@ -100,6 +100,17 @@ export const actions: ActionTree<UserState, RootState> = {
 	},
 
 	// ----------------------------------------/ User API
+    async updateUserPassword({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
+		try {
+			await api.updateUserPassword(payload)
+			dispatch("setAlert", {message: this.app.i18n.t('updateUserPassword_success_msg'), alertType: "success"}, { root: true })
+      return 'ok'
+		}
+		catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("updateUserPassword_error_msg"))
+		}
+	},
+
   // ------------/ERP user
   	async fetchContractingCompaniesToCreateERPuser({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
     try{

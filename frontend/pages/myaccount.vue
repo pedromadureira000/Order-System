@@ -185,7 +185,7 @@ export default {
         this.$store.dispatch("setAlert", { message: this.$t("Please_fill_the_form_correctly"), alertType: "error" }, { root: true })
       } else {
         this.loading_password = true;
-        await this.$store.dispatch('user/updatePassword', {password: this.password, current_password: this.current_password})
+        await this.$store.dispatch('user/updateOwnPassword', {password: this.password, current_password: this.current_password})
         this.loading_password = false;
       }
     },

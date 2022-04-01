@@ -1,6 +1,7 @@
 export const messages = {
   en: {
     //--------------------------------------------------------------------/Store APIs Success Messages (dispatch success dialog)
+    updateUserPassword_success_msg: "Password updated successfully.",
     // user
     login_success_msg: "Logged in with success.",
     logout_success_msg: "Logged out in with success.",
@@ -49,6 +50,7 @@ export const messages = {
     deletePriceTable_success_msg: "Price Table deleted.",
     
     //--------------------------------------------------------------------/Store APIs Error Messages (default_error_msg parameter)
+    updateUserPassword_error_msg: "Something went wrong when trying to update the user's password.",
     //user
     checkAuthenticated_error_msg: "Something went wrong when trying to get the user profile.",
     getCsrf_error_msg: "Something went wrong when trying to get CSRF Token.",
@@ -164,7 +166,7 @@ export const messages = {
     agent: 'agent',
     admin_agent: 'admin agent',
     super_user: 'super user',
-    erp: 'ERP User',
+    erp_user: 'ERP User',
     // Menu Itens
     Home: 'Home',
     About: 'About',
@@ -337,6 +339,7 @@ export const messages = {
     "DecimalErrorMessage": "This field must be a decimal number.",
     "Edit Items": "Edit Items",
     // -------------------------------------------------------------------/ Components
+    // change user's password
     // -------------------------------/Problem Connecting Error dialog
     ProblemConnectingTitle: "Problema de conexão",
     Check_your_internet_connection: "Verifique sua conexão de internet e tente novamente.",
@@ -361,6 +364,7 @@ export const messages = {
   
   'pt-BR': {
     //--------------------------------------------------------------------/Store APIs Success Messages (dispatch success dialog)
+    updateUserPassword_success_msg: "Senha atualizada com sucesso.",
     // user
     login_success_msg: "Usuário logado.",
     logout_success_msg: "Usuário deslogado.",
@@ -408,6 +412,7 @@ export const messages = {
     updatePriceTable_success_msg: "Tabela de preço atualizada.",
     deletePriceTable_success_msg: "Tabela de preço excluída.",
     //--------------------------------------------------------------------/Store APIs Error Messages (default_error_msg parameter)
+    updateUserPassword_error_msg: "Algo deu errado ao tentar atualizar a senha do usuário.",
     //user
     checkAuthenticated_error_msg: "Algo deu errado ao tentar obter o perfil do usuário.",
     getCsrf_error_msg: "Algo deu errado ao tentar obter o Token CSRF.",
@@ -523,7 +528,7 @@ export const messages = {
     agent: 'agente',
     admin_agent: 'agente admin',
     super_user: 'super user',
-    erp: 'Usuário ERP',
+    erp_user: 'Usuário ERP',
     // Menu Itens
     Home: 'Home',
     About: 'Sobre nós',
@@ -695,6 +700,7 @@ export const messages = {
     "Edit Items": "Editar Itens",
 
     // -------------------------------------------------------------------/ Components
+    // change user's password
     // -------------------------------/Problem Connecting Error dialog
     ProblemConnectingTitle: "Problem connecting",
     Check_your_internet_connection: "Check your internet connection and try again.",

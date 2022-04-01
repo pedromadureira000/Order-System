@@ -292,7 +292,7 @@ class fetchItemsToCreatePriceTable(APIView):
                 return Response({"error":[_( "The item table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 item_table = ItemTable.objects.get(item_table_compound_id=item_table_compound_id)
-            except Company.DoesNotExist:
+            except ItemTable.DoesNotExist:
                 return Response({"error":[_( "The item table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             if req_user_is_agent_without_all_estabs(request.user):
                 agent_item_tables = get_agent_item_tables(request.user)

@@ -101,6 +101,19 @@ class UserSerializer(serializers.ModelSerializer):
     def get_contracting_code(self, user):
         return user.contracting.contracting_code
 
+class UpdateUserPasswordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['password']
+        extra_kwargs = {
+            'password': {'write_only': True},
+        }
+
+    def update(self, instance, validated_data):
+        instance.set_password(validated_data['password'])
+        instance.save()
+        return instance
+
 class AgentEstablishmentToUserSerializer(serializers.ModelSerializer):
     establishment = serializers.SlugRelatedField(slug_field='establishment_compound_id', queryset=Establishment.objects.all())
     class Meta:
@@ -152,7 +165,7 @@ class ERPUserSerializer(UserSerializer):
             note=validated_data.get('note', ''),
             status=1
             )
-        assign_role(user, 'erp')
+        assign_role(user, 'erp_user')
         return user
 
     def update(self, instance, validated_data):

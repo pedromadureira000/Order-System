@@ -4,6 +4,7 @@ from rolepermissions.checkers import has_permission
 from rolepermissions.permissions import available_perm_status
 from .models import AgentEstablishment, User
 from organization.models import Company
+from rolepermissions.roles import get_user_roles
 
 def get_all_client_users_by_agent(agent):
     if has_permission(agent, 'access_all_establishments'):
@@ -36,4 +37,10 @@ def update_agent_establishments(agent, agent_establishments):
     establishments_to_create = list(filter(lambda estab: estab["establishment"].establishment_compound_id in to_create, agent_establishments))
     agent_establishments_to_create = [AgentEstablishment(establishment=obj['establishment'], agent=agent) for obj in establishments_to_create]
     agent.agent_establishments.bulk_create(agent_establishments_to_create)
+
+def get_update_permission(user):
+    # TODO seems bugado
+    role = get_user_roles(user)
+    permission = 'update_' + role[0].get_name()
+    return permission
 

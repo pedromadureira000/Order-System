@@ -37,3 +37,8 @@ export default {
 }
 
 </script>
+<style scoped>
+.v-list-item {
+  height: 0px;
+}
+</style>
