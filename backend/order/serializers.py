@@ -158,12 +158,12 @@ class OrderPUTSerializer(serializers.ModelSerializer):
         return value
 
     def validate_invoice_number(self, value):
-        if not has_role(self.context['request'].user, 'erp'):
+        if not has_role(self.context['request'].user, 'erp_user'):
             raise serializers.ValidationError(_("You cannot send the 'invoice number' field."))
         return value
 
     def validate_invoicing_date(self, value):
-        if not has_role(self.context['request'].user, 'erp'):
+        if not has_role(self.context['request'].user, 'erp_user'):
             raise serializers.ValidationError(_("You cannot send the 'invoicing date' field."))
         return value
 

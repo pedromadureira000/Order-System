@@ -8,17 +8,20 @@ from item.models import ItemTable, PriceTable
 from organization.models import Client, ClientEstablishment, ClientTable, Company, Contracting, Establishment
 from django.utils.translation import gettext_lazy as _
 
-class ContractingSerializer(serializers.ModelSerializer):
+class ContractingPOSTSerializer(serializers.ModelSerializer):
     name = serializers.CharField(min_length=3, max_length=60)
     class Meta:
         model = Contracting
         fields = ['contracting_code', 'name', 'status', 'active_users_limit', 'note']
 
-    def update(self, instance, validated_data):
-        validated_data['contracting_code'] = instance.contracting_code
-        return super().update(instance, validated_data)
+class ContractingPUTSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(min_length=3, max_length=60)
+    class Meta:
+        model = Contracting
+        fields = ['contracting_code', 'name', 'status', 'active_users_limit', 'note']
+        read_only_fields = ['contracting_code']
 
-class CompanySerializer(serializers.ModelSerializer):
+class CompanyPOSTSerializer(serializers.ModelSerializer):
     client_table=serializers.SlugRelatedField(slug_field='client_table_compound_id', 
             queryset=ClientTable.objects.all(), allow_null=True)
     item_table=serializers.SlugRelatedField(slug_field='item_table_compound_id',
@@ -52,10 +55,12 @@ class CompanySerializer(serializers.ModelSerializer):
                 "&" + validated_data['company_code']
         return super().create(validated_data)
 
-    def update(self, instance, validated_data):
-        # Not allow to update this fields
-        if validated_data.get('company_code'): validated_data.pop('company_code')
-        return super().update(instance, validated_data)
+class CompanyPUTSerializer(CompanyPOSTSerializer):
+    class Meta:
+        model = Company
+        fields = ['company_compound_id', 'company_code', 'contracting', 'item_table', 'client_table', 'name',
+                'cnpj_root','status', 'note']
+        read_only_fields = ['company_code']
 
 class EstablishmentPOSTSerializer(serializers.ModelSerializer):
     company=serializers.SlugRelatedField(slug_field='company_compound_id', queryset=Company.objects.all())
@@ -89,12 +94,11 @@ class EstablishmentPUTSerializer(serializers.ModelSerializer):
         fields = ['establishment_compound_id', 'establishment_code', 'company', 'name', 'cnpj', 'status', 'note']
         read_only_fields = ['establishment_code', 'company']
 
-class ClientTableSerializer(serializers.ModelSerializer):
+class ClientTablePOSTSerializer(serializers.ModelSerializer):
     contracting=serializers.HiddenField(default=UserContracting())
     class Meta:
         model = ClientTable
         fields =  ['client_table_compound_id' ,'client_table_code', 'contracting', 'description', 'note']
-        read_only_fields =  ['client_table_compound_id']
         validators = [UniqueTogetherValidator(queryset=ClientTable.objects.all(), fields=['client_table_code', 'contracting'], 
             message=_("The 'client_table_code' field must be unique."))]
 
@@ -104,11 +108,12 @@ class ClientTableSerializer(serializers.ModelSerializer):
                 "&" + validated_data['client_table_code']
         return super().create(validated_data)
 
-    def update(self, instance, validated_data):
-        # Not allow to update this fields
-        validated_data['client_table_code'] = instance.client_table_code
-        validated_data['contracting'] = instance.contracting
-        return super().update(instance, validated_data)
+class ClientTablePUTSerializer(serializers.ModelSerializer):
+    contracting=serializers.HiddenField(default=UserContracting())
+    class Meta:
+        model = ClientTable
+        fields =  ['client_table_compound_id' ,'client_table_code', 'contracting', 'description', 'note']
+        read_only_fields = ['client_table_code']
 
 class ClientEstablishmentToClientSerializer(serializers.ModelSerializer):
     establishment = serializers.SlugRelatedField(slug_field='establishment_compound_id', queryset=Establishment.objects.all())
@@ -199,7 +204,7 @@ class ClientSerializerPUT(serializers.ModelSerializer):
         model = Client
         fields =  ['client_compound_id', 'client_table', 'client_code', 'client_establishments',
                 'vendor_code', 'name', 'cnpj', 'status', 'note']
-        read_only_fields =  ['client_compound_id', 'client_table', 'client_code']
+        read_only_fields =  [ 'client_table', 'client_code']
 
     def validate(self, attrs):
         request_user = self.context["request"].user

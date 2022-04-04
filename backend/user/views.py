@@ -9,9 +9,9 @@ from rest_framework.views import APIView
 from organization.facade import get_clients_by_agent
 
 from organization.models import Client, Contracting, Establishment
-from organization.serializers import ClientSerializerPOST, ContractingSerializer, EstablishmentPOSTSerializer
+from organization.serializers import ClientSerializerPOST, ContractingPOSTSerializer, EstablishmentPOSTSerializer
 from .facade import get_all_client_users_by_agent, get_update_permission
-from .serializers import AdminAgentSerializer, AgentPOSTSerializer, AgentPUTSerializer, ClientUserSerializer, ERPUserSerializer, OwnProfileSerializer, SwaggerLoginSerializer, SwaggerProfilePasswordSerializer, UpdateUserPasswordSerializer
+from .serializers import AdminAgentPOSTSerializer, AdminAgentPUTSerializer, AgentPOSTSerializer, AgentPUTSerializer, ClientUserPOSTSerializer, ClientUserPUTSerializer, ERPUserPOSTSerializer, ERPUserPUTSerializer, OwnProfileSerializer, SwaggerLoginSerializer, SwaggerProfilePasswordSerializer, UpdateUserPasswordSerializer
 from .models import User
 from rolepermissions.checkers import has_permission, has_role
 from django.db import transaction
@@ -92,20 +92,20 @@ class fetchContractingCompaniesToCreateERPuser(APIView):
     def get(self, request):
         if has_permission(request.user, 'create_erp_user'):
             erp_users = Contracting.objects.filter(status=1)
-            return Response(ContractingSerializer(erp_users, many=True).data)
+            return Response(ContractingPOSTSerializer(erp_users, many=True).data)
         return unauthorized_response
 
 class ERPUserView(APIView):
     def get(self, request):
         if has_permission(request.user, 'get_erp_user'):
-            erp_users = User.objects.filter(Q(groups__name='erp'))
-            return Response(ERPUserSerializer(erp_users, many=True).data)
+            erp_users = User.objects.filter(Q(groups__name='erp_user'))
+            return Response(ERPUserPOSTSerializer(erp_users, many=True).data)
         return unauthorized_response
-    @swagger_auto_schema(request_body=ERPUserSerializer) 
+    @swagger_auto_schema(request_body=ERPUserPOSTSerializer) 
     @transaction.atomic
     def post(self, request):
         if has_permission(request.user, 'create_erp_user'):
-            serializer = ERPUserSerializer(data=request.data, context={"request":request})
+            serializer = ERPUserPOSTSerializer(data=request.data, context={"request":request})
             if serializer.is_valid():
                 try:
                     serializer.save()
@@ -118,16 +118,16 @@ class ERPUserView(APIView):
         return unauthorized_response
 
 class SpecificERPUser(APIView):
-    @swagger_auto_schema(request_body=ERPUserSerializer) 
+    @swagger_auto_schema(request_body=ERPUserPUTSerializer) 
     @transaction.atomic
     def put(self, request, contracting_code, username):
         if has_permission(request.user, 'update_erp_user'):
             user_code = contracting_code + "&" + username
             try: 
-                user = User.objects.get(user_code=user_code, groups__name='erp')
+                user = User.objects.get(user_code=user_code, groups__name='erp_user')
             except User.DoesNotExist:
                 return not_found_response(object_name='The erp user')
-            serializer = ERPUserSerializer(user, data=request.data, partial=True,
+            serializer = ERPUserPUTSerializer(user, data=request.data, partial=True,
                     context={"request": request})
             if serializer.is_valid():
                 try:
@@ -145,7 +145,7 @@ class SpecificERPUser(APIView):
         if has_permission(request.user, 'delete_erp_user'):
             user_code = contracting_code + "&" + username
             try:
-                user = User.objects.get(user_code=user_code, groups__name='erp')
+                user = User.objects.get(user_code=user_code, groups__name='erp_user')
             except User.DoesNotExist:
                 return not_found_response(object_name=_('The erp user'))
             try:
@@ -164,13 +164,13 @@ class AdminAgentView(APIView):
         if has_permission(request.user, 'get_admin_agents'):
             user = request.user
             agents = User.objects.filter(Q(contracting=user.contracting), Q(groups__name='admin_agent'))
-            return Response(AdminAgentSerializer(agents, many=True).data)
+            return Response(AdminAgentPOSTSerializer(agents, many=True).data)
         return unauthorized_response
-    @swagger_auto_schema(request_body=AdminAgentSerializer) 
+    @swagger_auto_schema(request_body=AdminAgentPOSTSerializer) 
     @transaction.atomic
     def post(self, request):
         if has_permission(request.user, 'create_admin_agent'):
-            serializer = AdminAgentSerializer(data=request.data, context={"request":request})
+            serializer = AdminAgentPOSTSerializer(data=request.data, context={"request":request})
             if serializer.is_valid():
                 try:
                     serializer.save()
@@ -183,7 +183,7 @@ class AdminAgentView(APIView):
         return unauthorized_response
 
 class SpecificAdminAgent(APIView):
-    @swagger_auto_schema(request_body=AdminAgentSerializer) 
+    @swagger_auto_schema(request_body=AdminAgentPUTSerializer) 
     @transaction.atomic
     def put(self, request, contracting_code, username):
         if has_permission(request.user, 'update_admin_agent'):
@@ -194,7 +194,7 @@ class SpecificAdminAgent(APIView):
                 user = User.objects.get(user_code=user_code, groups__name='admin_agent')
             except User.DoesNotExist:
                 return not_found_response(object_name=_('The admin agent'))
-            serializer = AdminAgentSerializer(user, data=request.data, partial=True,
+            serializer = AdminAgentPUTSerializer(user, data=request.data, partial=True,
                     context={"request": request})
             if serializer.is_valid():
                 try:
@@ -327,16 +327,16 @@ class ClientUserView(APIView):
             #  if req_user_is_agent_without_all_estabs(user):  <- This is not used because get_all_client_users_by_agent does it.
             if has_role(user, 'agent'):
                 client_users = get_all_client_users_by_agent(user)
-                return Response(ClientUserSerializer(client_users, many=True).data)
+                return Response(ClientUserPOSTSerializer(client_users, many=True).data)
             client_users = User.objects.filter(Q(contracting=user.contracting), Q(groups__name='client_user'))
-            return Response(ClientUserSerializer(client_users, many=True).data)
+            return Response(ClientUserPOSTSerializer(client_users, many=True).data)
         return unauthorized_response
-    @swagger_auto_schema(request_body=ClientUserSerializer) 
+    @swagger_auto_schema(request_body=ClientUserPOSTSerializer) 
     @transaction.atomic
     def post(self, request):
         if has_permission(request.user, 'create_client_user'):
                 request_user_is_agent_without_all_estabs = req_user_is_agent_without_all_estabs(request.user)
-                serializer = ClientUserSerializer(data=request.data, context={"request":request,
+                serializer = ClientUserPOSTSerializer(data=request.data, context={"request":request,
                     "request_user_is_agent_without_all_estabs": request_user_is_agent_without_all_estabs})
                 #  if serializer.is_valid(raise_exception=True):
                 if serializer.is_valid():
@@ -351,7 +351,7 @@ class ClientUserView(APIView):
         return unauthorized_response
 
 class SpecificClientUser(APIView):
-    @swagger_auto_schema(request_body=ClientUserSerializer) 
+    @swagger_auto_schema(request_body=ClientUserPUTSerializer) 
     @transaction.atomic
     def put(self, request, contracting_code, username):
         if has_permission(request.user, 'update_client_user'):
@@ -365,7 +365,7 @@ class SpecificClientUser(APIView):
             request_user_is_agent_without_all_estabs = req_user_is_agent_without_all_estabs(request.user)
             if request_user_is_agent_without_all_estabs and not agent_has_access_to_this_client_user(request.user, user):
                 return not_found_response(object_name=_('The client user'))
-            serializer = ClientUserSerializer(user, data=request.data, partial=True, context={"request": request,
+            serializer = ClientUserPUTSerializer(user, data=request.data, partial=True, context={"request": request,
                 "request_user_is_agent_without_all_estabs": request_user_is_agent_without_all_estabs})
             if serializer.is_valid():
                 try:

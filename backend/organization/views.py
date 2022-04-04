@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from item.serializers import PriceTableGetSerializer
 from organization.facade import get_agent_client_tables, get_clients_by_agent, get_establishments_to_create_client, get_price_tables_to_create_client
-from organization.serializers import  ClientSerializerPOST, ClientSerializerPUT, ClientTableSerializer, CompanySerializer, ContractingSerializer, EstablishmentPOSTSerializer, EstablishmentPUTSerializer
+from organization.serializers import  ClientSerializerPOST, ClientSerializerPUT, ClientTablePOSTSerializer, ClientTablePUTSerializer, CompanyPOSTSerializer, CompanyPUTSerializer, ContractingPOSTSerializer, ContractingPUTSerializer, EstablishmentPOSTSerializer, EstablishmentPUTSerializer
 from organization.models import Client, ClientTable, Company, Contracting, Establishment
 from rolepermissions.checkers import has_permission, has_role
 from django.db import transaction
@@ -18,15 +18,15 @@ class ContractingView(APIView):
     def get(self, request):
         if has_permission(request.user, 'get_contracting'):
             contractings = Contracting.objects.all()
-            data = ContractingSerializer(contractings, many=True).data
+            data = ContractingPOSTSerializer(contractings, many=True).data
             return Response(data)
         return unauthorized_response
-    @swagger_auto_schema(request_body=ContractingSerializer) 
+    @swagger_auto_schema(request_body=ContractingPOSTSerializer) 
     @transaction.atomic
     def post(self, request):
             if has_permission(request.user, 'create_contracting'):
                 data = request.data
-                serializer = ContractingSerializer(data=data)
+                serializer = ContractingPOSTSerializer(data=data)
                 if serializer.is_valid():
                     try:
                         serializer.save()
@@ -39,7 +39,7 @@ class ContractingView(APIView):
             return unauthorized_response
 
 class SpecificContracting(APIView):
-    @swagger_auto_schema(request_body=ContractingSerializer) 
+    @swagger_auto_schema(request_body=ContractingPUTSerializer) 
     @transaction.atomic
     def put(self, request, contracting_code):
         if has_permission(request.user, 'update_contracting'):
@@ -47,7 +47,7 @@ class SpecificContracting(APIView):
                 contracting = Contracting.objects.get(contracting_code=contracting_code)
             except Contracting.DoesNotExist:
                 return Response({"error":[_( "The contracting company was not found.")]}, status=status.HTTP_404_NOT_FOUND)
-            serializer = ContractingSerializer(contracting, data=request.data, partial=True)
+            serializer = ContractingPUTSerializer(contracting, data=request.data, partial=True)
             if serializer.is_valid():
                 try:
                     serializer.save()
@@ -82,15 +82,15 @@ class CompanyView(APIView):
         user = request.user
         if has_permission(user, 'get_companies'):
             companies = Company.objects.filter(contracting=user.contracting)
-            data = CompanySerializer(companies, many=True, context={"request": request}).data
+            data = CompanyPOSTSerializer(companies, many=True, context={"request": request}).data
             return Response(data)
         return unauthorized_response
-    @swagger_auto_schema(request_body=CompanySerializer) 
+    @swagger_auto_schema(request_body=CompanyPOSTSerializer) 
     @transaction.atomic
     def post(self, request):
         if has_permission(request.user, 'create_company'):
             data = request.data
-            serializer = CompanySerializer(data=data, context={"request": request})
+            serializer = CompanyPOSTSerializer(data=data, context={"request": request})
             if serializer.is_valid():
                 try:
                     serializer.save()
@@ -104,7 +104,7 @@ class CompanyView(APIView):
 
 class SpecificCompany(APIView):
     @transaction.atomic
-    @swagger_auto_schema(request_body=CompanySerializer) 
+    @swagger_auto_schema(request_body=CompanyPUTSerializer) 
     def put(self, request, company_compound_id):
         #  print('========================> : ',company_compound_id )
         if has_permission(request.user, 'update_company'):
@@ -114,7 +114,7 @@ class SpecificCompany(APIView):
                 company = Company.objects.get(company_compound_id=company_compound_id)
             except Company.DoesNotExist:
                 return Response({"error":[_( "The company was not found.")]}, status=status.HTTP_404_NOT_FOUND)
-            serializer = CompanySerializer(company, data=request.data, partial=True, context={"request": request})
+            serializer = CompanyPUTSerializer(company, data=request.data, partial=True, context={"request": request})
             if serializer.is_valid():
                 try:
                     serializer.save()
@@ -225,15 +225,15 @@ class ClientTableView(APIView):
         user = request.user
         if has_permission(user, 'get_client_tables'):
             client_table = ClientTable.objects.filter(contracting=user.contracting)
-            data = ClientTableSerializer(client_table, many=True).data
+            data = ClientTablePOSTSerializer(client_table, many=True).data
             return Response(data)
         return unauthorized_response
-    @swagger_auto_schema(request_body=ClientTableSerializer) 
+    @swagger_auto_schema(request_body=ClientTablePOSTSerializer) 
     @transaction.atomic
     def post(self, request):
             if has_permission(request.user, 'create_company'):
                 data = request.data
-                serializer = ClientTableSerializer(data=data, context={"request":request})
+                serializer = ClientTablePOSTSerializer(data=data, context={"request":request})
                 if serializer.is_valid():
                     try:
                         serializer.save()
@@ -247,7 +247,7 @@ class ClientTableView(APIView):
 
 class SpecificClientTable(APIView):
     @transaction.atomic
-    @swagger_auto_schema(request_body=ClientTableSerializer) 
+    @swagger_auto_schema(request_body=ClientTablePUTSerializer) 
     def put(self, request, client_table_compound_id):
         if has_permission(request.user, 'update_client_table'):
             if client_table_compound_id.split("&")[0] != request.user.contracting.contracting_code:
@@ -256,7 +256,7 @@ class SpecificClientTable(APIView):
                 client_table = ClientTable.objects.get(client_table_compound_id=client_table_compound_id)
             except ClientTable.DoesNotExist:
                 return Response({"error":[_( "The client table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
-            serializer = ClientTableSerializer(client_table, data=request.data, partial=True)
+            serializer = ClientTablePUTSerializer(client_table, data=request.data, partial=True)
             if serializer.is_valid():
                 try:
                     serializer.save()

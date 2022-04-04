@@ -140,9 +140,9 @@ class OwnProfileSerializer(UserSerializer):
     def get_contracting_code(self, user):
         return user.contracting.contracting_code
 
-class ERPUserSerializer(UserSerializer):
+class ERPUserPOSTSerializer(UserSerializer):
     #overwrite UserSerializer contracting field
-    contracting = serializers.SlugRelatedField(slug_field='contracting_code', queryset=Contracting.objects.all())
+    contracting = serializers.SlugRelatedField(slug_field='contracting_code', queryset=Contracting.objects.all(), write_only=True)
     user_code = serializers.SerializerMethodField()
 
     class Meta(UserSerializer.Meta):
@@ -168,15 +168,53 @@ class ERPUserSerializer(UserSerializer):
         assign_role(user, 'erp_user')
         return user
 
-    def update(self, instance, validated_data):
-        # prevent change of contracting
-        validated_data.pop('contracting') if validated_data.get('contracting') else None
-        return super().update(instance, validated_data)
+    def get_user_code(self, user):
+        return user.user_code
+
+class ERPUserPUTSerializer(serializers.ModelSerializer):
+    #OBS: I don't utilized the UserSerializer because I shouldn't have contracting field
+    roles = serializers.SerializerMethodField()
+    permissions = serializers.SerializerMethodField() 
+    status = serializers.ChoiceField(choices=[x[0] for x in status_choices])
+    user_code = serializers.SerializerMethodField()
+    contracting_code = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name', 'email', 'status',
+                'roles', 'permissions', 'contracting_code', 'user_code', 'note']
+        read_only_fields = ['username']
 
     def get_user_code(self, user):
         return user.user_code
 
-class AdminAgentSerializer(UserSerializer):
+    def get_roles(self, user):
+        # If "user" is OrderedDict. This means receive data and not receive instance.
+        # If "user" is model.User. This means we receive a instance.
+        if isinstance(user, OrderedDict):
+            roles = []
+            return roles
+        roles = []
+        user_roles = get_user_roles(user) 
+        for role in user_roles:
+            roles.append(role.get_name())
+        return roles
+
+    def get_permissions(self, user):
+        if isinstance(user, OrderedDict):
+            permissions_list = []
+            return permissions_list 
+        permissions = available_perm_status(user)
+        permissions_list = []
+        for key, value in permissions.items():
+            if value == True:
+                permissions_list.append(key) 
+        return permissions_list 
+
+    def get_contracting_code(self, user):
+        return user.contracting.contracting_code
+
+class AdminAgentPOSTSerializer(UserSerializer):
     def create(self, validated_data):  
         username = validated_data['username']
         contracting = validated_data['contracting']
@@ -191,6 +229,13 @@ class AdminAgentSerializer(UserSerializer):
             )
         assign_role(user, 'admin_agent')
         return user
+
+class AdminAgentPUTSerializer(UserSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name', 'email', 'status',
+                'roles', 'permissions', 'contracting_code', 'user_code', 'note']
+        read_only_fields = ['username']
 
 class AgentPOSTSerializer(UserSerializer):
     agent_establishments = AgentEstablishmentToUserSerializer(many=True)
@@ -272,7 +317,7 @@ class AgentPUTSerializer(UserSerializer):
             update_agent_establishments(instance, agent_establishments)
         return super().update(instance, validated_data)
 
-class ClientUserSerializer(UserSerializer):
+class ClientUserPOSTSerializer(UserSerializer):
     client = serializers.SlugRelatedField(slug_field='client_compound_id', queryset=Client.objects.all())
 
     class Meta(UserSerializer.Meta):
@@ -281,16 +326,15 @@ class ClientUserSerializer(UserSerializer):
 
     def validate_client(self, value):
         request_user = self.context["request"].user
-        if self.context['request'].method == 'POST':
-            # Check if client is from the same contracting as the request user
-            if value.client_table.contracting != request_user.contracting:
-                raise serializers.ValidationError(_("Client table not found."))
-            # Check if request user is agent without all estabs and can assign this client for a client_user
-            if self.context['request_user_is_agent_without_all_estabs'] and not agent_has_access_to_this_client(request_user, value):
-                raise serializers.ValidationError(_("You have no permission to assign this client to this client user.")) 
-            # Check if there is already an client user for this client
-            if value.user_set.exists():
-                raise serializers.ValidationError(_("You cannot create a client user for this client, because it already exists.")) 
+        # Check if client is from the same contracting as the request user
+        if value.client_table.contracting != request_user.contracting:
+            raise serializers.ValidationError(_("Client table not found."))
+        # Check if request user is agent without all estabs and can assign this client for a client_user
+        if self.context['request_user_is_agent_without_all_estabs'] and not agent_has_access_to_this_client(request_user, value):
+            raise serializers.ValidationError(_("You have no permission to assign this client to this client user.")) 
+        # Check if there is already an client user for this client
+        if value.user_set.exists():
+            raise serializers.ValidationError(_("You cannot create a client user for this client, because it already exists.")) 
         return value
 
     def create(self, validated_data):  
@@ -309,6 +353,25 @@ class ClientUserSerializer(UserSerializer):
         assign_role(user, 'client_user')
         return user
 
-    def update(self, instance, validated_data):
-        if validated_data.get('client'): validated_data.pop('client')
-        return super().update(instance, validated_data)
+class ClientUserPUTSerializer(UserSerializer):
+    client = serializers.SlugRelatedField(slug_field='client_compound_id', read_only=True)
+
+    class Meta:
+        model = User
+        fields = ['username', 'client', 'roles', 'permissions', 'first_name',
+                'last_name', 'email', 'status', 'note', 'contracting_code']
+        read_only_fields = ['username', 'client']
+
+    def validate_client(self, value):
+        request_user = self.context["request"].user
+        if self.context['request'].method == 'POST':
+            # Check if client is from the same contracting as the request user
+            if value.client_table.contracting != request_user.contracting:
+                raise serializers.ValidationError(_("Client table not found."))
+            # Check if request user is agent without all estabs and can assign this client for a client_user
+            if self.context['request_user_is_agent_without_all_estabs'] and not agent_has_access_to_this_client(request_user, value):
+                raise serializers.ValidationError(_("You have no permission to assign this client to this client user.")) 
+            # Check if there is already an client user for this client
+            if value.user_set.exists():
+                raise serializers.ValidationError(_("You cannot create a client user for this client, because it already exists.")) 
+        return value

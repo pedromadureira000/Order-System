@@ -17,7 +17,7 @@ from drf_yasg.utils import swagger_auto_schema
 from settings.response_templates import error_response, not_found_response, protected_error_response, serializer_invalid_response,  unauthorized_response, unknown_exception_response
 from django.utils.translation import gettext_lazy as _
 from decimal import Decimal
-from organization.serializers import CompanySerializer
+from organization.serializers import CompanyPOSTSerializer
 
 class ItemTableView(APIView):
     def get(self, request):
@@ -279,9 +279,9 @@ class fetchCompaniesToCreatePriceTable(APIView):
         if has_permission(request.user, 'create_price_table'):
             if req_user_is_agent_without_all_estabs(request.user):
                 companies = get_companies_to_create_pricetabe_by_agent(request.user)
-                return Response(CompanySerializer(companies, many=True).data)
+                return Response(CompanyPOSTSerializer(companies, many=True).data)
             companies = Company.objects.filter(status=1, contracting=request.user.contracting).exclude(item_table=None)
-            serializer = CompanySerializer(companies, many=True)
+            serializer = CompanyPOSTSerializer(companies, many=True)
             return Response(serializer.data)
         return
 
