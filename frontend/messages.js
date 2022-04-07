@@ -48,6 +48,8 @@ export const messages = {
     createPriceTable_success_msg: "Price Table created.",
     updatePriceTable_success_msg: "Price Table updated.",
     deletePriceTable_success_msg: "Price Table deleted.",
+    // Order
+    makeOrder_success_msg: "Order created.",  
     
     //--------------------------------------------------------------------/Store APIs Error Messages (default_error_msg parameter)
     updateUserPassword_error_msg: "Something went wrong when trying to update the user's password.",
@@ -123,6 +125,12 @@ export const messages = {
     fetchPriceTables_error_msg: "Something went wrong when trying to fetch price tables.",
     updatePriceTable_error_msg: "Something went wrong when trying to update the price table.",
     deletePriceTable_error_msg: "Something went wrong when trying to delete the price table.",
+    // Order
+    fetchClientEstabsToCreateOrder_error_msg: "Something went wrong when trying to fetch establishments to make order.",
+    searchOnePriceItemToMakeOrder_error_msg: "Something went wrong when trying to fetch price item to make order.",
+    searchPriceItemsToMakeOrder_error_msg: "Something went wrong when trying to fetch items to make order.",
+    fetchCategoriesToMakeOrder_error_msg: "Something went wrong when trying to fetch categories.",
+    makeOrder_error_msg: "Something went wrong when trying to make an order.",
 
     // -------------------------------------------------------------------/ Error Handler
     // Fields
@@ -338,6 +346,8 @@ export const messages = {
     "Available Items": "Available Items",
     "DecimalErrorMessage": "This field must be a decimal number.",
     "Edit Items": "Edit Items",
+    // -----------------------------------------------------------------------------------/client/order
+    
     // -------------------------------------------------------------------/ Components
     // change user's password
     // -------------------------------/Problem Connecting Error dialog
@@ -411,6 +421,9 @@ export const messages = {
     createPriceTable_success_msg: "Tabela de preço criada.",
     updatePriceTable_success_msg: "Tabela de preço atualizada.",
     deletePriceTable_success_msg: "Tabela de preço excluída.",
+    // Order
+    makeOrder_success_msg: "Pedido criado.",
+    
     //--------------------------------------------------------------------/Store APIs Error Messages (default_error_msg parameter)
     updateUserPassword_error_msg: "Algo deu errado ao tentar atualizar a senha do usuário.",
     //user
@@ -469,6 +482,7 @@ export const messages = {
     updateItemTable_error_msg: "Algo deu errado ao tentar atualizar a tabela de itens.",
     deleteItemTable_error_msg: "Algo deu errado ao tentar excluir a tabela de itens.",
     fetchItemTablesToCreateItemOrCategoryOrPriceTable_error_msg: "Algo deu errado ao tentar buscar tabelas de itens para criar item, categoria ou tabela de preços.",
+    fetchCompaniesToCreatePriceTable_error_msg: "Algo deu errado ao tentar buscar empresas para criar tabela de preço.",
     fetchCategoriesToCreateItem_error_msg: "Algo deu errado ao tentar buscar categorias para criar item.",
     createItem_error_msg: "Algo deu errado ao tentar criar um item.",
     fetchItems_error_msg: "Algo deu errado ao tentar buscar itens.",
@@ -484,6 +498,12 @@ export const messages = {
     fetchPriceTables_error_msg: "Algo deu errado ao tentar buscar tabelas de preço.",
     updatePriceTable_error_msg: "Algo deu errado ao tentar atualizar a tabela de preço.",
     deletePriceTable_error_msg: "Algo deu errado ao tentar excluir a tabela de preço.",
+    // Order
+    fetchClientEstabsToCreateOrder_error_msg: "Algo deu errado ao tentar buscar estabelecimentos para fazer pedido.",
+    searchOnePriceItemToMakeOrder_error_msg: "Algo deu errado ao tentar buscar item preço para fazer pedido.",
+    searchPriceItemsToMakeOrder_error_msg: "Algo deu errado ao tentar buscar itens para fazer pedido.",
+    fetchCategoriesToMakeOrder_error_msg: "Algo deu errado ao tentar buscar categorias.",
+    makeOrder_error_msg: "Algo deu errado ao tentar criar um pedido.",
 
     // -------------------------------------------------------------------/ Error Handler
     // Fields

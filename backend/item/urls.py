@@ -4,7 +4,6 @@ from item.views import (
     ItemTableView,
     ItemView,
     PriceItemForAgentsView,
-    GetPriceItemByClientUserView,
     SpecificItemTable,
     SpecificItemView,
 
@@ -35,7 +34,6 @@ urlpatterns = [
     path('items_to_create_price_table/<item_table_compound_id>', fetchItemsToCreatePriceTable.as_view()),
     path('pricetable', PriceTableView.as_view()),
     path('pricetable/<price_table_compound_id>', SpecificPriceTableView.as_view()),
-    path('get_price_items/<establishment_compound_id>', GetPriceItemByClientUserView.as_view()),
     path('get_price_items_for_agents/<price_table_compound_id>', PriceItemForAgentsView.as_view()),
     path('priceitem/<price_table_compound_id>/<item_compound_id>', SpecificPriceItemView.as_view()),
 ]

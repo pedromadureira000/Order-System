@@ -151,7 +151,7 @@ class GetCompaniesToCreateEstablishment(APIView):
     def get(self, request):
         if has_permission(request.user, 'create_establishment'):
             companies = Company.objects.filter(contracting=request.user.contracting, status=1)
-            return Response(CompanySerializer(companies, many=True).data)
+            return Response(CompanyPOSTSerializer(companies, many=True).data)
 
 class EstablishmentView(APIView):
     def get(self, request):
@@ -312,9 +312,9 @@ class GetClientTablesToCreateClient(APIView):
         if has_permission(request.user, 'create_client'):
             if req_user_is_agent_without_all_estabs(request.user):
                 client_tables = get_agent_client_tables(request.user)
-                return Response(ClientTableSerializer(client_tables, many=True).data)
+                return Response(ClientTablePOSTSerializer(client_tables, many=True).data)
             client_tables = ClientTable.objects.filter(contracting=request.user.contracting)
-            return Response(ClientTableSerializer(client_tables, many=True).data)
+            return Response(ClientTablePOSTSerializer(client_tables, many=True).data)
 
 class ClientView(APIView):
     def get(self, request):

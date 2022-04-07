@@ -4,7 +4,7 @@
   <div v-else>
     <div class="ma-3">
       <v-expansion-panels>
-        <v-expansion-panel>
+        <v-expansion-panel @change="fetchClientAndItemTables">
           <v-expansion-panel-header>
             <h3>{{$t('Create_Company')}}</h3>
           </v-expansion-panel-header>
@@ -110,7 +110,14 @@
         class="elevation-1 mt-3"
       >
         <template v-slot:item.actions="{ item }">
-          <company-edit-menu :company="item" :client_tables="client_tables" :item_tables="item_tables" @company-deleted="deleteCompany(item)" />
+          <company-edit-menu 
+            :company="item" 
+            :client_tables="client_tables" 
+            :item_tables="item_tables" 
+            :item_tables_and_price_tables_were_fetched="item_tables_and_price_tables_were_fetched"
+            @company-deleted="deleteCompany(item)" 
+            @fetch-client-and-item-tables="fetchClientAndItemTables"
+          />
         </template>
         <template v-slot:item.item_table="{ item }">
           <p>{{getTableVerboseName(item.item_table)}}</p>
@@ -183,7 +190,8 @@ export default {
         { text: 'Status', value: 'status' },
         { text: this.$t('Note'), value: 'note' },
         { text: this.$t('Actions'), value: 'actions' },
-      ]
+      ],
+      item_tables_and_price_tables_were_fetched: false,
     };
   },
 
@@ -191,12 +199,6 @@ export default {
     // Fetch Companies to EDIT list
     let companies = await this.$store.dispatch("organization/fetchCompanies");
     if (companies){this.companies.push(...companies)}
-    // Fetch client_table options
-    let client_tables = await this.$store.dispatch("organization/fetchClientTables");
-    if (client_tables){this.client_tables.push(...client_tables)}
-    // Fetch item_table options
-    let item_tables = await this.$store.dispatch("item/fetchItemTables");
-    if (item_tables) {this.item_tables.push(...item_tables)}
   },
 
   validations: {
@@ -296,6 +298,19 @@ export default {
     getTableVerboseName(table_compound_id){
       if (table_compound_id === null){return this.$t('Empty')} else{return table_compound_id.split("&")[1]} 
     },
+
+    async fetchClientAndItemTables(){
+      if (this.item_tables_and_price_tables_were_fetched === false) {
+        // Fetch item_table options
+        let item_tables = await this.$store.dispatch("item/fetchItemTables");
+        if (item_tables) {this.item_tables.push(...item_tables)}
+        // Fetch client_table options
+        let client_tables = await this.$store.dispatch("organization/fetchClientTables");
+        if (client_tables){this.client_tables.push(...client_tables)}
+        this.item_tables_and_price_tables_were_fetched = true
+      }
+    }    
+
   },
 };
 </script>

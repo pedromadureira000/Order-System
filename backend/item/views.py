@@ -380,20 +380,6 @@ class SpecificPriceTableView(APIView):
                 return unknown_exception_response(action=_('delete price table'))
         return unauthorized_response
 
-class GetPriceItemByClientUserView(APIView):
-    def get(self, request, establishment_compound_id):
-        if has_role(request.user, 'client_user'):
-            try:
-                price_table = PriceTable.objects.get(clientestablishment__client__client_compound_id=request.user.client.client_compound_id, clientestablishment__establishment__establishment_compound_id=establishment_compound_id)
-            except PriceTable.DoesNotExist:
-                return Response({"error":[_( "The price table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
-            try:
-                price_items = PriceItem.objects.filter(price_table=price_table)
-            except PriceItem.DoesNotExist:
-                return Response({"error":[_("The price items were not found.")]}, status=status.HTTP_404_NOT_FOUND)
-            return Response(ForTablePriceItemSerializer(price_items, many=True).data)
-        return unauthorized_response
-
 class PriceItemForAgentsView(APIView):
     def get(self, request, price_table_compound_id):
         if has_permission(request.user, 'get_price_tables'):

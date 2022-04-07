@@ -65,6 +65,17 @@
                 @blur="$v.barcode.$touch()"
                 class="mb-3"
               />
+              <!-- Client Status -->
+              <v-radio-group v-model="status" style="width: 25%;" label='Status' class="mb-3">
+                <v-radio
+                  :label="$t('Active')"
+                  value=1
+                ></v-radio>
+                <v-radio
+                  :label="$t('Disabled')"
+                  value=0
+                ></v-radio>
+              </v-radio-group>
               <!-- Image -->
               <v-row>
                 <v-col>
@@ -333,7 +344,7 @@ export default {
     this.description = this.item.description
     this.unit = this.item.unit
     this.barcode = this.item.barcode
-    this.status = this.item.status
+    this.status = String(this.item.status)
     this.technical_description = this.item.technical_description
     this.img_url = this.getImageUrl(this.item.image)
     // Default value for item_table_from_item

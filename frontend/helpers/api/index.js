@@ -847,6 +847,43 @@ export default {
 					return request.data 
 				})
 	},
-}
 
   //------------------------------------------------------/ Order APIs /---------------------------------------------------
+	async fetchClientEstabsToCreateOrder(){
+		return await axios({ 
+		method: "get",
+		url: `/api/order/establishments_to_make_order`,
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async fetchCategoriesToMakeOrder(establishment_compound_id){
+		return await axios({ 
+		method: "get",
+		url: `/api/order/fetch_categories_to_make_order/${establishment_compound_id}`,
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async searchOnePriceItemToMakeOrder(payload){
+		return await axios({ 
+		method: "get",
+		url: `/api/order/get_price_item/${payload.establishment}/${payload.item_code}`,
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async searchPriceItemsToMakeOrder(payload){
+		return await axios({ 
+		method: "get",
+		url: `/api/order/get_price_items/${payload.establishment}/${payload.item_code}`, //TODO??????
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+}
+

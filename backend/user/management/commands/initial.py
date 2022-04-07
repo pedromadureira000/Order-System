@@ -41,6 +41,7 @@ class Command(BaseCommand):
             last_name="ent",
             email="client@user.phsw",
             contracting=contracting,
+            client=client,
             status=1,
             password='asdf'
         )
@@ -81,6 +82,7 @@ class Command(BaseCommand):
             last_name="ent",
             email="client@user.phsw",
             contracting=contracting,
+            client=client,
             status=1,
             password='asdf'
         )

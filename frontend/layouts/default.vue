@@ -208,7 +208,7 @@ export default {
 		currentMenuItems() {
 			let user = this.$store.state.user.currentUser;
 			if (user) {
-        console.log(">>>>>>> ", user)
+        // console.log(">>>>>>> ", user)
 				return this.defaultMenuItems
 					.slice(0, 1)
           .concat(this.allMenuItems.filter(MenuItem => {

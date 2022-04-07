@@ -11,17 +11,16 @@
 </template>
 
 <script>
-  import {admin, adminAgent, agent} from '~/helpers/permissions'
-  /** let usersSubMenuPermissions = adminAgent.concat(admin).concat(agent) */
+  let viewOrders = ['update_order_items', 'get_orders', 'update_order_status']
   export default {
     middleware: ["authenticated"],
     data(){
       return {
         value: 'User',
-        /** allMenuItems: [ */
-          /** {"permissions": usersSubMenuPermissions, "title": "User", "icon":"mdi-account", "to": "/admin/user"}, */
-          /** {"permissions": company, "title": "Company", "icon":"mdi-office-building", "to": "/admin/user/company"}, */
-        /** ], */
+        allMenuItems: [
+          {"permissions": ['create_order'], "title": "Create Order", "icon":"mdi-account", "to": "/client/order/create_order"},
+          /** {"permissions": viewOrders, "title": "View Orders", "icon":"mdi-office-building", "to": "/client/order/view_orders"}, */
+        ],
       }
     },
 

@@ -41,7 +41,6 @@ class ErpUser(AbstractUserRole):
         "get_agents": True,
         "update_agent": True,
         "delete_agent": True,
-        "delete_order": True,
         # Agent
         "access_all_establishments": True, #only agent will use it
         "create_client": True,
@@ -78,7 +77,6 @@ class AdminAgent(AbstractUserRole):
         "get_agents": True,
         "update_agent": True,
         "delete_agent": True,
-        "delete_order": True,
         # Agent
         "access_all_establishments": True,
         "create_client": True,
@@ -135,4 +133,6 @@ class Agent(AbstractUserRole):
 class ClientUser(AbstractUserRole):
     available_permissions = {
         "get_orders": True,
+        "create_order": True,
+        "update_order_items": True
     }

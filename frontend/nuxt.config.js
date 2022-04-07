@@ -144,10 +144,18 @@ export default {
         'pt-BR': '/admin/item/tabela_de_preco'
       },
       // Order
-      // 'client/client/price_table': {
-        // en: '/admin/item/price_table',
-        // 'pt-BR': '/admin/item/price_table'
-      // },
+      'client/order': {
+        en: '/client/order',
+        'pt-BR': '/cliente/pedido'
+      },
+      'client/order/create_order': {
+        en: '/client/order/create_order',
+        'pt-BR': '/cliente/pedido/fazer_pedido'
+      },
+      'client/order/view_order': {
+        en: '/client/order/view_order',
+        'pt-BR': '/cliente/pedido/ver_pedidos'
+      },
     },
     vueI18n: {
       fallbackLocale: 'pt-BR',

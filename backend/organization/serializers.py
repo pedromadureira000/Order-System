@@ -55,12 +55,45 @@ class CompanyPOSTSerializer(serializers.ModelSerializer):
                 "&" + validated_data['company_code']
         return super().create(validated_data)
 
-class CompanyPUTSerializer(CompanyPOSTSerializer):
+class CompanyPUTSerializer(serializers.ModelSerializer):
+    client_table=serializers.SlugRelatedField(slug_field='client_table_compound_id', 
+            queryset=ClientTable.objects.all(), allow_null=True)
+    item_table=serializers.SlugRelatedField(slug_field='item_table_compound_id',
+            queryset=ItemTable.objects.all(), allow_null=True)
+    contracting=serializers.HiddenField(default=UserContracting())
     class Meta:
         model = Company
         fields = ['company_compound_id', 'company_code', 'contracting', 'item_table', 'client_table', 'name',
                 'cnpj_root','status', 'note']
         read_only_fields = ['company_code']
+
+    def validate_client_table(self, value):
+        # If there is any clientEstab for this company, do not allow change this field.
+        if self.instance.client_table != value:
+            if ClientEstablishment.objects.filter(establishment__company=self.instance).first():
+                raise serializers.ValidationError(_("The company must have no clients to be able to change the client table."))
+            # No orders too
+            if self.instance.order_set.first():
+                raise serializers.ValidationError(_("The company must have no orders to be able to change the client table."))
+        if value:
+            # Contracting Ownership
+            if value.contracting != self.context["request"].user.contracting:
+                raise NotFound(detail={"error": [_("Client table not found.")]})
+            return value
+
+        return value
+
+    def validate_item_table(self, value):
+        # If there is any price_table for this company, do not allow change this field.
+        if self.instance.item_table != value:
+            if self.instance.pricetable_set.first():
+                raise serializers.ValidationError(_("The company must have no price tables to be able to change the item table.")) #TODO translate
+        if value:
+            # Contracting Ownership
+            if value.contracting != self.context["request"].user.contracting:
+                raise NotFound(detail={"error": [_("Item table not found.")]})
+            return value
+        return value
 
 class EstablishmentPOSTSerializer(serializers.ModelSerializer):
     company=serializers.SlugRelatedField(slug_field='company_compound_id', queryset=Company.objects.all())

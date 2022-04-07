@@ -124,7 +124,6 @@ export const adminAgent = [
   "get_agents",
   "update_agent",
   "delete_agent",
-  "delete_order",
 ]
 export const agent = [
   "access_all_establishments",
@@ -153,4 +152,6 @@ export const agent = [
 ]
 export const client_user = [
   "get_orders",
+  "create_order",
+  "update_order_items"
 ]

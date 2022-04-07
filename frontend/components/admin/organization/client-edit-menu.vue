@@ -251,10 +251,11 @@ export default {
 
     async fetchEstablishmentsToCreateClient(){
       // Check if establishment_group already exists. If it exist use it, otherwise, fetch establishments and add them to the establishment_group
-      let establishment_group = this.establishment_groups.find(el=>el.group_id==this.client.client_table)
+      let establishment_group = this.establishment_groups.find(el=>el.group_id===this.client.client_table)
       if (establishment_group){
         var establishments = establishment_group.establishments
-      }else{
+      }
+      else{
         var establishments = await this.$store.dispatch("organization/fetchEstablishmentsToCreateClient", this.client.client_table);
         if (establishments){
           this.establishment_groups.push({group_id: this.client.client_table, establishments: [...establishments]})
@@ -265,7 +266,7 @@ export default {
           let establishment = establishments[establishment_index]
           // This will be necessary for update clie_estab.price_table(added from a checkbox) from a v-select.
           // The client_establishments objects from this.client_establishments must be same objects as the AUX variables
-          let cli_estab = this.client.client_establishments.find(el=>el.establishment == establishment.establishment_compound_id)
+          let cli_estab = this.client.client_establishments.find(el=>el.establishment === establishment.establishment_compound_id)
           if (cli_estab){
             establishment['AUX_cli_estab_' + this.client.client_compound_id] = cli_estab
             this.client_establishments.push(cli_estab)
@@ -284,7 +285,7 @@ export default {
               price_table: null}
           }
         }
-        this.establishments.push(...establishments)
+        this.establishments = establishments //TODO what I have done?
       }
     },
 
@@ -352,7 +353,7 @@ export default {
   watch: {
     show_edit_dialog(newValue, oldValue){
       if (newValue === true) {
-        if (this.establishments.length == 0){
+        if (this.establishments.length === 0){
           this.fetchEstablishmentsToCreateClient()
         }
       }
@@ -366,8 +367,7 @@ export default {
     this.vendor_code = this.client.vendor_code
     this.note = this.client.note
     // Default client_table_from_client
-    let cli_tab = this.client_tables.find(el=>el.client_table_compound_id === this.client.client_table)
-    this.client_table_from_client = cli_tab
+    this.client_table_from_client = this.client_tables.find(el=>el.client_table_compound_id === this.client.client_table)
   }
 }
 </script>

@@ -4,7 +4,7 @@
   <div v-else>
     <div class="ma-3">
       <v-expansion-panels>
-        <v-expansion-panel>
+        <v-expansion-panel @change="fetchCompaniesToCreateEstablishment">
           <v-expansion-panel-header>
             <h3>{{$t('Create_Establishment')}}</h3>
           </v-expansion-panel-header>
@@ -97,7 +97,13 @@
           <p>{{item.company.split('&')[1]}}</p>
         </template>
         <template v-slot:item.actions="{ item }">
-          <establishment-edit-menu :establishment="item" :companies="companies" @establishment-deleted="deleteEstablishment(item)" />
+          <establishment-edit-menu 
+            :establishment="item" 
+            :companies="companies" 
+            :companies_was_fetched="companies_was_fetched"
+            @establishment-deleted="deleteEstablishment(item)" 
+            @fetch-companies="fetchCompaniesToCreateEstablishment"
+          />
         </template>
         <template v-slot:item.cnpj_with_mask="{ item }">
           <input type="text" v-mask="'##.###.###/####-##'" :value="item.cnpj" disabled style="color: #000000DE; width: 130px"/>
@@ -150,23 +156,15 @@ export default {
         { text: 'Status', value: 'status' },
         { text: this.$t('Note'), value: 'note' },
         { text: this.$t('Actions'), value: 'actions' },
-      ]
+      ],
+      companies_was_fetched: false
     };
   },
 
   async fetch() {
     // Fetch Establishments to EDIT list
     let establishments = await this.$store.dispatch("organization/fetchEstablishments");
-    if (establishments){this.establishments.push(...establishments)}
-    // Fetch company options
-    let companies = await this.$store.dispatch("organization/fetchCompaniesToCreateEstablishment");
-    if (companies) {
-      this.companies.push(...companies)
-      if (this.companies.length > 0){
-        this.company = this.companies[0].company_compound_id
-      }
-    }
-    
+    if (establishments){this.establishments.push(...establishments)}  
   },
 
   validations: {
@@ -261,6 +259,21 @@ export default {
       this.establishments = this.establishments.filter((establishment) => establishment.establishment_compound_id != 
         establishmentToDelete.establishment_compound_id);
     },
+
+    async fetchCompaniesToCreateEstablishment(){
+      if (!this.companies_was_fetched){
+        // Fetch company options
+        let companies = await this.$store.dispatch("organization/fetchCompaniesToCreateEstablishment");
+        if (companies) {
+          this.companies.push(...companies)
+          if (this.companies.length > 0){
+            this.company = this.companies[0].company_compound_id
+          }
+        }
+        this.companies_was_fetched = true
+      }
+    }
+
   },
 };
 </script>

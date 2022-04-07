@@ -16,7 +16,7 @@
               >
                 <v-select
                   disabled
-                  v-model="company_from_estab"
+                  v-model="companyFromEstab"
                   :label="$t('Company')"
                   :items="companies"
                   :item-text="(x) => x.company_code + ' - ' + x.name"
@@ -108,11 +108,10 @@ export default {
   components: {
     "dots-menu-update-delete": require("@/components/dots-menu-update-delete.vue").default,
   },
-  props: ['establishment', 'companies'],
+  props: ['establishment', 'companies', 'companies_was_fetched'],
   directives: {mask},
   data() {
     return {
-      company_from_estab: null,
       show_edit_dialog: false,
       show_delete_confirmation_dialog: false,
       name: null,
@@ -181,6 +180,10 @@ export default {
       !this.$v.note.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 800));
       return errors;
     },
+    /** Defaul value to company field */
+    companyFromEstab(){
+      return this.companies.find(el=>el.company_compound_id === this.establishment.company)
+    }
   },
 
     methods: {
@@ -229,9 +232,17 @@ export default {
     this.cnpj = this.establishment.cnpj
     this.status = String(this.establishment.status)
     this.note = this.establishment.note
-    /** Defaul value to company_from_estab */
-    let comp = this.companies.find(el=>el.company_compound_id === this.establishment.company)
-    this.company_from_estab = comp
+  },
+
+  watch: {
+    show_edit_dialog(newValue){
+      if (newValue === true) {
+        // fetch companies
+        if (!this.companies_was_fetched) {
+          this.$emit('fetch-companies')
+        }	
+      }
+    },
   }
 }
 </script>

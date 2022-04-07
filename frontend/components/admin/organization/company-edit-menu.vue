@@ -123,7 +123,7 @@ export default {
   components: {
     "dots-menu-update-delete": require("@/components/dots-menu-update-delete.vue").default,
   },
-  props: ['company', 'client_tables', 'item_tables'],
+  props: ['company', 'client_tables', 'item_tables', 'item_tables_and_price_tables_were_fetched'],
   directives: {mask},
   data() {
     return {
@@ -251,6 +251,16 @@ export default {
     this.item_table = this.company.item_table
     this.status = String(this.company.status)
     this.note = this.company.note
+  },
+
+  watch: {
+    show_edit_dialog(newValue){
+      if (newValue === true) {
+        if (this.item_tables_and_price_tables_were_fetched === false) {
+            this.$emit('fetch-client-and-item-tables')
+        }	
+      }
+    },
   }
 }
 </script>

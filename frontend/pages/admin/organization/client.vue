@@ -85,7 +85,7 @@
               />
               <!-- Client Establishments -->
               <v-expansion-panels class="mb-5">
-                <v-expansion-panel @change="fetchEstablishmentsToCreateClient">
+                <v-expansion-panel>
                   <v-expansion-panel-header>{{$t('Client_Establishments')}}</v-expansion-panel-header>
                     <v-expansion-panel-content v-if="establishments.length > 0">
                       <v-container
@@ -226,6 +226,7 @@ export default {
       this.client_tables.push(...client_tables)
       if (this.client_tables.length > 0){
         this.client_table = this.client_tables[0].client_table_compound_id
+        await this.fetchEstablishmentsToCreateClient()
       }
     }
   },
@@ -333,12 +334,11 @@ export default {
       }
     },
     deleteClient(clientToDelete) {
-      /** console.log(">>>>>>> clientToDelete", clientToDelete) */
       this.clients = this.clients.filter((client) => client.client_compound_id != clientToDelete.client_compound_id);
     },
 
     async fetchEstablishmentsToCreateClient(){
-      let establishment_group = this.establishment_groups.find(el=>el.group_id==this.client_table)
+      let establishment_group = this.establishment_groups.find(el=>el.group_id===this.client_table)
       if (establishment_group){
         this.establishments = establishment_group.establishments
       }
@@ -349,9 +349,9 @@ export default {
             let establishment = establishments[establishment_index]
             // This will be necessary for update clie_estab.price_table(added from a checkbox) from a v-select.
             establishment.AUX_cli_estab = {establishment: establishment.establishment_compound_id, price_table: null}
-            this.establishments.push(establishment)
           }
-          this.establishment_groups = [{group_id: this.client_table, establishments: [...establishments]}]
+          this.establishments = establishments 
+          this.establishment_groups.push({group_id: this.client_table, establishments: [...establishments]})
         }
       }
     },

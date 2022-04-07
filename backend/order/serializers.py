@@ -3,12 +3,38 @@ from rolepermissions.checkers import has_role
 from organization.models import ClientEstablishment, Establishment
 from .facade import update_ordered_items
 from .models import Order, OrderedItem, OrderHistory
-from item.models import Item
+from item.models import Item, PriceItem
 from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import PermissionDenied
 from .validators import order_has_changed
 from settings.utils import positive_number
 import copy
+
+class fetchClientEstabsToCreateOrderSerializer(serializers.ModelSerializer):
+    company=serializers.SlugRelatedField(slug_field='company_compound_id', read_only=True)
+    company_name = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Establishment
+        fields = ['establishment_compound_id', 'establishment_code', 'name', 'company', 'company_name']
+
+    def get_company_name(self, obj):
+        return obj.company.name
+
+class searchOnePriceItemToMakeOrderSerializer(serializers.ModelSerializer):
+    item = serializers.SlugRelatedField(slug_field='item_compound_id', read_only=True)
+    item_description = serializers.SerializerMethodField()
+    category = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PriceItem
+        fields = ['item', 'item_description', 'category', 'unit_price']
+
+    def get_item_description(self, obj):
+        return obj.item.description
+
+    def get_category(self, obj):
+        return obj.item.category.description
 
 class OrderedItemSerializer(serializers.ModelSerializer):
     item = serializers.SlugRelatedField(slug_field='item_compound_id', queryset=Item.objects.all())

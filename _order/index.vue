@@ -42,8 +42,60 @@
                 required
                 class="mb-3"
               />
-
               <!-- Price Items -->
+              <!-- <v-expansion-panels> -->
+                <!-- <v-expansion-panel @change="fetchItemsToUpdatePriceTable"> -->
+                  <!-- <v-expansion-panel-header> -->
+                    <!-- <h4>{{$t('Add Price Items')}}</h4> -->
+                  <!-- </v-expansion-panel-header> -->
+                  <!-- <v-expansion-panel-content> -->
+                    <!-- <v-card> -->
+                      <!-- <v-card-title style="font-size: 1rem; font-weight: 400; line-height: 1rem">{{$t('Remove Items')}}</v-card-title> -->
+                      <!-- <v-card-text> -->
+                        <!-- <v-container fluid> -->
+                          <!-- <v-text-field -->
+                            <!-- v-for="(price_item, key) in price_items" -->
+                            <!-- :key="key" -->
+                            <!-- v-model="price_item.unit_price" -->
+                            <!-- :label="itemDescription(price_item.item)" -->
+                            <!-- type="number" -->
+                            <!-- @keydown.enter.prevent="" -->
+                          <!-- > -->
+                            <!-- <template v-slot:append> -->
+                              <!-- <v-icon @click="removeItem(price_item)"> -->
+                                <!-- mdi-minus -->
+                              <!-- </v-icon > -->
+                            <!-- </template> -->
+                          <!-- </v-text-field> -->
+                        <!-- </v-container> -->
+                      <!-- </v-card-text> -->
+
+                      <!-- <v-divider></v-divider> -->
+
+                      <!-- <v-card-title style="font-size: 1rem; font-weight: 400; line-height: 1rem">{{$t('Add Items')}}</v-card-title> -->
+                      <!-- <v-card-text> -->
+                        <!-- <v-container fluid> -->
+                          <!-- <v-text-field -->
+                            <!-- v-for="(item, key) in itemsToAdd" -->
+                            <!-- :key="key" -->
+                            <!-- v-model="item.unit_price" -->
+                            <!-- :label="item.item_code + ' - ' + item.description + ' ( ' + item.unit + ' )'" -->
+                            <!-- @keydown.enter.prevent="addItem(item)" -->
+                            <!-- type="number" -->
+                          <!-- > -->
+                            <!-- <template v-slot:append> -->
+                              <!-- <v-icon @click="addItem(item)" :disabled="item.unit_price == null"> -->
+                                <!-- mdi-plus -->
+                              <!-- </v-icon > -->
+                            <!-- </template> -->
+                          <!-- </v-text-field> -->
+                        <!-- </v-container> -->
+                      <!-- </v-card-text> -->
+                    <!-- </v-card> -->
+                  <!-- </v-expansion-panel-content> -->
+                <!-- </v-expansion-panel> -->
+              <!-- </v-expansion-panels> -->
+
               <v-expansion-panels>
                 <v-expansion-panel @change="fetchItemsToUpdatePriceTable">
                   <v-expansion-panel-header>
@@ -54,26 +106,23 @@
                       <v-card-title style="font-size: 1rem; font-weight: 400; line-height: 1rem">{{$t('Table Items')}}</v-card-title>
                       <v-card-text>
                         <v-container fluid>
-                          <div
-                            v-for="v in $v.price_items.$each.$iter"
-                            :key="v.item.$model"
+                          <v-text-field
+                            v-for="(v, key) in $v.price_items.$each.$iter"
+                            :key="key"
+                            :error-messages="v.errors.$model"
+                            :label="itemDescription(v.item.$model)"
+                            v-model="v.masked_price.$model"
+                            @keydown.enter.prevent=""
+                            @blur="priceErrors(v)"
+                            @input="writeUnmaskedValue($event, v)"
+                            v-money="money"
                           >
-                            <v-text-field
-                              :error-messages="v.errors.$model"
-                              :label="itemDescription(v.item.$model)"
-                              v-model="v.masked_price.$model"
-                              @keydown.enter.prevent=""
-                              @blur="priceErrors(v)"
-                              @input="writeUnmaskedValue($event, v)"
-                              v-money="money"
-                            >
-                              <template v-slot:append>
-                                <v-icon @click="removeItem(v.item.$model)">
-                                  mdi-minus
-                                </v-icon >
-                              </template>
-                            </v-text-field>
-                          </div>
+                            <template v-slot:append>
+                              <v-icon @click="removeItem(v.item.$model)">
+                                mdi-minus
+                              </v-icon >
+                            </template>
+                          </v-text-field>
                         </v-container>
                       </v-card-text>
 
@@ -85,7 +134,7 @@
                           <v-list-item-group>
                             <div
                               v-for="(item, key) in itemsToAdd"
-                              :key="item.item_code"
+                              :key="key"
                             >
                               <v-list-item>
                                 <v-list-item-content>
@@ -100,6 +149,7 @@
                               </v-list-item>
                               <v-divider
                                 v-if="key < itemsToAdd.length - 1"
+                                :key="key"
                               ></v-divider>
                             </div>
                           </v-list-item-group>
@@ -109,6 +159,7 @@
                   </v-expansion-panel-content>
                 </v-expansion-panel>
               </v-expansion-panels>
+
 
           </v-container>
         </v-card-text>
@@ -211,6 +262,7 @@ export default {
           // Reactivity for PriceTable list inside PriceTable.vue 
           this.loading = false;
           if (data) {
+            this.price_table.price_items = this.price_items,
             this.price_table.description = data.description
             this.price_table.note = data.note
               // Close dialog
@@ -261,7 +313,6 @@ export default {
               price_item['masked_price'] = price_item.unit_price.toLocaleString('pt-br',{style: 'currency', currency: 'BRL'})
             }
             this.price_items = price_items
-            console.log(">>>>>>> this.price_items: ", this.price_items)
         }
       },
 
@@ -270,8 +321,8 @@ export default {
         this.price_items = this.price_items.filter((obj)=> obj.item !== item_compound_id)
       },
       addItem(item){
+        this.price_items = this.price_items.concat([{item: item.item_compound_id, unit_price: 0, masked_price: '', errors: []}])
         item.unit_price = null
-        this.price_items.push({item: item.item_compound_id, unit_price: 0, masked_price: '', errors: []})
       },
       itemDescription(item_compound_id){
         let item = this.items.filter((item)=> item.item_compound_id === item_compound_id)[0]
