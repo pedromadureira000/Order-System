@@ -52,7 +52,7 @@ class CompanyPOSTSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data['company_compound_id'] = validated_data['contracting'].contracting_code + \
-                "&" + validated_data['company_code']
+                "*" + validated_data['company_code']
         return super().create(validated_data)
 
 class CompanyPUTSerializer(serializers.ModelSerializer):
@@ -115,8 +115,8 @@ class EstablishmentPOSTSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         # Create establishment_compound_id
-        validated_data['establishment_compound_id'] = validated_data['company'].contracting.contracting_code + "&" + \
-                validated_data['company'].company_code + "&" + validated_data['establishment_code']
+        validated_data['establishment_compound_id'] = validated_data['company'].contracting.contracting_code + "*" + \
+                validated_data['company'].company_code + "*" + validated_data['establishment_code']
         return super().create(validated_data)
 
 class EstablishmentPUTSerializer(serializers.ModelSerializer):
@@ -138,7 +138,7 @@ class ClientTablePOSTSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # Create client_table_compound_id
         validated_data['client_table_compound_id'] = validated_data['contracting'].contracting_code + \
-                "&" + validated_data['client_table_code']
+                "*" + validated_data['client_table_code']
         return super().create(validated_data)
 
 class ClientTablePUTSerializer(serializers.ModelSerializer):
@@ -214,8 +214,8 @@ class ClientSerializerPOST(serializers.ModelSerializer):
     def create(self, validated_data):
         # Create client_compound_id
         client = Client.objects.create(
-            client_compound_id = validated_data['client_table'].contracting.contracting_code + "&" + \
-                    validated_data['client_table'].client_table_code + "&" + validated_data['client_code'],
+            client_compound_id = validated_data['client_table'].contracting.contracting_code + "*" + \
+                    validated_data['client_table'].client_table_code + "*" + validated_data['client_code'],
             client_table=validated_data['client_table'],
             client_code=validated_data['client_code'],
             vendor_code=validated_data.get('vendor_code', ''), #Optional field

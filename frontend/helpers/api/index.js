@@ -858,10 +858,10 @@ export default {
 				})
 	},
 
-	async fetchCategoriesToMakeOrder(establishment_compound_id){
+	async fetchCategoriesToMakeOrderAndGetPriceTableInfo(establishment_compound_id){
 		return await axios({ 
 		method: "get",
-		url: `/api/order/fetch_categories_to_make_order/${establishment_compound_id}`,
+		url: `/api/order/fetch_categories_to_make_order_and_get_price_table_info/${establishment_compound_id}`,
 			}).then((request) => {
 					return request.data 
 				})
@@ -877,13 +877,57 @@ export default {
 	},
 
 	async searchPriceItemsToMakeOrder(payload){
+    let url =  payload.item_description ? `/api/order/get_price_items/${payload.establishment}/${payload.category}/${payload.item_description}` :
+       `/api/order/get_price_items/${payload.establishment}/${payload.category}/dontsearchanyitemdescription`
 		return await axios({ 
 		method: "get",
-		url: `/api/order/get_price_items/${payload.establishment}/${payload.item_code}`, //TODO??????
+		url: url,
 			}).then((request) => {
 					return request.data 
 				})
 	},
 
+	async makeOrder(payload){
+    let data_body = {
+      establishment: payload.establishment,
+      ordered_items: payload.ordered_items,
+      status: payload.status,
+      note: payload.note,
+		}
+		return await axios({ 
+		method: "post",
+		url: `/api/order/order`,
+		data: data_body}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async searchOrders(query_strings){
+    let url =  `/api/order/get_orders/?${query_strings}`
+		return await axios({ 
+		method: "get",
+		url: url,
+			}).then((request) => {
+					return request.data 
+				})
+	},
+ 
+	async fetchDataToFillFilterSelectorsToSearchOrders(){
+		return await axios({ 
+		method: "get",
+		url: "/api/order/fetch_data_to_fill_filter_selectors_to_search_orders",
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async fetchClientsToFillFilterSelectorToSearchOrders(client_table_compound_id){
+		return await axios({ 
+		method: "get",
+		url: `/api/order/fetch_clients_to_fill_filter_selector_to_search_orders/${client_table_compound_id}`,
+			}).then((request) => {
+					return request.data 
+				})
+	}, 
 }
 

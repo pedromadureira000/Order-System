@@ -182,7 +182,7 @@ export default {
         /** return await axios({  */
         /** method: "post", */
         /** data: { */
-          /** "client_table": "123&11", */
+          /** "client_table": "123*11", */
           /** "client_code": "689", */
           /** "vendor_code": "string", */
           /** "name": "string", */

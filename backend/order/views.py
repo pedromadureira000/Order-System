@@ -3,16 +3,17 @@ from rest_framework import status
 from rest_framework.response import Response
 from item.models import ItemCategory, ItemTable, PriceItem, PriceTable
 from item.serializers import CategoryPOSTSerializer
-from organization.models import Company, Establishment
+from organization.models import Client, Company, Establishment
 from user.validators import req_user_is_agent_without_all_estabs
-from .facade import get_orders_by_agent
-from .serializers import OrderDetailsSerializer, OrderPOSTSerializer,OrderPUTSerializer, fetchClientEstabsToCreateOrderSerializer, searchOnePriceItemToMakeOrderSerializer
+from .facade import fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders, fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders_by_agent, fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders_by_client_user, get_orders_by_agent
+from .serializers import ClientsToFillFilterSelectorsToSearchOrdersSerializer, CompanyWithEstabsSerializer, OrderDetailsSerializer, OrderPOSTSerializer,OrderPUTSerializer, fetchClientEstabsToCreateOrderSerializer, searchOnePriceItemToMakeOrderSerializer
 from .models import Order
 from rest_framework.views import APIView
 from rolepermissions.checkers import has_permission, has_role
 from drf_yasg.utils import swagger_auto_schema
 from settings.response_templates import not_found_response, serializer_invalid_response, unauthorized_response, unknown_exception_response
 from django.utils.translation import gettext_lazy as _
+from drf_yasg import openapi
 
 class fetchClientEstabsToCreateOrder(APIView):
     def get(self, request):
@@ -37,21 +38,27 @@ class searchOnePriceItemToMakeOrder(APIView):
             return Response(searchOnePriceItemToMakeOrderSerializer(price_item).data)
         return unauthorized_response
 
+# return Response({"error":[_( "The item was not found.")]}, status=status.HTTP_404_NOT_FOUND)
 class SearchPriceItemsToMakeOrder(APIView):
-      #  // EX priceItemObj: {item: '123$123$111111', item_description: 'Nice Item', category: 'category 1', unit_price: 1055.55} 
-    def get(self, request, establishment_compound_id):
+    def get(self, request, establishment_compound_id, category_compound_id, item_description):
         if has_permission(request.user, 'create_order'):
             try:
                 price_table = PriceTable.objects.get(clientestablishment__client=request.user.client, 
                         clientestablishment__establishment__establishment_compound_id=establishment_compound_id)
             except PriceTable.DoesNotExist:
                 return Response({"error":[_( "The price table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
-                #  return Response({"error":[_( "The item was not found.")]}, status=status.HTTP_404_NOT_FOUND)
-            price_items = PriceItem.objects.filter(price_table=price_table, item__status=1)
+            if item_description == 'dontsearchanyitemdescription':
+                item_description = ''
+            if category_compound_id == 'all':
+                price_items = PriceItem.objects.filter(price_table=price_table, item__status=1, 
+                    item__description__icontains=item_description)
+            else:
+                price_items = PriceItem.objects.filter(price_table=price_table, item__status=1, 
+                    item__category__category_compound_id=category_compound_id, item__description__icontains=item_description)
             return Response(searchOnePriceItemToMakeOrderSerializer(price_items, many=True).data)
         return unauthorized_response
 
-class fetchCategoriesToMakeOrder(APIView):
+class fetchCategoriesToMakeOrderAndGetPriceTableInfo(APIView):
     def get(self, request, establishment_compound_id):    
         if has_permission(request.user, 'create_order'):
             try:
@@ -66,20 +73,74 @@ class fetchCategoriesToMakeOrder(APIView):
                         status=status.HTTP_404_NOT_FOUND) #TODO translate 
             categories = ItemCategory.objects.filter(item_table=item_table)
             serializer = CategoryPOSTSerializer(categories, many=True)
-            return Response(serializer.data)
+            # Get price table description and code
+            try: 
+                price_table = PriceTable.objects.get(clientestablishment__establishment__establishment_compound_id=establishment_compound_id, 
+                        clientestablishment__client_id=request.user.client_id)
+            except PriceTable.DoesNotExist:
+                return Response({"error":[_( "The price table was not found.")]}, status=status.HTTP_404_NOT_FOUND) 
+            return Response({'categories': serializer.data, 'price_table': {"description": price_table.description, "table_code": price_table.table_code}})
         return unauthorized_response
-
-class OrderView(APIView):
-    @transaction.atomic
-    def get(self, request):
+ 
+class fetchDataToFillFilterSelectorsToSearchOrders(APIView):
+    def get(self, request):    
         if has_permission(request.user, 'get_orders'):
             if has_role(request.user, 'client_user'):
-                orders = Order.objects.filter(client=request.user.client).all()
+                comps_with_estabs = fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders_by_client_user(request.user)
+                comps_with_estabs_serializer = CompanyWithEstabsSerializer(comps_with_estabs, many=True)
+                return Response(comps_with_estabs_serializer.data)
+            if req_user_is_agent_without_all_estabs(request.user):
+                comps_with_estabs = fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders_by_agent(request.user)
+                comps_with_estabs_serializer = CompanyWithEstabsSerializer(comps_with_estabs, many=True)
+                return Response(comps_with_estabs_serializer.data)
+            comps_with_estabs = fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders(request.user)
+            comps_with_estabs_serializer = CompanyWithEstabsSerializer(comps_with_estabs, many=True)
+            return Response(comps_with_estabs_serializer.data)
+        return unauthorized_response
+
+class fetchClientsToFillFilterSelectorToSearchOrders(APIView):
+    def get(self, request, client_table_compound_id):    
+        if has_permission(request.user, 'get_orders'):
+            clients = Client.objects.filter(client_table__client_table_compound_id=client_table_compound_id)
+            client_serializer = ClientsToFillFilterSelectorsToSearchOrdersSerializer(clients, many=True)
+            return Response(client_serializer.data)
+        return unauthorized_response
+
+company_query_string = openapi.Parameter('company', openapi.IN_QUERY, description="company_compound_id", type=openapi.TYPE_STRING)
+establishment_query_string = openapi.Parameter('establishment', openapi.IN_QUERY, description="establishment_compound_id", 
+        type=openapi.TYPE_STRING)
+client_query_string = openapi.Parameter('client', openapi.IN_QUERY, description="client_compound_id", type=openapi.TYPE_STRING)
+invoice_number_query_string = openapi.Parameter('invoice_number', openapi.IN_QUERY, description="Order invoice_number field.", 
+        type=openapi.TYPE_STRING)
+order_number_query_string = openapi.Parameter('order_number', openapi.IN_QUERY, description="Order order_number field.", type=openapi.TYPE_STRING)
+#  period_query_string = openapi.Parameter('period', openapi.IN_QUERY, description="Period in ?? format.", type=openapi.TYPE_STRING)
+status_query_string = openapi.Parameter('status', openapi.IN_QUERY, description="pending = Typing, Transferred or Registered; 0 = Canceled; 1 = Typing; 2 = Transferred; 3 = Registered; 4 = Invoiced; 5 = Delivered", type=openapi.TYPE_STRING)
+class OrderView(APIView):
+    @transaction.atomic
+    @swagger_auto_schema(manual_parameters=[company_query_string, establishment_query_string, client_query_string, 
+        invoice_number_query_string, order_number_query_string, status_query_string]) 
+    def get(self, request):
+        if has_permission(request.user, 'get_orders'):
+            kwargs = {}
+            if request.GET.get("company"): kwargs.update({"company__company_compound_id": request.GET.get("company")})
+            if request.GET.get("establishment"): kwargs.update({"establishment__establishment_compound_id": request.GET.get("establishment")})
+            if request.GET.get("client"): kwargs.update({"client__client_compound_id": request.GET.get("client")})
+            if request.GET.get("invoice_number"): kwargs.update({"invoice_number": request.GET.get("invoice_number")})
+            if request.GET.get("order_number"): kwargs.update({"order_number": request.GET.get("order_number")})
+            #  if request.GET.get("period"): kwargs.update({"period": request.GET.get("period")})
+            if request.GET.get("status"): kwargs.update({"status": request.GET.get("status")})
+            #  print('>>>>>>>kwargs: ', kwargs)
+            if kwargs.get("status") and kwargs["status"] == "pending":
+                kwargs.pop("status")
+                kwargs.update({"status__in": [1,2,3] })
+            if has_role(request.user, 'client_user'):
+                if kwargs.get("client"): kwargs.pop("client")
+                orders = Order.objects.filter(client=request.user.client, **kwargs )
                 return Response(OrderPOSTSerializer(orders, many=True).data)
-            if has_role(request.user, 'agent'):
-                orders = get_orders_by_agent(request.user)
+            if req_user_is_agent_without_all_estabs(request.user):
+                orders = get_orders_by_agent(request.user).filter(**kwargs)
                 return Response(OrderPOSTSerializer(orders, many=True).data)
-            orders = Order.objects.filter(company__contracting=request.user.contracting).all()
+            orders = Order.objects.filter(company__contracting=request.user.contracting, **kwargs)
             return Response(OrderPOSTSerializer(orders, many=True).data)
         return unauthorized_response
     @swagger_auto_schema(request_body=OrderPOSTSerializer) 
@@ -96,12 +157,12 @@ class OrderView(APIView):
                     print(error)
                     return unknown_exception_response(action=_('create price table'))
             return serializer_invalid_response(serializer.errors)
-        return unauthorized_response
+        return unauthorized_response 
 
 class SpecificOrderView(APIView):
     def get(self, request, establishment_compound_id, order_number):
         if has_permission(request.user, 'get_orders'):
-            if establishment_compound_id.split("&")[0] != request.user.contracting.contracting_code:
+            if establishment_compound_id.split("*")[0] != request.user.contracting.contracting_code:
                 return not_found_response(object_name=_('The order'))
             try:
                 order = Order.objects.get(establishment__establishment_compound_id=establishment_compound_id, order_number=order_number)
@@ -119,7 +180,7 @@ class SpecificOrderView(APIView):
     @swagger_auto_schema(request_body=OrderPUTSerializer) 
     def put(self, request, establishment_compound_id, order_number):
         if has_permission(request.user, 'update_order_status') or has_role(request.user, 'client_user'):
-            if establishment_compound_id.split("&")[0] != request.user.contracting.contracting_code:
+            if establishment_compound_id.split("*")[0] != request.user.contracting.contracting_code:
                 return not_found_response(object_name=_('The order'))
             try:
                 order = Order.objects.get(establishment__establishment_compound_id=establishment_compound_id, order_number=order_number)

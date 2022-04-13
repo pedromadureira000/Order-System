@@ -108,7 +108,7 @@ class SpecificCompany(APIView):
     def put(self, request, company_compound_id):
         #  print('========================> : ',company_compound_id )
         if has_permission(request.user, 'update_company'):
-            if company_compound_id.split("&")[0] != request.user.contracting.contracting_code:
+            if company_compound_id.split("*")[0] != request.user.contracting.contracting_code:
                 return Response({"error":[_( "The company was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 company = Company.objects.get(company_compound_id=company_compound_id)
@@ -128,7 +128,7 @@ class SpecificCompany(APIView):
     @transaction.atomic
     def delete(self, request, company_compound_id):
         if has_permission(request.user, 'delete_company'):
-            if company_compound_id.split("&")[0] != request.user.contracting.contracting_code:
+            if company_compound_id.split("*")[0] != request.user.contracting.contracting_code:
                 return Response({"error":[_( "The company was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 company = Company.objects.get(company_compound_id=company_compound_id)
@@ -183,7 +183,7 @@ class SpecificEstablishment(APIView):
     @transaction.atomic
     def put(self, request, establishment_compound_id):
         if has_permission(request.user, 'update_establishment'):
-            if establishment_compound_id.split("&")[0] != request.user.contracting.contracting_code:
+            if establishment_compound_id.split("*")[0] != request.user.contracting.contracting_code:
                 return not_found_response(object_name=_('The establishment'))
             try:
                 establishment = Establishment.objects.get(establishment_compound_id=establishment_compound_id)
@@ -203,7 +203,7 @@ class SpecificEstablishment(APIView):
     @transaction.atomic
     def delete(self, request, establishment_compound_id):
         if has_permission(request.user, 'delete_establishment'):
-            if establishment_compound_id.split("&")[0] != request.user.contracting.contracting_code:
+            if establishment_compound_id.split("*")[0] != request.user.contracting.contracting_code:
                 return not_found_response(object_name=_('The establishment'))
             try:
                 establishment = Establishment.objects.get(establishment_compound_id=establishment_compound_id)
@@ -250,7 +250,7 @@ class SpecificClientTable(APIView):
     @swagger_auto_schema(request_body=ClientTablePUTSerializer) 
     def put(self, request, client_table_compound_id):
         if has_permission(request.user, 'update_client_table'):
-            if client_table_compound_id.split("&")[0] != request.user.contracting.contracting_code:
+            if client_table_compound_id.split("*")[0] != request.user.contracting.contracting_code:
                 return Response({"error":[_( "The client table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 client_table = ClientTable.objects.get(client_table_compound_id=client_table_compound_id)
@@ -270,7 +270,7 @@ class SpecificClientTable(APIView):
     @transaction.atomic
     def delete(self, request, client_table_compound_id):
         if has_permission(request.user, 'delete_client_table'):
-            if client_table_compound_id.split("&")[0] != request.user.contracting.contracting_code:
+            if client_table_compound_id.split("*")[0] != request.user.contracting.contracting_code:
                 return Response({"error":[_( "The client table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 client_table = ClientTable.objects.get(client_table_compound_id=client_table_compound_id)
@@ -291,7 +291,7 @@ class SpecificClientTable(APIView):
 class GetPriceTablesToCreateClient(APIView):
     def get(self, request, company_compound_id):
         if has_permission(request.user, 'create_client'):
-            if company_compound_id.split("&")[0] != request.user.contracting.contracting_code:
+            if company_compound_id.split("*")[0] != request.user.contracting.contracting_code:
                 return error_response(detail="You cannot access this 'company'", status=status.HTTP_403_FORBIDDEN) #TODO translate
             request_user_is_agent_without_all_estabs = req_user_is_agent_without_all_estabs(request.user)
             price_tables = get_price_tables_to_create_client(request.user, company_compound_id, request_user_is_agent_without_all_estabs)
@@ -301,7 +301,7 @@ class GetPriceTablesToCreateClient(APIView):
 class GetEstablishmentsToCreateClient(APIView):
     def get(self, request, client_table_compound_id):
         if has_permission(request.user, 'create_client'):
-            if client_table_compound_id.split("&")[0] != request.user.contracting.contracting_code:
+            if client_table_compound_id.split("*")[0] != request.user.contracting.contracting_code:
                 return error_response(detail="You cannot access this 'client_table'", status=status.HTTP_403_FORBIDDEN) #TODO translate
             request_user_is_agent_without_all_estabs = req_user_is_agent_without_all_estabs(request.user)
             establishments = get_establishments_to_create_client(request.user, client_table_compound_id,request_user_is_agent_without_all_estabs)
@@ -354,7 +354,7 @@ class SpecificClient(APIView):
         user = request.user
         if has_permission(user, 'update_client'):
             # Is from the same Contracting
-            if client_compound_id.split("&")[0] != user.contracting.contracting_code:
+            if client_compound_id.split("*")[0] != user.contracting.contracting_code:
                 return not_found_response(object_name=_('The client'))
             try:
                 client = Client.objects.get(client_compound_id=client_compound_id)
@@ -380,7 +380,7 @@ class SpecificClient(APIView):
     def delete(self, request, client_compound_id):
         if has_permission(request.user, 'delete_client'):
             # Is from the same Contracting
-            if client_compound_id.split("&")[0] != request.user.contracting.contracting_code:
+            if client_compound_id.split("*")[0] != request.user.contracting.contracting_code:
                 return not_found_response(object_name=_('The client'))
             try:
                 client = Client.objects.get(client_compound_id=client_compound_id)

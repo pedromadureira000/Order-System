@@ -296,7 +296,7 @@ export default {
     },
     // Get text representation for v-data-table slots
     getTableVerboseName(table_compound_id){
-      if (table_compound_id === null){return this.$t('Empty')} else{return table_compound_id.split("&")[1]} 
+      if (table_compound_id === null){return this.$t('Empty')} else{return table_compound_id.split("*")[1]} 
     },
 
     async fetchClientAndItemTables(){

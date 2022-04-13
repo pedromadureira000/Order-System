@@ -1,11 +1,29 @@
+from organization.facade import get_agent_companies
+from organization.models import Company, Establishment
 from .models import Order, OrderedItem
-from rolepermissions.checkers import has_permission
+from django.db.models import Prefetch
 
 # ----------------------------/ Orders /-----------------------------
 def get_orders_by_agent(agent):
-    if has_permission(agent, 'access_all_establishments'):
-        return Order.objects.filter(company__contracting=agent.contracting)
     return Order.objects.filter(establishment__in=agent.establishments.all())
+
+def fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders(user):
+    establishments = Establishment.objects.all()
+    return Company.objects.filter(contracting_id=user.contracting_id).prefetch_related(
+        Prefetch('establishment_set', queryset=establishments, to_attr='establishments')
+    )
+
+def fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders_by_agent(user):
+    return get_agent_companies(user).prefetch_related(
+        Prefetch('establishment_set', queryset=user.establishments.all(), to_attr='establishments')
+    )
+
+def fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders_by_client_user(user):
+    #  establishments = user.client.establishments.all()  <-- This would make a unnecessary query to 'client' 
+    establishments = Establishment.objects.filter(clientestablishment__client_id=user.client_id)
+    return Company.objects.filter(establishment__in=establishments).prefetch_related(
+        Prefetch('establishment_set', queryset=establishments, to_attr='establishments')
+    )
 
 def update_ordered_items(order, ordered_items):
     # Create set of OrderedItems as tuples

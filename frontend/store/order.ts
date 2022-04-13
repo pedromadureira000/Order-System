@@ -46,26 +46,57 @@ export const actions: ActionTree<OrderState, RootState> = {
     }
   },
 
-  async fetchCategoriesToMakeOrder({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, establishment_compound_id: string){
+  async fetchCategoriesToMakeOrderAndGetPriceTableInfo({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, establishment_compound_id: string){
     try {
-      let data = await api.fetchCategoriesToMakeOrder(establishment_compound_id)
+      let data = await api.fetchCategoriesToMakeOrderAndGetPriceTableInfo(establishment_compound_id)
       return data
     }
     catch(error){
-      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchCategoriesToMakeOrder_error_msg'))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchCategoriesToMakeOrderAndGetPriceTableInfo_error_msg'))
     }
   }, 
 
-  async makeOrder({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
+  async makeOrder({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
     try {
-      let data = await api.makeOrder()
+      await api.makeOrder(payload)
       dispatch("setAlert", {message: this.app.i18n.t('makeOrder_success_msg'), alertType: "success"}, { root: true })
-      return data
+      return 'ok'
     }
     catch(error){
       ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('makeOrder_error_msg'))
     }
   }, 
+
+  async fetchDataToFillFilterSelectorsToSearchOrders({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
+    try {
+      let data = await api.fetchDataToFillFilterSelectorsToSearchOrders()
+      return data
+    }
+    catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchDataToFillFilterSelectorsToSearchOrders_error_msg'))
+    }
+  }, 
+
+  async fetchClientsToFillFilterSelectorToSearchOrders({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, 
+                                                        client_table_compound_id: string){
+    try {
+      let data = await api.fetchClientsToFillFilterSelectorToSearchOrders(client_table_compound_id)
+      return data
+    }
+    catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchClientsToFillFilterSelectorToSearchOrders_error_msg'))
+    }
+  }, 
+
+  async searchOrders({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, query_strings: string){
+    try {
+      let data = await api.searchOrders(query_strings)
+      return data
+    }
+    catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('searchOrders_error_msg'))
+    }
+  },  
 }
 
 // --------------------------------------------/mutations/---------------------------------------------

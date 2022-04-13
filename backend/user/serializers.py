@@ -128,17 +128,23 @@ class AgentEstablishmentToUserSerializer(serializers.ModelSerializer):
 class OwnProfileSerializer(UserSerializer):
     #  agent_establishments = AgentEstablishmentToUserSerializer(many=True, read_only=True)
     client = serializers.SlugRelatedField(slug_field='client_compound_id', read_only=True)
+    client_name = serializers.SerializerMethodField()
     contracting_code = serializers.SerializerMethodField()
     status = serializers.ChoiceField(choices=[x[0] for x in status_choices], read_only=True)
 
     class Meta:
         model = User
-        fields = ['username', 'contracting', 'first_name', 'last_name', 'email', 'status', 'client',
+        fields = ['username', 'contracting', 'first_name', 'last_name', 'email', 'status', 'client', 'client_name',
                 'roles', 'permissions', 'contracting_code']
         read_only_fields = ['status' ,'contracting', 'client', 'username']
 
     def get_contracting_code(self, user):
         return user.contracting.contracting_code
+
+    def get_client_name(self, user):
+        if user.client_id: # TODO every validation like that must use _id
+            return user.client.name
+        return None
 
 class ERPUserPOSTSerializer(UserSerializer):
     #overwrite UserSerializer contracting field

@@ -94,7 +94,7 @@
         class="elevation-1 mt-3"
       >
         <template v-slot:item.company="{ item }">
-          <p>{{item.company.split('&')[1]}}</p>
+          <p>{{item.company.split('*')[1]}}</p>
         </template>
         <template v-slot:item.actions="{ item }">
           <establishment-edit-menu 

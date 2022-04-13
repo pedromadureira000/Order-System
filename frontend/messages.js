@@ -129,8 +129,11 @@ export const messages = {
     fetchClientEstabsToCreateOrder_error_msg: "Something went wrong when trying to fetch establishments to make order.",
     searchOnePriceItemToMakeOrder_error_msg: "Something went wrong when trying to fetch price item to make order.",
     searchPriceItemsToMakeOrder_error_msg: "Something went wrong when trying to fetch items to make order.",
-    fetchCategoriesToMakeOrder_error_msg: "Something went wrong when trying to fetch categories.",
+    fetchCategoriesToMakeOrderAndGetPriceTableInfo_error_msg_error_msg: "Something went wrong when trying to fetch categories.",
     makeOrder_error_msg: "Something went wrong when trying to make an order.",
+    searchOrders_error_msg: "Something went wrong when trying to search orders.",
+    fetchDataToFillFilterSelectorsToSearchOrders_error_msg: "Something went wrong when trying to fetch data to fill filter selectors.",
+    fetchClientsToFillFilterSelectorToSearchOrders_error_msg: "Something went wrong when trying to fetch clients to fill filter selector.",
 
     // -------------------------------------------------------------------/ Error Handler
     // Fields
@@ -347,15 +350,31 @@ export const messages = {
     "DecimalErrorMessage": "This field must be a decimal number.",
     "Edit Items": "Edit Items",
     // -----------------------------------------------------------------------------------/client/order
-    
+    "Create Order": "Create Order",
+    // --------------------------------------------------/client/order/create_order
+    "Add item": "Add item",
+    "Add": 'Add',
+    "Ordered Items": "Ordered Items",
+    "Unit price": "Unit price",
+    "Remove item": "Remove item",
+    "Close": "Close",
+    "Transfer": "Transfer",
+    "Search Items": "Search Items",
+    "Search": "Search",
+    "Item description":"Item description",
+    "Search Results": "Search Results",
+    "It seems that you have no establishments which you can buy at this moment.": "It seems that you have no establishments which you can buy at this moment.",
+    "Come back to Homepage": "Come back to Homepage",
+    "Select an establishment": "Select an establishment",
+    "All": "All",
     // -------------------------------------------------------------------/ Components
     // change user's password
     // -------------------------------/Problem Connecting Error dialog
-    ProblemConnectingTitle: "Problema de conexão",
-    Check_your_internet_connection: "Verifique sua conexão de internet e tente novamente.",
+    ProblemConnectingTitle: "Problem connecting",
+    Check_your_internet_connection: "Check your internet connection and try again.",
     // -------------------------------/Session Error dialog
-    SessionErrorText: 'A aplicação já está aberta em outra janela. Clique em "Usar aqui" para usar a aplicação nessa janela.',
-    Use_Here: 'Usar aqui',
+    SessionErrorText: 'The application is open in another window. Click "Use Here" to use the application in this window.',
+    Use_Here: 'Use here',
     // -------------------------------/Login dialog
     Username: 'Username',
     Password: 'Password',
@@ -502,8 +521,11 @@ export const messages = {
     fetchClientEstabsToCreateOrder_error_msg: "Algo deu errado ao tentar buscar estabelecimentos para fazer pedido.",
     searchOnePriceItemToMakeOrder_error_msg: "Algo deu errado ao tentar buscar item preço para fazer pedido.",
     searchPriceItemsToMakeOrder_error_msg: "Algo deu errado ao tentar buscar itens para fazer pedido.",
-    fetchCategoriesToMakeOrder_error_msg: "Algo deu errado ao tentar buscar categorias.",
+    fetchCategoriesToMakeOrderAndGetPriceTableInfo_error_msg_error_msg: "Algo deu errado ao tentar buscar categorias.",
     makeOrder_error_msg: "Algo deu errado ao tentar criar um pedido.",
+    searchOrders_error_msg: "Algo deu errado ao tentar pesquisar pedidos.",
+    fetchDataToFillFilterSelectorsToSearchOrders_error_msg: "Algo deu errado ao tentar carregar dados para preencher seletores de filtros.",
+    fetchClientsToFillFilterSelectorToSearchOrders_error_msg: "Algo deu errado ao tentar carregar clientes para preencher o seletor de filtro.",
 
     // -------------------------------------------------------------------/ Error Handler
     // Fields
@@ -719,14 +741,33 @@ export const messages = {
     "DecimalErrorMessage": "Esse campo deve ser um número decimal.",
     "Edit Items": "Editar Itens",
 
+    // -----------------------------------------------------------------------------------/client/order
+    "Create Order": "Fazer Pedido",
+
+    // --------------------------------------------------/client/order/create_order
+    "Add item": "Adicionar item",
+    "Add": 'Adicionar',
+    "Ordered Items": "Itens do Pedido",
+    "Unit price": "Preço unitário",
+    "Remove item": "Remover item",
+    "Close": "Fechar",
+    "Transfer": "Transferir",
+    "Search Items": "Buscar itens",
+    "Search": "Buscar",
+    "Item description":"Descrição do item",
+    "Search Results": "Resultados da pesquisa",
+    "It seems that you have no establishments which you can buy at this moment.": "Parece que você não tem estabelecimentos em que possa comprar neste momento.",
+    "Come back to Homepage": "Voltar para a página inicial",
+    "Select an establishment": "Selecione um estabelecimento",
+    "All": "Todos",
     // -------------------------------------------------------------------/ Components
     // change user's password
     // -------------------------------/Problem Connecting Error dialog
-    ProblemConnectingTitle: "Problem connecting",
-    Check_your_internet_connection: "Check your internet connection and try again.",
+    ProblemConnectingTitle: "Problema de conexão",
+    Check_your_internet_connection: "Verifique sua conexão de internet e tente novamente.",
     // -------------------------------/Session Error dialog
-    SessionErrorText: 'The application is open in another window. Click "Use Here" to use the application in this window.',
-    Use_Here: 'Use here',
+    SessionErrorText: 'A aplicação já está aberta em outra janela. Clique em "Usar aqui" para usar a aplicação nessa janela.',
+    Use_Here: 'Usar aqui',
     // -------------------------------/Login dialog
     Username: 'Username',
     Password: 'Senha',

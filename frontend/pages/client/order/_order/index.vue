@@ -7,22 +7,64 @@
         <v-card-title>{{$t('Edit')}}</v-card-title>
         <v-card-text>
           <v-container fluid>
-              <!-- Company -->
-              <v-row align="center">
-                <v-col
-                  class="d-flex"
-                  cols="12"
-                  sm="6"
-                >
-                  <v-select
-                    disabled
-                    v-model="company_from_price_table"
-                    :label="$t('Company')"
-                    :items="companies"
-                    :item-text="(x) => x.company_code + ' - ' + x.name"
-                  ></v-select>
-                </v-col>
-              </v-row>
+              <!-- Ordered items -->
+              <v-card>
+                <v-card-title style="font-size: 1rem; font-weight: 400; line-height: 1rem">{{$t('Ordered Items')}}</v-card-title>
+                <v-card-text>
+                  <v-container fluid>
+                    <v-data-table
+                      :headers="ordered_items_headers"
+                      :items="ordered_items__array"
+                      class="elevation-1"
+                      item-key="item.$model"
+                    >
+                      <template v-slot:item.image="{ item }">
+                        <v-img
+                          contain
+                          width="115px"
+                          height="87px"
+                          :lazy-src="$store.state.CDNBaseUrl + '/media/images/items/defaultimage.jpeg'"
+                          :src="getImageUrl(item.image.$model)"
+                        ></v-img>
+                      </template>
+                      <template v-slot:item.item_code="{ item }">
+                        <p>{{item.item.$model.split('*')[2]}}</p>
+                      </template>
+                      <template v-slot:item.item_description="{ item }">
+                        <p>{{item.item_description.$model}}</p>
+                      </template>
+                      <template v-slot:item.category="{ item }">
+                        <p>{{item.category.$model}}</p>
+                      </template>
+                      <template v-slot:item.unit="{ item }">
+                        <p>{{item.unit.$model}}</p>
+                      </template>
+                      <template v-slot:item.unit_price="{ item }">
+                        <p>{{getRealMask(Number(item.unit_price.$model))}}</p>
+                      </template>
+                      <template v-slot:item.quantity="{ item }">
+                        <v-text-field
+                          v-model="item.quantity.$model"
+                          :error-messages="item.errors.$model"
+                          :label="$t('Quantity')"
+                          @keydown.enter.prevent=""
+                          @blur="quantityErrors(item)"
+                        />
+                      </template>
+                      <template v-slot:item.total="{ item }">
+                        <p>{{getRealMask(item.quantity.$model * item.unit_price.$model)}}</p>
+                      </template>
+                      <template v-slot:item.remove_item="{ item }">
+                        <div style="display:flex; align-items: center; justify-content: center;">
+                          <v-icon @click="removeItem(item.item.$model)" color="red" large>
+                            mdi-close-circle-outline
+                          </v-icon >
+                        </div>
+                      </template>
+                    </v-data-table>
+                  </v-container>
+                </v-card-text>
+              </v-card>
               <!-- Description -->
               <v-text-field
                 :label="$t('Description')"

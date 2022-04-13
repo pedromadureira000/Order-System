@@ -42,7 +42,7 @@ class Item(models.Model):
         verbose_name_plural = _('items')
         constraints = [UniqueConstraint(fields=['item_table', 'item_code'], name='Item compound primary key')]
     item_table = models.ForeignKey('ItemTable', on_delete=models.PROTECT, verbose_name=_("item table"))
-    item_compound_id = models.CharField(_('item compound id'), max_length=23, unique=True, editable=False) # 999&999&9x15
+    item_compound_id = models.CharField(_('item compound id'), max_length=23, unique=True, editable=False) # 999*999*9x15
     item_code = models.SlugField(max_length=15, verbose_name=_('item code'))
     category = models.ForeignKey('ItemCategory', on_delete=models.CASCADE, verbose_name=_('category'))
     description = models.CharField(max_length=60, verbose_name=_('description'))
@@ -63,7 +63,7 @@ class PriceTable(models.Model):
         verbose_name_plural = _('price tables')
         constraints = [UniqueConstraint(fields=['company', 'table_code'], name='PriceTable compound primary key')]
     price_table_compound_id = models.SlugField(max_length=15, verbose_name=_('price table compound id'), unique=True, 
-            editable=False) # 999&999&9999999
+            editable=False) # 999*999*9999999
     company = models.ForeignKey('organization.Company', on_delete=models.PROTECT, verbose_name=_('company'))
     table_code = models.SlugField(max_length=7, verbose_name=_('table_code'))
     description = models.CharField(max_length=60, verbose_name=_('description'))

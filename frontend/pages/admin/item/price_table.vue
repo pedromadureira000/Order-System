@@ -148,7 +148,7 @@
             <price-table-edit-menu :price_table="item" :companies="companies" :item_group="item_group" @price-table-deleted="deletePriceTable(item)" />
           </template>
           <template v-slot:item.company="{ item }">
-            <p>{{item.company.split('&')[1]}}</p>
+            <p>{{item.company.split('*')[1]}}</p>
           </template>
         <template v-slot:item.note="{ item }">
           <p>{{$getNote(item.note)}}</p>

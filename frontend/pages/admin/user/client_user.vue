@@ -117,7 +117,7 @@
             <p>{{$getNote(item.note)}}</p>
           </template>
           <template v-slot:item.client="{ item }">
-            <p>{{item.client.split('&')[2]}}</p>
+            <p>{{item.client.split('*')[2]}}</p>
           </template>
         </v-data-table>
       </div>

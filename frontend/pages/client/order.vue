@@ -2,7 +2,7 @@
   <div>
     <v-bottom-navigation v-model="value">
       <v-btn v-for="item in currentMenuItems" :key="item.title" :value="item.title" :to="localePath(item.to)" nuxt>
-        <span>{{item.title}}</span>
+        <span>{{$t(item.title)}}</span>
         <v-icon>{{item.icon}}</v-icon>
       </v-btn>
     </v-bottom-navigation>

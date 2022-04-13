@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from rolepermissions.checkers import has_role
-from organization.models import ClientEstablishment, Establishment
+from organization.models import Client, ClientEstablishment, Company, Establishment
 from .facade import update_ordered_items
 from .models import Order, OrderedItem, OrderHistory
 from item.models import Item, PriceItem
@@ -16,7 +16,7 @@ class fetchClientEstabsToCreateOrderSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Establishment
-        fields = ['establishment_compound_id', 'establishment_code', 'name', 'company', 'company_name']
+        fields = ['establishment_compound_id', 'cnpj', 'establishment_code', 'name', 'company', 'company_name']
 
     def get_company_name(self, obj):
         return obj.company.name
@@ -24,17 +24,44 @@ class fetchClientEstabsToCreateOrderSerializer(serializers.ModelSerializer):
 class searchOnePriceItemToMakeOrderSerializer(serializers.ModelSerializer):
     item = serializers.SlugRelatedField(slug_field='item_compound_id', read_only=True)
     item_description = serializers.SerializerMethodField()
+    unit = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
 
     class Meta:
         model = PriceItem
-        fields = ['item', 'item_description', 'category', 'unit_price']
+        fields = ['item', 'item_description', 'category', 'unit_price', 'unit', 'image']
 
     def get_item_description(self, obj):
         return obj.item.description
 
     def get_category(self, obj):
         return obj.item.category.description
+    
+    def get_unit(self, obj):
+        return obj.item.unit
+
+    def get_image(self, obj):
+        if obj.item.image:
+            return obj.item.image.url
+        return '/media/images/items/defaultimage.jpeg'
+
+class EstablishmentForCompanyWithEstab(serializers.ModelSerializer):
+    class Meta:
+        model = Establishment
+        fields = ['establishment_compound_id', 'establishment_code', 'name']
+
+class CompanyWithEstabsSerializer(serializers.ModelSerializer):
+    client_table=serializers.SlugRelatedField(slug_field='client_table_compound_id', read_only=True)
+    establishments = EstablishmentForCompanyWithEstab(many=True)
+    class Meta:
+        model = Company
+        fields = ['company_compound_id', 'company_code', 'name', 'client_table', 'establishments']
+
+class ClientsToFillFilterSelectorsToSearchOrdersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Client
+        fields =  ['client_compound_id', 'client_code', 'name']
 
 class OrderedItemSerializer(serializers.ModelSerializer):
     item = serializers.SlugRelatedField(slug_field='item_compound_id', queryset=Item.objects.all())
@@ -66,7 +93,7 @@ class OrderPOSTSerializer(serializers.ModelSerializer):
 
     def validate_establishment(self, value):
         # Contracting ownership
-        if value.establishment_compound_id.split("&")[0] != self.context['request'].user.contracting.contracting_code:
+        if value.establishment_compound_id.split("*")[0] != self.context['request'].user.contracting.contracting_code:
             raise serializers.ValidationError(_("Establishment not found."))
         return value
 

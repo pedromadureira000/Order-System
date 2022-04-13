@@ -155,7 +155,7 @@
             <input type="text" v-mask="'##.###.###/####-##'" :value="item.cnpj" disabled style="color: #000000DE; width: 130px"/>
           </template>
           <template v-slot:item.client_table="{ item }">
-            <p>{{item.client_table.split("&")[1]}}</p>
+            <p>{{item.client_table.split("*")[1]}}</p>
           </template>
           <template v-slot:item.status="{ item }">
             <p>{{item.status === 1 ? $t('Active') : $t('Disabled')}}</p>

@@ -157,7 +157,7 @@
             <item-edit-menu :item="item" :item_tables="item_tables" :category_group="category_group" @item-deleted="deleteItem(item)" />
           </template>
           <template v-slot:item.category="{ item }">
-            <p>{{item.category.split('&')[2]}}</p>
+            <p>{{item.category.split('*')[2]}}</p>
           </template>
           <template v-slot:item.status="{ item }">
             <p>{{item.status === 1 ? $t('Active') : $t('Disabled')}}</p>
