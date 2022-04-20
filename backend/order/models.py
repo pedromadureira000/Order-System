@@ -17,7 +17,7 @@ class Order(models.Model):
     class Meta:
         verbose_name = _('order')
         verbose_name_plural = _('orders')
-        constraints = [UniqueConstraint(fields=['order_number', 'establishment'], name='order compound primary key')]
+        constraints = [UniqueConstraint(fields=['client','establishment', 'order_number',], name='order compound primary key')]
     order_number = models.IntegerField(_('order number'), editable=False)
     client_user = models.ForeignKey('user.User', on_delete=models.PROTECT, verbose_name=_('client user'),)
     client = models.ForeignKey('organization.Client', on_delete=models.PROTECT, verbose_name=_('client'))

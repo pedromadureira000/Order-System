@@ -11,47 +11,46 @@
             <v-row no-gutters>
               <!-- Company -->
               <v-col
-                class="d-flex"
-                cols="12"
+                class="mr-3"
               >
                 <v-select
                   v-model="company"
                   :label="$t('Company')"
                   :items="companies"
                   :item-text="(x) => x.company_compound_id ? x.company_code + ' - ' + x.name : $t('All')" 
-                  :item-value="(x) => x.company_compound_id"
-                  @change="fetchClientsToFillFilterSelectorToSearchOrders"
+                  return-object
+                  @change="companyChanged"
                 ></v-select>
               </v-col>
               <!-- Establishment -->
               <v-col
-                class="d-flex"
-                sm="6"
+                class="mr-3"
               >
                 <v-select
                   v-model="establishment"
                   :label="$t('Establishment')"
                   :items="establishments"
                   :item-text="(x) => x.establishment_compound_id ? x.establishment_code + ' - ' + x.name : $t('All')"
-                  :item-value="(x) => x.establishment_compound_id"
+                  return-object
                 ></v-select>
               </v-col>
               <!-- Client -->
               <v-col
-                class="d-flex"
-                cols="12"
-                sm="6"
+                class="mr-3"
+                v-if="!currentUserIsClientUser"
               >
                 <v-select
                   v-model="client"
                   :label="$t('Client')"
-                  :items="clients"
+                  :items="computed_clients"
                   :item-text="(x) => x.client_compound_id ? x.client_code + ' - ' + x.name : $t('All')"
-                  :item-value="(x) => x.client_compound_id"
+                  return-object
                 ></v-select>
               </v-col>
+            </v-row>
+            <v-row no-gutters>
               <!-- Invoice Number -->
-              <v-col cols="3">
+              <v-col cols="2">
                 <v-text-field
                   :error-messages="invoiceNumberErrors"
                   :label="$t('Invoice Number')"
@@ -62,7 +61,7 @@
                 />
               </v-col>
               <!-- Order Number -->
-              <v-col cols="3">
+              <v-col cols="2">
                 <v-text-field
                   :error-messages="orderNumberErrors"
                   :label="$t('Order Number')"
@@ -83,21 +82,20 @@
               <!-- Status -->
               <v-col
                 class="d-flex"
-                cols="12"
-                sm="6"
+                cols="3"
               >
                 <v-select
                   v-model="status"
-                  :label="$t('Status')"
+                  label="Status"
                   :items="status_options"
-                  :item-text="(x) => x.description"
-                  :item-value="(x) => $t(x.value)"
+                  :item-text="(x) => $t(x.description)"
+                  return-object
                 ></v-select>
               </v-col>
               <!-- Submit -->
-              <v-col cols="3" style="display: flex; justify-content: center;">
+              <v-col cols="2" style="display: flex; justify-content: center;">
                 <v-btn
-                  class="mt-3"
+                  class="mt-3 mr-0 ml-0"
                   color="primary"
                   :loading="loading"
                   :disabled="loading"
@@ -121,10 +119,10 @@
                 <p>{{item.order_number}}</p>
               </template>
               <template v-slot:item.order_date="{ item }">
-                <p>{{item.order_date}}</p>
+                <p>{{getLocaleDate(item.order_date)}}</p> 
               </template>
               <template v-slot:item.status="{ item }">
-                <p>{{item.status}}</p>
+                <p>{{$t(status_options.filter(el=>el.value===String(item.status))[0].description)}}</p>
               </template>
               <template v-slot:item.invoice_number="{ item }">
                 <p>{{item.invoice_number}}</p>
@@ -133,10 +131,10 @@
                 <p>{{item.invoice_date}}</p>
               </template>
               <template v-slot:item.order_amount="{ item }">
-                <p>{{getRealMask(item.order_amount)}}</p>
+                <p>{{getRealMask(Number(item.order_amount))}}</p>
               </template>
               <template v-slot:item.actions="{ item }">
-                <order-edit-menu :order="item"/>
+                <order-view-menu :order="item"/>
               </template>
             </v-data-table>
           </v-container>
@@ -147,19 +145,25 @@
 </template>
 
 <script>
-import { validationMixin } from "vuelidate";
+import {
+  integer,
+  maxLength,
+  minValue,
+} from "vuelidate/lib/validators";
+import { validationMixin,  } from "vuelidate";
 import {money} from "~/helpers/validators"
 import {VMoney} from 'v-money'
 
-let all_companies = {company_compound_id: null}
+let all_companies = {company_compound_id: null, establishments: [], client_table: null}
 let all_establishments = {establishment_compound_id: null}
-let all_clients = {client_compound_id: null}
+let all_clients = {client_compound_id: null, client_table: 'null'}
 let all_status = {description: 'All', value: null}
+let pending_status = {description: 'Pending', value: 'pending'}
 
 export default {
   middleware: ["authenticated"],
   components: {
-    "price-table-edit-menu": require("@/components/admin/item/price-table-edit-menu.vue").default,
+    "order-view-menu": require("@/components/client/order/order-view-menu.vue").default,
   },
   mixins: [validationMixin],
   directives: {money: VMoney},
@@ -169,37 +173,30 @@ export default {
       loading: false,
       money: money,
       // Fields
-      company: null,
-      establishment: null,
-      client: null,
+      company: all_companies,
+      establishment: all_establishments,
+      client: all_clients,
       invoice_number: '',
       order_number: '',
       period: '',
-      status: '',
+      status: pending_status,
       companies: [all_companies],
       clients: [all_clients],
-      client_groups: [],
       status_options: [
         all_status,
-        {description: 'Pending', value: 'pending'},
+        pending_status,
         {description: 'Canceled', value: '0'},
         {description: 'Typing', value: '1'},
         {description: 'Transferred', value: '2'},
         {description: 'Registered', value: '3'},
         {description: 'Invoiced', value: '4'},
         {description: 'Delivered', value: '5'},
-
       ],
       // Fields
       orders_headers: [
         { text: this.$t('Order Number'), value: 'order_number' },
-        /** { text: this.$t('Company'), value: 'company' }, */
-        /** { text: this.$t('Establishment'), value: 'establishment' }, */
-        /** { text: this.$t('Client'), value: 'client' }, */
-        /** { text: this.$t('Client User'), value: 'client_user' }, */
-        /** { text: this.$t('Price Table'), value: 'price_table' }, */
         { text: this.$t('Order Date'), value: 'order_date' },
-        { text: this.$t('Status'), value: 'status' },
+        { text: 'Status', value: 'status' },
         { text: this.$t('Invoice Number'), value: 'invoice_number' },
         { text: this.$t('Invoice Date'), value: 'invoice_date' },
         { text: this.$t('Order Amount'), value: 'order_amount' },
@@ -209,24 +206,32 @@ export default {
   },
 
   async fetch() {
-    /** Fetch Companies with Establishments */
+    // Fetch Companies with Establishments
     let data = await this.$store.dispatch("order/fetchDataToFillFilterSelectorsToSearchOrders"); 
     if (data){
       this.companies = [all_companies, ...data]
       console.log(">>>>>>> this.companies: ", this.companies)
     }
+    // Fetch Clients
+    if (!this.currentUserIsClientUser){
+      let clients = await this.$store.dispatch("order/fetchClientsToFillFilterSelectorToSearchOrders")
+      if (clients) {
+        this.clients = [all_clients, ...clients]
+      }
+    }
   },
 
   methods: {
     async searchOrders(){
+      /** clientInfoGroup */
       let query_strings = ""
-      query_strings += this.company ? `company=${this.company}&` : ''
-      query_strings += this.establishment ? `establishment=${this.establishment}&` : ''
-      query_strings += this.client ? `client=${this.client}&` : ''
+      query_strings += this.company.company_compound_id ? `company=${this.company.company_compound_id}&` : ''
+      query_strings += this.establishment.establishment_compound_id ? `establishment=${this.establishment.establishment_compound_id}&` : ''
+      query_strings += this.client.client_compound_id ? `client=${this.client.client_compound_id}&` : ''
       query_strings += this.invoice_number ? `invoice_number=${this.invoice_number}&` : ''
       query_strings += this.order_number ? `order_number=${this.order_number}&` : ''
       query_strings += this.period ? `period=${this.period}&` : ''
-      query_strings += this.status ? `status=${this.status}&` : ''
+      query_strings += this.status.value ? `status=${this.status.value}&` : ''
       if (query_strings !== "") {
         query_strings = query_strings.slice(0, -1) // remove the last '&' character
       }
@@ -236,26 +241,12 @@ export default {
       }
     },
  
-    async fetchClientsToFillFilterSelectorToSearchOrders(){
-      if (this.company === all_companies){
-        this.clients = [all_clients]
-        this.client = null
-        this.establishments = [all_establishments]
-
-      }
-      else {
-        let client_table_id = this.company.client_table
-        let client_group = this.client_groups.find(el=>el.group_id===client_table_id)
-        if (client_group){
-          this.clients = [all_clients, ...client_group.clients]
-        }
-        else{
-          let clients = await this.$store.dispatch("organization/fetchClientsToFillFilterSelectorToSearchOrders", client_table_id)
-          if (clients) {
-            this.clients = [all_clients, ...clients]
-            this.client_groups.push({group_id: client_table_id, clients: clients})
-          }
-        }
+    async companyChanged(){
+      // Reset establishment field
+      this.establishment = all_establishments
+      // Reset client field
+      if (this.client.client_table !== this.company.client_table){
+        this.client = all_clients
       }
     },
 
@@ -263,6 +254,9 @@ export default {
       return value.toLocaleString('pt-br',{style: 'currency', currency: 'BRL'})
     },
 
+    getLocaleDate(value){
+      return new Date(value).toLocaleDateString('pt-BR')
+    },
   },
 
   validations: {
@@ -284,7 +278,13 @@ export default {
       return this.$store.state.user.currentUser.roles.includes('client_user')
     },
     establishments(){
-      return [all_establishments,...this.company.establishments]
+      return [all_establishments, ...this.company.establishments]
+    },
+    computed_clients(){
+      // If the company is not all_companies, then return only the clients from the company.client_table
+      // otherwise return all clients
+      return this.company.company_compound_id ? [all_clients, 
+        ...this.clients.filter(el=>el.client_table===this.company.client_table)] : [all_clients, ...this.clients]  
     },
     // Vuelidate
     invoiceNumberErrors() {

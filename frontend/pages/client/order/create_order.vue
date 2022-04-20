@@ -36,7 +36,7 @@
               <v-col cols="5">
                 <v-text-field
                   :label="$t('Item code')"
-                  v-model="item_code_to_search"
+                  v-model.trim="item_code_to_search"
                   @keydown.enter.prevent="searchOnePriceItemToMakeOrder"
                 />
               </v-col>
@@ -66,7 +66,7 @@
               :headers="ordered_items_headers"
               :items="ordered_items__array"
               class="elevation-1"
-              item-key="item.$model"
+              item-key="item.$model.item_compound_id"
             >
               <template v-slot:item.image="{ item }">
                 <v-img
@@ -74,20 +74,20 @@
                   width="115px"
                   height="87px"
                   :lazy-src="$store.state.CDNBaseUrl + '/media/images/items/defaultimage.jpeg'"
-                  :src="getImageUrl(item.image.$model)"
+                  :src="getImageUrl(item.item.$model.image)"
                 ></v-img>
               </template>
               <template v-slot:item.item_code="{ item }">
-                <p>{{item.item.$model.split('*')[2]}}</p>
+                <p>{{item.item.$model.item_compound_id.split('*')[2]}}</p>
               </template>
               <template v-slot:item.item_description="{ item }">
-                <p>{{item.item_description.$model}}</p>
+                <p>{{item.item.$model.description}}</p>
               </template>
-              <template v-slot:item.category="{ item }">
-                <p>{{item.category.$model}}</p>
-              </template>
+              <!-- <template v-slot:item.category="{ item }"> -->
+                <!-- <p>{{item.category.$model}}</p> -->
+              <!-- </template> -->
               <template v-slot:item.unit="{ item }">
-                <p>{{item.unit.$model}}</p>
+                <p>{{item.item.$model.unit}}</p>
               </template>
               <template v-slot:item.unit_price="{ item }">
                 <p>{{getRealMask(Number(item.unit_price.$model))}}</p>
@@ -99,6 +99,10 @@
                   :label="$t('Quantity')"
                   @keydown.enter.prevent=""
                   @blur="quantityErrors(item)"
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  max="999999999.99"
                 />
               </template>
               <template v-slot:item.total="{ item }">
@@ -106,7 +110,7 @@
               </template>
               <template v-slot:item.remove_item="{ item }">
                 <div style="display:flex; align-items: center; justify-content: center;">
-                  <v-icon @click="removeItem(item.item.$model)" color="red" large>
+                  <v-icon @click="removeItem(item.item.$model.item_compound_id)" color="red" large>
                     mdi-close-circle-outline
                   </v-icon >
                 </div>
@@ -136,7 +140,7 @@
             type="submit"
             :loading="loading"
             :disabled="loading"
-            @click="saveOrder"
+            @click="makeOrder('1')"
           >{{$t('Save')}}</v-btn>
           <v-btn
             class="mt-3"
@@ -144,7 +148,7 @@
             type="submit"
             :loading="loading"
             :disabled="loading"
-            @click="saveOrderAndTransfer"
+            @click="makeOrder('2')"
           >{{$t('Transfer')}}</v-btn>
         </v-card-text>
       </v-card>
@@ -164,7 +168,7 @@
               ></v-select>
               <v-text-field
                 :label="$t('Item description')"
-                v-model="filter__item_description"
+                v-model.trim="filter__item_description"
               />
             </v-container>
           </v-card-text>
@@ -181,7 +185,7 @@
                   :headers="searched_items_headers"
                   :items="priceItemsToAdd"
                   class="elevation-1"
-                  item-key="item"
+                  item-key="item.item.item_compound_id"
                 >
                   <template v-slot:item.image="{ item }">
                     <v-img
@@ -189,23 +193,23 @@
                       width="115px"
                       height="87px"
                       :lazy-src="$store.state.CDNBaseUrl + '/media/images/items/defaultimage.jpeg'"
-                      :src="getImageUrl(item.image)"
+                      :src="getImageUrl(item.item.image)"
                     ></v-img>
                   </template>
                   <template v-slot:item.item_code="{ item }">
-                    <p>{{item.item.split('*')[2]}}</p>
+                    <p>{{item.item.item_compound_id.split('*')[2]}}</p>
                   </template>
                   <template v-slot:item.item_description="{ item }">
-                    <p>{{item.item_description}}</p>
+                    <p>{{item.item.description}}</p>
                   </template>
-                  <template v-slot:item.category="{ item }">
-                    <p>{{item.category}}</p>
-                  </template>
-                  <template v-slot:item.unit="{ item }">
-                    <p>{{item.unit}}</p>
-                  </template>
+                  <!-- <template v-slot:item.category="{ item }"> -->
+                    <!-- <p>{{item.category}}</p> -->
+                  <!-- </template> -->
                   <template v-slot:item.unit_price="{ item }">
                     <p>{{getRealMask(Number(item.unit_price))}}</p>
+                  </template>
+                  <template v-slot:item.unit="{ item }">
+                    <p>{{item.item.unit}}</p>
                   </template>
                   <template v-slot:item.add_item="{ item }">
                     <div style="display:flex; align-items: center; justify-content: center;">
@@ -215,7 +219,6 @@
                     </div>
                   </template>
                 </v-data-table>
-              <!-- ------------------------ -->
             </v-container>
           </v-card-text>
         </v-card>
@@ -270,8 +273,6 @@
       </v-dialog>
 
     </div>
-    <v-btn label="Test" @click="gambiarra2"> test</v-btn>
-
   </div>
 </template>
 
@@ -284,8 +285,7 @@ import {
   maxValue,
 } from "vuelidate/lib/validators";
 import {validationMixin} from "vuelidate";
-import {money} from "~/helpers/validators"
-import {VMoney} from 'v-money'
+import {decimal_only_2places} from "~/helpers/validators"
 import {mask} from 'vue-the-mask'
 
 let default_category_value = {category_compound_id: 'all', description: 'All'}
@@ -295,17 +295,15 @@ export default {
     "price-table-edit-menu": require("@/components/admin/item/price-table-edit-menu.vue").default,
   },
   mixins: [validationMixin],
-  directives: {money: VMoney, mask},
+  directives: {mask},
   data() {
     return {
     // Order Fields ---------
       establishment: null,
       note: "",
       ordered_items: [],
-      // EX {item: '123$123$111111', item_description: "Nice Item", category: "Category asdf", unit_price: 1055.55, quantity: 5.33, errors: []} 
     // ---------
       search_results: [],
-      // EX priceItemObj: {item: '123$123$111111', item_description: 'Nice Item', category: 'category 1', unit_price: 1055.55} 
       establishments: [],
       categories: [default_category_value, ],
       price_table: null,
@@ -314,8 +312,6 @@ export default {
       filter__category: default_category_value,
       filter__item_description: "",
       loading: false,
-      money: money,
-      item_compound_id_prefix: "",
       show_select_establishment_dialog: false,
       show_you_have_no_establishments_to_buy_message: false,
       show_search_dialog: false,
@@ -323,7 +319,7 @@ export default {
         { text: this.$t('Image'), value: 'image' },
         { text: this.$t('Code'), value: 'item_code' },
         { text: this.$t('Description'), value: 'item_description' },
-        { text: this.$t('Category'), value: 'category' },
+        /** { text: this.$t('Category'), value: 'category' }, */
         { text: this.$t('Unit'), value: 'unit' },
         { text: this.$t('Unit price'), value: 'unit_price' },
         { text: this.$t('Quantity'), value: 'quantity' },
@@ -334,7 +330,7 @@ export default {
         { text: this.$t('Image'), value: 'image' },
         { text: this.$t('Code'), value: 'item_code' },
         { text: this.$t('Description'), value: 'item_description' },
-        { text: this.$t('Category'), value: 'category' },
+        /** { text: this.$t('Category'), value: 'category' }, */
         { text: this.$t('Unit'), value: 'unit' },
         { text: this.$t('Unit price'), value: 'unit_price' },
         { text: this.$t('Add item'), value: 'add_item' },
@@ -364,16 +360,22 @@ export default {
   },
 
   methods: {
-    async saveOrder(){
+    async makeOrder(status){
       this.$v.orderInfoGroup.$touch();
       if (this.$v.orderInfoGroup.$invalid) {
         this.$store.dispatch("setAlert", { message: this.$t('Please_fill_the_form_correctly'), alertType: "error" }, { root: true })
       } else {
         this.loading = true
+        // The API to make order must receive item_compound_id as value for the item field.
+        let ordered_items_fixed = this.ordered_items.map(el=>{
+          let element = JSON.parse(JSON.stringify(el)) // This is doing a Deep copy 
+          element.item = element.item.item_compound_id
+          return element
+        })
         let response = await this.$store.dispatch("order/makeOrder", {
           establishment: this.establishment.establishment_compound_id,
-          ordered_items: this.ordered_items,
-          status: '1',
+          ordered_items: ordered_items_fixed,
+          status: status,
           note: this.note,
         })
         // Don't reset ordered_items and default_quantity if there is errors
@@ -385,29 +387,11 @@ export default {
       }
     },
 
-    async saveOrderAndTransfer(){
-      this.$v.orderInfoGroup.$touch();
-      if (this.$v.orderInfoGroup.$invalid) {
-        this.$store.dispatch("setAlert", { message: this.$t('Please_fill_the_form_correctly'), alertType: "error" }, { root: true })
-      } else {
-        this.loading = true;
-        let response = await this.$store.dispatch("order/makeOrder", {
-          establishment: this.establishment.establishment_compound_id,
-          ordered_items: this.ordered_items,
-          status: '2',
-          note: this.note,
-        });
-        // Don't reset ordered_items and default_quantity if there is errors
-        if (response === 'ok'){
-          this.ordered_items = []
-          this.default_quantity = 1
-        }
-        this.loading = false;
-      }
-    },
-
     async searchOnePriceItemToMakeOrder(){
-      if (this.ordered_items.some(el=>el.item === this.item_compound_id_prefix + this.item_code_to_search)){
+      if (!this.item_code_to_search){
+        this.$store.dispatch("setAlert", { message: this.$t('Plese fill the item code field.'), alertType: "warning" }, { root: true })
+      }
+      if (this.ordered_items.some(el=>el.item.item_compound_id.split('*')[2] === this.item_code_to_search)){
         this.$store.dispatch("setAlert", { message: this.$t('This item is already added to the order.'), alertType: "warning" }, { root: true })
       }
       else{
@@ -415,40 +399,23 @@ export default {
           {establishment: this.establishment.establishment_compound_id, item_code: this.item_code_to_search}
         )
         if (search_result){
-          if (!this.item_compound_id_prefix){
-            this.item_compound_id_prefix = search_result.item.split('*')[0] + '*' + search_result.item.split('*')[1] + '*'
-          }
           this.ordered_items.push({...search_result, quantity: this.default_quantity, errors: []})
         }
       }
     },
 
     async searchPriceItemsToMakeOrder(){
-          /** let item_already_exists = this.item_group.find(el=>el.establishment === this.establishment.establishment_compound_id) */
-          /** if (item_already_exists){ */
-            /** this.items = item_already_exists.items */
-          /** } */
-          /** else{ */
-          /** } */
       let filter_parameters = {establishment: this.establishment.establishment_compound_id, category: this.filter__category.category_compound_id, 
         item_description: this.filter__item_description}
       let search_results = await this.$store.dispatch("order/searchPriceItemsToMakeOrder", filter_parameters);
       if (search_results){
-        if (!this.item_compound_id_prefix){
-          // TODO when i change the establishment it can change the item_table (clear this field in this case)
-          let first_item = search_results[0]
-          console.log(">>>>>>> first_item: ", first_item)
-          if (first_item){
-            this.item_compound_id_prefix = first_item.item.split('*')[0] + '*' + first_item.item.split('*')[1] + '*'
-          }
-        }
         this.search_results = search_results
       }
     },
 
     async fetchCategoriesToMakeOrderAndGetPriceTableInfo(){
-      // TODO add groups
-      let {categories, price_table} = await this.$store.dispatch("order/fetchCategoriesToMakeOrderAndGetPriceTableInfo", this.establishment.establishment_compound_id);
+      let {categories, price_table} = await this.$store.dispatch("order/fetchCategoriesToMakeOrderAndGetPriceTableInfo",
+        this.establishment.establishment_compound_id);
       if (categories){
         this.categories.push(...categories) 
       }
@@ -464,6 +431,7 @@ export default {
       !v.quantity.decimal && errors.push(this.$t("DecimalErrorMessage"));
       !v.quantity.minValue && errors.push(this.$formatStr(this.$t("This_value_must_be_greater_than_X"), 0.01));
       !v.quantity.maxValue && errors.push(this.$formatStr(this.$t("This_value_must_be_less_than_X"), 999999999.99));
+      !v.quantity.decimal_only_2places && errors.push(this.$t("DecimalErrorMessage2Places"));
       v.errors.$model = errors;
     },
 
@@ -478,19 +446,11 @@ export default {
 
     // Add and remove item functions
     removeItem(item_compound_id){
-      this.ordered_items = this.ordered_items.filter((obj)=> obj.item !== item_compound_id)
+      this.ordered_items = this.ordered_items.filter((obj)=> obj.item.item_compound_id !== item_compound_id)
     },
     addItem(price_item){
       this.ordered_items.push({...price_item, quantity: this.default_quantity, errors: []})
     },
-    // TEst
-    gambiarra2(){
-      /** return Array.from(this.$v.ordered_items.$each.$iter.entries()) */
-      console.log(">>>>>>> array: ", Array.from(this.$v.ordered_items.$each.$iter))
-      console.log(">>>>>>> array: ",  Object.values(this.$v.ordered_items.$each.$iter))
-      console.log(">>>>>>> not array: ", this.$v.ordered_items.$each.$iter)
-    },
-
     // Image
     getImageUrl(image){
       if (image) {
@@ -517,6 +477,7 @@ export default {
     default_quantity: {
       required,
       decimal,
+      decimal_only_2places,
       maxValue: maxValue(999999999.99),
       minValue: minValue(0.01),
 
@@ -529,6 +490,7 @@ export default {
         quantity: {
           required,
           decimal,
+          decimal_only_2places,
           maxValue: maxValue(999999999.99),
           minValue: minValue(0.01),
         },
@@ -556,6 +518,7 @@ export default {
       if (!this.$v.default_quantity.$dirty) return errors;
       !this.$v.default_quantity.required && errors.push(this.$t("This_field_is_required"));
       !this.$v.default_quantity.decimal && errors.push(this.$t("DecimalErrorMessage"));
+      !this.$v.default_quantity.decimal_only_2places && errors.push(this.$t("DecimalErrorMessage2Places"));
       !this.$v.default_quantity.minValue && errors.push(this.$formatStr(this.$t("This_value_must_be_greater_than_X"), 0.01 ));
       !this.$v.default_quantity.maxValue && errors.push(this.$formatStr(this.$t("This_value_must_be_less_than_X"), 999999999.99));
       return errors;
@@ -566,7 +529,7 @@ export default {
         let return_value = true
         let ordered_items = this.ordered_items
         for (const prop in ordered_items){
-          if (ordered_items[prop].item === price_item.item){
+          if (ordered_items[prop].item.item_compound_id === price_item.item.item_compound_id){
             return_value = false
           }
         }
@@ -579,7 +542,6 @@ export default {
   },
 
   /** mounted() { */
-    /** console.log('>>>>>>>>>>>>>>>>>>', this.item_compound_id_prefix) */
   /** } */
 };
 </script>

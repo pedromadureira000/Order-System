@@ -152,8 +152,8 @@ export default {
         en: '/client/order/create_order',
         'pt-BR': '/cliente/pedido/fazer_pedido'
       },
-      'client/order/view_order': {
-        en: '/client/order/view_order',
+      'client/order/view_orders': {
+        en: '/client/order/view_orders',
         'pt-BR': '/cliente/pedido/ver_pedidos'
       },
     },

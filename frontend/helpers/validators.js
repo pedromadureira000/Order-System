@@ -13,3 +13,5 @@ export const money = {
           precision: 2,
           masked: false
         }
+
+export const decimal_only_2places = helpers.regex('decimal_only_2places', /^(?!(?:0|0\.0|0\.00)$)[+]?\d+(\.\d[0-9]?)?$/)

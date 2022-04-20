@@ -18,6 +18,6 @@ urlpatterns = [
     path('fetch_data_to_fill_filter_selectors_to_search_orders', fetchDataToFillFilterSelectorsToSearchOrders.as_view()), 
     path('fetch_clients_to_fill_filter_selector_to_search_orders', fetchClientsToFillFilterSelectorToSearchOrders.as_view()), 
     path('order', OrderView.as_view()),
-    path('order/<establishment_compound_id>/<order_number>', SpecificOrderView.as_view()),
+    path('order/<client_compound_id>/<establishment_compound_id>/<order_number>', SpecificOrderView.as_view()),
     path('establishments_to_make_order', fetchClientEstabsToCreateOrder.as_view()),
 ]

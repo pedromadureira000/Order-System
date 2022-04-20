@@ -903,7 +903,7 @@ export default {
 	},
 
 	async searchOrders(query_strings){
-    let url =  `/api/order/get_orders/?${query_strings}`
+    let url =  query_strings ? `/api/order/order?${query_strings}` : "/api/order/order"
 		return await axios({ 
 		method: "get",
 		url: url,
@@ -921,13 +921,39 @@ export default {
 				})
 	},
 
-	async fetchClientsToFillFilterSelectorToSearchOrders(client_table_compound_id){
+	async fetchClientsToFillFilterSelectorToSearchOrders(){
 		return await axios({ 
 		method: "get",
-		url: `/api/order/fetch_clients_to_fill_filter_selector_to_search_orders/${client_table_compound_id}`,
+		url: "/api/order/fetch_clients_to_fill_filter_selector_to_search_orders",
 			}).then((request) => {
 					return request.data 
 				})
 	}, 
+
+	async fetchOrderDetails(payload){
+    let url = `/api/order/order/${payload.client}/${payload.establishment}/${payload.order_number}`
+		return await axios({
+		method: "get",
+		url: url,
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async updateOrder(payload){
+    let data_body = {
+      ordered_items: payload.ordered_items,
+      status: payload.status,
+      note: payload.note,
+      agent_note: payload.agent_note,
+		}
+		return await axios({ 
+		method: "put",
+		url: `/api/order/order/${payload.client}/${payload.establishment}/${payload.order_number}`,
+		data: data_body}).then((request) => {
+					return request.data 
+				})
+	},
+
 }
 

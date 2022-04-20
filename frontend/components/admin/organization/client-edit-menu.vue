@@ -1,6 +1,6 @@
 <template>
   <div>
-    <dots-menu-update-delete :menu_items="menu_items" :handleClick="handleClick"/>
+    <dots-menu :menu_items="menu_items" :handleClick="handleClick"/>
 
     <v-dialog :retain-focus="false" v-model="show_edit_dialog" max-width="50%">
       <v-card>
@@ -152,7 +152,7 @@ import {mask} from 'vue-the-mask'
 export default {
   mixins: [validationMixin],
   components: {
-    "dots-menu-update-delete": require("@/components/dots-menu-update-delete.vue").default,
+    "dots-menu": require("@/components/dots-menu.vue").default,
     "price-table-v-select": require("@/components/admin/organization/price-table-v-select.vue").default,
   },
   directives: {mask},

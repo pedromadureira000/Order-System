@@ -1,9 +1,12 @@
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 from rolepermissions.checkers import has_role
 from organization.models import Client, ClientEstablishment, Company, Establishment
+from organization.validators import UserClientId
+from user.models import User
 from .facade import update_ordered_items
 from .models import Order, OrderedItem, OrderHistory
-from item.models import Item, PriceItem
+from item.models import Item, PriceItem, PriceTable
 from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import PermissionDenied
 from .validators import order_has_changed
@@ -21,30 +24,17 @@ class fetchClientEstabsToCreateOrderSerializer(serializers.ModelSerializer):
     def get_company_name(self, obj):
         return obj.company.name
 
+class ItemAuxForOrderedItemAuxSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Item
+        fields = ['item_compound_id', 'unit', 'description', 'image'] 
+
 class searchOnePriceItemToMakeOrderSerializer(serializers.ModelSerializer):
-    item = serializers.SlugRelatedField(slug_field='item_compound_id', read_only=True)
-    item_description = serializers.SerializerMethodField()
-    unit = serializers.SerializerMethodField()
-    category = serializers.SerializerMethodField()
-    image = serializers.SerializerMethodField()
+    item = ItemAuxForOrderedItemAuxSerializer()
 
     class Meta:
         model = PriceItem
-        fields = ['item', 'item_description', 'category', 'unit_price', 'unit', 'image']
-
-    def get_item_description(self, obj):
-        return obj.item.description
-
-    def get_category(self, obj):
-        return obj.item.category.description
-    
-    def get_unit(self, obj):
-        return obj.item.unit
-
-    def get_image(self, obj):
-        if obj.item.image:
-            return obj.item.image.url
-        return '/media/images/items/defaultimage.jpeg'
+        fields = ['item',  'unit_price']
 
 class EstablishmentForCompanyWithEstab(serializers.ModelSerializer):
     class Meta:
@@ -59,9 +49,10 @@ class CompanyWithEstabsSerializer(serializers.ModelSerializer):
         fields = ['company_compound_id', 'company_code', 'name', 'client_table', 'establishments']
 
 class ClientsToFillFilterSelectorsToSearchOrdersSerializer(serializers.ModelSerializer):
+    client_table=serializers.SlugRelatedField(slug_field='client_table_compound_id', read_only=True)
     class Meta:
         model = Client
-        fields =  ['client_compound_id', 'client_code', 'name']
+        fields =  ['client_compound_id', 'client_code', 'client_table', 'name']
 
 class OrderedItemSerializer(serializers.ModelSerializer):
     item = serializers.SlugRelatedField(slug_field='item_compound_id', queryset=Item.objects.all())
@@ -146,11 +137,12 @@ class OrderPOSTSerializer(serializers.ModelSerializer):
         return super().validate(attrs)
 
     def create(self, validated_data):
+        request_user = self.context['request'].user
         ordered_items = validated_data.pop('ordered_items')
         validated_data['company'] = validated_data['establishment'].company
         validated_data['client'] = self.context['request'].user.client
         validated_data['client_user'] = self.context['request'].user
-        last_order = validated_data['establishment'].order_set.order_by("order_date").last()
+        last_order = validated_data['establishment'].order_set.filter(client_id=request_user.client_id).order_by("order_date").last()
         validated_data['order_number'] = last_order.order_number + 1 if last_order else 1
         order = Order.objects.create(**validated_data)
         # Create OrderedItems
@@ -235,10 +227,10 @@ class OrderPUTSerializer(serializers.ModelSerializer):
         if request_user.contracting.status != 1:
             raise PermissionDenied(detail={"error": [_("Your contracting is disabled.")]})
         # Deny setting wrong invoice_number
-        if (invoice_number and status != 4) or (invoice_number and status == 4 and self.instance.status != 3):
+        if (invoice_number and status not in [4, 5] and self.instance.status not in [4, 5]):
             raise serializers.ValidationError(_("You can only add invoice number when order status has changed from 'Registered' to 'Invoiced'."))
         # Deny setting wrong invoicing_date
-        if (invoicing_date and status != 4) or (invoicing_date and status == 4 and self.instance.status != 3):
+        if (invoicing_date and status not in [4, 5] and self.instance.status not in [4, 5]):
             raise serializers.ValidationError(_("You can only add invoicing date when order status has changed from 'Registered 'to 'Invoiced'."))
         # Force setting invoice_number when status changes from 'Registered' to 'Invoiced'.
         if status == 4 and self.instance.status == 3 and not invoice_number:
@@ -294,17 +286,62 @@ class OrderHistorySerializer(serializers.ModelSerializer):
         model = OrderHistory
         fields = ['history_type', 'history_description', 'user', 'agent_note', 'date']
 
-class OrderDetailsSerializer(serializers.ModelSerializer):
+class OrderGetSerializer(serializers.ModelSerializer):
     company = serializers.SlugRelatedField(slug_field='company_compound_id', read_only=True)
     establishment = serializers.SlugRelatedField(slug_field='establishment_compound_id', read_only=True)
     client = serializers.SlugRelatedField(slug_field='client_compound_id', read_only=True)
     client_user = serializers.SlugRelatedField(slug_field='user_code', read_only=True)
     price_table = serializers.SlugRelatedField(slug_field='price_table_compound_id', read_only=True)
-    ordered_items = OrderedItemSerializer(many=True)
-    order_history = OrderHistorySerializer(many=True)
     class Meta:
         model = Order
-        fields = ['order_number', 'company', 'establishment', 'client', 'client_user', 'price_table', 'ordered_items', 'order_amount', 'status', 
-                'order_date', 'invoicing_date', 'invoice_number', 'note', 'order_history']
+        fields = ['order_number', 'company', 'establishment', 'client', 'client_user', 'price_table', 'order_amount', 'status', 
+                'order_date', 'invoicing_date', 'invoice_number', 'note']
         read_only_fields = fields
 
+# Order Details Serializers
+
+class CompanyAuxSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Company
+        fields = ['company_code', 'name']
+
+class EstablishmentAuxSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Establishment
+        fields = ['establishment_compound_id', 'establishment_code', 'name', 'cnpj']
+
+class ClientAuxSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Client
+        fields =  ['client_compound_id', 'client_code', 'name', 'cnpj']
+
+class ClientUserAuxSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        #  fields = ['username']
+        fields = ['username', 'first_name', 'last_name']
+
+class PriceTableAuxSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PriceTable
+        fields = ['table_code', 'description']
+        read_only_fields = fields
+
+class OrderedItemAuxSerializer(serializers.ModelSerializer):
+    item = ItemAuxForOrderedItemAuxSerializer()
+    class Meta:
+        model = OrderedItem
+        fields = ['item', 'quantity', 'unit_price', 'date']
+        read_only_fields = [*fields]
+
+class OrderDetailsSerializer(serializers.ModelSerializer):
+    company =  CompanyAuxSerializer()
+    establishment = EstablishmentAuxSerializer()
+    client = ClientAuxSerializer()
+    client_user = ClientUserAuxSerializer()
+    price_table = PriceTableAuxSerializer()
+    ordered_items = OrderedItemAuxSerializer(many=True)
+    class Meta:
+        model = Order
+        fields = ['company', 'establishment', 'client', 'client_user', 'price_table', 'ordered_items', 'order_amount']
+        read_only_fields = fields

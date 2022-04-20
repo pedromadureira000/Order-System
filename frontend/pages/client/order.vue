@@ -19,7 +19,7 @@
         value: 'User',
         allMenuItems: [
           {"permissions": ['create_order'], "title": "Create Order", "icon":"mdi-account", "to": "/client/order/create_order"},
-          /** {"permissions": viewOrders, "title": "View Orders", "icon":"mdi-office-building", "to": "/client/order/view_orders"}, */
+          {"permissions": viewOrders, "title": "View Orders", "icon":"mdi-office-building", "to": "/client/order/view_orders"},
         ],
       }
     },

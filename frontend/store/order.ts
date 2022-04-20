@@ -77,14 +77,14 @@ export const actions: ActionTree<OrderState, RootState> = {
     }
   }, 
 
-  async fetchClientsToFillFilterSelectorToSearchOrders({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, 
-                                                        client_table_compound_id: string){
+  async fetchClientsToFillFilterSelectorToSearchOrders({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
     try {
-      let data = await api.fetchClientsToFillFilterSelectorToSearchOrders(client_table_compound_id)
+      let data = await api.fetchClientsToFillFilterSelectorToSearchOrders()
       return data
     }
     catch(error){
-      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchClientsToFillFilterSelectorToSearchOrders_error_msg'))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, 
+                   this.app.i18n.t('fetchClientsToFillFilterSelectorToSearchOrders_error_msg'))
     }
   }, 
 
@@ -97,6 +97,27 @@ export const actions: ActionTree<OrderState, RootState> = {
       ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('searchOrders_error_msg'))
     }
   },  
+
+  async fetchOrderDetails({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
+    try {
+      let data = await api.fetchOrderDetails(payload)
+      return data
+    }
+    catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchOrderDetails_error_msg'))
+    }
+  }, 
+
+  async updateOrder({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
+    try {
+      let data = await api.updateOrder(payload)
+      dispatch("setAlert", {message: this.app.i18n.t('updateOrder_success_msg'), alertType: "success"}, { root: true })
+      return data
+    }
+    catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('updateOrder_error_msg'))
+    }
+  }, 
 }
 
 // --------------------------------------------/mutations/---------------------------------------------

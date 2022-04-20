@@ -50,6 +50,7 @@ export const messages = {
     deletePriceTable_success_msg: "Price Table deleted.",
     // Order
     makeOrder_success_msg: "Order created.",  
+    updateOrder_success_msg: "Order updated.",
     
     //--------------------------------------------------------------------/Store APIs Error Messages (default_error_msg parameter)
     updateUserPassword_error_msg: "Something went wrong when trying to update the user's password.",
@@ -134,6 +135,8 @@ export const messages = {
     searchOrders_error_msg: "Something went wrong when trying to search orders.",
     fetchDataToFillFilterSelectorsToSearchOrders_error_msg: "Something went wrong when trying to fetch data to fill filter selectors.",
     fetchClientsToFillFilterSelectorToSearchOrders_error_msg: "Something went wrong when trying to fetch clients to fill filter selector.",
+    fetchOrderDetails_error_msg: "Something went wrong when trying to fetch order details.",
+    updateOrder_error_msg: "Something went wrong when trying to update the order.",
 
     // -------------------------------------------------------------------/ Error Handler
     // Fields
@@ -348,9 +351,11 @@ export const messages = {
     "Add Items": "Add Items",
     "Available Items": "Available Items",
     "DecimalErrorMessage": "This field must be a decimal number.",
+    "DecimalErrorMessage2Places": "Ensure that there are no more than 2 decimal places",
     "Edit Items": "Edit Items",
     // -----------------------------------------------------------------------------------/client/order
     "Create Order": "Create Order",
+    "View Orders": "View Orders",
     // --------------------------------------------------/client/order/create_order
     "Add item": "Add item",
     "Add": 'Add',
@@ -367,6 +372,27 @@ export const messages = {
     "Come back to Homepage": "Come back to Homepage",
     "Select an establishment": "Select an establishment",
     "All": "All",
+    // --------------------------------------------------/client/order/view_orders
+    "Order Number": "Order Nº",
+    "Order Date": "Order Date",
+    "Invoice Number": "Invoice Number",
+    "Invoice Date": "Invoice Date",
+    "Order Amount": "Order Amount",
+    "Canceled": "Canceled",
+    "Pending": "Pending",
+    "Typing": "Typing",
+    "Transferred": "Transferred",
+    "Registered": "Registered",
+    "Invoiced": "Invoiced",
+    "Delivered": "Delivered",
+    "Search Orders": "Search Orders",
+    "Period": "Period",
+    "View Details": "View Details",
+    "Order Details": "Order Details",
+    "Edit Order": "Edit Order",
+    "Agent Note": "Agent Note",
+    "The item code cannot be empty.": "The item code cannot be empty.",
+    "This item is already added to the order.": "This item is already added to the order.",
     // -------------------------------------------------------------------/ Components
     // change user's password
     // -------------------------------/Problem Connecting Error dialog
@@ -442,6 +468,7 @@ export const messages = {
     deletePriceTable_success_msg: "Tabela de preço excluída.",
     // Order
     makeOrder_success_msg: "Pedido criado.",
+    updateOrder_success_msg: "Pedido atualizado.",
     
     //--------------------------------------------------------------------/Store APIs Error Messages (default_error_msg parameter)
     updateUserPassword_error_msg: "Algo deu errado ao tentar atualizar a senha do usuário.",
@@ -526,6 +553,8 @@ export const messages = {
     searchOrders_error_msg: "Algo deu errado ao tentar pesquisar pedidos.",
     fetchDataToFillFilterSelectorsToSearchOrders_error_msg: "Algo deu errado ao tentar carregar dados para preencher seletores de filtros.",
     fetchClientsToFillFilterSelectorToSearchOrders_error_msg: "Algo deu errado ao tentar carregar clientes para preencher o seletor de filtro.",
+    fetchOrderDetails_error_msg: "Algo deu errado ao tentar carregar detalhes do pedido.",
+    updateOrder_error_msg: "Algo deu errado ao tentar atualizar o pedido.",
 
     // -------------------------------------------------------------------/ Error Handler
     // Fields
@@ -739,10 +768,12 @@ export const messages = {
     "Add Items": "Adicionar Itens",
     "Available Items": "Itens Disponíveis",
     "DecimalErrorMessage": "Esse campo deve ser um número decimal.",
+    "DecimalErrorMessage2Places": "Certifique-se de que não haja mais de 2 casas decimais",
     "Edit Items": "Editar Itens",
 
     // -----------------------------------------------------------------------------------/client/order
     "Create Order": "Fazer Pedido",
+    "View Orders": "Ver Pedidos",
 
     // --------------------------------------------------/client/order/create_order
     "Add item": "Adicionar item",
@@ -760,6 +791,27 @@ export const messages = {
     "Come back to Homepage": "Voltar para a página inicial",
     "Select an establishment": "Selecione um estabelecimento",
     "All": "Todos",
+    // --------------------------------------------------/client/order/view_orders
+    "Order Number": "Nº do Pedido",
+    "Order Date": "Data do Pedido",
+    "Invoice Number": "Número da nota",
+    "Invoice Date": "Data do Faturamento",
+    "Order Amount": "Valor Total",
+    "Canceled": "Cancelado",
+    "Pending": "Pendente",
+    "Typing": "Digitação",
+    "Transferred": "Transferido",
+    "Registered": "Registrado",
+    "Invoiced": "Faturado",
+    "Delivered": "Entregue",
+    "Search Orders": "Buscar Pedidos",
+    "Period": "Periodo",
+    "View Details": "Ver Detalhes",
+    "Order Details": "Detalhes do Pedido",
+    "Edit Order": "Editar Pedido",
+    "Agent Note": "Observação do Agente",
+    "The item code cannot be empty.": "O código do item não pode estar vazio.",
+    "This item is already added to the order.": "Este item já foi adicionado ao pedido.",
     // -------------------------------------------------------------------/ Components
     // change user's password
     // -------------------------------/Problem Connecting Error dialog

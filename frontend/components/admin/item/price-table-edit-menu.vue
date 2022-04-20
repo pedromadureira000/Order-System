@@ -1,6 +1,6 @@
 <template>
   <div>
-    <dots-menu-update-delete :menu_items="menu_items" :handleClick="handleClick"/>
+    <dots-menu :menu_items="menu_items" :handleClick="handleClick"/>
 
     <v-dialog :retain-focus="false" v-model="show_edit_dialog" max-width="50%">
       <v-card>
@@ -156,7 +156,7 @@ import {VMoney} from 'v-money'
 export default {
   mixins: [validationMixin],
   components: {
-    "dots-menu-update-delete": require("@/components/dots-menu-update-delete.vue").default,
+    "dots-menu": require("@/components/dots-menu.vue").default,
   },
   directives: {money: VMoney},
   props: ['price_table',  'companies','item_group'],

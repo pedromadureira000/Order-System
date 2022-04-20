@@ -1,6 +1,6 @@
 <template>
   <div>
-    <dots-menu-update-delete :menu_items="menu_items" :handleClick="handleClick"/>
+    <dots-menu :menu_items="menu_items" :handleClick="handleClick"/>
      <!-- Edit Dialog -->
     <v-dialog :retain-focus="false" v-model="show_edit_dialog" max-width="50%">
       <v-card>
@@ -99,7 +99,7 @@ import { validationMixin } from "vuelidate";
 export default {
   mixins: [validationMixin],
   components: {
-    "dots-menu-update-delete": require("@/components/dots-menu-update-delete.vue").default,
+    "dots-menu": require("@/components/dots-menu.vue").default,
     "change-users-password": require("@/components/admin/user/change-users-password.vue").default,
   },
   props: ['admin_agent'],

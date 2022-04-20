@@ -25,6 +25,11 @@ def fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders_by_client_
         Prefetch('establishment_set', queryset=establishments, to_attr='establishments')
     )
 
+def get_order_details(client_compound_id, establishment_compound_id, order_number):
+    #TODO improve this query with prefetch_related
+    return Order.objects.get(client__client_compound_id=client_compound_id, 
+            establishment__establishment_compound_id=establishment_compound_id, order_number=order_number)
+
 def update_ordered_items(order, ordered_items):
     # Create set of OrderedItems as tuples
     ordered_items_set = {(ordered_item['item'].item_compound_id, ordered_item['quantity'], ordered_item['unit_price']) for ordered_item in ordered_items}
