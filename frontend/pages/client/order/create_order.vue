@@ -115,6 +115,18 @@
                   </v-icon >
                 </div>
               </template>
+              <!-- Footer -->
+              <template slot="body.append">
+                  <tr class="black--text">
+                      <th class="title">Total:</th>
+                      <th class="title"></th>
+                      <th class="title"></th>
+                      <th class="title"></th>
+                      <th class="title"></th>
+                      <th class="title"></th>
+                      <th class="title"> {{ getRealMask(getOrderTotal()) }}</th>
+                  </tr>
+              </template>
             </v-data-table>
           </v-container>
         </v-card-text>
@@ -183,7 +195,7 @@
             <v-container fluid class="mt-2">
                 <v-data-table
                   :headers="searched_items_headers"
-                  :items="priceItemsToAdd"
+                  :items="search_results"
                   class="elevation-1"
                   item-key="item.item.item_compound_id"
                 >
@@ -213,7 +225,7 @@
                   </template>
                   <template v-slot:item.add_item="{ item }">
                     <div style="display:flex; align-items: center; justify-content: center;">
-                      <v-icon @click="addItem(item)" color="green" large>
+                      <v-icon @click="addItem(item)" color="green" large v-if="!itemIsAlreadyInTheOrder(item.item.item_compound_id)">
                         mdi-plus
                       </v-icon >
                     </div>
@@ -290,6 +302,7 @@ import {mask} from 'vue-the-mask'
 
 let default_category_value = {category_compound_id: 'all', description: 'All'}
 export default {
+  name: "CreateOrder",
   middleware: ["authenticated"],
   components: {
     "price-table-edit-menu": require("@/components/admin/item/price-table-edit-menu.vue").default,
@@ -318,12 +331,12 @@ export default {
       ordered_items_headers: [
         { text: this.$t('Image'), value: 'image' },
         { text: this.$t('Code'), value: 'item_code' },
-        { text: this.$t('Description'), value: 'item_description' },
+        { text: this.$t('Description'), value: 'item_description', width: '100%' },
         /** { text: this.$t('Category'), value: 'category' }, */
+        { text: this.$t('Unit price'), value: 'unit_price', align: 'right' },
+        { text: this.$t('Quantity'), value: 'quantity', width: '10%'},
         { text: this.$t('Unit'), value: 'unit' },
-        { text: this.$t('Unit price'), value: 'unit_price' },
-        { text: this.$t('Quantity'), value: 'quantity' },
-        { text: 'Total', value: 'total' },
+        { text: 'Total', value: 'total', align: 'right' },
         { text: this.$t('Remove item'), value: 'remove_item' },
       ],
       searched_items_headers: [
@@ -443,7 +456,12 @@ export default {
     getRealMask(value){
       return value.toLocaleString('pt-br',{style: 'currency', currency: 'BRL'})
     },
-
+    // Get order Total
+    getOrderTotal(){
+      return this.ordered_items.reduce((previous, current)=>{
+        return (typeof previous == 'number' ? previous : (previous.unit_price * previous.quantity)) + (current.unit_price * current.quantity)
+      }, 0)
+    },
     // Add and remove item functions
     removeItem(item_compound_id){
       this.ordered_items = this.ordered_items.filter((obj)=> obj.item.item_compound_id !== item_compound_id)
@@ -467,7 +485,10 @@ export default {
         return this.$store.state.CDNBaseUrl + '/media/images/items/defaultimage.jpeg'
       }
     },
-
+    // Check if can add item to order
+    itemIsAlreadyInTheOrder(item_compound_id){
+      return this.ordered_items.some(el=>el.item.item_compound_id === item_compound_id)
+    },
   },
 
   validations: {
@@ -524,18 +545,18 @@ export default {
       return errors;
     },
     // Price Items to Add
-    priceItemsToAdd(){
-      return this.search_results.filter((price_item)=> {
-        let return_value = true
-        let ordered_items = this.ordered_items
-        for (const prop in ordered_items){
-          if (ordered_items[prop].item.item_compound_id === price_item.item.item_compound_id){
-            return_value = false
-          }
-        }
-        return return_value
-      })
-    },
+    /** priceItemsToAdd(){ */
+      /** return this.search_results.filter((price_item)=> { */
+        /** let return_value = true */
+        /** let ordered_items = this.ordered_items */
+        /** for (const prop in ordered_items){ */
+          /** if (ordered_items[prop].item.item_compound_id === price_item.item.item_compound_id){ */
+            /** return_value = false */
+          /** } */
+        /** } */
+        /** return return_value */
+      /** }) */
+    /** }, */
     ordered_items__array(){
       return Object.values(this.$v.ordered_items.$each.$iter)
     },

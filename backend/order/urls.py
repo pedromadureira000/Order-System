@@ -1,5 +1,6 @@
 from django.urls import path
 from .views import (
+    OrderHistoryView,
     SearchPriceItemsToMakeOrder,
     OrderView,
     SpecificOrderView,
@@ -20,4 +21,5 @@ urlpatterns = [
     path('order', OrderView.as_view()),
     path('order/<client_compound_id>/<establishment_compound_id>/<order_number>', SpecificOrderView.as_view()),
     path('establishments_to_make_order', fetchClientEstabsToCreateOrder.as_view()),
+    path('order_history/<client_compound_id>/<establishment_compound_id>/<order_number>', OrderHistoryView.as_view()),
 ]

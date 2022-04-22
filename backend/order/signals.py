@@ -22,9 +22,9 @@ def order_post_save(sender, instance, created=False, **kwargs):
     if created:
         order_history = OrderHistory(order=instance, user=instance.client_user, history_type="I")
         if instance.status == 1:
-            order_history.history_description = _("Order created with 'Typing' status.")
+            order_history.history_description = "- " + _("Order created with 'Typing' status.")
         if instance.status == 2:
-            order_history.history_description = _("Order created with 'Transferred' status.")
+            order_history.history_description = "- " + _("Order created with 'Transferred' status.")
         order_history.save()
     # Order Status Alteration
     else:

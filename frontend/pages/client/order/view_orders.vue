@@ -121,6 +121,12 @@
               <template v-slot:item.order_date="{ item }">
                 <p>{{getLocaleDate(item.order_date)}}</p> 
               </template>
+              <template v-slot:item.company="{ item }">
+                <p>{{typeof item.company === 'string' ? item.company : item.company.company_code}}</p> 
+              </template>
+              <template v-slot:item.establishment="{ item }">
+                <p>{{typeof item.establishment === 'string' ? item.establishment.split('*')[2] : item.establishment.establishment_code}}</p>
+              </template>
               <template v-slot:item.status="{ item }">
                 <p>{{$t(status_options.filter(el=>el.value===String(item.status))[0].description)}}</p>
               </template>
@@ -131,7 +137,7 @@
                 <p>{{item.invoice_date}}</p>
               </template>
               <template v-slot:item.order_amount="{ item }">
-                <p>{{getRealMask(Number(item.order_amount))}}</p>
+                <p style="float: right;">{{getRealMask(Number(item.order_amount))}}</p>
               </template>
               <template v-slot:item.actions="{ item }">
                 <order-view-menu :order="item"/>
@@ -161,6 +167,7 @@ let all_status = {description: 'All', value: null}
 let pending_status = {description: 'Pending', value: 'pending'}
 
 export default {
+  name: "ViewOrders",
   middleware: ["authenticated"],
   components: {
     "order-view-menu": require("@/components/client/order/order-view-menu.vue").default,
@@ -194,13 +201,15 @@ export default {
       ],
       // Fields
       orders_headers: [
-        { text: this.$t('Order Number'), value: 'order_number' },
-        { text: this.$t('Order Date'), value: 'order_date' },
+        { text: this.$t('Order Number'), value: 'order_number'},
+        { text: this.$t('Order Date'), value: 'order_date'},
+        { text: this.$t('Company'), value: 'company'},
+        { text: this.$t('Establishment'), value: 'establishment'},
         { text: 'Status', value: 'status' },
-        { text: this.$t('Invoice Number'), value: 'invoice_number' },
-        { text: this.$t('Invoice Date'), value: 'invoice_date' },
-        { text: this.$t('Order Amount'), value: 'order_amount' },
-        { text: this.$t('Actions'), value: 'actions' },
+        { text: this.$t('Invoice Number'), value: 'invoice_number'},
+        { text: this.$t('Invoice Date'), value: 'invoice_date'},
+        { text: this.$t('Order Amount'), value: 'order_amount'},
+        { text: this.$t('Actions'), value: 'actions'},
       ]
     };
   },
@@ -210,7 +219,6 @@ export default {
     let data = await this.$store.dispatch("order/fetchDataToFillFilterSelectorsToSearchOrders"); 
     if (data){
       this.companies = [all_companies, ...data]
-      console.log(">>>>>>> this.companies: ", this.companies)
     }
     // Fetch Clients
     if (!this.currentUserIsClientUser){

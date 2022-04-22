@@ -54,13 +54,13 @@ class ClientsToFillFilterSelectorsToSearchOrdersSerializer(serializers.ModelSeri
         model = Client
         fields =  ['client_compound_id', 'client_code', 'client_table', 'name']
 
-class OrderedItemSerializer(serializers.ModelSerializer):
+class OrderedItemPOSTSerializer(serializers.ModelSerializer):
     item = serializers.SlugRelatedField(slug_field='item_compound_id', queryset=Item.objects.all())
     quantity = serializers.DecimalField(max_digits=11, decimal_places=2,required=True, validators=[positive_number])
     class Meta:
         model = OrderedItem
-        fields = ['item', 'quantity', 'unit_price', 'date']
-        read_only_fields = ['unit_price', 'date']
+        fields = ['item', 'quantity', 'unit_price', 'sequence_number', 'date']
+        read_only_fields = ['unit_price', 'date', 'sequence_number']
 
 class OrderPOSTSerializer(serializers.ModelSerializer):
     company = serializers.SlugRelatedField(slug_field='company_compound_id', read_only=True)
@@ -68,7 +68,7 @@ class OrderPOSTSerializer(serializers.ModelSerializer):
     client = serializers.SlugRelatedField(slug_field='client_compound_id', read_only=True)
     client_user = serializers.SlugRelatedField(slug_field='user_code', read_only=True)
     price_table = serializers.SlugRelatedField(slug_field='price_table_compound_id', read_only=True)
-    ordered_items = OrderedItemSerializer(many=True)
+    ordered_items = OrderedItemPOSTSerializer(many=True)
     class Meta:
         model = Order
         fields = ['order_number', 'company', 'establishment', 'client', 'client_user', 'price_table', 'ordered_items', 'order_amount', 'status', 
@@ -147,11 +147,19 @@ class OrderPOSTSerializer(serializers.ModelSerializer):
         order = Order.objects.create(**validated_data)
         # Create OrderedItems
         ordered_items_list = []
-        for ordered_item in ordered_items:
+        for index, ordered_item in enumerate(ordered_items):
             ordered_items_list.append(OrderedItem(item=ordered_item['item'], quantity=ordered_item['quantity'], 
-                unit_price=ordered_item['unit_price'], order=order))
+                unit_price=ordered_item['unit_price'], order=order, sequence_number=index))
         order.ordered_items.bulk_create(ordered_items_list)
         return order
+
+class OrderedItemPUTSerializer(serializers.ModelSerializer):
+    item = serializers.SlugRelatedField(slug_field='item_compound_id', queryset=Item.objects.all())
+    quantity = serializers.DecimalField(max_digits=11, decimal_places=2,required=True, validators=[positive_number])
+    class Meta:
+        model = OrderedItem
+        fields = ['item', 'quantity', 'unit_price', 'sequence_number', 'date']
+        read_only_fields = ['unit_price', 'date']
 
 # PUT will be used by client_user to edit ordered_items and note, and to change status to 'transferred'. This can only be done when the order status is 'typing'. 
 #  agent/admin_agent/erp can update order status and create notes in the order history
@@ -161,8 +169,8 @@ class OrderPUTSerializer(serializers.ModelSerializer):
     client = serializers.SlugRelatedField(slug_field='client_compound_id', read_only=True)
     client_user = serializers.SlugRelatedField(slug_field='user_code', read_only=True)
     price_table = serializers.SlugRelatedField(slug_field='price_table_compound_id', read_only=True)
-    ordered_items = OrderedItemSerializer(many=True)
-    agent_note = serializers.CharField(max_length=800, required=False, write_only=True)
+    ordered_items = OrderedItemPUTSerializer(many=True)
+    #  agent_note = serializers.CharField(max_length=800, required=False, write_only=True)
     class Meta:
         model = Order
         fields = ['order_number', 'company', 'establishment', 'client', 'client_user', 'price_table', 'ordered_items', 
@@ -264,6 +272,8 @@ class OrderPUTSerializer(serializers.ModelSerializer):
                     #TODO N+1 query
                     order_amount += ordered_item['unit_price'] * ordered_item['quantity'] 
                 attrs['order_amount'] = order_amount
+        current_ordered_items = OrderedItem.objects.filter(order=self.instance)
+        attrs['current_ordered_items'] = current_ordered_items
         if not order_has_changed(self.instance, attrs):
             raise serializers.ValidationError(_("You have not changed any fields."))
         return super().validate(attrs)
@@ -277,28 +287,25 @@ class OrderPUTSerializer(serializers.ModelSerializer):
         instance._request_user = self.context['request'].user
         
         if has_role(self.context['request'].user, 'client_user') and ordered_items:
-            update_ordered_items(instance, ordered_items)
+            update_ordered_items(instance, ordered_items, validated_data['current_ordered_items'])
         return super().update(instance, validated_data)
 
 class OrderHistorySerializer(serializers.ModelSerializer):
-    user = serializers.SlugRelatedField(slug_field='user_code', read_only=True)
+    user = serializers.SlugRelatedField(slug_field='username', read_only=True)
     class Meta:
         model = OrderHistory
         fields = ['history_type', 'history_description', 'user', 'agent_note', 'date']
 
 class OrderGetSerializer(serializers.ModelSerializer):
-    company = serializers.SlugRelatedField(slug_field='company_compound_id', read_only=True)
+    company = serializers.SlugRelatedField(slug_field='company_code', read_only=True)
     establishment = serializers.SlugRelatedField(slug_field='establishment_compound_id', read_only=True)
     client = serializers.SlugRelatedField(slug_field='client_compound_id', read_only=True)
-    client_user = serializers.SlugRelatedField(slug_field='user_code', read_only=True)
-    price_table = serializers.SlugRelatedField(slug_field='price_table_compound_id', read_only=True)
+    #  client_user = serializers.SlugRelatedField(slug_field='user_code', read_only=True)
+    #  price_table = serializers.SlugRelatedField(slug_field='price_table_compound_id', read_only=True)
     class Meta:
         model = Order
-        fields = ['order_number', 'company', 'establishment', 'client', 'client_user', 'price_table', 'order_amount', 'status', 
-                'order_date', 'invoicing_date', 'invoice_number', 'note']
+        fields = ['order_number', 'company', 'establishment', 'client', 'order_amount', 'status', 'order_date', 'invoicing_date', 'invoice_number']
         read_only_fields = fields
-
-# Order Details Serializers
 
 class CompanyAuxSerializer(serializers.ModelSerializer):
     class Meta:
@@ -310,6 +317,7 @@ class EstablishmentAuxSerializer(serializers.ModelSerializer):
         model = Establishment
         fields = ['establishment_compound_id', 'establishment_code', 'name', 'cnpj']
 
+# Order Details Serializers
 class ClientAuxSerializer(serializers.ModelSerializer):
     class Meta:
         model = Client
@@ -331,17 +339,17 @@ class OrderedItemAuxSerializer(serializers.ModelSerializer):
     item = ItemAuxForOrderedItemAuxSerializer()
     class Meta:
         model = OrderedItem
-        fields = ['item', 'quantity', 'unit_price', 'date']
+        fields = ['item', 'quantity', 'unit_price', 'date', 'sequence_number']
         read_only_fields = [*fields]
 
 class OrderDetailsSerializer(serializers.ModelSerializer):
-    company =  CompanyAuxSerializer()
     establishment = EstablishmentAuxSerializer()
+    company = CompanyAuxSerializer()
     client = ClientAuxSerializer()
     client_user = ClientUserAuxSerializer()
     price_table = PriceTableAuxSerializer()
     ordered_items = OrderedItemAuxSerializer(many=True)
     class Meta:
         model = Order
-        fields = ['company', 'establishment', 'client', 'client_user', 'price_table', 'ordered_items', 'order_amount']
+        fields = ['company', 'establishment', 'client', 'client_user', 'price_table', 'ordered_items', 'note', 'agent_note']
         read_only_fields = fields

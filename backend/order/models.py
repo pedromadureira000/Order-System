@@ -48,6 +48,7 @@ class OrderedItem(models.Model):
     quantity = models.DecimalField(max_digits=11, decimal_places=2, verbose_name=_('quantity'))
     unit_price = models.DecimalField(max_digits=11, decimal_places=2, verbose_name=_('unit price'))
     date = models.DateTimeField(auto_now_add=True, verbose_name=_('date'))
+    sequence_number = models.IntegerField(verbose_name=_('sequence number'))
 
 class OrderHistory(models.Model):
     class Meta:

@@ -136,6 +136,7 @@ export const messages = {
     fetchDataToFillFilterSelectorsToSearchOrders_error_msg: "Something went wrong when trying to fetch data to fill filter selectors.",
     fetchClientsToFillFilterSelectorToSearchOrders_error_msg: "Something went wrong when trying to fetch clients to fill filter selector.",
     fetchOrderDetails_error_msg: "Something went wrong when trying to fetch order details.",
+    fetchOrderHistory_error_msg: "Something went wrong when trying to fetch order history.",
     updateOrder_error_msg: "Something went wrong when trying to update the order.",
 
     // -------------------------------------------------------------------/ Error Handler
@@ -393,6 +394,13 @@ export const messages = {
     "Agent Note": "Agent Note",
     "The item code cannot be empty.": "The item code cannot be empty.",
     "This item is already added to the order.": "This item is already added to the order.",
+    "Order History": "Order History",
+    "Alteration": "Alteration",
+    "Inclusion": "Inclusion",
+    "History type": "History type",
+    "History description": "History description",
+    "Date": "Date",
+    "User": "User",
     // -------------------------------------------------------------------/ Components
     // change user's password
     // -------------------------------/Problem Connecting Error dialog
@@ -554,6 +562,7 @@ export const messages = {
     fetchDataToFillFilterSelectorsToSearchOrders_error_msg: "Algo deu errado ao tentar carregar dados para preencher seletores de filtros.",
     fetchClientsToFillFilterSelectorToSearchOrders_error_msg: "Algo deu errado ao tentar carregar clientes para preencher o seletor de filtro.",
     fetchOrderDetails_error_msg: "Algo deu errado ao tentar carregar detalhes do pedido.",
+    fetchOrderHistory_error_msg: "Algo deu errado ao tentar carregar o histórico do pedido.",
     updateOrder_error_msg: "Algo deu errado ao tentar atualizar o pedido.",
 
     // -------------------------------------------------------------------/ Error Handler
@@ -812,6 +821,13 @@ export const messages = {
     "Agent Note": "Observação do Agente",
     "The item code cannot be empty.": "O código do item não pode estar vazio.",
     "This item is already added to the order.": "Este item já foi adicionado ao pedido.",
+    "Order History": "Histórico do Pedido",
+    "Alteration": "Alteração",
+    "Inclusion": "Inclusão",
+    "History type": "Tipo do histórico",
+    "History description": "Descrição do histórico",
+    "Date": "Data",
+    "User": "Usuário",
     // -------------------------------------------------------------------/ Components
     // change user's password
     // -------------------------------/Problem Connecting Error dialog

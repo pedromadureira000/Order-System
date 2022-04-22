@@ -85,26 +85,10 @@ export default {
           this.order.client_table = order_details.client_table
           this.order.price_table = order_details.price_table
           this.order.ordered_items = order_details.ordered_items
+          this.order.note = order_details.note
+          this.order.agent_note = order_details.agent_note
           // Show order after details are fetched
           this.order_details_fetched = true
-        }
-      },
-
-      // Search Price Items
-      async searchPriceItemsToMakeOrder(){
-        let filter_parameters = {establishment: this.establishment.establishment_compound_id, category: this.filter__category.category_compound_id, 
-          item_description: this.filter__item_description}
-        let search_results = await this.$store.dispatch("order/searchPriceItemsToMakeOrder", filter_parameters);
-        if (search_results){
-          if (!this.item_compound_id_prefix){
-            // TODO when i change the establishment it can change the item_table (clear this field in this case)
-            let first_item = search_results[0]
-            console.log(">>>>>>> first_item: ", first_item)
-            if (first_item){
-              this.item_compound_id_prefix = first_item.item.split('*')[0] + '*' + first_item.item.split('*')[1] + '*'
-            }
-          }
-          this.search_results = search_results
         }
       },
     },

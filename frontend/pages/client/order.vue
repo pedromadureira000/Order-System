@@ -13,6 +13,7 @@
 <script>
   let viewOrders = ['update_order_items', 'get_orders', 'update_order_status']
   export default {
+  name: "Order",
     middleware: ["authenticated"],
     data(){
       return {

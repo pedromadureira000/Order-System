@@ -108,6 +108,17 @@ export const actions: ActionTree<OrderState, RootState> = {
     }
   }, 
 
+  async fetchOrderHistory({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
+    try {
+      let data = await api.fetchOrderHistory(payload)
+      return data
+    }
+    catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchOrderHistory_error_msg'))
+    }
+  }, 
+
+
   async updateOrder({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
     try {
       let data = await api.updateOrder(payload)

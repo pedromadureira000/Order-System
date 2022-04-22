@@ -940,6 +940,17 @@ export default {
 				})
 	},
 
+	async fetchOrderHistory(payload){
+    let url = `/api/order/order_history/${payload.client}/${payload.establishment}/${payload.order_number}`
+		return await axios({
+		method: "get",
+		url: url,
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+
 	async updateOrder(payload){
     let data_body = {
       ordered_items: payload.ordered_items,

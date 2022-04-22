@@ -1,6 +1,6 @@
 from organization.facade import get_agent_companies
 from organization.models import Company, Establishment
-from .models import Order, OrderedItem
+from .models import Order, OrderHistory, OrderedItem
 from django.db.models import Prefetch
 
 # ----------------------------/ Orders /-----------------------------
@@ -30,11 +30,16 @@ def get_order_details(client_compound_id, establishment_compound_id, order_numbe
     return Order.objects.get(client__client_compound_id=client_compound_id, 
             establishment__establishment_compound_id=establishment_compound_id, order_number=order_number)
 
-def update_ordered_items(order, ordered_items):
+def get_order_history(client_compound_id, establishment_compound_id, order_number):
+    #TODO improve this query with prefetch_related
+    return OrderHistory.objects.filter(order__client__client_compound_id=client_compound_id, 
+            order__establishment__establishment_compound_id=establishment_compound_id, order__order_number=order_number)
+
+def update_ordered_items(order, ordered_items, current_ordered_items):
     # Create set of OrderedItems as tuples
-    ordered_items_set = {(ordered_item['item'].item_compound_id, ordered_item['quantity'], ordered_item['unit_price']) for ordered_item in ordered_items}
-    current_ordered_items = OrderedItem.objects.filter(order=order)
-    current_ordered_items_set = set(current_ordered_items.values_list('item__item_compound_id', 'quantity', 'unit_price'))
+    ordered_items_set = {(ordered_item['item'].item_compound_id, ordered_item['quantity'], ordered_item['unit_price'], 
+        ordered_item['sequence_number']) for ordered_item in ordered_items}
+    current_ordered_items_set = set(current_ordered_items.values_list('item__item_compound_id', 'quantity', 'unit_price', 'sequence_number'))
     intersection = ordered_items_set.intersection(current_ordered_items_set)
     to_delete = current_ordered_items_set.difference(intersection)
     to_create = ordered_items_set.difference(intersection)
@@ -42,11 +47,11 @@ def update_ordered_items(order, ordered_items):
     current_ordered_items.filter(item__item_compound_id__in=to_delete_item_list).delete()
     # List the OrderedItems to be created from the serialized 'ordered_items'. 
     ordered_items_to_create = list(filter(lambda ordered_item: (ordered_item["item"].item_compound_id, 
-        ordered_item['quantity'], ordered_item['unit_price']) in to_create, ordered_items))
+        ordered_item['quantity'], ordered_item['unit_price'], ordered_item['sequence_number']) in to_create, ordered_items))
     if ordered_items_to_create:
         # Create a list with the real OrderedItem instances to be saved with bulk_create.
         ordered_items_to_create = [OrderedItem(item=obj['item'], quantity=obj['quantity'], unit_price=obj['unit_price'],
-            order=order) for obj in  ordered_items_to_create]
+            order=order, sequence_number=obj['sequence_number']) for obj in  ordered_items_to_create]
         order.ordered_items.bulk_create(ordered_items_to_create)
 
 #---------------------------Old apis

@@ -6,9 +6,9 @@ from item.serializers import CategoryPOSTSerializer
 from organization.facade import get_clients_by_agent
 from organization.models import Client, Company, Establishment
 from user.validators import req_user_is_agent_without_all_estabs
-from .facade import fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders, fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders_by_agent, fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders_by_client_user, get_order_details, get_orders_by_agent
-from .serializers import ClientsToFillFilterSelectorsToSearchOrdersSerializer, CompanyWithEstabsSerializer, OrderDetailsSerializer, OrderGetSerializer, OrderPOSTSerializer,OrderPUTSerializer, fetchClientEstabsToCreateOrderSerializer, searchOnePriceItemToMakeOrderSerializer
-from .models import Order
+from .facade import fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders, fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders_by_agent, fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders_by_client_user, get_order_details, get_order_history, get_orders_by_agent
+from .serializers import ClientsToFillFilterSelectorsToSearchOrdersSerializer, CompanyWithEstabsSerializer, OrderDetailsSerializer, OrderGetSerializer, OrderHistorySerializer, OrderPOSTSerializer,OrderPUTSerializer, fetchClientEstabsToCreateOrderSerializer, searchOnePriceItemToMakeOrderSerializer
+from .models import Order, OrderHistory
 from rest_framework.views import APIView
 from rolepermissions.checkers import has_permission, has_role
 from drf_yasg.utils import swagger_auto_schema
@@ -237,3 +237,26 @@ class SpecificOrderView(APIView):
                 #  print(error)
                 #  return unknown_exception_response(action=_('delete order'))
         #  return unauthorized_response
+
+class OrderHistoryView(APIView):
+    @transaction.atomic
+    def get(self, request, client_compound_id, establishment_compound_id, order_number):
+        if has_permission(request.user, 'get_orders'):
+            if client_compound_id.split("*")[0] != request.user.contracting.contracting_code:
+                return not_found_response(object_name=_('The client'))
+            if establishment_compound_id.split("*")[0] != request.user.contracting.contracting_code:
+                return not_found_response(object_name=_('The order'))
+            # Client user can't access order from another client
+            if has_role(request.user, 'client_user'):
+                if client_compound_id != request.user.client.client_compound_id:
+                    return not_found_response(object_name=_('The order'))
+            # Agent without all estabs can't access order from some clients
+            if req_user_is_agent_without_all_estabs(request.user):
+                if not request.user.establishments.filter(establishment_compound_id=establishment_compound_id).first():
+                    return not_found_response(object_name=_('The order'))
+            try:
+                order_history = get_order_history(client_compound_id, establishment_compound_id, order_number)
+            except OrderHistory.DoesNotExist:
+                return not_found_response(object_name=_('The order history'))
+            return Response(OrderHistorySerializer(order_history, many=True).data)
+        return unauthorized_response

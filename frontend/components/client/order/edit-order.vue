@@ -1,133 +1,137 @@
 <template>
   <div v-if="order_details_fetched">
     <!-- ========= Edit Order Dialog ============ -->
-    <v-dialog :retain-focus="false" v-model="show_edit_dialog" max-width="85%" persistent>
+    <v-dialog :retain-focus="false" v-model="show_edit_dialog" max-width="90%" persistent>
       <v-card>
-        <v-card-title>{{$t('Edit Order')}}</v-card-title>
-        <!-- Company -->
+        <v-card-title style="display: flex; justify-content: center;" class="mb-2">{{$t('Edit Order')}}</v-card-title>
         <form @submit.prevent="updateOrder" class="ml-3">
-          <div style="width: 25%;">
-            <v-select
-              disabled
-              :value="order.company"
-              :label="$t('Company')"
-              :item-text="(x) => x.company_code + ' - ' + x.name"
-              :items="[order.company]"
-            ></v-select>
+          <div style="display: flex; justify-content: center;">
+            <div style="width: 80%">
+              <v-row >
+                <v-col>
+                  <!-- Company -->
+                  <div>
+                    <v-select
+                      disabled
+                      :value="order.company"
+                      :label="$t('Company')"
+                      :item-text="(x) => x.company_code + ' - ' + x.name"
+                      :items="[order.company]"
+                    ></v-select>
+                  </div>
+                  <!-- Client -->
+                    <div >
+                      <v-select
+                        disabled
+                        :value="order.client"
+                        :label="$t('Client')"
+                        :item-text="(x) => x.client_code + ' - ' + x.name"
+                        :items="[order.client]"
+                      ></v-select>
+                    </div>
+                    <!-- Order Number -->
+                    <v-text-field
+                      disabled
+                      :label="$t('Order Number')"
+                      :value="order.order_number"
+                      class="mb-3"
+                    />
+                    <!-- Invoice Number -->
+                    <v-text-field
+                      disabled
+                      :label="$t('Invoice Number')"
+                      :value="order.invoice_number"
+                      class="mb-3"
+                    />
+                    <!-- Order Amount -->
+                    <v-text-field
+                      disabled
+                      :label="$t('Order Amount')"
+                      :value="getRealMask(Number(order.order_amount))"
+                      class="mb-3"
+                    />
+                    <!-- Price table -->
+                    <div>
+                      <v-select
+                        disabled
+                        :value="order.price_table"
+                        :label="$t('Price_Table')"
+                        :item-text="(x) => x.table_code + ' - ' + x.description"
+                        :items="[order.price_table]"
+                      ></v-select>
+                    </div>
+                    <!-- Note -->
+                    <v-textarea
+                      :disabled="!currentUserIsClientUserAndCanEditTheOrder"
+                      outlined
+                      :label="$t('Note')"
+                      v-model.trim="note"
+                      :error-messages="noteErrors"
+                      @blur="$v.note.$touch()"
+                      class="mb-3"
+                    />
+                </v-col>
+
+                <v-col>
+                  <!-- Establishment -->
+                    <div>
+                      <v-select
+                        disabled
+                        :value="order.establishment"
+                        :label="$t('Establishment')"
+                        :item-text="(x) =>  x.establishment_code + ' - ' + x.name"
+                        :items="[order.establishment]"
+                      ></v-select>
+                    </div>
+                    <!-- Client user -->
+                    <div>
+                      <v-select
+                        disabled
+                        :value="order.client_user"
+                        :label="$t('Client_User')"
+                        :item-text="(x) => x.first_name + ' ' + x.last_name + '('+ x.username + ')'"
+                        :items="[order.client_user]"
+                      ></v-select>
+                    </div>
+                    <!-- Order Date -->
+                    <v-text-field
+                      disabled
+                      :label="$t('Order Date')"
+                      :value="getLocaleDate(order.order_date)"
+                      class="mb-3"
+                    />
+                    <!-- Invoice Date -->
+                    <v-text-field
+                      disabled
+                      :label="$t('Invoice Date')"
+                      :value="getLocaleDate(order.invoice_date)"
+                      class="mb-3"
+                    />
+                    <!-- Order Status -->
+                    <div>
+                      <v-select
+                        :disabled="statusIsDisabled"
+                        v-model="status"
+                        label="Status"
+                        :items="status_options_computed"
+                        :item-text="(x) => $t(x.description)"
+                        :item-value="(x) => x.value"
+                      ></v-select>
+                    </div>
+                    <!-- Agent Note -->
+                    <v-textarea
+                      v-if="!currentUserIsClientUser"
+                      outlined
+                      :label="$t('Agent Note')"
+                      v-model.trim="agent_note"
+                      :error-messages="agentNoteErrors"
+                      @blur="$v.agent_note.$touch()"
+                      class="mb-3"
+                    />
+                </v-col>
+              </v-row>
+            </div>
           </div>
-        <!-- Establishment -->
-          <div style="width: 25%;">
-            <v-select
-              disabled
-              :value="order.establishment"
-              :label="$t('Establishment')"
-              :item-text="(x) =>  x.establishment_code + ' - ' + x.name"
-              :items="[order.establishment]"
-            ></v-select>
-          </div>
-        <!-- Client -->
-          <div style="width: 25%;">
-            <v-select
-              disabled
-              :value="order.client"
-              :label="$t('Client')"
-              :item-text="(x) => x.client_code + ' - ' + x.name"
-              :items="[order.client]"
-            ></v-select>
-          </div>
-        <!-- Client user -->
-          <div style="width: 25%;">
-            <v-select
-              disabled
-              :value="order.client_user"
-              :label="$t('Client User')"
-              :item-text="(x) => x.first_name + ' ' + x.last_name + '('+ x.username + ')'"
-              :items="[order.client_user]"
-            ></v-select>
-          </div>
-        <!-- Price table -->
-          <div style="width: 25%;">
-            <v-select
-              disabled
-              :value="order.price_table"
-              :label="$t('Price_Table')"
-              :item-text="(x) => x.table_code + ' - ' + x.description"
-              :items="[order.price_table]"
-            ></v-select>
-          </div>
-          <!-- Order Number -->
-          <v-text-field
-            disabled
-            style="width: 25%;"
-            :label="$t('Order Number')"
-            :value="order.order_number"
-            class="mb-3"
-          />
-          <!-- Order Date -->
-          <v-text-field
-            disabled
-            style="width: 25%;"
-            :label="$t('Order Date')"
-            :value="getLocaleDate(order.order_date)"
-            class="mb-3"
-          />
-          <!-- Invoice Number -->
-          <v-text-field
-            disabled
-            style="width: 25%;"
-            :label="$t('Invoice Number')"
-            :value="order.invoice_number"
-            class="mb-3"
-          />
-          <!-- Invoice Date -->
-          <v-text-field
-            disabled
-            style="width: 25%;"
-            :label="$t('Invoice Date')"
-            :value="getLocaleDate(order.invoice_date)"
-            class="mb-3"
-          />
-          <!-- Order Amount -->
-          <v-text-field
-            disabled
-            style="width: 25%;"
-            :label="$t('Order Amount')"
-            :value="getRealMask(Number(order.order_amount))"
-            class="mb-3"
-          />
-          <!-- Order Status -->
-          <div style="width: 25%;">
-            <v-select
-              :disabled="statusIsDisabled"
-              v-model="status"
-              label="Status"
-              :items="status_options_computed"
-              :item-text="(x) => $t(x.description)"
-              :item-value="(x) => x.value"
-            ></v-select>
-          </div>
-          <!-- Note -->
-          <v-textarea
-            :disabled="!currentUserIsClientUserAndCanEditTheOrder"
-            outlined
-            :label="$t('Note')"
-            v-model.trim="order.note"
-            :error-messages="noteErrors"
-            @blur="$v.note.$touch()"
-            class="mb-3"
-            style="width: 55%"
-          />
-          <!-- Agent Note -->
-          <v-textarea
-            v-if="!currentUserIsClientUser"
-            outlined
-            :label="$t('Agent Note')"
-            v-model.trim="order.agent_note"
-            :error-messages="agentNoteErrors"
-            @blur="$v.agent_note.$touch()"
-            class="mb-3"
-            style="width: 55%"
-          />
           <!-- Ordered items -->
           <v-expansion-panels class="mb-5">
             <v-expansion-panel>
@@ -181,6 +185,7 @@
                       :headers="edit_ordered_items_headers"
                       :items="ordered_items__array"
                       class="elevation-1"
+                      sort-by="sequence_number.$model"
                       item-key="item.$model.item_compound_id"
                     >
                       <template v-slot:item.image="{ item }">
@@ -191,6 +196,7 @@
                           :lazy-src="$store.state.CDNBaseUrl + '/media/images/items/defaultimage.jpeg'"
                           :src="getImageUrl(item.item.$model.image)"
                         ></v-img>
+                        <!-- <p>Seq numb: {{item.sequence_number.$model}}</p> -->
                       </template>
                       <template v-slot:item.item_code="{ item }">
                         <p>{{item.item.$model.item_compound_id.split('*')[2]}}</p>
@@ -222,7 +228,7 @@
                         />
                       </template>
                       <template v-slot:item.total="{ item }">
-                        <p>{{getRealMask(item.quantity.$model * item.unit_price.$model)}}</p>
+                        <p >{{getRealMask(item.quantity.$model * item.unit_price.$model)}}</p>
                       </template>
                       <template v-slot:item.remove_item="{ item }" v-if="currentUserIsClientUserAndCanEditTheOrder">
                         <div style="display:flex; align-items: center; justify-content: center;">
@@ -230,6 +236,18 @@
                             mdi-close-circle-outline
                           </v-icon >
                         </div>
+                      </template>
+                      <!-- Footer -->
+                      <template slot="body.append">
+                          <tr class="black--text">
+                              <th class="title">Total:</th>
+                              <th class="title"></th>
+                              <th class="title"></th>
+                              <th class="title"></th>
+                              <th class="title"></th>
+                              <th class="title"></th>
+                              <th class="title"> {{ getRealMask(getOrderTotal()) }}</th>
+                          </tr>
                       </template>
                     </v-data-table>
                   </v-container>
@@ -301,7 +319,7 @@
           <v-container fluid class="mt-2">
               <v-data-table
                 :headers="searched_items_headers"
-                :items="priceItemsToAdd"
+                :items="search_results"
                 class="elevation-1"
                 item-key="item.item_compound_id"
               >
@@ -331,7 +349,7 @@
                 </template>
                 <template v-slot:item.add_item="{ item }">
                   <div style="display:flex; align-items: center; justify-content: center;">
-                    <v-icon @click="addItem(item)" color="green" large>
+                    <v-icon @click="addItem(item)" color="green" large v-if="!itemIsAlreadyInTheOrder(item.item.item_compound_id)">
                       mdi-plus
                     </v-icon >
                   </div>
@@ -386,14 +404,14 @@ export default {
         {description: 'Delivered', value: 5},
       ],
       edit_ordered_items_headers: [
-        { text: this.$t('Image'), value: 'image' },
-        { text: this.$t('Code'), value: 'item_code' },
-        { text: this.$t('Description'), value: 'item_description' },
+        { text: this.$t('Image'), value: 'image', align: 'center' },
+        { text: this.$t('Code'), value: 'item_code', align: 'center' },
+        { text: this.$t('Description'), value: 'item_description', align: 'left', width: '80%' },
         /** { text: this.$t('Category'), value: 'category' }, */
-        { text: this.$t('Unit'), value: 'unit' },
-        { text: this.$t('Unit price'), value: 'unit_price' },
-        { text: this.$t('Quantity'), value: 'quantity' },
-        { text: 'Total', value: 'total' },
+        { text: this.$t('Unit price'), value: 'unit_price', align: 'right' },
+        { text: this.$t('Quantity'), value: 'quantity', align: 'center', width: '25%'},
+        { text: this.$t('Unit'), value: 'unit', align: 'center' },
+        { text: 'Total', value: 'total', align: 'right' },
         ],
       searched_items_headers: [
         { text: this.$t('Image'), value: 'image' },
@@ -451,15 +469,15 @@ export default {
           ordered_items: ordered_items_fixed,
           status: this.status,
         }
-        if (this.note){payload['note'] = this.note}
-        if (this.agent_note){payload['agent_note'] = this.agent_note}
+        if (this.note && this.currentUserIsClientUser){payload['note'] = this.note}
+        if (this.agent_note && !this.currentUserIsClientUser){payload['agent_note'] = this.agent_note}
         let response = await this.$store.dispatch("order/updateOrder", payload)
         if (response) {
+          console.log(">>>>>>> why it's not updating the note? ", response)
           this.order.order_amount = response.order_amount
           this.order.status = response.status
           this.order.note = response.note
           this.order.agent_note = response.agent_note
-          console.log(">>>>>>> response: ", response)
           this.$emit('close-edit-dialog')
         }
         this.loading = false;
@@ -479,7 +497,7 @@ export default {
           {establishment: this.order.establishment.establishment_compound_id, item_code: this.item_code_to_search}
         )
         if (search_result){
-          this.ordered_items.push({...search_result, quantity: this.default_quantity, errors: []})
+          this.ordered_items.push({...search_result, quantity: this.default_quantity, sequence_number: this.getSequenceNumber(),errors: []})
         }
       }
     },
@@ -507,12 +525,10 @@ export default {
 
     // Add and remove item
     removeItem(item_compound_id){
-      console.log(">>>>>>> ", item_compound_id)
       this.ordered_items = this.ordered_items.filter((obj)=> obj.item.item_compound_id !== item_compound_id)
     },
     addItem(price_item){
-      console.log(">>>>>>> addItem(price_item){  :", price_item)
-      this.ordered_items.push({...price_item, quantity: this.default_quantity, errors: []})
+      this.ordered_items.push({...price_item, quantity: this.default_quantity, sequence_number: this.getSequenceNumber(), errors: []})
     },
 
     // Image
@@ -531,6 +547,22 @@ export default {
         return this.$store.state.CDNBaseUrl + '/media/images/items/defaultimage.jpeg'
       }
     },
+    // Sequence Number
+    getSequenceNumber(){
+      return this.ordered_items.reduce((previous, current)=>{
+        return Math.max(typeof previous == 'number' ? previous : previous.sequence_number, current.sequence_number);
+      }, 0) + 1
+    },
+    // Check if can add item to order
+    itemIsAlreadyInTheOrder(item_compound_id){
+      return this.ordered_items.some(el=>el.item.item_compound_id === item_compound_id)
+    },
+    // Get order Total
+    getOrderTotal(){
+      return this.ordered_items.reduce((previous, current)=>{
+        return (typeof previous == 'number' ? previous : (previous.unit_price * previous.quantity)) + (current.unit_price * current.quantity)
+      }, 0)
+    }
   },
 
   validations: {
@@ -559,6 +591,7 @@ export default {
           minValue: minValue(0.01),
         },
         unit_price: {},
+        sequence_number: {},
         errors: {},
       }
     },
@@ -600,18 +633,18 @@ export default {
       return errors;
     },
     // Price Items to Add
-    priceItemsToAdd(){
-      return this.search_results.filter((price_item)=> {
-        let return_value = true
-        let ordered_items = this.ordered_items
-        for (const prop in ordered_items){
-          if (ordered_items[prop].item.item_compound_id === price_item.item.item_compound_id){
-            return_value = false
-          }
-        }
-        return return_value
-      })
-    },
+    /** priceItemsToAdd(){ */
+      /** return this.search_results.filter((price_item)=> { */
+        /** let return_value = true */
+        /** let ordered_items = this.ordered_items */
+        /** for (const prop in ordered_items){ */
+          /** if (ordered_items[prop].item.item_compound_id === price_item.item.item_compound_id){ */
+            /** return_value = false */
+          /** } */
+        /** } */
+        /** return return_value */
+      /** }) */
+    /** }, */
     ordered_items__array(){
       return Object.values(this.$v.ordered_items.$each.$iter)
     },
@@ -643,6 +676,9 @@ export default {
           el.errors = []
           return el
         })
+        console.log(">>>>>>> where is the note? ", this.order)
+        this.note = this.order.note
+        this.agent_note = this.order.agent_note
         this.status = this.order.status
         if (this.currentUserIsClientUserAndCanEditTheOrder) { 
           this.edit_ordered_items_headers.push({ text: this.$t('Remove item'), value: 'remove_item' })
