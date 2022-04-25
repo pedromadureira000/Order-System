@@ -167,14 +167,22 @@ export default {
 				})
 	},
 
-	async fetchClientTablesToCreateClient(){
+	// async fetchClientTablesToCreateClient(){
+		// return await axios({ 
+		// method: "get",
+		// url: "/api/organization/client_tables_to_create_client",
+			// }).then((request) => {
+					// return request.data 
+				// })
+	// },
+	async fetchCompaniesToCreateClient(){
 		return await axios({ 
 		method: "get",
-		url: "/api/organization/client_tables_to_create_client",
+		url: "/api/organization/companies_to_create_client",
 			}).then((request) => {
 					return request.data 
 				})
-	},
+	}, 
 
 	async fetchEstablishmentsToCreateClient(client_table_compound_id){
 		return await axios({ 
@@ -204,10 +212,10 @@ export default {
 				})
 	},
 
-  	async fetchClients(){
+  	async fetchClients(client_table_compound_id){
 		return await axios({ 
 		method: "get",
-		url: "/api/organization/client",
+		url: `/api/organization/get_clients/${client_table_compound_id}`,
 			}).then((request) => {
 					return request.data 
 				})
@@ -695,10 +703,11 @@ export default {
 				})
 	},
 
-	async fetchItems(){
+	async fetchItems(query_strings){
+    let url =  query_strings ? `/api/item/item?${query_strings}` : "/api/item/item"
 		return await axios({ 
 		method: "get",
-		url: "/api/item/item",
+		url: url,
 			}).then((request) => {
 					return request.data 
 				})
@@ -739,10 +748,10 @@ export default {
 				})
 	},
 
-	async fetchCategories(){
+	async fetchCategories(item_table_compound_id){
 		return await axios({ 
 		method: "get",
-		url: "/api/item/category",
+		url: `/api/item/get_categories/${item_table_compound_id}`,
 			}).then((request) => {
 					return request.data 
 				})

@@ -220,13 +220,13 @@ export const actions: ActionTree<UserState, RootState> = {
 		}
 	},
 
-	async fetchClientTablesToCreateClient({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
+	async fetchCompaniesToCreateClient({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
     try {
-      let companies = await api.fetchClientTablesToCreateClient()
+      let companies = await api.fetchCompaniesToCreateClient()
       return companies
     }
     catch(error){
-      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchClientTablesToCreateClient_error_msg'))
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchCompaniesToCreateClient_error_msg'))
 		}
 	},
 
@@ -241,9 +241,9 @@ export const actions: ActionTree<UserState, RootState> = {
 		}
 	},
 
-	async fetchClients({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
+	async fetchClients({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, client_table_compound_id: string){
     try {
-      let clients = await api.fetchClients()
+      let clients = await api.fetchClients(client_table_compound_id)
       return clients
     }
     catch(error){

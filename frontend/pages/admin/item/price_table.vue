@@ -66,8 +66,8 @@
                       <v-card-text>
                         <v-container fluid>
                           <v-text-field
-                            v-for="(v, key) in $v.price_items.$each.$iter"
-                            :key="key"
+                            v-for="v in $v.price_items.$each.$iter"
+                            :key="v.item.$model"
                             :error-messages="v.errors.$model"
                             :label="itemDescription(v.item.$model)"
                             v-model="v.masked_price.$model"
@@ -141,14 +141,14 @@
           item-key="price_table_compound_id"
           class="elevation-1 mt-3"
         >
+          <template v-slot:item.company="{ item }">
+            <p>{{item.company.split('*')[1] + ' - ' + item.company_name}}</p>
+          </template>
           <template v-slot:item.description="{ item }">
             <p style="width: 240px;">{{item.description}}</p>
           </template>
           <template v-slot:item.actions="{ item }">
             <price-table-edit-menu :price_table="item" :companies="companies" :item_group="item_group" @price-table-deleted="deletePriceTable(item)" />
-          </template>
-          <template v-slot:item.company="{ item }">
-            <p>{{item.company.split('*')[1]}}</p>
           </template>
         <template v-slot:item.note="{ item }">
           <p>{{$getNote(item.note)}}</p>
@@ -194,9 +194,9 @@ export default {
       loading: false,
       money: money,
       headers: [
+        { text: this.$t('Company'), value: 'company' },
         { text: this.$t('Table_code'), value: 'table_code' },
         { text: this.$t('Description'), value: 'description' },
-        { text: this.$t('Company'), value: 'company' },
         { text: this.$t('Note'), value: 'note' },
         { text: this.$t('Actions'), value: 'actions' },
       ]

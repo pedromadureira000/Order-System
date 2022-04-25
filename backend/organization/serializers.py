@@ -170,6 +170,13 @@ class ClientEstablishmentToClientSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(_("You can't add this price table to this 'client_establishment'."))
         return super().validate(attrs)
 
+class CompaniesToCreateClientSerializer(serializers.ModelSerializer):
+    client_table=serializers.SlugRelatedField(slug_field='client_table_compound_id', 
+            queryset=ClientTable.objects.all(), allow_null=True)
+    class Meta:
+        model = Company
+        fields = ['company_code', 'name', 'client_table']
+
 class ClientSerializerPOST(serializers.ModelSerializer):
     client_establishments = ClientEstablishmentToClientSerializer(many=True)
     client_table = serializers.SlugRelatedField(slug_field='client_table_compound_id', queryset=ClientTable.objects.all())

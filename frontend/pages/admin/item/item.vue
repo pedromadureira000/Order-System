@@ -10,7 +10,7 @@
           </v-expansion-panel-header>
           <v-expansion-panel-content>
             <form @submit.prevent="createItem">
-              <!-- Item Table -->
+              <!-- Company -->
               <v-row align="center">
                 <v-col
                   class="d-flex"
@@ -18,11 +18,11 @@
                   sm="6"
                 >
                   <v-select
-                    v-model="item_table"
-                    :label="$t('Item_Table')"
-                    :items="item_tables"
-                    :item-text="(x) => x.item_table_code + ' - ' + x.description"
-                    :item-value="(x) => x.item_table_compound_id"
+                    v-model="company"
+                    :label="$t('Company')"
+                    :items="companies"
+                    :item-text="(x) => x.company_code + ' - ' + x.name"
+                    return-object
                     @change="fetchCategoriesToCreateItem"
                   ></v-select>
                 </v-col>
@@ -133,13 +133,68 @@
       </v-expansion-panels>
 
       <div v-if="hasGetItemsPermission()">
-        <h3 class="mt-6">{{$t('Edit Item')}}</h3>
+        <h3 class="mt-6 mb-7">{{$t('Edit Item')}}</h3>
+        <!-- Search filters -->
+        <v-card class="mb-6">
+          <v-card-title style="font-size: 1rem; font-weight: 400; line-height: 1rem">{{$t('Search filters')}}</v-card-title>
+          <v-row class="ml-2">
+            <v-col cols='3'>
+                <v-select
+                  v-model="filter__company"
+                  :label="$t('Company')"
+                  :items="companies"
+                  :item-text="(x) => x.company_code + ' - ' + x.name"
+                  return-object
+                  @change="fetchCategoriesToSearchItems"
+                ></v-select>
+            </v-col>
+            <v-col cols="3">
+              <v-select
+                v-model="filter__category"
+                :label="$t('Category')"
+                :items="category_filter_options"
+                :item-text="(x) => x.category_compound_id === 'all' ? $t(x.description) : x.category_compound_id.split('*')[2] + ' - ' + x.description"
+                :item-value="(x) => x.category_compound_id"
+              ></v-select>
+            </v-col>
+            <v-col cols="2">
+              <v-text-field
+                :label="$t('Item code')"
+                :error-messages="itemCodeToSearchItemsErrors"
+                v-model.trim="filter__item_code"
+                @keydown.enter.prevent="searchOnePriceItemToMakeOrder"
+                @blur="$v.filter__item_code.$touch()"
+              />
+            </v-col>
+            <v-col cols="3">
+              <v-text-field
+                :label="$t('Item description')"
+                v-model.trim="filter__item_description"
+                :error-messages="itemDescriptionToSearchItemsErrors"
+                @blur="$v.filter__item_description.$touch()"
+              />
+            </v-col>
+            <v-col cols="1" style="display: flex; justify-content: center; align-items: center;">
+              <v-btn
+                class="mr-4"
+                style="width: 84%;"
+                color="primary"
+                :loading="loading"
+                :disabled="loading"
+                @click="fetchItems"
+              >{{$t('Search')}}</v-btn>
+            </v-col>
+          </v-row>
+        </v-card>
+
+        <!-- Items list -->
         <v-data-table
           :headers="headers"
           :items="items"
           :items-per-page="10"
           item-key="item_compound_id"
           class="elevation-1 mt-3"
+          @pagination="changePagination"
         >
           <template v-slot:item.description="{ item }">
             <p style="width: 240px;">{{item.description}}</p>
@@ -154,7 +209,7 @@
             ></v-img>
           </template>
           <template v-slot:item.actions="{ item }">
-            <item-edit-menu :item="item" :item_tables="item_tables" :category_group="category_group" @item-deleted="deleteItem(item)" />
+            <item-edit-menu :item="item" :companies="companies" :category_group="category_group" @item-deleted="deleteItem(item)" />
           </template>
           <template v-slot:item.category="{ item }">
             <p>{{item.category.split('*')[2]}}</p>
@@ -180,6 +235,7 @@ import {
 import { validationMixin } from "vuelidate";
 import {slugFieldValidator} from "~/helpers/validators"
 
+let default_category_value = {category_compound_id: 'all', description: 'All'}
 export default {
   middleware: ["authenticated"],
   components: {
@@ -189,7 +245,8 @@ export default {
 
   data() {
     return {
-      item_table: null,
+      company: null,
+      companies: [],
       category: null,
       item_code: null,
       description: null,
@@ -200,11 +257,14 @@ export default {
       image: null,
       items: [],
       categories: [],
-      item_tables: [],
       category_group: [],
-      /**EX:  category_group: [{item_table: '123$123', categories: [{categoryObj, categoryObj2 }]}] */
       img_url: '',
       loading: false,
+      filter__company: null,
+      filter__item_description: '',
+      filter__item_code: '',
+      filter__category: default_category_value,
+      category_filter_options: [default_category_value, ],
       headers: [
         { text: this.$t('Image'), value: 'image' },
         { text: this.$t('Code'), value: 'item_code' },
@@ -220,16 +280,15 @@ export default {
   },
 
   async fetch() {
-    let items = await this.$store.dispatch("item/fetchItems");
-    if (items){this.items.push(...items)}
-
-    // Fetch ItemTables
-    let item_tables = await this.$store.dispatch("item/fetchItemTablesToCreateItemOrCategoryOrPriceTable"); 
-    if (item_tables){
-      this.item_tables.push(...item_tables)
-      if (this.item_tables.length > 0){
-        this.item_table = this.item_tables[0].item_table_compound_id
+    // Fetch Companies
+    let companies = await this.$store.dispatch("item/fetchCompaniesToCreatePriceTable"); 
+    if (companies){
+      this.companies.push(...companies)
+      if (this.companies.length > 0){
+        this.company = this.companies[0]
         await this.fetchCategoriesToCreateItem()
+        this.filter__company = this.companies[0]
+        await this.fetchCategoriesToSearchItems()
       }
     }
   },
@@ -242,7 +301,7 @@ export default {
       } else {
         this.loading = true;
         const formData = new FormData()
-        formData.append('item_table', this.item_table)
+        formData.append('item_table', this.company.item_table)
         formData.append('item_code', this.item_code)
         formData.append('category', this.category)
         formData.append('description', this.description)
@@ -255,11 +314,10 @@ export default {
         }
         let data = await this.$store.dispatch("item/createItem", formData);
         if (data) {
-          this.items.push(data);
           // Clearing fields
           this.$v.$reset()
           // this avoid "This field is required" errors by vuelidate
-          this.item_table = this.item_tables[0].item_table_compound_id
+          this.company = this.companies[0]
           this.category = this.categories[0].category_compound_id 
           this.item_code = ""
           this.description = ""
@@ -274,28 +332,64 @@ export default {
       }
     },
 
+    async fetchItems(){
+      let query_strings = ""
+      query_strings += `item_table=${this.filter__company.item_table}&`
+      query_strings += this.filter__category.category_compound_id ? `category=${this.filter__category.category_compound_id}&` : ''
+      query_strings += this.filter__item_code ? `item_code=${this.filter__item_code}&` : ''
+      query_strings += this.filter__item_description ? `item_description=${this.filter__item_description}&` : ''
+      if (query_strings !== "") {
+        query_strings = query_strings.slice(0, -1) // remove the last '&' character
+      }
+      let items = await this.$store.dispatch("item/fetchItems", query_strings);
+      console.log(">>>>>>> items: ", items)
+      if (items) {
+        this.items = items
+      }
+    },
+
+    async fetchCategoriesToSearchItems(){
+      let category_already_exists = this.category_group.find(el=>el.item_table == this.filter__company.item_table)
+      if (category_already_exists){
+        this.category_filter_options = [default_category_value, ...category_already_exists.categories]
+        this.filter__category = default_category_value
+      }
+      else{
+        let categories = await this.$store.dispatch("item/fetchCategoriesToCreateItem", this.filter__company.item_table); 
+        if (categories){
+          this.category_group.push({item_table: this.filter__company.item_table, categories: categories} )
+          this.category_filter_options = [default_category_value, ...categories]
+          this.filter__category = default_category_value
+        }
+      }
+    },
+
+    changePagination(event){
+      console.log(">>>>>>>event: ", event)
+    },
+
     deleteItem(itemToDelete) {
       this.items = this.items.filter((item) => item.item_code != itemToDelete.item_code);
     },
 
     async fetchCategoriesToCreateItem(){
-          let category_already_exists = this.category_group.find(el=>el.item_table == this.item_table)
-          if (category_already_exists){
-            this.categories = category_already_exists.categories
-            if (this.categories.length > 0){
-              this.category = this.categories[0].category_compound_id 
-            }
+      let category_already_exists = this.category_group.find(el=>el.item_table == this.company.item_table)
+      if (category_already_exists){
+        this.categories = category_already_exists.categories
+        if (this.categories.length > 0){
+          this.category = this.categories[0].category_compound_id 
+        }
+      }
+      else{
+        let categories = await this.$store.dispatch("item/fetchCategoriesToCreateItem", this.company.item_table); 
+        if (categories){
+          this.category_group.push({item_table: this.company.item_table, categories: categories} )
+          this.categories = categories
+          if (this.categories.length > 0){
+            this.category = this.categories[0].category_compound_id 
           }
-          else{
-            let categories = await this.$store.dispatch("item/fetchCategoriesToCreateItem", this.item_table); 
-            if (categories){
-              this.category_group.push({item_table: this.item_table, categories: categories} )
-              this.categories = categories
-              if (this.categories.length > 0){
-                this.category = this.categories[0].category_compound_id 
-              }
-            }
-          }
+        }
+      }
     },
 
     // Image
@@ -362,6 +456,14 @@ export default {
     technical_description: {
       maxLength: maxLength(800)
     },
+    // Search items Filter
+    filter__item_code: {
+      slugFieldValidator, 
+      maxLength: maxLength(15)
+    },
+    filter__item_description: { 
+      maxLength: maxLength(60)
+    },
     itemInfoGroup: [
       "item_code",
       "description",
@@ -405,6 +507,20 @@ export default {
       const errors = [];
       if (!this.$v.technical_description.$dirty) return errors;
       !this.$v.technical_description.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 800));
+      return errors;
+    },
+    // Search items filter
+    itemCodeToSearchItemsErrors() {
+      const errors = [];
+      if (!this.$v.filter__item_code.$dirty) return errors;
+      !this.$v.filter__item_code.slugFieldValidator && errors.push(this.$t('SlugFieldErrorMessage'));
+      !this.$v.filter__item_code.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 15));
+      return errors;
+    },
+    itemDescriptionToSearchItemsErrors() {
+      const errors = [];
+      if (!this.$v.description.$dirty) return errors;
+      !this.$v.description.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 60));
       return errors;
     },
   },

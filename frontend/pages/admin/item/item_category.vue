@@ -10,7 +10,7 @@
           </v-expansion-panel-header>
           <v-expansion-panel-content>
             <form @submit.prevent="createItemCategory">
-              <!-- Item Table -->
+              <!-- Company -->
               <v-row align="center">
                 <v-col
                   class="d-flex"
@@ -18,11 +18,11 @@
                   sm="6"
                 >
                   <v-select
-                    v-model="item_table"
-                    :label="$t('Item_Table')"
-                    :items="item_tables"
-                    :item-text="(x) => x.item_table_code + ' - ' + x.description"
-                    :item-value="(x) => x.item_table_compound_id"
+                    v-model="company"
+                    :label="$t('Company')"
+                    :items="companies"
+                    :item-text="(x) => x.company_code + ' - ' + x.name"
+                    return-object
                   ></v-select>
                 </v-col>
               </v-row>
@@ -67,7 +67,25 @@
       </v-expansion-panels>
 
       <div v-if="hasGetItemCategoriesPermission()">
-        <h3 class="mt-6">{{$t('Edit Category')}}</h3>
+        <h3 class="mt-6 mb-7">{{$t('Edit Category')}}</h3>
+        <!-- Select company -->
+        <v-card class="mb-6">
+          <v-row>
+            <v-col cols='3'>
+              <v-card-title style="font-size: 1rem; font-weight: 400; line-height: 1rem">{{$t('Select company')}}</v-card-title>
+            </v-col>
+            <v-col cols='3'>
+                <v-select
+                  v-model="company_to_fetch_categories"
+                  :label="$t('Company')"
+                  :items="companies"
+                  :item-text="(x) => x.company_code + ' - ' + x.name"
+                  return-object
+                ></v-select>
+            </v-col>
+            <v-col cols="6"></v-col>
+          </v-row>
+        </v-card>
         <v-data-table
           :headers="headers"
           :items="categories"
@@ -79,7 +97,7 @@
             <p style="width: 240px;">{{item.description}}</p>
           </template>
           <template v-slot:item.actions="{ item }">
-            <item-category-edit-menu :category="item" :item_tables="item_tables" @item-category-deleted="deleteItemCategory(item)" />
+            <item-category-edit-menu :category="item" :companies="companies" @item-category-deleted="deleteItemCategory(item)" />
           </template>
           <template v-slot:item.note="{ item }">
             <p>{{$getNote(item.note)}}</p>
@@ -108,12 +126,14 @@ export default {
 
   data() {
     return {
-      item_table: null,
+      company: null,
+      companies: [],
       category_code: null,
       description: null,
       note: null,
+      company_to_fetch_categories: null,
       categories: [],
-      item_tables: [],
+      category_group: [],
       loading: false,
       headers: [
         { text: this.$t('Category code'), value: 'category_code' },
@@ -125,20 +145,36 @@ export default {
   },
 
   async fetch() {
-    let categories = await this.$store.dispatch("item/fetchCategories");
-    if (categories){this.categories.push(...categories)}
-
-    // Fetch item_tables
-    let item_tables = await this.$store.dispatch("item/fetchItemTablesToCreateItemOrCategoryOrPriceTable"); 
-    if (item_tables){
-      this.item_tables.push(...item_tables)
-      if (this.item_tables.length > 0){
-        this.item_table = this.item_tables[0].item_table_compound_id
+    // Fetch Companies
+    let companies = await this.$store.dispatch("item/fetchCompaniesToCreatePriceTable"); 
+    if (companies){
+      this.companies.push(...companies)
+      if (this.companies.length > 0){
+        this.company = this.companies[0]
+        // this will lead to call fetchCategories function
+        this.company_to_fetch_categories = this.companies[0]
       }
     }
   },
 
   methods: {
+    async fetchCategories(){
+      console.log(">>>>>>> inside fetchCategories()")
+      let category_group = this.category_group.find(el=>el.group_id===this.company_to_fetch_categories.item_table)
+      if (category_group){
+        console.log(">>>>>>> inside fetchCategories(): category_group found")
+        this.categories = category_group.categories
+      }
+      else{
+        console.log(">>>>>>> inside fetchCategories(): category_group was not found")
+        let categories = await this.$store.dispatch("item/fetchCategories", this.company_to_fetch_categories.item_table);
+        if (categories){
+          this.categories.push(...categories)
+          this.category_group.push({group_id: this.company_to_fetch_categories.item_table, categories: [...categories]})
+        }
+      }
+    },
+
     async createItemCategory() {
       this.$v.itemInfoGroup.$touch();
       if (this.$v.itemInfoGroup.$invalid) {
@@ -215,6 +251,16 @@ export default {
       !this.$v.note.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 800));
       return errors;
     },
+  },
+
+  watch: {
+    company_to_fetch_categories(newValue, oldValue){
+      console.log(">>>>>>> newValue: ", newValue)
+      console.log(">>>>>>> OldValue:", oldValue)
+      if (newValue.item_table !== (oldValue === null ? null : oldValue.item_table)) {
+        this.fetchCategories()
+      }
+    }	
   },
 };
 </script>

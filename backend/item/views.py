@@ -18,6 +18,7 @@ from settings.response_templates import error_response, not_found_response, prot
 from django.utils.translation import gettext_lazy as _
 from decimal import Decimal
 from organization.serializers import CompanyPOSTSerializer
+from drf_yasg import openapi
 
 class ItemTableView(APIView):
     def get(self, request):
@@ -100,12 +101,13 @@ class fetchItemTablesToCreateItemOrCategoryOrPriceTable(APIView):
         return unauthorized_response
 
 class CategoryView(APIView):
-    def get(self, request):
+    def get(self, request, item_table_compound_id):
         if has_permission(request.user, 'get_item_category'):
             if has_role(request.user, 'agent'):
-                item_categories = get_categories_by_agent(request.user)
+                item_categories = get_categories_by_agent(request.user).filter(item_table__item_table_compound_id=item_table_compound_id)
                 return Response(CategoryPOSTSerializer(item_categories, many=True).data)
-            item_categories = ItemCategory.objects.filter(item_table__contracting=request.user.contracting).all()
+            item_categories = ItemCategory.objects.filter(item_table__contracting=request.user.contracting, 
+                    item_table__item_table_compound_id=item_table_compound_id)
             serializer = CategoryPOSTSerializer(item_categories, many=True)
             return Response(serializer.data)
         return unauthorized_response
@@ -194,14 +196,29 @@ class fetchCategoriesToCreateItem(APIView):
             return Response(CategoryPOSTSerializer(categories, many=True).data)
         return unauthorized_response
 
+item_table_query_string = openapi.Parameter('item_table', openapi.IN_QUERY, description="item_table_compound_id field", type=openapi.TYPE_STRING)
+category_query_string = openapi.Parameter('category', openapi.IN_QUERY, description="category_compound_id field", type=openapi.TYPE_STRING)
+item_code_query_string = openapi.Parameter('item_code', openapi.IN_QUERY, description="item_code", 
+        type=openapi.TYPE_STRING)
+item_description_query_string = openapi.Parameter('item_description', openapi.IN_QUERY, description="item_description field", 
+        type=openapi.TYPE_STRING)
+
 class ItemView(APIView):
     parser_classes = [MultiPartParser, FormParser]
+
+    @swagger_auto_schema(manual_parameters=[item_table_query_string, category_query_string, item_code_query_string, 
+        item_description_query_string]) 
     def get(self, request):
         if has_permission(request.user, 'get_items'):
+            kwargs = {}
+            if request.GET.get("item_table"): kwargs.update({"item_table__item_table_compound_id": request.GET.get("item_table")})
+            if request.GET.get("category"): kwargs.update({"category__category_compound_id": request.GET.get("category")})
+            if request.GET.get("item_code"): kwargs.update({"item_code": request.GET.get("item_code")})
+            if request.GET.get("item_description"): kwargs.update({"item_description": request.GET.get("item_description")})
             if has_role(request.user, 'agent'):
-                items = get_items_by_agent(request.user)
+                items = get_items_by_agent(request.user).filter(**kwargs)
                 return Response(ItemPOSTSerializer(items, many=True).data)
-            items = Item.objects.filter(item_table__contracting=request.user.contracting).all()
+            items = Item.objects.filter(item_table__contracting=request.user.contracting, **kwargs )
             return Response(ItemPOSTSerializer(items, many=True).data)
         return unauthorized_response
     @transaction.atomic

@@ -137,12 +137,16 @@ class ForTablePriceItemSerializer(serializers.ModelSerializer):
 
 class PriceTableGetSerializer(serializers.ModelSerializer):
     company = serializers.SlugRelatedField(slug_field='company_compound_id', read_only=True)
+    company_name = serializers.SerializerMethodField()
     item_table = serializers.SerializerMethodField()
 
     class Meta:
         model = PriceTable
-        fields = ['price_table_compound_id', 'item_table','company', 'table_code', 'description', 'note']
+        fields = ['price_table_compound_id', 'item_table','company', 'company_name', 'table_code', 'description', 'note']
         read_only_fields = fields
+
+    def get_company_name(self, obj):
+        return obj.company.name #TODO bad query
 
     def get_item_table(self, obj):
         # TODO: This will really happen?

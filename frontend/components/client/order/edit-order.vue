@@ -158,8 +158,10 @@
                             <v-col cols="5">
                               <v-text-field
                                 :label="$t('Item code')"
+                                :error-messages="itemCodeToSearchErrors"
                                 v-model.trim="item_code_to_search"
                                 @keydown.enter.prevent="searchOnePriceItemToMakeOrder"
+                                @blur="$v.item_code_to_search.$touch()"
                               />
                             </v-col>
                             <v-col cols="3" style="display: flex; justify-content: center;">
@@ -371,7 +373,7 @@ import {
   maxValue,
 } from "vuelidate/lib/validators";
 import { validationMixin } from "vuelidate";
-import {decimal_only_2places} from "~/helpers/validators"
+import {decimal_only_2places, slugFieldValidator} from "~/helpers/validators"
 let default_category_value = {category_compound_id: 'all', description: 'All'}
 export default {
   mixins: [validationMixin],
@@ -486,19 +488,24 @@ export default {
 
     // Search Price Item
     async searchOnePriceItemToMakeOrder(){
-      if (!this.item_code_to_search){
-        this.$store.dispatch("setAlert", { message: this.$t('Plese fill the item code field.'), alertType: "warning" }, { root: true })
-      }
-      if (this.ordered_items.some(el=>el.item.item_compound_id.split('*')[2] === this.item_code_to_search)){
-        this.$store.dispatch("setAlert", { message: this.$t('This item is already added to the order.'), alertType: "warning" }, { root: true })
-      }
-      else{
-        let search_result = await this.$store.dispatch("order/searchOnePriceItemToMakeOrder", 
-          {establishment: this.order.establishment.establishment_compound_id, item_code: this.item_code_to_search}
-        )
-        if (search_result){
-          this.ordered_items.push({...search_result, quantity: this.default_quantity, sequence_number: this.getSequenceNumber(),errors: []})
+      this.$v.defaultQuantity.$touch();
+      if (this.$v.defaultQuantity.$invalid) {
+        this.$store.dispatch("setAlert", { message: this.$t("Please_fill_the_form_correctly"), alertType: "error" }, { root: true })
+      } 
+      else {
+        this.loading = true
+        if (this.ordered_items.some(el=>el.item.item_compound_id.split('*')[2] === this.item_code_to_search)){
+          this.$store.dispatch("setAlert", { message: this.$t('This item is already added to the order.'), alertType: "warning" }, { root: true })
         }
+        else{
+          let search_result = await this.$store.dispatch("order/searchOnePriceItemToMakeOrder", 
+            {establishment: this.order.establishment.establishment_compound_id, item_code: this.item_code_to_search}
+          )
+          if (search_result){
+            this.ordered_items.push({...search_result, quantity: this.default_quantity, sequence_number: this.getSequenceNumber(),errors: []})
+          }
+        }
+        this.loading = false
       }
     },
 
@@ -578,7 +585,11 @@ export default {
       decimal_only_2places,
       maxValue: maxValue(999999999.99),
       minValue: minValue(0.01),
-
+    },
+    item_code_to_search: {
+      required, 
+      slugFieldValidator, 
+      maxLength: maxLength(15)
     },
     ordered_items: {
       $each: {
@@ -600,6 +611,7 @@ export default {
       "agent_note",
       "ordered_items"
     ],
+    defaultQuantity: ["default_quantity", "item_code_to_search"]
   },
 
   computed: {
@@ -630,6 +642,14 @@ export default {
       !this.$v.default_quantity.decimal_only_2places && errors.push(this.$t("DecimalErrorMessage2Places"));
       !this.$v.default_quantity.minValue && errors.push(this.$formatStr(this.$t("This_value_must_be_greater_than_X"), 0.01 ));
       !this.$v.default_quantity.maxValue && errors.push(this.$formatStr(this.$t("This_value_must_be_less_than_X"), 999999999.99));
+      return errors;
+    },
+    itemCodeToSearchErrors() {
+      const errors = [];
+      if (!this.$v.item_code_to_search.$dirty) return errors;
+      !this.$v.item_code_to_search.required && errors.push(this.$t("This_field_is_required"));
+      !this.$v.item_code_to_search.slugFieldValidator && errors.push(this.$t('SlugFieldErrorMessage'));
+      !this.$v.item_code_to_search.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 15));
       return errors;
     },
     // Price Items to Add

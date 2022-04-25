@@ -7,7 +7,7 @@
         <v-card-title>{{$t('Edit')}}</v-card-title>
         <v-card-text>
           <v-container fluid>
-              <!-- Item Table -->
+              <!-- Company -->
               <v-row align="center">
                 <v-col
                   class="d-flex"
@@ -16,15 +16,15 @@
                 >
                   <v-select
                     disabled
-                    v-model="item_table_from_item"
-                    :label="$t('Item_Table')"
-                    :items="item_tables"
-                    :item-text="(x) => x.item_table_code + ' - ' + x.description"
+                    :value="item_company"
+                    :label="$t('Company')"
+                    :items="companies"
+                    :item-text="(x) => x.company_code + ' - ' + x.name"
                   ></v-select>
                 </v-col>
               </v-row>
               <!-- Category -->
-              <v-row align="center">
+              <v-row align="center" style="margin-top: -10px">
                 <v-col
                   class="d-flex"
                   cols="12"
@@ -138,7 +138,6 @@
 </template>
 
 <script>
-import axios from '~/plugins/axios'
 import {
   required,
   minLength,
@@ -150,10 +149,10 @@ export default {
   components: {
     "dots-menu": require("@/components/dots-menu.vue").default,
   },
-  props: ['item', 'item_tables', 'category_group'],
+  props: ['item', 'companies', 'category_group'],
   data() {
     return {
-      item_table_from_item: null,
+      item_company: null,
       show_edit_dialog: false,
       show_delete_confirmation_dialog: false,
       category: null,
@@ -347,9 +346,8 @@ export default {
     this.status = String(this.item.status)
     this.technical_description = this.item.technical_description
     this.img_url = this.getImageUrl(this.item.image)
-    // Default value for item_table_from_item
-    let item_table = this.item_tables.find(el=>el.item_table_compound_id === this.item.item_table)
-    this.item_table_from_item = item_table
+    // Default value for item_company
+    this.item_company = this.companies.find(el=>el.item_table === this.item.item_table)
   },
 
   watch: {

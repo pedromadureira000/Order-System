@@ -7,6 +7,7 @@
             <v-list-item-title>{{logged_user.first_name}} {{logged_user.last_name}}</v-list-item-title>
             <v-list-item-subtitle>Username: {{logged_user.username}}</v-list-item-subtitle>
             <v-list-item-subtitle v-if="hasRoleOtherThenClientUser">{{$t('Role')}}: {{$t(logged_user.roles[0])}}</v-list-item-subtitle>
+            <v-list-item-subtitle v-if="currentUserIsClientUser">{{$t('Client')}}: {{logged_user.client.split('*')[2] + ' - ' + logged_user.client_name}}</v-list-item-subtitle>
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -204,6 +205,9 @@ export default {
 		logged_user(){
 			return this.$store.state.user.currentUser
 		},
+    currentUserIsClientUser(){
+      return this.$store.state.user.currentUser.roles.includes('client_user')
+    },
     /** Calculates which Menus the CurrentUser has access and return it concatenated with defaultMenuItems (between Home and About page). */
 		currentMenuItems() {
 			let user = this.$store.state.user.currentUser;

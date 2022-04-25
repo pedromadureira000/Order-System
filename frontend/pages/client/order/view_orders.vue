@@ -231,22 +231,29 @@ export default {
 
   methods: {
     async searchOrders(){
-      /** clientInfoGroup */
-      let query_strings = ""
-      query_strings += this.company.company_compound_id ? `company=${this.company.company_compound_id}&` : ''
-      query_strings += this.establishment.establishment_compound_id ? `establishment=${this.establishment.establishment_compound_id}&` : ''
-      query_strings += this.client.client_compound_id ? `client=${this.client.client_compound_id}&` : ''
-      query_strings += this.invoice_number ? `invoice_number=${this.invoice_number}&` : ''
-      query_strings += this.order_number ? `order_number=${this.order_number}&` : ''
-      query_strings += this.period ? `period=${this.period}&` : ''
-      query_strings += this.status.value ? `status=${this.status.value}&` : ''
-      if (query_strings !== "") {
-        query_strings = query_strings.slice(0, -1) // remove the last '&' character
-      }
-      let orders = await this.$store.dispatch("order/searchOrders", query_strings); 
-      if (orders){
-        this.orders = orders
-      }
+      this.$v.clientInfoGroup.$touch();
+      if (this.$v.clientInfoGroup.$invalid) {
+        this.$store.dispatch("setAlert", { message: this.$t("Please_fill_the_form_correctly"), alertType: "error" }, { root: true })
+      } 
+      else {
+        this.loading = true
+        let query_strings = ""
+        query_strings += this.company.company_compound_id ? `company=${this.company.company_compound_id}&` : ''
+        query_strings += this.establishment.establishment_compound_id ? `establishment=${this.establishment.establishment_compound_id}&` : ''
+        query_strings += this.client.client_compound_id ? `client=${this.client.client_compound_id}&` : ''
+        query_strings += this.invoice_number ? `invoice_number=${this.invoice_number}&` : ''
+        query_strings += this.order_number ? `order_number=${this.order_number}&` : ''
+        query_strings += this.period ? `period=${this.period}&` : ''
+        query_strings += this.status.value ? `status=${this.status.value}&` : ''
+        if (query_strings !== "") {
+          query_strings = query_strings.slice(0, -1) // remove the last '&' character
+        }
+        let orders = await this.$store.dispatch("order/searchOrders", query_strings); 
+        if (orders){
+          this.orders = orders
+        }
+        this.loading = false
+      }    
     },
  
     async companyChanged(){

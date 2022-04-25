@@ -7,7 +7,7 @@
         <v-card-title>{{$t('Edit')}}</v-card-title>
         <v-card-text>
           <v-container fluid>
-            <!-- Client Table -->
+            <!-- Company -->
             <v-row align="center">
               <v-col
                 class="d-flex"
@@ -16,10 +16,10 @@
               >
                 <v-select
                   disabled
-                  v-model="client_table_from_client"
-                  :label="$t('Client_Table')"
-                  :items="client_tables"
-                  :item-text="(x) => x.client_table_code"
+                  v-model="client_company"
+                  :label="$t('Company')"
+                  :items="companies"
+                  :item-text="(x) => x.company_code + ' - ' + x.name" 
                 ></v-select>
               </v-col>
             </v-row>
@@ -156,10 +156,10 @@ export default {
     "price-table-v-select": require("@/components/admin/organization/price-table-v-select.vue").default,
   },
   directives: {mask},
-  props: ['client', 'client_tables','establishment_groups', 'price_table_groups'],
+  props: ['client', 'companies','establishment_groups', 'price_table_groups'],
   data() {
     return {
-      client_table_from_client: null,
+      client_company: null,
       show_edit_dialog: false,
       show_delete_confirmation_dialog: false,
       client_establishments: [],
@@ -366,8 +366,8 @@ export default {
     this.status = String(this.client.status)
     this.vendor_code = this.client.vendor_code
     this.note = this.client.note
-    // Default client_table_from_client
-    this.client_table_from_client = this.client_tables.find(el=>el.client_table_compound_id === this.client.client_table)
+    // Default client_company
+    this.client_company = this.companies.find(el=>el.client_table === this.client.client_table)
   }
 }
 </script>

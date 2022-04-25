@@ -6,13 +6,13 @@ from organization import facade
 
 def get_categories_by_agent(agent):
     if has_permission(agent, 'access_all_establishments'):
-        return ItemCategory.objects.filter(item_table__contracting=agent.contracting).all()
-    return ItemCategory.objects.filter(item_table__company__in=Company.objects.filter(establishment__in=agent.establishments.all())).all()
+        return ItemCategory.objects.filter(item_table__contracting=agent.contracting)
+    return ItemCategory.objects.filter(item_table__company__in=Company.objects.filter(establishment__in=agent.establishments.all()))
 
 def get_items_by_agent(agent):
     if has_permission(agent, 'access_all_establishments'):
-        return Item.objects.filter(item_table__contracting=agent.contracting).all()
-    return Item.objects.filter(item_table__company__in=Company.objects.filter(establishment__in=agent.establishments.all())).all()
+        return Item.objects.filter(item_table__contracting=agent.contracting)
+    return Item.objects.filter(item_table__company__in=Company.objects.filter(establishment__in=agent.establishments.all()))
 
 # TODO does not user .all() in the end. Because maybe i want only filter(like in 'get_price_tables_to_create_client')
 def get_price_tables_by_agent(agent): 

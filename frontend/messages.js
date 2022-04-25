@@ -90,7 +90,7 @@ export const messages = {
     deleteCompany_error_msg: "Something went wrong when trying to delete the company.",
     fetchPriceTablesToCreateClient_error_msg: "Something went wrong when trying to fetch price tables to create a client.",
     fetchEstablishmentsToCreateClient_error_msg: "Something went wrong when trying to fetch establishments to create a client.",
-    fetchClientTablesToCreateClient_error_msg: "Something went wrong when trying to fetch client tables to create a client.",
+    fetchCompaniesToCreateClient_error_msg: "Something went wrong when trying to fetch companies to create client.",
     createClient_error_msg: "Something went wrong when trying to create a client.",
     fetchClients_error_msg: "Something went wrong when trying to fetch clients.",
     updateClient_error_msg: "Something went wrong when trying to update the client.",
@@ -278,6 +278,7 @@ export const messages = {
     Edit_Client: "Edit Client",
     Vendor_Code: "Vendor Code",
     Client_Establishments: "Client Establishments",
+    "Select company": "Select company",
     // ------------------------------------------------------------------------------------/admin/user
     ERP_User: 'ERP User',
     Admin_Agent: 'Admin Agent',
@@ -327,6 +328,7 @@ export const messages = {
     Item_Category: 'Item Category',
     "Item Table" : "Item Table",
     "Item": "Item",
+    "Search filters": "Search filters",
     // Item table
     "Create Item Table": "Create Item Table",
     "Edit Item Table": "Edit Item Table",
@@ -516,7 +518,7 @@ export const messages = {
     deleteCompany_error_msg: "Algo deu errado ao tentar excluir a empresa.",
     fetchPriceTablesToCreateClient_error_msg: "Algo deu errado ao tentar buscar tabelas de preço na pagina de criação de cliente.",
     fetchEstablishmentsToCreateClient_error_msg: "Algo deu errado ao tentar buscar estabelecimentos na pagina de criação de cliente.",
-    fetchClientTablesToCreateClient_error_msg: "Algo deu errado ao tentar buscar tabelas de clientes na pagina de criação de cliente.",
+    fetchCompaniesToCreateClient_error_msg: "Algo deu errado ao tentar buscar empresas para criar cliente.",
     createClient_error_msg: "Algo deu errado ao tentar criar cliente",
     fetchClients_error_msg: "Algo deu errado ao tentar buscar clientes",
     updateClient_error_msg: "Algo deu errado ao tentar atualizar o cliente.",
@@ -704,6 +706,7 @@ export const messages = {
     Edit_Client: "Editar Cliente",
     Vendor_Code: "Código do Vendedor",
     Client_Establishments: "Estabelecimentos do Cliente",
+    "Select company": "Selecione a empresa",
     // ---------------------------------------------------------------------------------------/admin/user
     ERP_User: 'Usuário ERP',
     Admin_Agent: 'Agente Admin',
@@ -753,6 +756,7 @@ export const messages = {
     Item_Category: 'Categoria de Itens',
     "Item Table" : "Tabela de Itens",
     "Item": "Item",
+    "Search filters": "Filtros de busca",
     // Item table
     "Create Item Table": "Criar Tabela de Itens",
     "Edit Item Table": "Editar Tabela de Itens",

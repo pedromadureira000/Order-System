@@ -3,8 +3,8 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from item.serializers import PriceTableGetSerializer
-from organization.facade import get_agent_client_tables, get_clients_by_agent, get_establishments_to_create_client, get_price_tables_to_create_client
-from organization.serializers import  ClientSerializerPOST, ClientSerializerPUT, ClientTablePOSTSerializer, ClientTablePUTSerializer, CompanyPOSTSerializer, CompanyPUTSerializer, ContractingPOSTSerializer, ContractingPUTSerializer, EstablishmentPOSTSerializer, EstablishmentPUTSerializer
+from organization.facade import get_agent_companies, get_clients_by_agent, get_establishments_to_create_client, get_price_tables_to_create_client
+from organization.serializers import  ClientSerializerPOST, ClientSerializerPUT, ClientTablePOSTSerializer, ClientTablePUTSerializer, CompaniesToCreateClientSerializer, CompanyPOSTSerializer, CompanyPUTSerializer, ContractingPOSTSerializer, ContractingPUTSerializer, EstablishmentPOSTSerializer, EstablishmentPUTSerializer
 from organization.models import Client, ClientTable, Company, Contracting, Establishment
 from rolepermissions.checkers import has_permission, has_role
 from django.db import transaction
@@ -297,7 +297,6 @@ class GetPriceTablesToCreateClient(APIView):
             price_tables = get_price_tables_to_create_client(request.user, company_compound_id, request_user_is_agent_without_all_estabs)
             return Response(PriceTableGetSerializer(price_tables, many=True).data)
 
-
 class GetEstablishmentsToCreateClient(APIView):
     def get(self, request, client_table_compound_id):
         if has_permission(request.user, 'create_client'):
@@ -307,24 +306,33 @@ class GetEstablishmentsToCreateClient(APIView):
             establishments = get_establishments_to_create_client(request.user, client_table_compound_id,request_user_is_agent_without_all_estabs)
             return Response(EstablishmentPOSTSerializer(establishments, many=True).data)
 
-class GetClientTablesToCreateClient(APIView):
+#  class GetClientTablesToCreateClient(APIView):
+    #  def get(self, request):
+        #  if has_permission(request.user, 'create_client'):
+            #  if req_user_is_agent_without_all_estabs(request.user):
+                #  client_tables = get_agent_client_tables(request.user)
+                #  return Response(ClientTablePOSTSerializer(client_tables, many=True).data)
+            #  client_tables = ClientTable.objects.filter(contracting=request.user.contracting)
+            #  return Response(ClientTablePOSTSerializer(client_tables, many=True).data)
+class GetCompaniesToCreateClient(APIView):
     def get(self, request):
         if has_permission(request.user, 'create_client'):
             if req_user_is_agent_without_all_estabs(request.user):
-                client_tables = get_agent_client_tables(request.user)
-                return Response(ClientTablePOSTSerializer(client_tables, many=True).data)
-            client_tables = ClientTable.objects.filter(contracting=request.user.contracting)
-            return Response(ClientTablePOSTSerializer(client_tables, many=True).data)
+                companies = get_agent_companies(request.user).exclude(client_table=None)
+                return Response(CompaniesToCreateClientSerializer(companies, many=True).data)
+            companies = Company.objects.filter(contracting=request.user.contracting).exclude(client_table=None)
+            return Response(CompaniesToCreateClientSerializer(companies, many=True).data)
 
 class ClientView(APIView):
-    def get(self, request):
+    def get(self, request, client_table_compound_id):
         user = request.user
         if has_permission(user, 'get_clients'):
             if has_role(user, 'agent'):
-                clients = get_clients_by_agent(user)
+                clients = get_clients_by_agent(user).filter(client_table__client_table_compound_id=client_table_compound_id)
                 data = ClientSerializerPOST(clients, many=True).data
                 return Response(data)
-            clients = Client.objects.filter(client_table__contracting=user.contracting)
+            clients = Client.objects.filter(client_table__contracting=user.contracting, 
+                    client_table__client_table_compound_id=client_table_compound_id)
             data = ClientSerializerPOST(clients, many=True).data
             return Response(data)
         return unauthorized_response

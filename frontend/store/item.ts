@@ -72,9 +72,9 @@ export const actions: ActionTree<ItemState, RootState> = {
     }
   },
 
-  async fetchCategories({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
+  async fetchCategories({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, item_table_compound_id: string){
     try{
-      let items = await api.fetchCategories()
+      let items = await api.fetchCategories(item_table_compound_id)
       return items
     }
     catch(error){
@@ -136,9 +136,9 @@ export const actions: ActionTree<ItemState, RootState> = {
     }
   },
 
-  async fetchItems({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
+  async fetchItems({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
     try{
-      let items = await api.fetchItems()
+      let items = await api.fetchItems(payload)
       return items
     }
     catch(error){
