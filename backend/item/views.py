@@ -19,6 +19,7 @@ from django.utils.translation import gettext_lazy as _
 from decimal import Decimal
 from organization.serializers import CompanyPOSTSerializer
 from drf_yasg import openapi
+import math
 
 class ItemTableView(APIView):
     def get(self, request):
@@ -196,30 +197,42 @@ class fetchCategoriesToCreateItem(APIView):
             return Response(CategoryPOSTSerializer(categories, many=True).data)
         return unauthorized_response
 
+page_query_string = openapi.Parameter('page', openapi.IN_QUERY, description="page number", type=openapi.TYPE_INTEGER)
+items_per_page_query_string = openapi.Parameter('items_per_page', openapi.IN_QUERY, description="items per page", 
+        type=openapi.TYPE_INTEGER)
 item_table_query_string = openapi.Parameter('item_table', openapi.IN_QUERY, description="item_table_compound_id field", type=openapi.TYPE_STRING)
 category_query_string = openapi.Parameter('category', openapi.IN_QUERY, description="category_compound_id field", type=openapi.TYPE_STRING)
 item_code_query_string = openapi.Parameter('item_code', openapi.IN_QUERY, description="item_code", 
         type=openapi.TYPE_STRING)
-item_description_query_string = openapi.Parameter('item_description', openapi.IN_QUERY, description="item_description field", 
+description_query_string = openapi.Parameter('description', openapi.IN_QUERY, description="description field", 
         type=openapi.TYPE_STRING)
 
 class ItemView(APIView):
     parser_classes = [MultiPartParser, FormParser]
 
     @swagger_auto_schema(manual_parameters=[item_table_query_string, category_query_string, item_code_query_string, 
-        item_description_query_string]) 
+        description_query_string]) 
     def get(self, request):
         if has_permission(request.user, 'get_items'):
             kwargs = {}
+            page = request.GET.get("page")
+            items_per_page = request.GET.get("items_per_page")
+            page = int(page) if page and page.isdigit() else 1
+            items_per_page = int(items_per_page) if items_per_page and items_per_page in ["5", "10", "15"] else 10
+            start = (page - 1) * items_per_page
+            end = page * items_per_page
             if request.GET.get("item_table"): kwargs.update({"item_table__item_table_compound_id": request.GET.get("item_table")})
             if request.GET.get("category"): kwargs.update({"category__category_compound_id": request.GET.get("category")})
             if request.GET.get("item_code"): kwargs.update({"item_code": request.GET.get("item_code")})
-            if request.GET.get("item_description"): kwargs.update({"item_description": request.GET.get("item_description")})
+            if request.GET.get("description"): kwargs.update({"description__icontains": request.GET.get("description")})
             if has_role(request.user, 'agent'):
-                items = get_items_by_agent(request.user).filter(**kwargs)
+                items = get_items_by_agent(request.user).filter(**kwargs)[start:end]
                 return Response(ItemPOSTSerializer(items, many=True).data)
-            items = Item.objects.filter(item_table__contracting=request.user.contracting, **kwargs )
-            return Response(ItemPOSTSerializer(items, many=True).data)
+            items = Item.objects.filter(item_table__contracting=request.user.contracting, **kwargs)
+            total = items.count()
+            lastPage = math.ceil(total / items_per_page)
+            return Response({"items": ItemPOSTSerializer(items[start:end], many=True).data, "current_page": page,
+                "lastPage": lastPage, "total": total})
         return unauthorized_response
     @transaction.atomic
     @swagger_auto_schema(request_body=ItemPOSTSerializer) 

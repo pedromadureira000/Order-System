@@ -182,13 +182,15 @@ export default {
       } else {
         this.loading = true;
         let data = await this.$store.dispatch("item/createCategory", {
-          item_table: this.item_table,
+          item_table: this.company.item_table,
           category_code: this.category_code,
           description: this.description,
           note: this.note,
         });
         if (data) {
-          this.categories.push(data);
+          if (data.item_table === this.company_to_fetch_categories.item_table){
+            this.categories.push(data);
+          } 
         }
         this.loading = false;
       }

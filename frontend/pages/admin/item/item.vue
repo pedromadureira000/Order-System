@@ -38,7 +38,7 @@
                     v-model="category"
                     :label="$t('Category')"
                     :items="categories"
-                    :item-text="(x) => x.category_code + ' - ' + x.description"
+                    :item-text="(x) => x.category_compound_id === null ? $t('All') : x.category_code + ' - ' + x.description"
                     :item-value="(x) => x.category_compound_id"
                   ></v-select>
                 </v-col>
@@ -153,8 +153,8 @@
                 v-model="filter__category"
                 :label="$t('Category')"
                 :items="category_filter_options"
-                :item-text="(x) => x.category_compound_id === 'all' ? $t(x.description) : x.category_compound_id.split('*')[2] + ' - ' + x.description"
-                :item-value="(x) => x.category_compound_id"
+                :item-text="(x) => x.category_compound_id === null ? $t(x.description) : x.category_compound_id.split('*')[2] + ' - ' + x.description"
+                return-object
               ></v-select>
             </v-col>
             <v-col cols="2">
@@ -181,7 +181,7 @@
                 color="primary"
                 :loading="loading"
                 :disabled="loading"
-                @click="fetchItems"
+                @click="options['page'] = 1; fetchItems()"
               >{{$t('Search')}}</v-btn>
             </v-col>
           </v-row>
@@ -195,6 +195,10 @@
           item-key="item_compound_id"
           class="elevation-1 mt-3"
           @pagination="changePagination"
+          :options.sync="options"
+          :server-items-length="totalItems"
+          :loading="loading_items"
+          :footer-props="{'items-per-page-options': [5, 10, 15]}"
         >
           <template v-slot:item.description="{ item }">
             <p style="width: 240px;">{{item.description}}</p>
@@ -235,7 +239,7 @@ import {
 import { validationMixin } from "vuelidate";
 import {slugFieldValidator} from "~/helpers/validators"
 
-let default_category_value = {category_compound_id: 'all', description: 'All'}
+let default_category_value = {category_compound_id: null, description: 'All'}
 export default {
   middleware: ["authenticated"],
   components: {
@@ -260,21 +264,24 @@ export default {
       category_group: [],
       img_url: '',
       loading: false,
+      loading_items: false,
+      options: {},
+      totalItems: 0,
       filter__company: null,
       filter__item_description: '',
       filter__item_code: '',
       filter__category: default_category_value,
       category_filter_options: [default_category_value, ],
       headers: [
-        { text: this.$t('Image'), value: 'image' },
-        { text: this.$t('Code'), value: 'item_code' },
-        { text: this.$t('Description'), value: 'description' },
-        { text: this.$t('Category'), value: 'category' },
-        { text: this.$t('Unit'), value: 'unit' },
-        { text: this.$t('Barcode'), value: 'barcode' },
-        { text: 'Status', value: 'status' },
-        { text: this.$t('Technical description'), value: 'technical_description' },
-        { text: this.$t('Actions'), value: 'actions' },
+        { text: this.$t('Image'), value: 'image', sortable: false},
+        { text: this.$t('Code'), value: 'item_code', sortable: false},
+        { text: this.$t('Description'), value: 'description', sortable: false},
+        { text: this.$t('Category'), value: 'category', sortable: false},
+        { text: this.$t('Unit'), value: 'unit', sortable: false},
+        { text: this.$t('Barcode'), value: 'barcode', sortable: false},
+        { text: 'Status', value: 'status', sortable: false},
+        { text: this.$t('Technical description'), value: 'technical_description', sortable: false },
+        { text: this.$t('Actions'), value: 'actions', sortable: false},
       ]
     };
   },
@@ -314,6 +321,9 @@ export default {
         }
         let data = await this.$store.dispatch("item/createItem", formData);
         if (data) {
+          if (this.filter__company.item_table === data.item_table){
+            this.items.push(data)
+          }
           // Clearing fields
           this.$v.$reset()
           // this avoid "This field is required" errors by vuelidate
@@ -333,19 +343,32 @@ export default {
     },
 
     async fetchItems(){
+      this.loading_items = true
+      const { sortBy, sortDesc, page, itemsPerPage } = this.options
+      /** console.log(">>>>>>> sortBy: ", sortBy) */
+      /** console.log(">>>>>>> sortDesc: ", sortDesc) */
+      console.log(">>>>>>> page front: ", page)
+      console.log(">>>>>>> itemsPerPage front: ", itemsPerPage)
       let query_strings = ""
+      query_strings += `page=${page}&`
+      query_strings += `items_per_page=${itemsPerPage}&`
       query_strings += `item_table=${this.filter__company.item_table}&`
       query_strings += this.filter__category.category_compound_id ? `category=${this.filter__category.category_compound_id}&` : ''
       query_strings += this.filter__item_code ? `item_code=${this.filter__item_code}&` : ''
-      query_strings += this.filter__item_description ? `item_description=${this.filter__item_description}&` : ''
+      query_strings += this.filter__item_description ? `description=${this.filter__item_description}&` : ''
       if (query_strings !== "") {
         query_strings = query_strings.slice(0, -1) // remove the last '&' character
       }
-      let items = await this.$store.dispatch("item/fetchItems", query_strings);
+      let {items, current_page, lastPage, total} = await this.$store.dispatch("item/fetchItems", query_strings);
       console.log(">>>>>>> items: ", items)
+      console.log(">>>>>>> current_page: ", current_page)
+      console.log(">>>>>>> lastPage: ", lastPage)
+      console.log(">>>>>>> total: ", total)
       if (items) {
         this.items = items
+        this.totalItems = total
       }
+      this.loading_items = false
     },
 
     async fetchCategoriesToSearchItems(){
@@ -365,7 +388,7 @@ export default {
     },
 
     changePagination(event){
-      console.log(">>>>>>>event: ", event)
+      /** console.log(">>>>>>>changePagination event: ", event) */
     },
 
     deleteItem(itemToDelete) {
@@ -528,6 +551,14 @@ export default {
   /** mounted() { */
     /** console.log('>>>>>>>>>>>>>>>>>> CDN url: ', this.cdn_url) */
   /** } */
+  watch: {
+    options: {
+      handler () {
+        this.fetchItems()
+      },
+      deep: true,
+    },
+  },
 };
 </script>
 <style scoped>
