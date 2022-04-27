@@ -9,7 +9,7 @@ from rest_framework.parsers import FormParser, MultiPartParser
 from .validators import agent_has_access_to_this_item_table, agent_has_access_to_this_price_table 
 from user.validators import req_user_is_agent_without_all_estabs
 from .facade import get_categories_by_agent, get_categories_to_create_item_by_agent_without_all_estabs, get_companies_to_create_pricetabe_by_agent, get_items_by_agent, get_price_tables_by_agent
-from .serializers import ForTablePriceItemSerializer, ItemPOSTSerializer, ItemPUTSerializer, CategoryPOSTSerializer, CategoryPUTSerializer, ItemTablePOSTSerializer, ItemTablePUTSerializer, PriceTableGetSerializer, PriceTablePOSTSerializer, SpecificPriceTablePUTSerializer, SpecificPriceItemSerializer
+from .serializers import ForTablePriceItemSerializer, ItemPOSTSerializer, ItemPUTSerializer, CategoryPOSTSerializer, CategoryPUTSerializer, ItemTablePOSTSerializer, ItemTablePUTSerializer, PriceItemForAgentsSerializer, PriceTableGetSerializer, PriceTablePOSTSerializer, SpecificPriceTablePUTSerializer, SpecificPriceItemSerializer
 from .models import ItemTable, Item, ItemCategory, PriceTable, PriceItem
 from rest_framework.views import APIView
 from rolepermissions.checkers import has_permission, has_role
@@ -200,6 +200,8 @@ class fetchCategoriesToCreateItem(APIView):
 page_query_string = openapi.Parameter('page', openapi.IN_QUERY, description="page number", type=openapi.TYPE_INTEGER)
 items_per_page_query_string = openapi.Parameter('items_per_page', openapi.IN_QUERY, description="items per page", 
         type=openapi.TYPE_INTEGER)
+sort_by_query_string = openapi.Parameter('sort_by', openapi.IN_QUERY, description="sort by", type=openapi.TYPE_STRING)
+sort_desc_query_string = openapi.Parameter('sort_desc', openapi.IN_QUERY, description="sort desc", type=openapi.TYPE_STRING)
 item_table_query_string = openapi.Parameter('item_table', openapi.IN_QUERY, description="item_table_compound_id field", type=openapi.TYPE_STRING)
 category_query_string = openapi.Parameter('category', openapi.IN_QUERY, description="category_compound_id field", type=openapi.TYPE_STRING)
 item_code_query_string = openapi.Parameter('item_code', openapi.IN_QUERY, description="item_code", 
@@ -215,10 +217,14 @@ class ItemView(APIView):
     def get(self, request):
         if has_permission(request.user, 'get_items'):
             kwargs = {}
+            sort_desc = True if request.GET.get("sort_desc") == "true" else False
+            sort_by = request.GET.get("sort_by") if request.GET.get("sort_by") in ["item_code", "description"] else "item_code"
+            if sort_desc:
+                sort_by = '-' + sort_by
             page = request.GET.get("page")
-            items_per_page = request.GET.get("items_per_page")
             page = int(page) if page and page.isdigit() else 1
-            items_per_page = int(items_per_page) if items_per_page and items_per_page in ["5", "10", "15"] else 10
+            items_per_page = request.GET.get("items_per_page")
+            items_per_page = int(items_per_page) if items_per_page in ["5", "10", "15"] else 10
             start = (page - 1) * items_per_page
             end = page * items_per_page
             if request.GET.get("item_table"): kwargs.update({"item_table__item_table_compound_id": request.GET.get("item_table")})
@@ -226,9 +232,12 @@ class ItemView(APIView):
             if request.GET.get("item_code"): kwargs.update({"item_code": request.GET.get("item_code")})
             if request.GET.get("description"): kwargs.update({"description__icontains": request.GET.get("description")})
             if has_role(request.user, 'agent'):
-                items = get_items_by_agent(request.user).filter(**kwargs)[start:end]
-                return Response(ItemPOSTSerializer(items, many=True).data)
-            items = Item.objects.filter(item_table__contracting=request.user.contracting, **kwargs)
+                items = get_items_by_agent(request.user).filter(**kwargs).order_by(sort_by)
+                total = items.count()
+                lastPage = math.ceil(total / items_per_page)
+                return Response({"items": ItemPOSTSerializer(items[start:end], many=True).data, "current_page": page,
+                    "lastPage": lastPage, "total": total })
+            items = Item.objects.filter(item_table__contracting=request.user.contracting, **kwargs).order_by(sort_by)
             total = items.count()
             lastPage = math.ceil(total / items_per_page)
             return Response({"items": ItemPOSTSerializer(items[start:end], many=True).data, "current_page": page,
@@ -315,24 +324,24 @@ class fetchCompaniesToCreatePriceTable(APIView):
             return Response(serializer.data)
         return
 
-class fetchItemsToCreatePriceTable(APIView):
-    def get(self, request, item_table_compound_id):
-        if has_permission(request.user, 'create_price_table'):
-            if item_table_compound_id.split("*")[0] != request.user.contracting.contracting_code:
-                return Response({"error":[_( "The item table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
-            try:
-                item_table = ItemTable.objects.get(item_table_compound_id=item_table_compound_id)
-            except ItemTable.DoesNotExist:
-                return Response({"error":[_( "The item table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
-            if req_user_is_agent_without_all_estabs(request.user):
-                agent_item_tables = get_agent_item_tables(request.user)
-                if item_table in agent_item_tables:
-                    items = Item.objects.filter(item_table=item_table, status=1)
-                    return Response(ItemPOSTSerializer(items, many=True).data)
-                return Response({"error":[_( "The item table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
-            items = Item.objects.filter(item_table=item_table, status=1)
-            return Response(ItemPOSTSerializer(items, many=True).data)
-        return unauthorized_response
+#  class fetchItemsToCreatePriceTable(APIView):
+    #  def get(self, request, item_table_compound_id):
+        #  if has_permission(request.user, 'create_price_table'):
+            #  if item_table_compound_id.split("*")[0] != request.user.contracting.contracting_code:
+                #  return Response({"error":[_( "The item table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
+            #  try:
+                #  item_table = ItemTable.objects.get(item_table_compound_id=item_table_compound_id)
+            #  except ItemTable.DoesNotExist:
+                #  return Response({"error":[_( "The item table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
+            #  if req_user_is_agent_without_all_estabs(request.user):
+                #  agent_item_tables = get_agent_item_tables(request.user)
+                #  if item_table in agent_item_tables:
+                    #  items = Item.objects.filter(item_table=item_table, status=1)
+                    #  return Response(ItemPOSTSerializer(items, many=True).data)
+                #  return Response({"error":[_( "The item table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
+            #  items = Item.objects.filter(item_table=item_table, status=1)
+            #  return Response(ItemPOSTSerializer(items, many=True).data)
+        #  return unauthorized_response
 
 class PriceTableView(APIView):
     def get(self, request):
@@ -425,7 +434,7 @@ class PriceItemForAgentsView(APIView):
                 agent_price_tables = get_price_tables_by_agent(request.user)
                 if not price_table in agent_price_tables:
                     return Response({"error":[_( "The price table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
-            return Response(ForTablePriceItemSerializer(price_items, many=True).data)
+            return Response(PriceItemForAgentsSerializer(price_items, many=True).data)
         return unauthorized_response
 
 class SpecificPriceItemView(APIView):

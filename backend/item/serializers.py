@@ -248,3 +248,17 @@ class SpecificPriceItemSerializer(serializers.ModelSerializer):
         model = PriceItem
         fields = ['item', 'price_table', 'unit_price', 'last_modified', 'creation_date']
         read_only_fields =  ['item', 'price_table', 'last_modified', 'creation_date']
+
+
+class ItemForPriceItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Item
+        fields = ['item_compound_id', 'description', 'unit'] 
+
+class PriceItemForAgentsSerializer(serializers.ModelSerializer):
+    item = ItemForPriceItemSerializer()
+    unit_price = serializers.DecimalField(max_digits=11, decimal_places=2,required=True, validators=[positive_number])
+
+    class Meta:
+        model = PriceItem
+        fields = ['item', 'unit_price']

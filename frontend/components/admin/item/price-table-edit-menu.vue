@@ -2,7 +2,7 @@
   <div>
     <dots-menu :menu_items="menu_items" :handleClick="handleClick"/>
 
-    <v-dialog :retain-focus="false" v-model="show_edit_dialog" max-width="50%">
+    <v-dialog :retain-focus="false" v-model="show_edit_dialog" max-width="95%">
       <v-card>
         <v-card-title>{{$t('Edit')}}</v-card-title>
         <v-card-text>
@@ -45,7 +45,7 @@
 
               <!-- Price Items -->
               <v-expansion-panels>
-                <v-expansion-panel @change="fetchItemsToUpdatePriceTable">
+                <v-expansion-panel @change="fetchPriceItemsFromThePriceTable">
                   <v-expansion-panel-header>
                     <h3>{{$t('Edit Items')}}</h3>
                   </v-expansion-panel-header>
@@ -54,54 +54,92 @@
                       <v-card-title style="font-size: 1rem; font-weight: 400; line-height: 1rem">{{$t('Table Items')}}</v-card-title>
                       <v-card-text>
                         <v-container fluid>
-                          <div
-                            v-for="v in $v.price_items.$each.$iter"
-                            :key="v.item.$model"
-                          >
-                            <v-text-field
-                              :error-messages="v.errors.$model"
-                              :label="itemDescription(v.item.$model)"
-                              v-model="v.masked_price.$model"
-                              @keydown.enter.prevent=""
-                              @blur="priceErrors(v)"
-                              @input="writeUnmaskedValue($event, v)"
-                              v-money="money"
-                            >
-                              <template v-slot:append>
-                                <v-icon @click="removeItem(v.item.$model)">
-                                  mdi-minus
-                                </v-icon >
-                              </template>
-                            </v-text-field>
-                          </div>
+                          <v-simple-table>
+                            <template v-slot:default>
+                              <thead>
+                                <tr>
+                                  <th class="text-left">
+                                    Item
+                                  </th>
+                                  <th class="text-left">
+                                    {{$t('Unit price')}}
+                                  </th>
+                                  <th class="text-left">
+                                    {{$t('Unit')}}
+                                  </th>
+                                  <th class="text-left">
+                                    {{$t('Remove item')}}
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr
+                                  v-for="v in $v.price_items.$each.$iter"
+                                  :key="v.item.$model.item_compound_id"
+                                >
+                                  <td>
+                                    <p>{{v.item.$model.item_compound_id.split('*')[2] + ' - ' + v.item.$model.description}}</p>
+                                  </td>
+                                  <td>
+                                    <v-text-field
+                                      :error-messages="v.errors.$model"
+                                      v-model="v.masked_price.$model"
+                                      @keydown.enter.prevent=""
+                                      @blur="priceErrors(v)"
+                                      @input="writeUnmaskedValue($event, v)"
+                                      v-money="money"
+                                    ></v-text-field>
+                                  </td>
+                                  <td>
+                                    <p>{{v.item.$model.unit}}</p>
+                                  </td>
+                                  <td class="text-center">
+                                    <v-icon @click="removeItem(v.item.$model.item_compound_id)" color="red">
+                                      mdi-close-circle-outline
+                                    </v-icon >
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </template>
+                          </v-simple-table>
                         </v-container>
                       </v-card-text>
 
                       <v-divider></v-divider>
 
-                      <v-card-title style="font-size: 1rem; font-weight: 400; line-height: 1rem">{{$t('Available Items')}}</v-card-title>
+                      <v-card-title style="font-size: 1rem; font-weight: 400; line-height: 1rem">{{$t('Search Items')}}</v-card-title>
                       <v-card-text>
                         <v-container fluid>
                           <v-list-item-group>
-                            <div
-                              v-for="(item, key) in itemsToAdd"
-                              :key="item.item_code"
-                            >
-                              <v-list-item>
-                                <v-list-item-content>
-                                  <v-list-item-title>{{item.item_code + ' - ' + item.description + ' ( ' + item.unit + ' )'}}</v-list-item-title>
-                                </v-list-item-content>
+                            <search-items
+                              ref="search_items"
+                              :category_group="category_group"
+                              :companies="companies"
+                              :price_table="price_table"
+                              :price_items="price_items"
+                              :itsForAdminItemPage="false"
+                              :itsForPriceItems="true"
+                              @add-item="addItem"
+                            />
+                            <!-- <div -->
+                              <!-- v-for="(item, key) in itemsToAdd" -->
+                              <!-- :key="item.item_code" -->
+                            <!-- > -->
+                              <!-- <v-list-item> -->
+                                <!-- <v-list-item-content> -->
+                                  <!-- <v-list-item-title>{{item.item_code + ' - ' + item.description + ' ( ' + item.unit + ' )'}}</v-list-item-title> -->
+                                <!-- </v-list-item-content> -->
 
-                                <v-list-item-action>
-                                  <v-icon @click="addItem(item)">
-                                    mdi-plus
-                                  </v-icon >
-                                </v-list-item-action>
-                              </v-list-item>
-                              <v-divider
-                                v-if="key < itemsToAdd.length - 1"
-                              ></v-divider>
-                            </div>
+                                <!-- <v-list-item-action> -->
+                                  <!-- <v-icon @click="addItem(item)"> -->
+                                    <!-- mdi-plus -->
+                                  <!-- </v-icon > -->
+                                <!-- </v-list-item-action> -->
+                              <!-- </v-list-item> -->
+                              <!-- <v-divider -->
+                                <!-- v-if="key < itemsToAdd.length - 1" -->
+                              <!-- ></v-divider> -->
+                            <!-- </div> -->
                           </v-list-item-group>
                         </v-container>
                       </v-card-text>
@@ -165,7 +203,7 @@ export default {
       show_edit_dialog: false,
       show_delete_confirmation_dialog: false,
       price_items: [],
-      items: [],
+      price_items_already_fetched: false,
       description: null,
       note: null,
       loading: false,
@@ -186,7 +224,8 @@ export default {
             this.show_delete_confirmation_dialog = true
           }
         }] : []),
-      ]
+      ],
+      category_group: [],
     }
   },
 
@@ -202,9 +241,16 @@ export default {
           this.$store.dispatch("setAlert", { message: this.$t("Please_fill_the_form_correctly"), alertType: "error" }, { root: true })
         } else {
           this.loading = true;
+          // Fix price_items (item field should have item_compound_id as value)
+          let price_items_fixed = this.price_items.map(el=>{
+            let element = JSON.parse(JSON.stringify(el))
+            // This is doing a Deep copy
+            element.item = element.item.item_compound_id
+            return element
+          })
           let data = await this.$store.dispatch("item/updatePriceTable", {
             price_table_compound_id: this.price_table.price_table_compound_id,
-            price_items: this.price_items,
+            price_items: price_items_fixed,
             description: this.description,
             note: this.note,
           })
@@ -228,31 +274,16 @@ export default {
         }
       },
 
-      // TODO : it would be better if it have only one query
-      async fetchItemsToUpdatePriceTable(){
-        // it would run every time the v-expansion-panel emited @change if in didn't add this if
-        if (this.items.length === 0) {
-          /** console.log(">>>>>>> $$$$$$$$$$$$$$ this.price_table.item_table: ", this.price_table.item_table) */
-          /** console.log(">>>>>>> $$$$$$$$$$$$$$ this.item_group: ", this.item_group) */
-          let item_group_already_exists = this.item_group.find(el=>el.item_table===this.price_table.item_table)
-          if (item_group_already_exists){
-            this.items = item_group_already_exists.items
-          } 
-          else {
-            let items = await this.$store.dispatch("item/fetchItemsToCreatePriceTable", this.price_table.item_table); 
-            if (items){
-              this.item_group.push({item_table: this.price_table.item_table, items: items} )
-              this.items = items
-              /** console.log(">>>>>>> !!!!!!!!!!! what is going on? ", this.item_group) */
-            }
-          }
-          // Fetch price items after fetch items
-          //TODO it could receive price_items from the parent component (when you have just created a price_table for ex)
-          this.fetchPriceItemsFromThePriceTable()
-        }
-      },
+      /** async fetchItemsToUpdatePriceTable(){ */
+          /** let items = await this.$store.dispatch("item/fetchItemsToCreatePriceTable", this.price_table.item_table);  */
+          /** if (items){ */
+            /** this.items = items */
+          /** } */
+      /** }, */
 
       async fetchPriceItemsFromThePriceTable(){
+        // it jill run every time the v-expansion-panel emit @change 
+        if (!this.price_items_already_fetched) {
           let price_items = await this.$store.dispatch("item/fetchPriceItemsFromThePriceTable", this.price_table.price_table_compound_id); 
           if (price_items){
             for (let index in price_items){
@@ -261,21 +292,20 @@ export default {
               price_item['masked_price'] = price_item.unit_price.toLocaleString('pt-br',{style: 'currency', currency: 'BRL'})
             }
             this.price_items = price_items
+            this.price_items_already_fetched = true
             console.log(">>>>>>> this.price_items: ", this.price_items)
+          }
         }
       },
 
       // Price Item Functions
       removeItem(item_compound_id){
-        this.price_items = this.price_items.filter((obj)=> obj.item !== item_compound_id)
+        this.price_items = this.price_items.filter((obj)=> obj.item.item_compound_id !== item_compound_id)
       },
       addItem(item){
         item.unit_price = null
-        this.price_items.push({item: item.item_compound_id, unit_price: 0, masked_price: '', errors: []})
-      },
-      itemDescription(item_compound_id){
-        let item = this.items.filter((item)=> item.item_compound_id === item_compound_id)[0]
-        return item.item_code + " - " + item.description + " ( " + item.unit + " )" 
+        this.price_items.push({item: {item_compound_id: item.item_compound_id, description: item.description, unit: item.unit}, 
+          unit_price: 0, masked_price: '', errors: []})
       },
 
       // Permission Functions
@@ -346,20 +376,6 @@ export default {
       !this.$v.note.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 800));
       return errors;
     },
-
-    // Item Price
-    itemsToAdd(){
-      return this.items.filter((item)=> {
-        let return_value = true
-        let price_items = this.price_items
-        for (const prop in price_items){
-          if (price_items[prop].item === item.item_compound_id){
-            return_value = false
-          }
-        }
-        return return_value
-      })
-    }
   },
 
   mounted() {
@@ -377,3 +393,6 @@ export default {
   /** } */
 }
 </script>
+
+<style scoped>
+</style>

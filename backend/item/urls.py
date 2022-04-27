@@ -17,7 +17,6 @@ from item.views import (
     fetchCategoriesToCreateItem,
     fetchCompaniesToCreatePriceTable,
     fetchItemTablesToCreateItemOrCategoryOrPriceTable,
-    fetchItemsToCreatePriceTable,
 )
 
 app_name = 'item'
@@ -32,7 +31,7 @@ urlpatterns = [
     path('item', ItemView.as_view()),
     path('item/<item_compound_id>', SpecificItemView.as_view()),
     path('companies_to_create_price_table', fetchCompaniesToCreatePriceTable.as_view()),
-    path('items_to_create_price_table/<item_table_compound_id>', fetchItemsToCreatePriceTable.as_view()),
+    #  path('items_to_create_price_table/<item_table_compound_id>', fetchItemsToCreatePriceTable.as_view()),
     path('pricetable', PriceTableView.as_view()),
     path('pricetable/<price_table_compound_id>', SpecificPriceTableView.as_view()),
     path('get_price_items_for_agents/<price_table_compound_id>', PriceItemForAgentsView.as_view()),

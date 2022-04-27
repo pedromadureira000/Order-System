@@ -149,10 +149,9 @@ export default {
   components: {
     "dots-menu": require("@/components/dots-menu.vue").default,
   },
-  props: ['item', 'companies', 'category_group'],
+  props: ['item', 'companies', 'category_group', 'item_company'],
   data() {
     return {
-      item_company: null,
       show_edit_dialog: false,
       show_delete_confirmation_dialog: false,
       category: null,
@@ -346,8 +345,6 @@ export default {
     this.status = String(this.item.status)
     this.technical_description = this.item.technical_description
     this.img_url = this.getImageUrl(this.item.image)
-    // Default value for item_company
-    this.item_company = this.companies.find(el=>el.item_table === this.item.item_table)
   },
 
   watch: {

@@ -180,15 +180,15 @@ export const actions: ActionTree<ItemState, RootState> = {
   },
 
   
-  async fetchItemsToCreatePriceTable({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, item_table_compound_id: string){
-    try {
-      let items = await api.fetchItemsToCreatePriceTable(item_table_compound_id)
-      return items
-    }
-    catch(error){
-      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("fetchItemsToCreatePriceTable_error_msg"))
-    }
-  },
+  // async fetchItemsToCreatePriceTable({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, item_table_compound_id: string){
+    // try {
+      // let items = await api.fetchItemsToCreatePriceTable(item_table_compound_id)
+      // return items
+    // }
+    // catch(error){
+      // ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("fetchItemsToCreatePriceTable_error_msg"))
+    // }
+  // },
 
   async fetchPriceItemsFromThePriceTable({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, price_table_compound_id: string){
     try {

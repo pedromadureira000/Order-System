@@ -790,14 +790,14 @@ export default {
 	},
 
   
-	async fetchItemsToCreatePriceTable(item_table_compound_id){
-		return await axios({ 
-		method: "get",
-		url: `/api/item/items_to_create_price_table/${item_table_compound_id}`,
-			}).then((request) => {
-					return request.data 
-				})
-	},
+	// async fetchItemsToCreatePriceTable(item_table_compound_id){
+		// return await axios({ 
+		// method: "get",
+		// url: `/api/item/items_to_create_price_table/${item_table_compound_id}`,
+			// }).then((request) => {
+					// return request.data 
+				// })
+	// },
 
   
 	async fetchPriceItemsFromThePriceTable(price_table_compound_id){

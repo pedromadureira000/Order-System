@@ -23,7 +23,6 @@
                     :items="companies"
                     :item-text="(x) => x.company_code + ' - ' + x.name"
                     :item-value="(x) => x"
-                    @change="fetchItemsToCreatePriceTable"
                   ></v-select>
                 </v-col>
               </v-row>
@@ -213,7 +212,7 @@ export default {
       this.companies.push(...companies)
       if (this.companies.length > 0){
         this.company = this.companies[0]
-        await this.fetchItemsToCreatePriceTable()
+        /** await this.fetchItemsToCreatePriceTable() */
       }
     }
   },
@@ -242,19 +241,19 @@ export default {
       this.price_tables = this.price_tables.filter((item) => item.price_table_compound_id != itemToDelete.price_table_compound_id);
     },
 
-    async fetchItemsToCreatePriceTable(){
-          let item_already_exists = this.item_group.find(el=>el.item_table == this.company.item_table)
-          if (item_already_exists){
-            this.items = item_already_exists.items
-          }
-          else{
-            let items = await this.$store.dispatch("item/fetchItemsToCreatePriceTable", this.company.item_table); 
-            if (items){
-              this.item_group.push({item_table: this.company.item_table, items: items} )
-              this.items = items
-            }
-          }
-    },
+    /** async fetchItemsToCreatePriceTable(){ */
+          /** let item_already_exists = this.item_group.find(el=>el.item_table == this.company.item_table) */
+          /** if (item_already_exists){ */
+            /** this.items = item_already_exists.items */
+          /** } */
+          /** else{ */
+            /** let items = await this.$store.dispatch("item/fetchItemsToCreatePriceTable", this.company.item_table);  */
+            /** if (items){ */
+              /** this.item_group.push({item_table: this.company.item_table, items: items} ) */
+              /** this.items = items */
+            /** } */
+          /** } */
+    /** }, */
 
     // Price Item Functions
     removeItem(item_compound_id){
