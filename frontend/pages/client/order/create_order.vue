@@ -52,7 +52,7 @@
                 >{{$t('Add')}}</v-btn>
               </v-col>
               <v-col cols="1" style="display: flex; align-items: center;">
-                <v-icon @click="show_search_dialog = true" large>
+                <v-icon @click="show_search_dialog = true; search_dialog_was_already_open = true" large>
                   mdi-magnify
                 </v-icon >
               </v-col>
@@ -177,8 +177,8 @@
                 v-model="filter__category"
                 :label="$t('Category')"
                 :items="categories"
-                :item-text="(x) => x.category_compound_id === 'all' ? $t(x.description) : x.category_compound_id + ' - ' + x.description"
-                :item-value="(x) => x.category_compound_id"
+                :item-text="(x) => x.category_compound_id ? x.category_compound_id.split('*')[2] + ' - ' + x.description : $t(x.description)"
+                return-object
               ></v-select>
               <v-text-field
                 :label="$t('Item description')"
@@ -188,7 +188,13 @@
           </v-card-text>
           <v-card-actions>
             <v-spacer />
-            <v-btn class="blue--text darken-1" text @click="searchPriceItemsToMakeOrder">{{$t('Search')}}</v-btn>
+            <v-btn 
+              class="blue--text darken-1" 
+              text 
+              @click="options['page'] = 1; searchPriceItemsToMakeOrder()"
+              :loading="loading_items"
+              :disabled="loading_items"
+            >{{$t('Search')}}</v-btn>
             <v-btn class="blue--text darken-1" text @click="show_search_dialog = false">{{$t('Close')}}</v-btn>
           </v-card-actions>
 
@@ -200,6 +206,10 @@
                   :items="search_results"
                   class="elevation-1"
                   item-key="item.item.item_compound_id"
+                  :options.sync="options"
+                  :server-items-length="totalItems"
+                  :loading="loading_items"
+                  :footer-props="{'items-per-page-options': [5, 10, 15]}"
                 >
                   <template v-slot:item.image="{ item }">
                     <v-img
@@ -302,7 +312,7 @@ import {validationMixin} from "vuelidate";
 import {decimal_only_2places, slugFieldValidator} from "~/helpers/validators"
 import {mask} from 'vue-the-mask'
 
-let default_category_value = {category_compound_id: 'all', description: 'All'}
+let default_category_value = {category_compound_id: null, description: 'All'}
 export default {
   name: "CreateOrder",
   middleware: ["authenticated"],
@@ -323,6 +333,11 @@ export default {
       categories: [default_category_value, ],
       price_table: null,
       default_quantity: 1,
+      // ---
+      search_dialog_was_already_open: false,
+      options: {},
+      totalItems: 0,
+      loading_items: false,
       item_code_to_search: "",
       filter__category: default_category_value,
       filter__item_description: "",
@@ -331,24 +346,24 @@ export default {
       show_you_have_no_establishments_to_buy_message: false,
       show_search_dialog: false,
       ordered_items_headers: [
-        { text: this.$t('Image'), value: 'image' },
-        { text: this.$t('Code'), value: 'item_code' },
-        { text: this.$t('Description'), value: 'item_description', width: '100%' },
+        { text: this.$t('Image'), value: 'image', sortable: false },
+        { text: this.$t('Code'), value: 'item_code', sortable: false },
+        { text: this.$t('Description'), value: 'item_description', width: '100%', sortable: false },
         /** { text: this.$t('Category'), value: 'category' }, */
-        { text: this.$t('Unit price'), value: 'unit_price', align: 'right' },
-        { text: this.$t('Quantity'), value: 'quantity', width: '10%'},
-        { text: this.$t('Unit'), value: 'unit' },
-        { text: 'Total', value: 'total', align: 'right' },
-        { text: this.$t('Remove item'), value: 'remove_item' },
+        { text: this.$t('Unit price'), value: 'unit_price', align: 'right', sortable: false },
+        { text: this.$t('Quantity'), value: 'quantity', width: '10%', sortable: false},
+        { text: this.$t('Unit'), value: 'unit', sortable: false },
+        { text: 'Total', value: 'total', align: 'right', sortable: false },
+        { text: this.$t('Remove item'), value: 'remove_item', sortable: false },
       ],
       searched_items_headers: [
-        { text: this.$t('Image'), value: 'image' },
-        { text: this.$t('Code'), value: 'item_code' },
-        { text: this.$t('Description'), value: 'item_description' },
+        { text: this.$t('Image'), value: 'image', sortable: false,  },
+        { text: this.$t('Code'), value: 'item_code', sortable: true },
+        { text: this.$t('Description'), value: 'item_description', sortable: true },
         /** { text: this.$t('Category'), value: 'category' }, */
-        { text: this.$t('Unit'), value: 'unit' },
-        { text: this.$t('Unit price'), value: 'unit_price' },
-        { text: this.$t('Add item'), value: 'add_item' },
+        { text: this.$t('Unit'), value: 'unit', sortable: false },
+        { text: this.$t('Unit price'), value: 'unit_price', sortable: true },
+        { text: this.$t('Add item'), value: 'add_item', sortable: false },
       ]
     };
   },
@@ -428,12 +443,25 @@ export default {
     },
 
     async searchPriceItemsToMakeOrder(){
-      let filter_parameters = {establishment: this.establishment.establishment_compound_id, category: this.filter__category.category_compound_id, 
-        item_description: this.filter__item_description}
-      let search_results = await this.$store.dispatch("order/searchPriceItemsToMakeOrder", filter_parameters);
-      if (search_results){
-        this.search_results = search_results
+      this.loading_items = true
+      const { sortBy, sortDesc, page, itemsPerPage } = this.options
+      let query_strings = ""
+      query_strings += sortBy[0] ? `sort_by=${sortBy[0]}&` : ''
+      query_strings += sortDesc[0] ? `sort_desc=${sortDesc[0]}&` : ''
+      query_strings += `page=${page}&`
+      query_strings += `items_per_page=${itemsPerPage}&`
+      query_strings += this.filter__category.category_compound_id ? `category=${this.filter__category.category_compound_id}&` : ''
+      query_strings += this.filter__item_description ? `item_description=${this.filter__item_description}&` : ''
+      if (query_strings !== "") {
+        query_strings = query_strings.slice(0, -1) // remove the last '&' character
       }
+      let {price_items, current_page, lastPage, total} = await this.$store.dispatch("order/searchPriceItemsToMakeOrder", 
+        {establishment: this.establishment.establishment_compound_id, query_strings: query_strings });
+      if (price_items){
+        this.search_results = price_items
+        this.totalItems = total
+      }
+      this.loading_items = false
     },
 
     async fetchCategoriesToMakeOrderAndGetPriceTableInfo(){
@@ -573,7 +601,18 @@ export default {
   },
 
   /** mounted() { */
-  /** } */
+  /** }, */
+
+  watch: {
+    options: {
+      handler () {
+        if (this.search_dialog_was_already_open){
+          this.searchPriceItemsToMakeOrder()
+        }
+      },
+      deep: true,
+    },
+  },
 };
 </script>
 <style scoped>

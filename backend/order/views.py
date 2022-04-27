@@ -15,6 +15,7 @@ from drf_yasg.utils import swagger_auto_schema
 from settings.response_templates import not_found_response, serializer_invalid_response, unauthorized_response, unknown_exception_response
 from django.utils.translation import gettext_lazy as _
 from drf_yasg import openapi
+import math
 
 class fetchClientEstabsToCreateOrder(APIView):
     def get(self, request):
@@ -39,24 +40,54 @@ class searchOnePriceItemToMakeOrder(APIView):
             return Response(searchOnePriceItemToMakeOrderSerializer(price_item).data)
         return unauthorized_response
 
-# return Response({"error":[_( "The item was not found.")]}, status=status.HTTP_404_NOT_FOUND)
+
+page_query_string = openapi.Parameter('page', openapi.IN_QUERY, description="page number", type=openapi.TYPE_INTEGER)
+items_per_page_query_string = openapi.Parameter('items_per_page', openapi.IN_QUERY, description="items per page", 
+        type=openapi.TYPE_INTEGER)
+sort_by_query_string = openapi.Parameter('sort_by', openapi.IN_QUERY, description="sort by", type=openapi.TYPE_STRING)
+sort_desc_query_string = openapi.Parameter('sort_desc', openapi.IN_QUERY, description="sort desc", type=openapi.TYPE_STRING)
+#  item_code_query_string = openapi.Parameter('item_code', openapi.IN_QUERY, description="item_code", 
+        #  type=openapi.TYPE_STRING)
+category_query_string = openapi.Parameter('category', openapi.IN_QUERY, description="category_compound_id field", type=openapi.TYPE_STRING)
+item_description_query_string = openapi.Parameter('item_description', openapi.IN_QUERY, description="item description field", 
+        type=openapi.TYPE_STRING)
+
 class SearchPriceItemsToMakeOrder(APIView):
-    def get(self, request, establishment_compound_id, category_compound_id, item_description):
+
+    @swagger_auto_schema(manual_parameters=[item_description_query_string, category_query_string, page_query_string, items_per_page_query_string, sort_by_query_string, sort_desc_query_string]) 
+    def get(self, request, establishment_compound_id):
         if has_permission(request.user, 'create_order'):
+            kwargs = {}
+            sort_desc = True if request.GET.get("sort_desc") == "true" else False
+            if request.GET.get("sort_by") == "item_code":
+                sort_by = "item__item_code"
+            elif request.GET.get("sort_by") == "item_description":
+                sort_by = "item__description"
+            elif request.GET.get("sort_by") == "unit_price":
+                sort_by = request.GET.get("sort_by") 
+            else:
+                sort_by = "item__item_code"
+            if sort_desc:
+                sort_by = '-' + sort_by
+            page = request.GET.get("page")
+            page = int(page) if page and page.isdigit() else 1
+            items_per_page = request.GET.get("items_per_page")
+            items_per_page = int(items_per_page) if items_per_page in ["5", "10", "15"] else 10
+            start = (page - 1) * items_per_page
+            end = page * items_per_page
+            if request.GET.get("category"): kwargs.update({"item__category__category_compound_id": request.GET.get("category")})
+            #  if request.GET.get("item_code"): kwargs.update({"item_code": request.GET.get("item_code")})
+            if request.GET.get("item_description"): kwargs.update({"item__description__icontains": request.GET.get("item_description")})
             try:
                 price_table = PriceTable.objects.get(clientestablishment__client=request.user.client, 
                         clientestablishment__establishment__establishment_compound_id=establishment_compound_id)
             except PriceTable.DoesNotExist:
                 return Response({"error":[_( "The price table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
-            if item_description == 'dontsearchanyitemdescription':
-                item_description = ''
-            if category_compound_id == 'all':
-                price_items = PriceItem.objects.filter(price_table=price_table, item__status=1, 
-                    item__description__icontains=item_description)
-            else:
-                price_items = PriceItem.objects.filter(price_table=price_table, item__status=1, 
-                    item__category__category_compound_id=category_compound_id, item__description__icontains=item_description)
-            return Response(searchOnePriceItemToMakeOrderSerializer(price_items, many=True).data)
+            price_items = PriceItem.objects.filter(price_table=price_table, item__status=1, **kwargs).order_by(sort_by)
+            total = price_items.count()
+            lastPage = math.ceil(total / items_per_page)
+            return Response({"price_items": searchOnePriceItemToMakeOrderSerializer(price_items[start:end], many=True).data, 
+                "current_page": page, "lastPage": lastPage, "total": total })
         return unauthorized_response
 
 class fetchCategoriesToMakeOrderAndGetPriceTableInfo(APIView):

@@ -125,7 +125,7 @@ class OrderPOSTSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(_("You must add at least one item to the order."))
         for ordered_item in attrs['ordered_items']:
             if ordered_item['item'] not in available_items:
-                raise serializers.ValidationError(_("You cannot add this item to the order."))
+                raise serializers.ValidationError(_("You cannot add the item whose code is '{item}' to the order.").format(item=ordered_item['item'].item_code))
             # Deny duplicate values
             if ordered_item in check_for_duplicate_values:
                 raise serializers.ValidationError(_("There are duplicate items."))
@@ -262,7 +262,7 @@ class OrderPUTSerializer(serializers.ModelSerializer):
                 available_items = client_establishment.price_table.items.filter(status=1)
                 for ordered_item in ordered_items:
                     if ordered_item['item'] not in available_items:
-                        raise serializers.ValidationError(_("You cannot add this item to the order."))
+                        raise serializers.ValidationError(_("You cannot add the item whose code is '{item}' to the order.").format(item=ordered_item['item'].item_code))
                     # Deny duplicate values
                     if ordered_item in check_for_duplicate_values:
                         raise serializers.ValidationError(_("There are duplicate items."))

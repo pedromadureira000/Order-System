@@ -53,71 +53,6 @@
                 @blur="$v.note.$touch()"
                 class="mb-3"
               />
-              <!-- Price Items -->
-              <v-expansion-panels>
-                <v-expansion-panel>
-                  <v-expansion-panel-header>
-                    <h3>{{$t('Add Items')}}</h3>
-                  </v-expansion-panel-header>
-                  <v-expansion-panel-content>
-                    <v-card outlined>
-                      <v-card-title style="font-size: 1rem; font-weight: 400; line-height: 1rem">{{$t('Table Items')}}</v-card-title>
-                      <v-card-text>
-                        <v-container fluid>
-                          <v-text-field
-                            v-for="v in $v.price_items.$each.$iter"
-                            :key="v.item.$model"
-                            :error-messages="v.errors.$model"
-                            :label="itemDescription(v.item.$model)"
-                            v-model="v.masked_price.$model"
-                            @keydown.enter.prevent=""
-                            @blur="priceErrors(v)"
-                            @input="writeUnmaskedValue($event, v)"
-                            v-money="money"
-                          >
-                            <template v-slot:append>
-                              <v-icon @click="removeItem(v.item.$model)">
-                                mdi-minus
-                              </v-icon >
-                            </template>
-                          </v-text-field>
-                        </v-container>
-                      </v-card-text>
-
-                      <v-divider></v-divider>
-
-                      <v-card-title style="font-size: 1rem; font-weight: 400; line-height: 1rem">{{$t('Available Items')}}</v-card-title>
-                      <v-card-text>
-                        <v-container fluid>
-                          <v-list-item-group>
-                            <div
-                              v-for="(item, key) in itemsToAdd"
-                              :key="key"
-                            >
-                              <v-list-item>
-                                <v-list-item-content>
-                                  <v-list-item-title>{{item.item_code + ' - ' + item.description + ' ( ' + item.unit + ' )'}}</v-list-item-title>
-                                </v-list-item-content>
-
-                                <v-list-item-action>
-                                  <v-icon @click="addItem(item)">
-                                    mdi-plus
-                                  </v-icon >
-                                </v-list-item-action>
-                              </v-list-item>
-                              <v-divider
-                                v-if="key < itemsToAdd.length - 1"
-                                :key="key"
-                              ></v-divider>
-                            </div>
-                          </v-list-item-group>
-                        </v-container>
-                      </v-card-text>
-                    </v-card>
-                  </v-expansion-panel-content>
-                </v-expansion-panel>
-              </v-expansion-panels>
-
               <!-- Submit -->
               <v-btn
                 class="mt-3"
@@ -147,7 +82,12 @@
             <p style="width: 240px;">{{item.description}}</p>
           </template>
           <template v-slot:item.actions="{ item }">
-            <price-table-edit-menu :price_table="item" :companies="companies" :item_group="item_group" @price-table-deleted="deletePriceTable(item)" />
+            <price-table-edit-menu 
+              :price_table="item" 
+              :companies="companies" 
+              :item_group="item_group" 
+              @price-table-deleted="deletePriceTable(item)" 
+            />
           </template>
         <template v-slot:item.note="{ item }">
           <p>{{$getNote(item.note)}}</p>
@@ -163,8 +103,6 @@ import {
   required,
   maxLength,
   minLength,
-  minValue,
-  maxValue,
 } from "vuelidate/lib/validators";
 import { validationMixin } from "vuelidate";
 import {slugFieldValidator, money} from "~/helpers/validators"
@@ -183,9 +121,6 @@ export default {
       table_code: null,
       description: null,
       note: "",
-      price_items: [],
-      /**EX: [{item: '123$123$111111', unit_price: 1055.55}, masked_price: "R$ 1.055,55" , errors: []] */
-      items: [],
       companies: [],
       item_group: [],
       /**EX:  item_group: [{item_table: '123$123', items: [{categoryObj, categoryObj2 }]}] */
@@ -226,13 +161,18 @@ export default {
         this.loading = true;
         let data = await this.$store.dispatch("item/createPriceTable", {
           company: this.company.company_compound_id,
-          price_items: this.price_items,
+          price_items: [],
           table_code: this.table_code,
           description: this.description,
           note: this.note,
         });
         if (data) {
           this.price_tables.push(data);
+          // Clear fields
+          this.table_code = ""
+          this.description = ""
+          this.note = ""
+          this.$v.$reset()
         }
         this.loading = false;
       }
@@ -241,34 +181,7 @@ export default {
       this.price_tables = this.price_tables.filter((item) => item.price_table_compound_id != itemToDelete.price_table_compound_id);
     },
 
-    /** async fetchItemsToCreatePriceTable(){ */
-          /** let item_already_exists = this.item_group.find(el=>el.item_table == this.company.item_table) */
-          /** if (item_already_exists){ */
-            /** this.items = item_already_exists.items */
-          /** } */
-          /** else{ */
-            /** let items = await this.$store.dispatch("item/fetchItemsToCreatePriceTable", this.company.item_table);  */
-            /** if (items){ */
-              /** this.item_group.push({item_table: this.company.item_table, items: items} ) */
-              /** this.items = items */
-            /** } */
-          /** } */
-    /** }, */
-
-    // Price Item Functions
-    removeItem(item_compound_id){
-      this.price_items = this.price_items.filter((obj)=> obj.item !== item_compound_id)
-    },
-    addItem(item){
-      this.price_items = this.price_items.concat([{item: item.item_compound_id, unit_price: 0, masked_price: '', errors: []}])
-    },
-    itemDescription(item_compound_id){
-      let item = this.items.filter((item)=> item.item_compound_id === item_compound_id)[0]
-      return item.item_code + " - " + item.description + " ( " + item.unit + " )" 
-    },
-
     // Permission Functions
-
     hasCreatePriceTablePermission(){
       let user = this.$store.state.user.currentUser;
       return user.permissions.includes("create_price_table")
@@ -277,22 +190,6 @@ export default {
       let user = this.$store.state.user.currentUser;
       return user.permissions.includes("get_price_tables")
     },
-
-    // Validate item
-    priceErrors(v) {
-      const errors = [];
-      /** if (!v.unit_price.$dirty){ */
-      /** } */
-      !v.unit_price.minValue && errors.push(this.$formatStr(this.$t("This_value_must_be_greater_than_X"), 'R$ 0,00'));
-      !v.unit_price.maxValue && errors.push(this.$formatStr(this.$t("This_value_must_be_less_than_X"), 'R$ 999.999.999,99'));
-      v.errors.$model = errors;
-    },
-
-    // masked_price: "R$ 1.000,00" is written over unit_price as "1000.00"
-    writeUnmaskedValue(event, v){
-      v.unit_price.$model = event.replace('R$ ', '').replace(/\./gi,'').replace(',','.')
-      /** console.log(">>>>>>> unmasked value: ", v.unit_price.$model) */
-    }
   },
 
   validations: {
@@ -309,22 +206,10 @@ export default {
     note: {
       maxLength: maxLength(800)
     },
-    price_items: {
-      $each: {
-        unit_price: {
-          maxValue: maxValue(999999999.99),
-          minValue: minValue(0.01),
-        },
-        item: {},
-        errors: {},
-        masked_price: {}
-      }
-    },
     priceTableInfoGroup: [
       "table_code",
       "description",
       "note",
-      "price_items"
     ],
   },
 
@@ -351,19 +236,6 @@ export default {
       !this.$v.note.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 800));
       return errors;
     },
-    // Item Price
-    itemsToAdd(){
-      return this.items.filter((item)=> {
-        let return_value = true
-        let price_items = this.price_items
-        for (const prop in price_items){
-          if (price_items[prop].item === item.item_compound_id){
-            return_value = false
-          }
-        }
-        return return_value
-      })
-    }
   },
 };
 </script>

@@ -886,8 +886,8 @@ export default {
 	},
 
 	async searchPriceItemsToMakeOrder(payload){
-    let url =  payload.item_description ? `/api/order/get_price_items/${payload.establishment}/${payload.category}/${payload.item_description}` :
-       `/api/order/get_price_items/${payload.establishment}/${payload.category}/dontsearchanyitemdescription`
+    let url =  payload.query_strings ? `/api/order/get_price_items/${payload.establishment}?${payload.query_strings}` : 
+      `/api/order/get_price_items/${payload.establishment}`
 		return await axios({ 
 		method: "get",
 		url: url,

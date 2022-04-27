@@ -212,8 +212,8 @@ description_query_string = openapi.Parameter('description', openapi.IN_QUERY, de
 class ItemView(APIView):
     parser_classes = [MultiPartParser, FormParser]
 
-    @swagger_auto_schema(manual_parameters=[item_table_query_string, category_query_string, item_code_query_string, 
-        description_query_string]) 
+    @swagger_auto_schema(manual_parameters=[page_query_string, items_per_page_query_string, sort_by_query_string, sort_desc_query_string, 
+        item_table_query_string, category_query_string, item_code_query_string, description_query_string]) 
     def get(self, request):
         if has_permission(request.user, 'get_items'):
             kwargs = {}
