@@ -429,7 +429,6 @@ export default {
         { text: this.$t('Add item'), value: 'add_item', sortable: false },
       ],
       // Pagination
-      options: {},
       search_dialog_was_already_open: false,
       search_dialog_was_already_open: false,
       options: {},
@@ -699,7 +698,7 @@ export default {
       }
       else{
         if (this.order.status === 1){return this.status_options.filter(el=>el.value === 0 || el.value === 1)}
-        if (this.order.status === 2){return this.status_options.filter(el=>el.value === 0 || el.value === 2)}
+        if (this.order.status === 2){return this.status_options.filter(el=>el.value === 0 || el.value === 2 || el.value === 3)}
         if (this.order.status === 3){return this.status_options.filter(el=>el.value === 0 || el.value === 4 || el.value === 3)}
         if (this.order.status === 4){return this.status_options.filter(el=>el.value === 0 || el.value === 3 || el.value === 5 || el.value === 4)}
         if (this.order.status === 5){return this.status_options.filter(el=>el.value === 0 || el.value === 4 || el.value === 5)} 

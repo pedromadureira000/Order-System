@@ -403,6 +403,8 @@ export const messages = {
     "History description": "History description",
     "Date": "Date",
     "User": "User",
+    "Initial Period": "Initial Period",
+    "Final Period": "Final Period",
     // -------------------------------------------------------------------/ Components
     // change user's password
     // -------------------------------/Problem Connecting Error dialog
@@ -818,7 +820,7 @@ export const messages = {
     "Invoiced": "Faturado",
     "Delivered": "Entregue",
     "Search Orders": "Buscar Pedidos",
-    "Period": "Periodo",
+    "Period": "Período",
     "View Details": "Ver Detalhes",
     "Order Details": "Detalhes do Pedido",
     "Edit Order": "Editar Pedido",
@@ -832,6 +834,8 @@ export const messages = {
     "History description": "Descrição do histórico",
     "Date": "Data",
     "User": "Usuário",
+    "Initial Period": "Período Initial",
+    "Final Period": "Período Final",
     // -------------------------------------------------------------------/ Components
     // change user's password
     // -------------------------------/Problem Connecting Error dialog

@@ -16,6 +16,7 @@ from settings.response_templates import not_found_response, serializer_invalid_r
 from django.utils.translation import gettext_lazy as _
 from drf_yasg import openapi
 import math
+import datetime
 
 class fetchClientEstabsToCreateOrder(APIView):
     def get(self, request):
@@ -142,6 +143,11 @@ class fetchClientsToFillFilterSelectorToSearchOrders(APIView):
             return Response(client_serializer.data)
         return unauthorized_response
 
+page_query_string = openapi.Parameter('page', openapi.IN_QUERY, description="page number", type=openapi.TYPE_INTEGER)
+items_per_page_query_string = openapi.Parameter('items_per_page', openapi.IN_QUERY, description="items per page", 
+        type=openapi.TYPE_INTEGER)
+sort_by_query_string = openapi.Parameter('sort_by', openapi.IN_QUERY, description="sort by", type=openapi.TYPE_STRING)
+sort_desc_query_string = openapi.Parameter('sort_desc', openapi.IN_QUERY, description="sort desc", type=openapi.TYPE_STRING)
 company_query_string = openapi.Parameter('company', openapi.IN_QUERY, description="company_compound_id", type=openapi.TYPE_STRING)
 establishment_query_string = openapi.Parameter('establishment', openapi.IN_QUERY, description="establishment_compound_id", 
         type=openapi.TYPE_STRING)
@@ -149,21 +155,34 @@ client_query_string = openapi.Parameter('client', openapi.IN_QUERY, description=
 invoice_number_query_string = openapi.Parameter('invoice_number', openapi.IN_QUERY, description="Order invoice_number field.", 
         type=openapi.TYPE_STRING)
 order_number_query_string = openapi.Parameter('order_number', openapi.IN_QUERY, description="Order order_number field.", type=openapi.TYPE_STRING)
-#  period_query_string = openapi.Parameter('period', openapi.IN_QUERY, description="Period in ?? format.", type=openapi.TYPE_STRING)
+initial_period_query_string = openapi.Parameter('initial_period', openapi.IN_QUERY, description="Initial period in ?? format.",
+        type=openapi.TYPE_STRING)
+final_period_query_string = openapi.Parameter('final_period', openapi.IN_QUERY, description="Final period in ?? format.", type=openapi.TYPE_STRING)
 status_query_string = openapi.Parameter('status', openapi.IN_QUERY, description="pending = Typing, Transferred or Registered; 0 = Canceled; 1 = Typing; 2 = Transferred; 3 = Registered; 4 = Invoiced; 5 = Delivered", type=openapi.TYPE_STRING)
 class OrderView(APIView):
-    @transaction.atomic
     @swagger_auto_schema(manual_parameters=[company_query_string, establishment_query_string, client_query_string, 
         invoice_number_query_string, order_number_query_string, status_query_string]) 
     def get(self, request):
         if has_permission(request.user, 'get_orders'):
             kwargs = {}
+            sort_desc = True if request.GET.get("sort_desc") == "true" else False
+            sort_by = request.GET.get("sort_by") if request.GET.get("sort_by") in ["order_number", "order_date", "status", 
+                    "order_amount" ] else "-order_date"
+            if sort_desc:
+                sort_by = '-' + sort_by
+            page = request.GET.get("page")
+            page = int(page) if page and page.isdigit() else 1
+            items_per_page = request.GET.get("items_per_page")
+            items_per_page = int(items_per_page) if items_per_page in ["5", "10", "15"] else 10
+            start = (page - 1) * items_per_page
+            end = page * items_per_page
             if request.GET.get("company"): kwargs.update({"company__company_compound_id": request.GET.get("company")})
             if request.GET.get("establishment"): kwargs.update({"establishment__establishment_compound_id": request.GET.get("establishment")})
             if request.GET.get("client"): kwargs.update({"client__client_compound_id": request.GET.get("client")})
             if request.GET.get("invoice_number"): kwargs.update({"invoice_number": request.GET.get("invoice_number")})
             if request.GET.get("order_number"): kwargs.update({"order_number": request.GET.get("order_number")})
-            #  if request.GET.get("period"): kwargs.update({"period": request.GET.get("period")})
+            if request.GET.get("initial_period"): kwargs.update({"order_date__gte": request.GET.get("initial_period")})
+            if request.GET.get("final_period"): kwargs.update({"order_date__lte": request.GET.get("final_period")})
             if request.GET.get("status"): kwargs.update({"status": request.GET.get("status")})
             #  print('>>>>>>>kwargs: ', kwargs)
             if kwargs.get("status") and kwargs["status"] == "pending":
@@ -171,13 +190,22 @@ class OrderView(APIView):
                 kwargs.update({"status__in": [1,2,3] })
             if has_role(request.user, 'client_user'):
                 if kwargs.get("client"): kwargs.pop("client")
-                orders = Order.objects.filter(client=request.user.client, **kwargs )
-                return Response(OrderGetSerializer(orders, many=True).data)
+                orders = Order.objects.filter(client=request.user.client, **kwargs ).order_by(sort_by)
+                total = orders.count()
+                lastPage = math.ceil(total / items_per_page)
+                return Response({"orders": OrderGetSerializer(orders[start:end], many=True).data, "current_page": page,
+                    "lastPage": lastPage, "total": total })
             if req_user_is_agent_without_all_estabs(request.user):
-                orders = get_orders_by_agent(request.user).filter(**kwargs)
-                return Response(OrderGetSerializer(orders, many=True).data)
-            orders = Order.objects.filter(company__contracting=request.user.contracting, **kwargs)
-            return Response(OrderGetSerializer(orders, many=True).data)
+                orders = get_orders_by_agent(request.user).filter(**kwargs).order_by(sort_by)
+                total = orders.count()
+                lastPage = math.ceil(total / items_per_page)
+                return Response({"orders": OrderGetSerializer(orders[start:end], many=True).data, "current_page": page,
+                    "lastPage": lastPage, "total": total })
+            orders = Order.objects.filter(company__contracting=request.user.contracting, **kwargs).order_by(sort_by)
+            total = orders.count()
+            lastPage = math.ceil(total / items_per_page)
+            return Response({"orders": OrderGetSerializer(orders[start:end], many=True).data, "current_page": page,
+                "lastPage": lastPage, "total": total })
         return unauthorized_response
     @swagger_auto_schema(request_body=OrderPOSTSerializer) 
     @transaction.atomic

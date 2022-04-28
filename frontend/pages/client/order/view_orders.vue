@@ -71,14 +71,6 @@
                   class="mr-2"
                 />
               </v-col>
-              <!-- Period -->
-              <v-col cols="3">
-                <v-text-field
-                  :label="$t('Period')"
-                  v-model="period"
-                  class="mr-2"
-                />
-              </v-col>
               <!-- Status -->
               <v-col
                 class="d-flex"
@@ -92,14 +84,45 @@
                   return-object
                 ></v-select>
               </v-col>
+              <!-- Period -->
+              <v-col cols="3">
+                <v-row>
+                  <v-col class="ml-3">
+                    <v-text-field
+                      :label="$t('Initial Period')"
+                      v-model="initial_period"
+                      class="mr-2"
+                      outlined
+                      dense
+                      placeholder="dd/mm/yyyy"
+                      persistent-placeholder
+                      v-mask="'##/##/####'"
+                      type="tel"
+                    />
+                  </v-col>
+                  <v-col>
+                    <v-text-field
+                      :label="$t('Final Period')"
+                      v-model="final_period"
+                      class="mr-2"
+                      outlined
+                      dense
+                      placeholder="dd/mm/yyyy"
+                      persistent-placeholder
+                      v-mask="'##/##/####'"
+                      type="tel"
+                    />
+                  </v-col>
+                </v-row>
+              </v-col>
               <!-- Submit -->
               <v-col cols="2" style="display: flex; justify-content: center;">
                 <v-btn
                   class="mt-3 mr-0 ml-0"
                   color="primary"
-                  :loading="loading"
-                  :disabled="loading"
-                  @click="searchOrders"
+                  :loading="loading_items"
+                  :disabled="loading_items"
+                  @click="options['page'] = 1; searchOrders()"
                 >{{$t('Search')}}</v-btn>
               </v-col>
             </v-row>
@@ -114,6 +137,10 @@
               :items="orders"
               class="elevation-1"
               item-key="item"
+              :options.sync="options"
+              :server-items-length="totalItems"
+              :loading="loading_items"
+              :footer-props="{'items-per-page-options': [5, 10, 15]}"
             >
               <template v-slot:item.order_number="{ item }">
                 <p>{{item.order_number}}</p>
@@ -157,8 +184,7 @@ import {
   minValue,
 } from "vuelidate/lib/validators";
 import { validationMixin,  } from "vuelidate";
-import {money} from "~/helpers/validators"
-import {VMoney} from 'v-money'
+import {mask} from 'vue-the-mask'
 
 let all_companies = {company_compound_id: null, establishments: [], client_table: null}
 let all_establishments = {establishment_compound_id: null}
@@ -173,19 +199,18 @@ export default {
     "order-view-menu": require("@/components/client/order/order-view-menu.vue").default,
   },
   mixins: [validationMixin],
-  directives: {money: VMoney},
+  directives: {mask},
   data() {
     return {
       orders: [],
-      loading: false,
-      money: money,
       // Fields
       company: all_companies,
       establishment: all_establishments,
       client: all_clients,
       invoice_number: '',
       order_number: '',
-      period: '',
+      initial_period: '',
+      final_period: '',
       status: pending_status,
       companies: [all_companies],
       clients: [all_clients],
@@ -201,16 +226,20 @@ export default {
       ],
       // Fields
       orders_headers: [
-        { text: this.$t('Order Number'), value: 'order_number'},
-        { text: this.$t('Order Date'), value: 'order_date'},
-        { text: this.$t('Company'), value: 'company'},
-        { text: this.$t('Establishment'), value: 'establishment'},
-        { text: 'Status', value: 'status' },
-        { text: this.$t('Invoice Number'), value: 'invoice_number'},
-        { text: this.$t('Invoice Date'), value: 'invoice_date'},
-        { text: this.$t('Order Amount'), value: 'order_amount'},
-        { text: this.$t('Actions'), value: 'actions'},
-      ]
+        { text: this.$t('Order Number'), value: 'order_number', sortable: true},
+        { text: this.$t('Order Date'), value: 'order_date', sortable: true},
+        { text: this.$t('Company'), value: 'company', sortable: false},
+        { text: this.$t('Establishment'), value: 'establishment', sortable: false},
+        { text: 'Status', value: 'status', sortable: true },
+        { text: this.$t('Invoice Number'), value: 'invoice_number', sortable: false},
+        { text: this.$t('Invoice Date'), value: 'invoice_date', sortable: false},
+        { text: this.$t('Order Amount'), value: 'order_amount', sortable: true},
+        { text: this.$t('Actions'), value: 'actions', sortable: false},
+      ],
+      // Pagination
+      loading_items: false,
+      options: {},
+      totalItems: 0,
     };
   },
 
@@ -236,23 +265,30 @@ export default {
         this.$store.dispatch("setAlert", { message: this.$t("Please_fill_the_form_correctly"), alertType: "error" }, { root: true })
       } 
       else {
-        this.loading = true
+        this.loading_items = true
+        const { sortBy, sortDesc, page, itemsPerPage } = this.options
         let query_strings = ""
+        query_strings += sortBy[0] ? `sort_by=${sortBy[0]}&` : ''
+        query_strings += sortDesc[0] ? `sort_desc=${sortDesc[0]}&` : ''
+        query_strings += `page=${page}&`
+        query_strings += `items_per_page=${itemsPerPage}&`
         query_strings += this.company.company_compound_id ? `company=${this.company.company_compound_id}&` : ''
         query_strings += this.establishment.establishment_compound_id ? `establishment=${this.establishment.establishment_compound_id}&` : ''
         query_strings += this.client.client_compound_id ? `client=${this.client.client_compound_id}&` : ''
         query_strings += this.invoice_number ? `invoice_number=${this.invoice_number}&` : ''
         query_strings += this.order_number ? `order_number=${this.order_number}&` : ''
-        query_strings += this.period ? `period=${this.period}&` : ''
+        query_strings += this.initial_period ? `initial_period=${this.fixPeriod(this.initial_period)}&` : ''
+        query_strings += this.final_period ? `final_period=${this.fixPeriod(this.final_period)}&` : ''
         query_strings += this.status.value ? `status=${this.status.value}&` : ''
         if (query_strings !== "") {
           query_strings = query_strings.slice(0, -1) // remove the last '&' character
         }
-        let orders = await this.$store.dispatch("order/searchOrders", query_strings); 
+        let {orders, current_page, lastPage, total} = await this.$store.dispatch("order/searchOrders", query_strings);
         if (orders){
           this.orders = orders
+          this.totalItems = total
         }
-        this.loading = false
+        this.loading_items = false
       }    
     },
  
@@ -272,6 +308,13 @@ export default {
     getLocaleDate(value){
       return new Date(value).toLocaleDateString('pt-BR')
     },
+
+    fixPeriod(value){
+      let splited_date = value.split('/')
+      let fixed_date = splited_date[2] + '-' + splited_date[1] + '-' + splited_date[0]
+      return fixed_date
+
+    }
   },
 
   validations: {
@@ -321,6 +364,15 @@ export default {
     /** if (this.currentUserIsClientUser){ */
     /** } */
   /** } */
+
+  watch: {
+    options: {
+      handler () {
+        this.searchOrders()
+      },
+      deep: true,
+    },
+  },
     
 };
 </script>
