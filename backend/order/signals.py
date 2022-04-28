@@ -9,7 +9,7 @@ def order_pre_save(sender, instance, **kwargs):
     if instance.id:
         old_instance = getattr(instance, '_old_instance', None)
         # Clear invoice_number and invoicing_date if status is coming back from 'Registered 'to 'Invoiced'.
-        if instance.status == 4 and old_instance.status == 3:
+        if instance.status == 3 and old_instance.status == 4:
             instance.invoicing_date = None
             instance.invoice_number = ''
 

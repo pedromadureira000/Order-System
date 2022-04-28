@@ -236,10 +236,10 @@ class OrderPUTSerializer(serializers.ModelSerializer):
             raise PermissionDenied(detail={"error": [_("Your contracting is disabled.")]})
         # Deny setting wrong invoice_number
         if (invoice_number and status not in [4, 5] and self.instance.status not in [4, 5]):
-            raise serializers.ValidationError(_("You can only add invoice number when order status has changed from 'Registered' to 'Invoiced'."))
+            raise serializers.ValidationError(_("You can only add invoice number when order status is 'Invoiced' of 'Delivered'."))
         # Deny setting wrong invoicing_date
         if (invoicing_date and status not in [4, 5] and self.instance.status not in [4, 5]):
-            raise serializers.ValidationError(_("You can only add invoicing date when order status has changed from 'Registered 'to 'Invoiced'."))
+            raise serializers.ValidationError(_("You can only add invoicing date when order status is 'Invoiced' of 'Delivered'."))
         # Force setting invoice_number when status changes from 'Registered' to 'Invoiced'.
         if status == 4 and self.instance.status == 3 and not invoice_number:
             raise serializers.ValidationError(_("You need send invoice number when order status has changed from 'Registered' to 'Invoiced'."))
@@ -280,7 +280,7 @@ class OrderPUTSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         ordered_items = validated_data.get('ordered_items')
-        if ordered_items:
+        if ordered_items or ordered_items == []:
             ordered_items = validated_data.pop('ordered_items')  
         # This is for accessing instance fields before they are updated 
         instance._old_instance = copy.copy(instance)

@@ -323,7 +323,7 @@ class GetCompaniesToCreateClient(APIView):
             companies = Company.objects.filter(contracting=request.user.contracting).exclude(client_table=None)
             return Response(CompaniesToCreateClientSerializer(companies, many=True).data)
 
-class ClientView(APIView):
+class GetClientsView(APIView):
     def get(self, request, client_table_compound_id):
         user = request.user
         if has_permission(user, 'get_clients'):
@@ -336,6 +336,8 @@ class ClientView(APIView):
             data = ClientSerializerPOST(clients, many=True).data
             return Response(data)
         return unauthorized_response
+
+class ClientView(APIView):
     @swagger_auto_schema(request_body=ClientSerializerPOST) 
     @transaction.atomic
     def post(self, request):
