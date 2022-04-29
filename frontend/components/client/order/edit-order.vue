@@ -475,6 +475,7 @@ export default {
           return element
         })
         let payload = {
+          id: this.order.id,
           client: this.order.client.client_compound_id,
           establishment: this.order.establishment.establishment_compound_id,
           order_number: this.order.order_number,
@@ -485,7 +486,6 @@ export default {
         if (this.agent_note && !this.currentUserIsClientUser){payload['agent_note'] = this.agent_note}
         let response = await this.$store.dispatch("order/updateOrder", payload)
         if (response) {
-          console.log(">>>>>>> why it's not updating the note? ", response)
           this.order.order_amount = response.order_amount
           this.order.status = response.status
           this.order.note = response.note

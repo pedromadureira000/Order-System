@@ -261,7 +261,7 @@ export default {
     client_code: {
       required, 
       slugFieldValidator, 
-      maxLength: maxLength(9)
+      maxLength: maxLength(6)
     },
     cnpj: {
       required, 
@@ -296,7 +296,7 @@ export default {
       if (!this.$v.client_code.$dirty) return errors;
       !this.$v.client_code.required && errors.push(this.$t("This_field_is_required"));
       !this.$v.client_code.slugFieldValidator && errors.push(this.$t('SlugFieldErrorMessage'));
-      !this.$v.client_code.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 9));
+      !this.$v.client_code.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 6));
       return errors;
     },
     cnpjError() { 

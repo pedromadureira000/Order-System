@@ -74,8 +74,7 @@ export default {
 
       // Fetch Order details
       async fetchOrderDetails(){
-        let order_details = await this.$store.dispatch("order/fetchOrderDetails", {client: this.order.client,
-          establishment: this.order.establishment, order_number: this.order.order_number});
+        let order_details = await this.$store.dispatch("order/fetchOrderDetails", this.order.id);
         if (order_details){
           // Add details to the order
           this.order.company= order_details.company

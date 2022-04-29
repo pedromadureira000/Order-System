@@ -71,9 +71,9 @@ class OrderPOSTSerializer(serializers.ModelSerializer):
     ordered_items = OrderedItemPOSTSerializer(many=True)
     class Meta:
         model = Order
-        fields = ['order_number', 'company', 'establishment', 'client', 'client_user', 'price_table', 'ordered_items', 'order_amount', 'status', 
-                'order_date', 'invoicing_date', 'invoice_number', 'note']
-        read_only_fields = ['order_number', 'company', 'client', 'client_user', 'price_table', 'order_date',
+        fields = ['id','order_number', 'company', 'establishment', 'client', 'client_user', 'price_table', 'ordered_items',
+                'order_amount', 'status', 'order_date', 'invoicing_date', 'invoice_number', 'note']
+        read_only_fields = ['id', 'order_number', 'company', 'client', 'client_user', 'price_table', 'order_date',
                'order_amount', 'invoice_number', 'invoicing_date']
 
     def validate_status(self, value):
@@ -140,10 +140,12 @@ class OrderPOSTSerializer(serializers.ModelSerializer):
         request_user = self.context['request'].user
         ordered_items = validated_data.pop('ordered_items')
         validated_data['company'] = validated_data['establishment'].company
-        validated_data['client'] = self.context['request'].user.client
-        validated_data['client_user'] = self.context['request'].user
-        last_order = validated_data['establishment'].order_set.filter(client_id=request_user.client_id).order_by("order_date").last()
+        validated_data['client'] = request_user.client
+        validated_data['client_user'] = request_user
+        last_order = request_user.client.order_set.order_by("order_date").last()
         validated_data['order_number'] = last_order.order_number + 1 if last_order else 1
+        validated_data['id'] = request_user.client.client_table.client_table_code + '.' + \
+            self.context['request'].user.client.client_code + '.' + str(validated_data['order_number'])
         order = Order.objects.create(**validated_data)
         # Create OrderedItems
         ordered_items_list = []
@@ -173,9 +175,9 @@ class OrderPUTSerializer(serializers.ModelSerializer):
     #  agent_note = serializers.CharField(max_length=800, required=False, write_only=True)
     class Meta:
         model = Order
-        fields = ['order_number', 'company', 'establishment', 'client', 'client_user', 'price_table', 'ordered_items', 
+        fields = ['id','order_number', 'company', 'establishment', 'client', 'client_user', 'price_table', 'ordered_items', 
                 'order_amount', 'status', 'order_date', 'invoicing_date', 'invoice_number', 'note', 'agent_note']
-        read_only_fields = ['order_number', 'company', 'establishment', 'client', 'client_user', 'price_table', 
+        read_only_fields = ['id', 'order_number', 'company', 'establishment', 'client', 'client_user', 'price_table', 
                 'order_date', 'order_amount']
     def validate_note(self, value):
         if not has_role(self.context['request'].user, 'client_user'): 
@@ -304,7 +306,7 @@ class OrderGetSerializer(serializers.ModelSerializer):
     #  price_table = serializers.SlugRelatedField(slug_field='price_table_compound_id', read_only=True)
     class Meta:
         model = Order
-        fields = ['order_number', 'company', 'establishment', 'client', 'order_amount', 'status', 'order_date', 'invoicing_date', 'invoice_number']
+        fields = ['id', 'order_number', 'company', 'establishment', 'client', 'order_amount', 'status', 'order_date', 'invoicing_date', 'invoice_number']
         read_only_fields = fields
 
 class CompanyAuxSerializer(serializers.ModelSerializer):

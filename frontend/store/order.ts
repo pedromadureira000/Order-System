@@ -98,9 +98,9 @@ export const actions: ActionTree<OrderState, RootState> = {
     }
   },  
 
-  async fetchOrderDetails({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
+  async fetchOrderDetails({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, id: string){
     try {
-      let data = await api.fetchOrderDetails(payload)
+      let data = await api.fetchOrderDetails(id)
       return data
     }
     catch(error){
@@ -108,9 +108,9 @@ export const actions: ActionTree<OrderState, RootState> = {
     }
   }, 
 
-  async fetchOrderHistory({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
+  async fetchOrderHistory({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, id: string){
     try {
-      let data = await api.fetchOrderHistory(payload)
+      let data = await api.fetchOrderHistory(id)
       return data
     }
     catch(error){

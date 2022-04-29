@@ -223,14 +223,14 @@ export default {
         {description: 'Delivered', value: '5'},
       ],
       view_details_ordered_items_headers: [
-        { text: this.$t('Image'), value: 'image' },
-        { text: this.$t('Code'), value: 'item_code' },
-        { text: this.$t('Description'), value: 'item_description' },
+        { text: this.$t('Image'), value: 'image', sortable: false },
+        { text: this.$t('Code'), value: 'item_code', sortable: true },
+        { text: this.$t('Description'), value: 'item_description', sortable: true },
         /** { text: this.$t('Category'), value: 'category' }, */
-        { text: this.$t('Unit price'), value: 'unit_price', align: 'right' },
-        { text: this.$t('Quantity'), value: 'quantity', width: '15%'},
-        { text: this.$t('Unit'), value: 'unit' },
-        { text: 'Total', value: 'total', align: 'right' },
+        { text: this.$t('Unit price'), value: 'unit_price', align: 'right', sortable: true },
+        { text: this.$t('Quantity'), value: 'quantity', width: '15%', sortable: true},
+        { text: this.$t('Unit'), value: 'unit', sortable: true },
+        { text: 'Total', value: 'total', align: 'right', sortable: true },
       ],
       history_type_options: [
         {description: 'Inclusion', value: 'I'},
@@ -238,11 +238,11 @@ export default {
         {description: 'Note', value: 'N'},
       ],
       order_history_headers: [
-        { text: this.$t('Date'), value: 'date' },
-        { text: this.$t('User'), value: 'user' },
-        { text: this.$t('History type'), value: 'history_type' },
-        { text: this.$t('History description'), value: 'history_description' },
-        { text: this.$t('Agent_note'), value: 'agent_note' },
+        { text: this.$t('Date'), value: 'date', sortable: true },
+        { text: this.$t('User'), value: 'user', sortable: true },
+        { text: this.$t('History type'), value: 'history_type', sortable: true },
+        { text: this.$t('History description'), value: 'history_description', sortable: true },
+        { text: this.$t('Agent_note'), value: 'agent_note', sortable: false },
       ],
     }
   },
@@ -250,8 +250,7 @@ export default {
   methods: {
     // Fetch Order details
     async fetchOrderHistory(){
-      let order_history = await this.$store.dispatch("order/fetchOrderHistory", {client: this.order.client.client_compound_id,
-        establishment: this.order.establishment.establishment_compound_id, order_number: this.order.order_number});
+      let order_history = await this.$store.dispatch("order/fetchOrderHistory", this.order.id);
       if (order_history){
         this.order_history = order_history
       }
@@ -300,7 +299,7 @@ export default {
     getOrderTotal(){
       return this.order.ordered_items.reduce((previous, current)=>{
         return (typeof previous == 'number' ? previous : (previous.unit_price * previous.quantity)) + (current.unit_price * current.quantity)
-      })
+      },0)
     }
   },
 

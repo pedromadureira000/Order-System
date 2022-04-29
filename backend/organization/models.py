@@ -79,7 +79,7 @@ class Client(models.Model):
         constraints = [UniqueConstraint(fields=['client_table', 'client_code'], name='Client compound primary key')]
     client_compound_id = models.CharField(_('client compound id'), max_length=16, editable=False, unique=True,) 
     client_table = models.ForeignKey('ClientTable',on_delete=models.PROTECT, verbose_name=_('client table'))
-    client_code = models.SlugField(max_length=9, verbose_name=_('client code'))
+    client_code = models.SlugField(max_length=6, verbose_name=_('client code'))
     vendor_code = models.CharField(blank=True, max_length=9, verbose_name=_('vendor code'))
     name = models.CharField(max_length=60, verbose_name=_('name'))
     cnpj = CNPJField(masked=True, verbose_name="CNPJ")

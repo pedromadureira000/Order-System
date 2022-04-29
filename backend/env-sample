@@ -5,6 +5,7 @@ ALLOWED_HOSTS=localhost, 127.0.0.1
 #------------- Database
 DATABASE_URL=postgres://postgres:postgres@localhost:5432/testdb
 # DATABASE_URL=<protocolo postgres>://<usuario>:<senha>@<endereço ip>:<porta>/<nome_do_banco>
+# Command to access : psql postgres://phsw:senhasegura@localhost:5432/postgres 
 
 #-------------Sentry
 SENTRY_DSN=

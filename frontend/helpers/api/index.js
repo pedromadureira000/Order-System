@@ -939,8 +939,8 @@ export default {
 				})
 	}, 
 
-	async fetchOrderDetails(payload){
-    let url = `/api/order/order/${payload.client}/${payload.establishment}/${payload.order_number}`
+	async fetchOrderDetails(id){
+    let url = `/api/order/order/${id}`
 		return await axios({
 		method: "get",
 		url: url,
@@ -949,8 +949,8 @@ export default {
 				})
 	},
 
-	async fetchOrderHistory(payload){
-    let url = `/api/order/order_history/${payload.client}/${payload.establishment}/${payload.order_number}`
+	async fetchOrderHistory(id){
+    let url = `/api/order/order_history/${id}`
 		return await axios({
 		method: "get",
 		url: url,
@@ -958,7 +958,6 @@ export default {
 					return request.data 
 				})
 	},
-
 
 	async updateOrder(payload){
     let data_body = {
@@ -969,7 +968,7 @@ export default {
 		}
 		return await axios({ 
 		method: "put",
-		url: `/api/order/order/${payload.client}/${payload.establishment}/${payload.order_number}`,
+		url: `/api/order/order/${payload.id}`,
 		data: data_body}).then((request) => {
 					return request.data 
 				})

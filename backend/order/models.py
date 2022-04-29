@@ -17,8 +17,9 @@ class Order(models.Model):
     class Meta:
         verbose_name = _('order')
         verbose_name_plural = _('orders')
-        constraints = [UniqueConstraint(fields=['client','establishment', 'order_number',], name='order compound primary key')]
-    order_number = models.IntegerField(_('order number'), editable=False)
+        constraints = [UniqueConstraint(fields=['client', 'order_number',], name='order compound primary key')]
+    id = models.CharField(_('order id'), max_length=20, primary_key=True) # EX: xxx.xxxxxx.xxxxxxxxx  
+    order_number = models.IntegerField(_('order number'), editable=False) # Order number go until 999.999.999
     client_user = models.ForeignKey('user.User', on_delete=models.PROTECT, verbose_name=_('client user'),)
     client = models.ForeignKey('organization.Client', on_delete=models.PROTECT, verbose_name=_('client'))
     company = models.ForeignKey('organization.Company', on_delete=models.PROTECT, verbose_name=_('company'))

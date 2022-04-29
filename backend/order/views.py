@@ -6,7 +6,7 @@ from item.serializers import CategoryPOSTSerializer
 from organization.facade import get_clients_by_agent
 from organization.models import Client, Company, Establishment
 from user.validators import req_user_is_agent_without_all_estabs
-from .facade import fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders, fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders_by_agent, fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders_by_client_user, get_order_details, get_order_history, get_orders_by_agent
+from .facade import fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders, fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders_by_agent, fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders_by_client_user, get_orders_by_agent
 from .serializers import ClientsToFillFilterSelectorsToSearchOrdersSerializer, CompanyWithEstabsSerializer, OrderDetailsSerializer, OrderGetSerializer, OrderHistorySerializer, OrderPOSTSerializer,OrderPUTSerializer, fetchClientEstabsToCreateOrderSerializer, searchOnePriceItemToMakeOrderSerializer
 from .models import Order, OrderHistory
 from rest_framework.views import APIView
@@ -224,41 +224,32 @@ class OrderView(APIView):
         return unauthorized_response 
 
 class SpecificOrderView(APIView):
-    def get(self, request, client_compound_id, establishment_compound_id, order_number):
+    def get(self, request, id):
         if has_permission(request.user, 'get_orders'):
-            if client_compound_id.split("*")[0] != request.user.contracting.contracting_code:
-                return not_found_response(object_name=_('The client'))
-            if establishment_compound_id.split("*")[0] != request.user.contracting.contracting_code:
+            try:
+                order = Order.objects.get(id=id, company__contracting_id=request.user.contracting_id)
+            except Order.DoesNotExist:
                 return not_found_response(object_name=_('The order'))
             # Client user can't access order from another client
             if has_role(request.user, 'client_user'):
-                if client_compound_id != request.user.client.client_compound_id:
+                if order.client_id != request.user.client_id:
                     return not_found_response(object_name=_('The order'))
             # Agent without all estabs can't access order from some clients
             if req_user_is_agent_without_all_estabs(request.user):
-                if not request.user.establishments.filter(establishment_compound_id=establishment_compound_id).first():
+                if not request.user.establishments.filter(id=order.establishment_id).first():
                     return not_found_response(object_name=_('The order'))
-            try:
-                order = get_order_details(client_compound_id, establishment_compound_id, order_number)
-            except Order.DoesNotExist:
-                return not_found_response(object_name=_('The order'))
             return Response(OrderDetailsSerializer(order).data)
         return unauthorized_response
     @transaction.atomic
     @swagger_auto_schema(request_body=OrderPUTSerializer) 
-    def put(self, request, client_compound_id, establishment_compound_id, order_number):
+    def put(self, request, id):
         if has_permission(request.user, 'update_order_status') or has_role(request.user, 'client_user'):
-            if client_compound_id.split("*")[0] != request.user.contracting.contracting_code:
-                return not_found_response(object_name=_('The client'))
-            if establishment_compound_id.split("*")[0] != request.user.contracting.contracting_code:
-                return not_found_response(object_name=_('The order'))
             try:
-                order = Order.objects.get(client__client_compound_id=client_compound_id, 
-                        establishment__establishment_compound_id=establishment_compound_id, order_number=order_number)
+                order = Order.objects.get(id=id, company__contracting_id=request.user.contracting_id)
             except Order.DoesNotExist:
                 return not_found_response(object_name=_('The order'))
             if has_role(request.user, 'client_user'):
-                if order.client != request.user.client:
+                if order.client_id != request.user.client_id:
                     return not_found_response(object_name=_('The order'))
             if req_user_is_agent_without_all_estabs(request.user):
                 if not request.user.establishments.filter(id=order.establishment_id).first():
@@ -299,22 +290,20 @@ class SpecificOrderView(APIView):
 
 class OrderHistoryView(APIView):
     @transaction.atomic
-    def get(self, request, client_compound_id, establishment_compound_id, order_number):
+    def get(self, request, id):
         if has_permission(request.user, 'get_orders'):
-            if client_compound_id.split("*")[0] != request.user.contracting.contracting_code:
-                return not_found_response(object_name=_('The client'))
-            if establishment_compound_id.split("*")[0] != request.user.contracting.contracting_code:
+            try:
+                order = Order.objects.get(id=id, company__contracting_id=request.user.contracting_id)
+            except Order.DoesNotExist:
                 return not_found_response(object_name=_('The order'))
-            # Client user can't access order from another client
             if has_role(request.user, 'client_user'):
-                if client_compound_id != request.user.client.client_compound_id:
+                if order.client_id != request.user.client_id:
                     return not_found_response(object_name=_('The order'))
-            # Agent without all estabs can't access order from some clients
             if req_user_is_agent_without_all_estabs(request.user):
-                if not request.user.establishments.filter(establishment_compound_id=establishment_compound_id).first():
+                if not request.user.establishments.filter(id=order.establishment_id).first():
                     return not_found_response(object_name=_('The order'))
             try:
-                order_history = get_order_history(client_compound_id, establishment_compound_id, order_number)
+                order_history = OrderHistory.objects.filter(order_id=id)
             except OrderHistory.DoesNotExist:
                 return not_found_response(object_name=_('The order history'))
             return Response(OrderHistorySerializer(order_history, many=True).data)
