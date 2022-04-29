@@ -27,7 +27,7 @@
                 <v-text-field
                   :error-messages="defaultQuantityErrors"
                   :label="$t('Quantity')"
-                  v-model="default_quantity"
+                  v-model.trim="default_quantity"
                   @keydown.enter.prevent=""
                   @blur="$v.default_quantity.$touch()"
                   class="mr-2"
@@ -96,7 +96,7 @@
               </template>
               <template v-slot:item.quantity="{ item }">
                 <v-text-field
-                  v-model="item.quantity.$model"
+                  v-model.trim="item.quantity.$model"
                   :error-messages="item.errors.$model"
                   :label="$t('Quantity')"
                   @keydown.enter.prevent=""

@@ -162,6 +162,7 @@
                   class="elevation-1"
                   sort-by="data"
                   item-key="data"
+                  :items-per-page='-1'
                 >
                   <template v-slot:item.date="{ item }">
                     <p>{{getLocaleDateAndTime(item.date)}}</p>

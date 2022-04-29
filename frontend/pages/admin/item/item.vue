@@ -47,7 +47,7 @@
               <!-- Item code -->
               <v-text-field
                 :label="$t('Item code')"
-                v-model="item_code"
+                v-model.trim="item_code"
                 :error-messages="itemCodeErrors"
                 required
                 @blur="$v.item_code.$touch()"

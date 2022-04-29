@@ -55,4 +55,16 @@ def order_post_save(sender, instance, created=False, **kwargs):
                 order_history.agent_note = instance.agent_note
                 if old_instance.status == instance.status:
                     order_history.history_type = "N"
+            # Add invoice_number field
+            if old_instance.invoice_number != instance.invoice_number:
+                if not instance.invoice_number:
+                    order_history.history_description += _("\n - The invoice number field was cleaned.")
+                else:
+                    order_history.history_description += _("\n - Invoice number added with value '{invoice_number}'.").format(invoice_number=instance.invoice_number)
+            # Add invoicing_date field
+            if old_instance.invoicing_date != instance.invoicing_date:
+                if not instance.invoicing_date:
+                    order_history.history_description += _("\n - The invoice date field was cleaned.")
+                else:
+                    order_history.history_description += _("\n - Invoice date added with value '{invoicing_date}'.").format(invoicing_date=instance.invoicing_date)
         order_history.save()

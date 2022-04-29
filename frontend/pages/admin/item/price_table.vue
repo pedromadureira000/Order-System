@@ -29,7 +29,7 @@
               <!-- Price Table Code -->
               <v-text-field
                 :label="$t('Price Table Code')"
-                v-model="table_code"
+                v-model.trim="table_code"
                 :error-messages="tableCodeErrors"
                 required
                 @blur="$v.table_code.$touch()"
@@ -167,7 +167,7 @@ export default {
           note: this.note,
         });
         if (data) {
-          this.price_tables.push(data);
+          this.price_tables.push({...data, company_name: this.company.name});
           // Clear fields
           this.table_code = ""
           this.description = ""

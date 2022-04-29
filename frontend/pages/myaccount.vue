@@ -6,7 +6,7 @@
         <div class="mb-3">
           <v-text-field
             :label="$t('First_Name')"
-            v-model="first_name"
+            v-model.trim="first_name"
             :error-messages="firstNameErrors"
             required
             @blur="$v.first_name.$touch()"
@@ -15,7 +15,7 @@
         <div class="mb-3">
           <v-text-field
             :label="$t('Last_Name')"
-            v-model="last_name"
+            v-model.trim="last_name"
             :error-messages="lastNameErrors"
             required
             @blur="$v.last_name.$touch()"
@@ -24,7 +24,7 @@
         <div class="mb-3">
           <v-text-field
             label="Email"
-            v-model="email"
+            v-model.trim="email"
             :error-messages="emailErrors"
             required
             @blur="$v.email.$touch()"
@@ -33,7 +33,7 @@
         <!-- <div class="mb-3"> -->
           <!-- <v-text-field -->
             <!-- label="CPF" -->
-            <!-- v-model="cpf" -->
+            <!-- v-model.trim="cpf" -->
             <!-- :error-messages="cpfErrors" -->
             <!-- required -->
             <!-- @blur="$v.cpf.$touch()" -->
@@ -55,7 +55,7 @@
           <v-text-field
             type="password"
             :label="$t('Current_password')"
-            v-model="current_password"
+            v-model.trim="current_password"
             :error-messages="currentPassErrors"
             required
             @blur="$v.current_password.$touch()"
@@ -65,7 +65,7 @@
           <v-text-field
             type="password"
             :label="$t('Password')"
-            v-model="password"
+            v-model.trim="password"
             :error-messages="passwordErrors"
             required
             @blur="$v.password.$touch()"
@@ -75,7 +75,7 @@
           <v-text-field
             type="password"
             :label="$t('Password_Confirm')"
-            v-model="password_confirm"
+            v-model.trim="password_confirm"
             :error-messages="passConfirmErrors"
             required
             @blur="$v.password_confirm.$touch()"

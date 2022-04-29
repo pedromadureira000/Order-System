@@ -54,7 +54,7 @@
                 <v-text-field
                   :error-messages="invoiceNumberErrors"
                   :label="$t('Invoice Number')"
-                  v-model="invoice_number"
+                  v-model.trim="invoice_number"
                   @keydown.enter.prevent=""
                   @blur="$v.invoice_number.$touch()"
                   class="mr-2"
@@ -65,7 +65,7 @@
                 <v-text-field
                   :error-messages="orderNumberErrors"
                   :label="$t('Order Number')"
-                  v-model="order_number"
+                  v-model.trim="order_number"
                   @keydown.enter.prevent=""
                   @blur="$v.order_number.$touch()"
                   class="mr-2"
@@ -90,7 +90,7 @@
                   <v-col class="ml-3">
                     <v-text-field
                       :label="$t('Initial Period')"
-                      v-model="initial_period"
+                      v-model.trim="initial_period"
                       class="mr-2"
                       outlined
                       dense
@@ -103,7 +103,7 @@
                   <v-col>
                     <v-text-field
                       :label="$t('Final Period')"
-                      v-model="final_period"
+                      v-model.trim="final_period"
                       class="mr-2"
                       outlined
                       dense

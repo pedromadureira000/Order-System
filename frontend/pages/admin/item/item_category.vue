@@ -29,7 +29,7 @@
               <!-- Item Category Code -->
               <v-text-field
                 :label="$t('Category code')"
-                v-model="category_code"
+                v-model.trim="category_code"
                 :error-messages="itemCategoryCodeErrors"
                 required
                 @blur="$v.category_code.$touch()"

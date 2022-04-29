@@ -13,7 +13,7 @@
               <!-- Username -->
                 <v-text-field
                   label="Username"
-                  v-model="username"
+                  v-model.trim="username"
                   :error-messages="usernameErrors"
                   required
                   @blur="$v.username.$touch()"
@@ -21,7 +21,7 @@
                 <!-- First Name -->
                 <v-text-field
                   :label="$t('First_name')"
-                  v-model="first_name"
+                  v-model.trim="first_name"
                   :error-messages="firstNameErrors"
                   required
                   @blur="$v.first_name.$touch()"
@@ -29,7 +29,7 @@
                 <!-- Last name -->
                 <v-text-field
                   :label="$t('Last_name')"
-                  v-model="last_name"
+                  v-model.trim="last_name"
                   :error-messages="lastNameErrors"
                   required
                   @blur="$v.last_name.$touch()"
@@ -38,7 +38,7 @@
                 <v-text-field
                   label="Email"
                   type="email"
-                  v-model="email"
+                  v-model.trim="email"
                   :error-messages="emailErrors"
                   required
                   @blur="$v.email.$touch()"
@@ -47,7 +47,7 @@
                 <v-text-field
                   type="password"
                   :label="$t('Password')"
-                  v-model="password"
+                  v-model.trim="password"
                   :error-messages="passwordErrors"
                   required
                   @blur="$v.password.$touch()"
@@ -56,7 +56,7 @@
                 <v-text-field
                   type="password"
                   :label="$t('Password_Confirm')"
-                  v-model="password_confirm"
+                  v-model.trim="password_confirm"
                   :error-messages="passConfirmErrors"
                   required
                   @blur="$v.password_confirm.$touch()"
@@ -65,7 +65,7 @@
                 <v-textarea
                   outlined
                   :label="$t('Note')"
-                  v-model="note"
+                  v-model.trim="note"
                   :error-messages="noteErrors"
                   @blur="$v.note.$touch()"
                   class="mb-3"

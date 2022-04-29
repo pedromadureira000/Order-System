@@ -30,7 +30,7 @@
               <!-- Name -->
               <v-text-field
                 :label="$t('Name')"
-                v-model="name"
+                v-model.trim="name"
                 :error-messages="nameErrors"
                 required
                 @blur="$v.name.$touch()"
@@ -39,7 +39,7 @@
               <!-- Client Code -->
               <v-text-field
                 :label="$t('Client_code')"
-                v-model="client_code"
+                v-model.trim="client_code"
                 :error-messages="clientCodeErrors"
                 required
                 @blur="$v.client_code.$touch()"
@@ -69,7 +69,7 @@
               <!-- Vendor Code -->
               <v-text-field
                 :label="$t('Vendor_Code')"
-                v-model="vendor_code"
+                v-model.trim="vendor_code"
                 :error-messages="vendorCodeErrors"
                 @blur="$v.vendor_code.$touch()"
                 class="mb-3"
@@ -78,7 +78,7 @@
               <v-textarea
                 outlined
                 :label="$t('Note')"
-                v-model="note"
+                v-model.trim="note"
                 :error-messages="noteErrors"
                 @blur="$v.note.$touch()"
                 class="mb-3"

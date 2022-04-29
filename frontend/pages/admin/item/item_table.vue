@@ -22,7 +22,7 @@
               <!-- Item Table Code -->
               <v-text-field
                 :label="$t('Table_code')"
-                v-model="item_table_code"
+                v-model.trim="item_table_code"
                 :error-messages="itemTableCodeErrors"
                 required
                 @blur="$v.item_table_code.$touch()"
@@ -32,7 +32,7 @@
               <v-textarea
                 outlined
                 :label="$t('Note')"
-                v-model="note"
+                v-model.trim="note"
                 :error-messages="noteErrors"
                 @blur="$v.note.$touch()"
                 class="mb-3"
