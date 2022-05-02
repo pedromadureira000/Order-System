@@ -1,6 +1,6 @@
 from organization.facade import get_agent_companies
 from organization.models import Company, Establishment
-from .models import Order, OrderHistory, OrderedItem
+from .models import Order, OrderedItem
 from django.db.models import Prefetch
 
 # ----------------------------/ Orders /-----------------------------
@@ -22,6 +22,13 @@ def fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders_by_client_
     #  establishments = user.client.establishments.all()  <-- This would make a unnecessary query to 'client' 
     establishments = Establishment.objects.filter(clientestablishment__client_id=user.client_id)
     return Company.objects.filter(establishment__in=establishments).prefetch_related(
+        Prefetch('establishment_set', queryset=establishments, to_attr='establishments')
+    )
+
+def get_comps_and_estabs_to_duplicate_order(cli_user, item_table_compound_id):
+    # check statuses TODO active
+    establishments = Establishment.objects.filter(clientestablishment__client_id=cli_user.client_id).exclude(clientestablishment__price_table=None)
+    return Company.objects.filter(establishment__in=establishments, item_table__item_table_compound_id=item_table_compound_id).prefetch_related(
         Prefetch('establishment_set', queryset=establishments, to_attr='establishments')
     )
 

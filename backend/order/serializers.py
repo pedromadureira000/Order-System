@@ -355,3 +355,89 @@ class OrderDetailsSerializer(serializers.ModelSerializer):
         model = Order
         fields = ['company', 'establishment', 'client', 'client_user', 'price_table', 'ordered_items', 'note', 'agent_note']
         read_only_fields = fields
+
+class OrderDuplicateSerializer(serializers.ModelSerializer):
+    company = serializers.SlugRelatedField(slug_field='company_code', read_only=True)
+    establishment = serializers.SlugRelatedField(slug_field='establishment_compound_id', read_only=True)
+    client = serializers.SlugRelatedField(slug_field='client_compound_id', read_only=True)
+    class Meta:
+        model = Order
+        fields = ['id', 'order_number', 'company', 'establishment', 'client', 'order_amount', 'status', 'order_date', 'invoicing_date', 'invoice_number']
+        read_only_fields = fields
+
+    def validate(self, attrs):
+        request_user = self.context['request'].user
+        client = request_user.client
+        establishment = self.instance.establishment
+        company = establishment.company
+        # Contracting ownership
+        if establishment.establishment_compound_id.split("*")[0] != request_user.contracting.contracting_code:
+            raise serializers.ValidationError(_("Establishment not found."))
+        #Check if the request_user is active
+        if request_user.status != 1:
+            raise PermissionDenied(detail={"error": [_("Your account is disabled.")]})
+        #Check if the contracting is active
+        if request_user.contracting.status != 1:
+            raise PermissionDenied(detail={"error": [_("Your contracting is disabled.")]})
+        #Check if the client is active
+        if client.status != 1:
+            raise PermissionDenied(detail={"error": [_("The client company is disabled.")]})
+        #Check if the company is active
+        if company.status != 1:
+            raise PermissionDenied(detail={"error": [_("The company is disabled.")]})
+        #Check if the establishment is active
+        if establishment.status != 1:
+            raise PermissionDenied(detail={"error": [_("The establishment is disabled.")]})
+        # Check if client have access to this establishment 
+        try:
+            client_establishment = ClientEstablishment.objects.get(client=client, establishment=establishment)
+        except ClientEstablishment.DoesNotExist:
+            raise PermissionDenied(detail={"error": [_("Establishment not found.")]})
+        # Check if ClientEstablishment has a price_table
+        if not client_establishment.price_table:
+            raise PermissionDenied(detail={"error": [_("You cannot buy from this establishment.")]})
+        attrs['price_table'] = client_establishment.price_table
+
+        # Check if item is available for this client by price table
+        available_items = client_establishment.price_table.items.filter(status=1)
+        order_amount = 0
+        ordered_items = self.instance.ordered_items.all()
+        attrs['ordered_items'] = []
+        attrs['some_items_were_not_copied'] = False
+        for ordered_item in ordered_items:
+            if ordered_item.item in available_items:
+                attrs['ordered_items'].append(ordered_item) 
+                # Add unit_price to ordered_item
+                ordered_item.unit_price = client_establishment.price_table.price_items.get(item=ordered_item.item).unit_price #TODO N+1 query
+                order_amount += ordered_item.unit_price * ordered_item.quantity 
+            else:
+                attrs['some_items_were_not_copied'] = True
+        attrs['order_amount'] = order_amount
+        return super().validate(attrs)
+
+    def update(self, instance, validated_data):
+        request_user = self.context['request'].user
+        establishment = instance.establishment
+        company = establishment.company
+        some_items_were_not_copied = validated_data.pop('some_items_were_not_copied')
+        ordered_items = validated_data.pop('ordered_items')
+        validated_data['establishment'] = establishment
+        validated_data['company'] = company
+        validated_data['client'] = request_user.client
+        validated_data['client_user'] = request_user
+        validated_data['status'] = 1
+        last_order = request_user.client.order_set.order_by("order_date").last()
+        validated_data['order_number'] = last_order.order_number + 1 if last_order else 1
+        validated_data['id'] = request_user.client.client_table.client_table_code + '.' + \
+            request_user.client.client_code + '.' + str(validated_data['order_number'])
+        order = Order.objects.create(**validated_data)
+        # Create OrderedItems
+        ordered_items_list = []
+        for index, ordered_item in enumerate(ordered_items):
+            ordered_items_list.append(OrderedItem(item=ordered_item.item, quantity=ordered_item.quantity, 
+                unit_price=ordered_item.unit_price, order=order, sequence_number=index))
+        order.ordered_items.bulk_create(ordered_items_list)
+        #  if  validated_data['some_items_were_not_copied'] == True:
+            #  order.some_items_were_not_copied = True
+        #  return order
+        return (order, some_items_were_not_copied)

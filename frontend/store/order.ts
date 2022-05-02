@@ -108,9 +108,9 @@ export const actions: ActionTree<OrderState, RootState> = {
     }
   }, 
 
-  async fetchOrderHistory({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, id: string){
+  async fetchOrderHistory({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, order_id: string){
     try {
-      let data = await api.fetchOrderHistory(id)
+      let data = await api.fetchOrderHistory(order_id)
       return data
     }
     catch(error){
@@ -127,6 +127,27 @@ export const actions: ActionTree<OrderState, RootState> = {
     }
     catch(error){
       ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('updateOrder_error_msg'))
+    }
+  }, 
+
+  async fetchCompaniesAndEstabsToDuplicateOrder({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, order_id: string){
+    try {
+      let data = await api.fetchCompaniesAndEstabsToDuplicateOrder(order_id)
+      return data
+    }
+    catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('fetchCompaniesAndEstabsToDuplicateOrder_error_msg'))
+    }
+  }, 
+
+  async duplicateOrder({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, order_id: string){
+    try {
+      let data = await api.duplicateOrder(order_id)
+      dispatch("setAlert", {message: this.app.i18n.t('duplicateOrder_success_msg'), alertType: "success"}, { root: true })
+      return data
+    }
+    catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('duplicateOrder_error_msg'))
     }
   }, 
 }

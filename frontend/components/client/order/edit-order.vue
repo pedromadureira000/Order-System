@@ -36,18 +36,18 @@
                       :value="order.order_number"
                       class="mb-3"
                     />
+                    <!-- Order ID -->
+                    <v-text-field
+                      disabled
+                      :label="$t('Order ID')"
+                      :value="order.id"
+                      class="mb-3"
+                    />
                     <!-- Invoice Number -->
                     <v-text-field
                       disabled
                       :label="$t('Invoice Number')"
                       :value="order.invoice_number"
-                      class="mb-3"
-                    />
-                    <!-- Order Amount -->
-                    <v-text-field
-                      disabled
-                      :label="$t('Order Amount')"
-                      :value="getRealMask(Number(order.order_amount))"
                       class="mb-3"
                     />
                     <!-- Price table -->
@@ -98,6 +98,13 @@
                       disabled
                       :label="$t('Order Date')"
                       :value="getLocaleDate(order.order_date)"
+                      class="mb-3"
+                    />
+                    <!-- Order Amount -->
+                    <v-text-field
+                      disabled
+                      :label="$t('Order Amount')"
+                      :value="getRealMask(Number(order.order_amount))"
                       class="mb-3"
                     />
                     <!-- Invoice Date -->
@@ -384,7 +391,7 @@ export default {
   components: {
     "dots-menu": require("@/components/dots-menu.vue").default,
   },
-  props: ['order', 'show_edit_dialog', 'order_details_fetched'],
+  props: ['order', 'show_edit_dialog'],
   data() {
     return {
       show_cancel_dialog: false,
@@ -434,6 +441,8 @@ export default {
       options: {},
       totalItems: 0,
       loading_items: false,
+      // util
+      order_details_fetched: false
     }
   },
 
@@ -713,21 +722,34 @@ export default {
   },
 
   watch: {
-    order_details_fetched(newValue){
-      if (newValue === true){
-        this.ordered_items = this.order.ordered_items.map(el=>{
-          el.errors = []
-          return el
-        })
-        console.log(">>>>>>> where is the note? ", this.order)
-        this.note = this.order.note
-        this.agent_note = this.order.agent_note
-        this.status = this.order.status
-        if (this.currentUserIsClientUserAndCanEditTheOrder) { 
-          this.edit_ordered_items_headers.push({ text: this.$t('Remove item'), value: 'remove_item', sortable: false})
-          this.fetchCategoriesToMakeOrderAndGetPriceTableInfo()
+    order: {
+      handler(obj){
+        /** console.log(">>>>>>> INSIDE ORDER WATCHER") */
+        if (obj.ordered_items){
+          // Run this code only once after fetch order details (since updating order will update some fields of this.order)
+          if (!this.order_details_fetched){
+            this.order_details_fetched = true
+            this.ordered_items = this.order.ordered_items.map(el=>{
+              // This will avoid changes in the edit-order-component from alterate ordered_items in the order-details-component 
+              let element = JSON.parse(JSON.stringify(el))
+              element.errors = []
+              return element
+            })
+            /** console.log(">>>>>>> where is the note? ", this.order) */
+            this.note = this.order.note
+            this.agent_note = this.order.agent_note
+            this.status = this.order.status
+            if (this.currentUserIsClientUserAndCanEditTheOrder) { 
+              this.edit_ordered_items_headers.push({ text: this.$t('Remove item'), value: 'remove_item', sortable: false})
+              this.fetchCategoriesToMakeOrderAndGetPriceTableInfo()
+            }
+          }
         }
-      }
+        else{
+          this.order_details_fetched = false
+        }
+      },
+      deep: true
     },
     options: {
       handler () {

@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 from rest_framework.validators import UniqueTogetherValidator
+from order.serializers import EstablishmentForCompanyWithEstab
 from organization.facade import update_client_establishments
 from user.validators import agent_has_permission_to_assign_this_client_table_to_client
 from organization.validators import UserContracting, agent_has_permission_to_assign_this_establishment_to_client
@@ -276,3 +277,9 @@ class ClientSerializerPUT(serializers.ModelSerializer):
             update_client_establishments(instance, client_establishments)
         return super().update(instance, validated_data)
     
+class CompaniesAndEstabsToDuplicateOrderSerializer(serializers.ModelSerializer):
+    establishment_set = EstablishmentForCompanyWithEstab(many=True)
+    class Meta:
+        model = Company
+        fields = ['company_code', 'name', 'company_compound_id', 'establishment_set']
+

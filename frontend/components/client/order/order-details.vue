@@ -1,7 +1,7 @@
 <template>
   <div v-if="order_details_fetched">
     <!-- ========= View Details Dialog ============ -->
-    <v-dialog :retain-focus="false" v-model="show_view_details_dialog" max-width="90%" persistent>
+    <v-dialog :retain-focus="false" :value="show_view_details_dialog" max-width="90%" persistent>
       <v-card class="pa-3">
         <v-row class="mb-1">
           <v-col style="display: flex; justify-content: center;">
@@ -76,6 +76,10 @@
                           <tr>
                             <td><b>{{$t('Order Amount')}}</b></td>
                             <td>{{getRealMask(Number(order.order_amount))}}</td>
+                          </tr>
+                          <tr>
+                            <td><b>{{$t('Order ID')}}</b></td>
+                            <td>{{order.id}}</td>
                           </tr>
                           <tr v-if="!currentUserIsClientUser">
                             <td><b>{{$t('Agent Note')}}</b></td>
@@ -207,7 +211,7 @@ import {VMoney} from 'v-money'
 export default {
   mixins: [validationMixin],
   directives: {money: VMoney},
-  props: ['order', 'show_view_details_dialog', 'order_details_fetched'],
+  props: ['order', 'show_view_details_dialog'],
   data() {
     return {
       note: null,
@@ -244,6 +248,7 @@ export default {
         { text: this.$t('History description'), value: 'history_description', sortable: true },
         { text: this.$t('Agent_note'), value: 'agent_note', sortable: false },
       ],
+      order_details_fetched: false,
     }
   },
 
@@ -276,7 +281,7 @@ export default {
     },
     parseHistoryDescription(text){
       let parsed_text = text.split('\n') 
-      console.log(">>>>>>> parsed_text>>>>: ", parsed_text)
+      /** console.log(">>>>>>> parsed_text>>>>: ", parsed_text) */
       return parsed_text
     },
     // Image
@@ -297,6 +302,9 @@ export default {
     },
     // Get order Total
     getOrderTotal(){
+      /** console.log(">>>>>>>getOrderTotal -> this.order: ", this.order) */
+      /** console.log(">>>>>>>order_details_fetched  ", this.order_details_fetched) */
+      /** console.log(">>>>>>>show_view_details_dialog  ", this.show_view_details_dialog) */
       return this.order.ordered_items.reduce((previous, current)=>{
         return (typeof previous == 'number' ? previous : (previous.unit_price * previous.quantity)) + (current.unit_price * current.quantity)
       },0)
@@ -306,6 +314,20 @@ export default {
   computed: {
     currentUserIsClientUser(){
       return this.$store.state.user.currentUser.roles.includes('client_user')
+    },
+  },
+  watch: {
+    order: {
+       handler(obj){
+         /** console.log(">>>>>>>watch order: ", obj) */
+         if (obj.ordered_items){
+           this.order_details_fetched = true
+         }
+         else{
+           this.order_details_fetched = false
+         }
+       },
+       deep: true
     }
   }
 }

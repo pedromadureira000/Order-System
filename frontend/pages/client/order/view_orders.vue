@@ -136,7 +136,7 @@
               :headers="orders_headers"
               :items="orders"
               class="elevation-1"
-              item-key="item"
+              item-key="id"
               :options.sync="options"
               :server-items-length="totalItems"
               :loading="loading_items"
@@ -167,7 +167,8 @@
                 <p style="float: right;">{{getRealMask(Number(item.order_amount))}}</p>
               </template>
               <template v-slot:item.actions="{ item }">
-                <order-view-menu :order="item"/>
+                <order-view-menu :order="item" @order-duplicated="orderDuplicated" :ref="'order_view_menu_' + item.id"/>
+                <!-- <v-btn @click="testt(item)">testt</v-btn> -->
               </template>
             </v-data-table>
           </v-container>
@@ -313,8 +314,18 @@ export default {
       let splited_date = value.split('/')
       let fixed_date = splited_date[2] + '-' + splited_date[1] + '-' + splited_date[0]
       return fixed_date
+    },
+    // Duplicate Order
+    orderDuplicated(order){
+      this.orders.push(order)
+      // The v-data-table update is async
+			setTimeout(() => {
+        this.$refs['order_view_menu_' + order.id].show_edit_dialog = true
+			}, 50);
+    },
 
-    }
+    /** testt(order){ */
+    /** } */
   },
 
   validations: {

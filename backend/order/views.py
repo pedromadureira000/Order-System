@@ -1,13 +1,15 @@
 from django.db import transaction
+from django.db.models.query import Prefetch
 from rest_framework import status
 from rest_framework.response import Response
 from item.models import ItemCategory, ItemTable, PriceItem, PriceTable
 from item.serializers import CategoryPOSTSerializer
 from organization.facade import get_clients_by_agent
 from organization.models import Client, Company, Establishment
+from organization.serializers import CompaniesAndEstabsToDuplicateOrderSerializer
 from user.validators import req_user_is_agent_without_all_estabs
-from .facade import fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders, fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders_by_agent, fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders_by_client_user, get_orders_by_agent
-from .serializers import ClientsToFillFilterSelectorsToSearchOrdersSerializer, CompanyWithEstabsSerializer, OrderDetailsSerializer, OrderGetSerializer, OrderHistorySerializer, OrderPOSTSerializer,OrderPUTSerializer, fetchClientEstabsToCreateOrderSerializer, searchOnePriceItemToMakeOrderSerializer
+from .facade import fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders, fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders_by_agent, fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders_by_client_user, get_comps_and_estabs_to_duplicate_order, get_orders_by_agent
+from .serializers import ClientsToFillFilterSelectorsToSearchOrdersSerializer, CompanyWithEstabsSerializer, OrderDetailsSerializer, OrderDuplicateSerializer, OrderGetSerializer, OrderHistorySerializer, OrderPOSTSerializer,OrderPUTSerializer, fetchClientEstabsToCreateOrderSerializer, searchOnePriceItemToMakeOrderSerializer
 from .models import Order, OrderHistory
 from rest_framework.views import APIView
 from rolepermissions.checkers import has_permission, has_role
@@ -219,7 +221,7 @@ class OrderView(APIView):
                 except Exception as error:
                     transaction.rollback()
                     print(error)
-                    return unknown_exception_response(action=_('create price table'))
+                    return unknown_exception_response(action=_('create order'))
             return serializer_invalid_response(serializer.errors)
         return unauthorized_response 
 
@@ -290,10 +292,10 @@ class SpecificOrderView(APIView):
 
 class OrderHistoryView(APIView):
     @transaction.atomic
-    def get(self, request, id):
+    def get(self, request, order_id):
         if has_permission(request.user, 'get_orders'):
             try:
-                order = Order.objects.get(id=id, company__contracting_id=request.user.contracting_id)
+                order = Order.objects.get(id=order_id, company__contracting_id=request.user.contracting_id)
             except Order.DoesNotExist:
                 return not_found_response(object_name=_('The order'))
             if has_role(request.user, 'client_user'):
@@ -303,8 +305,41 @@ class OrderHistoryView(APIView):
                 if not request.user.establishments.filter(id=order.establishment_id).first():
                     return not_found_response(object_name=_('The order'))
             try:
-                order_history = OrderHistory.objects.filter(order_id=id)
+                order_history = OrderHistory.objects.filter(order_id=order_id)
             except OrderHistory.DoesNotExist:
                 return not_found_response(object_name=_('The order history'))
             return Response(OrderHistorySerializer(order_history, many=True).data)
         return unauthorized_response
+
+class fetchCompaniesAndEstabsToDuplicateOrder(APIView):
+    def get(self, request, order_id):    
+        if has_permission(request.user, 'create_order'):
+            try:
+                order = Order.objects.get(id=order_id, company__contracting_id=request.user.contracting_id)
+            except Order.DoesNotExist:
+                return not_found_response(object_name=_('The order'))
+            comps_with_estabs = get_comps_and_estabs_to_duplicate_order(request.user, order.company.item_table.item_table_compound_id)
+            return Response(CompaniesAndEstabsToDuplicateOrderSerializer(comps_with_estabs, many=True).data)
+        return unauthorized_response
+
+class DuplicateOrder(APIView):
+    @transaction.atomic
+    def post(self, request, order_id):
+        if has_permission(request.user, 'create_order'):
+            try:
+                order = Order.objects.get(id=order_id, company__contracting_id=request.user.contracting_id)
+            except Order.DoesNotExist:
+                return not_found_response(object_name=_('The order'))
+            serializer = OrderDuplicateSerializer(order, data={}, context={"request": request})
+            if serializer.is_valid():
+                try:
+                    order, some_items_were_not_copied = serializer.save()
+                    response = {"response_data": OrderGetSerializer(order).data, "some_items_were_not_copied": str(some_items_were_not_copied)}
+                    return Response(response, status=status.HTTP_201_CREATED)
+                except Exception as error:
+                    transaction.rollback()
+                    print(error)
+                    return unknown_exception_response(action=_('create order'))
+            return serializer_invalid_response(serializer.errors)
+        return unauthorized_response
+

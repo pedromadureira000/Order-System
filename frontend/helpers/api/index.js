@@ -949,8 +949,8 @@ export default {
 				})
 	},
 
-	async fetchOrderHistory(id){
-    let url = `/api/order/order_history/${id}`
+	async fetchOrderHistory(order_id){
+    let url = `/api/order/order_history/${order_id}`
 		return await axios({
 		method: "get",
 		url: url,
@@ -970,6 +970,26 @@ export default {
 		method: "put",
 		url: `/api/order/order/${payload.id}`,
 		data: data_body}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async fetchCompaniesAndEstabsToDuplicateOrder(order_id){
+    let url = `/api/order/fetch_comps_and_estabs_to_duplicate_order/${order_id}`
+		return await axios({
+		method: "get",
+		url: url,
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async duplicateOrder(order_id){
+    let url = `/api/order/duplicate_order/${order_id}`
+		return await axios({
+		method: "post",
+		url: url,
+			}).then((request) => {
 					return request.data 
 				})
 	},

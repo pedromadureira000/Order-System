@@ -51,7 +51,9 @@ export const messages = {
     // Order
     makeOrder_success_msg: "Order created.",  
     updateOrder_success_msg: "Order updated.",
-    
+    duplicateOrder_success_msg: "Order duplicated.",
+    fetchCompaniesAndEstabsToDuplicateOrder_error_msg: "Something went wrong when trying to fetch companies and establishments to duplicate order.",
+ 
     //--------------------------------------------------------------------/Store APIs Error Messages (default_error_msg parameter)
     updateUserPassword_error_msg: "Something went wrong when trying to update the user's password.",
     //user
@@ -138,6 +140,7 @@ export const messages = {
     fetchOrderDetails_error_msg: "Something went wrong when trying to fetch order details.",
     fetchOrderHistory_error_msg: "Something went wrong when trying to fetch order history.",
     updateOrder_error_msg: "Something went wrong when trying to update the order.",
+    duplicateOrder_error_msg: "Something went wrong when trying to duplicate the order.",
 
     // -------------------------------------------------------------------/ Error Handler
     // Fields
@@ -425,6 +428,12 @@ export const messages = {
     Are_you_sure_you_want_to_delete: 'Are you sure you want to delete this item?',
     //-------------------------------/admin/organization/price-table-v-select
     Empty: 'Empty',
+    //----------------------/dialog duplicate order
+    areYouSureAboutDuplicateOrderMessage: "Do you want to duplicate this order with typing status?",
+    "There is no establishments available.": "There is no establishments available.",
+    "There is no companies available.": "There is no companies available.",
+    "some_items_were_not_copied": "Some items were not copied.",
+    "Order ID": "Order ID",
   },
 
 //====================================================================================
@@ -481,6 +490,8 @@ export const messages = {
     // Order
     makeOrder_success_msg: "Pedido criado.",
     updateOrder_success_msg: "Pedido atualizado.",
+    duplicateOrder_success_msg: "Pedido duplicado",
+    fetchCompaniesAndEstabsToDuplicateOrder_error_msg: "Algo deu errado ao tentar buscar empresas e estabelecimentos para duplicar pedido.",
     
     //--------------------------------------------------------------------/Store APIs Error Messages (default_error_msg parameter)
     updateUserPassword_error_msg: "Algo deu errado ao tentar atualizar a senha do usuário.",
@@ -568,6 +579,7 @@ export const messages = {
     fetchOrderDetails_error_msg: "Algo deu errado ao tentar carregar detalhes do pedido.",
     fetchOrderHistory_error_msg: "Algo deu errado ao tentar carregar o histórico do pedido.",
     updateOrder_error_msg: "Algo deu errado ao tentar atualizar o pedido.",
+    duplicateOrder_error_msg: "Algo deu errado ao tentar duplicar o pedido.",
 
     // -------------------------------------------------------------------/ Error Handler
     // Fields
@@ -856,5 +868,11 @@ export const messages = {
     Are_you_sure_you_want_to_delete: 'Tem certeza que quer excluir esse item?',
     //-------------------------------/admin/organization/price-table-v-select
     Empty: 'Vazio',
+    //----------------------/dialog duplicate order
+    areYouSureAboutDuplicateOrderMessage: "Deseja duplicar esse pedido com status digitação?",
+    "There is no establishments available.": "Não há estabelecimentos disponíveis",
+    "There is no companies available.": "Não há empresas disponíveis",
+    "some_items_were_not_copied": "Alguns items não foram copiados.",
+    "Order ID": "ID do Pedido",
   },
 }

@@ -16,7 +16,7 @@ let category_fields = ['category_code']
 let price_table_fields = ['unit_price', 'table_code']
 
 // Order
-let order_fields = ['order_number', 'client_user',  'items', 'order_date', 'invoicing_date', 'invoice_number', 'order_amount', 
+let order_fields = ['id','order_number', 'client_user',  'items', 'order_date', 'invoicing_date', 'invoice_number', 'order_amount', 
   'agent_note', 'date', 'sequence_number', 'order', 'user']
 
 // commum fields
