@@ -81,7 +81,7 @@ class CompanyView(APIView):
     def get(self, request):
         user = request.user
         if has_permission(user, 'get_companies'):
-            companies = Company.objects.filter(contracting=user.contracting)
+            companies = Company.objects.filter(contracting_id=user.contracting_id)
             data = CompanyPOSTSerializer(companies, many=True, context={"request": request}).data
             return Response(data)
         return unauthorized_response
@@ -108,7 +108,7 @@ class SpecificCompany(APIView):
     def put(self, request, company_compound_id):
         #  print('========================> : ',company_compound_id )
         if has_permission(request.user, 'update_company'):
-            if company_compound_id.split("*")[0] != request.user.contracting.contracting_code:
+            if company_compound_id.split("*")[0] != request.user.contracting_id:
                 return Response({"error":[_( "The company was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 company = Company.objects.get(company_compound_id=company_compound_id)
@@ -128,7 +128,7 @@ class SpecificCompany(APIView):
     @transaction.atomic
     def delete(self, request, company_compound_id):
         if has_permission(request.user, 'delete_company'):
-            if company_compound_id.split("*")[0] != request.user.contracting.contracting_code:
+            if company_compound_id.split("*")[0] != request.user.contracting_id:
                 return Response({"error":[_( "The company was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 company = Company.objects.get(company_compound_id=company_compound_id)
@@ -150,14 +150,14 @@ class SpecificCompany(APIView):
 class GetCompaniesToCreateEstablishment(APIView):
     def get(self, request):
         if has_permission(request.user, 'create_establishment'):
-            companies = Company.objects.filter(contracting=request.user.contracting, status=1)
+            companies = Company.objects.filter(contracting_id=request.user.contracting_id, status=1)
             return Response(CompanyPOSTSerializer(companies, many=True).data)
 
 class EstablishmentView(APIView):
     def get(self, request):
         user = request.user
         if has_permission(request.user, 'get_establishments'):
-            establishments = Establishment.objects.filter(company__contracting=user.contracting)
+            establishments = Establishment.objects.filter(company__contracting_id=user.contracting_id)
             data = EstablishmentPOSTSerializer(establishments, many=True).data
             return Response(data)
         return unauthorized_response
@@ -183,7 +183,7 @@ class SpecificEstablishment(APIView):
     @transaction.atomic
     def put(self, request, establishment_compound_id):
         if has_permission(request.user, 'update_establishment'):
-            if establishment_compound_id.split("*")[0] != request.user.contracting.contracting_code:
+            if establishment_compound_id.split("*")[0] != request.user.contracting_id:
                 return not_found_response(object_name=_('The establishment'))
             try:
                 establishment = Establishment.objects.get(establishment_compound_id=establishment_compound_id)
@@ -203,7 +203,7 @@ class SpecificEstablishment(APIView):
     @transaction.atomic
     def delete(self, request, establishment_compound_id):
         if has_permission(request.user, 'delete_establishment'):
-            if establishment_compound_id.split("*")[0] != request.user.contracting.contracting_code:
+            if establishment_compound_id.split("*")[0] != request.user.contracting_id:
                 return not_found_response(object_name=_('The establishment'))
             try:
                 establishment = Establishment.objects.get(establishment_compound_id=establishment_compound_id)
@@ -224,7 +224,7 @@ class ClientTableView(APIView):
     def get(self, request):
         user = request.user
         if has_permission(user, 'get_client_tables'):
-            client_table = ClientTable.objects.filter(contracting=user.contracting)
+            client_table = ClientTable.objects.filter(contracting_id=user.contracting_id)
             data = ClientTablePOSTSerializer(client_table, many=True).data
             return Response(data)
         return unauthorized_response
@@ -250,7 +250,7 @@ class SpecificClientTable(APIView):
     @swagger_auto_schema(request_body=ClientTablePUTSerializer) 
     def put(self, request, client_table_compound_id):
         if has_permission(request.user, 'update_client_table'):
-            if client_table_compound_id.split("*")[0] != request.user.contracting.contracting_code:
+            if client_table_compound_id.split("*")[0] != request.user.contracting_id:
                 return Response({"error":[_( "The client table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 client_table = ClientTable.objects.get(client_table_compound_id=client_table_compound_id)
@@ -270,7 +270,7 @@ class SpecificClientTable(APIView):
     @transaction.atomic
     def delete(self, request, client_table_compound_id):
         if has_permission(request.user, 'delete_client_table'):
-            if client_table_compound_id.split("*")[0] != request.user.contracting.contracting_code:
+            if client_table_compound_id.split("*")[0] != request.user.contracting_id:
                 return Response({"error":[_( "The client table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 client_table = ClientTable.objects.get(client_table_compound_id=client_table_compound_id)
@@ -291,7 +291,7 @@ class SpecificClientTable(APIView):
 class GetPriceTablesToCreateClient(APIView):
     def get(self, request, company_compound_id):
         if has_permission(request.user, 'create_client'):
-            if company_compound_id.split("*")[0] != request.user.contracting.contracting_code:
+            if company_compound_id.split("*")[0] != request.user.contracting_id:
                 return error_response(detail="You cannot access this 'company'", status=status.HTTP_403_FORBIDDEN) #TODO translate
             request_user_is_agent_without_all_estabs = req_user_is_agent_without_all_estabs(request.user)
             price_tables = get_price_tables_to_create_client(request.user, company_compound_id, request_user_is_agent_without_all_estabs)
@@ -300,7 +300,7 @@ class GetPriceTablesToCreateClient(APIView):
 class GetEstablishmentsToCreateClient(APIView):
     def get(self, request, client_table_compound_id):
         if has_permission(request.user, 'create_client'):
-            if client_table_compound_id.split("*")[0] != request.user.contracting.contracting_code:
+            if client_table_compound_id.split("*")[0] != request.user.contracting_id:
                 return error_response(detail="You cannot access this 'client_table'", status=status.HTTP_403_FORBIDDEN) #TODO translate
             request_user_is_agent_without_all_estabs = req_user_is_agent_without_all_estabs(request.user)
             establishments = get_establishments_to_create_client(request.user, client_table_compound_id,request_user_is_agent_without_all_estabs)
@@ -312,7 +312,7 @@ class GetEstablishmentsToCreateClient(APIView):
             #  if req_user_is_agent_without_all_estabs(request.user):
                 #  client_tables = get_agent_client_tables(request.user)
                 #  return Response(ClientTablePOSTSerializer(client_tables, many=True).data)
-            #  client_tables = ClientTable.objects.filter(contracting=request.user.contracting)
+            #  client_tables = ClientTable.objects.filter(contracting_id=request.user.contracting_id)
             #  return Response(ClientTablePOSTSerializer(client_tables, many=True).data)
 class GetCompaniesToCreateClient(APIView):
     def get(self, request):
@@ -320,7 +320,7 @@ class GetCompaniesToCreateClient(APIView):
             if req_user_is_agent_without_all_estabs(request.user):
                 companies = get_agent_companies(request.user).exclude(client_table=None)
                 return Response(CompaniesToCreateClientSerializer(companies, many=True).data)
-            companies = Company.objects.filter(contracting=request.user.contracting).exclude(client_table=None)
+            companies = Company.objects.filter(contracting_id=request.user.contracting_id).exclude(client_table=None)
             return Response(CompaniesToCreateClientSerializer(companies, many=True).data)
 
 class GetClientsView(APIView):
@@ -331,7 +331,7 @@ class GetClientsView(APIView):
                 clients = get_clients_by_agent(user).filter(client_table__client_table_compound_id=client_table_compound_id)
                 data = ClientSerializerPOST(clients, many=True).data
                 return Response(data)
-            clients = Client.objects.filter(client_table__contracting=user.contracting, 
+            clients = Client.objects.filter(client_table__contracting_id=user.contracting_id, 
                     client_table__client_table_compound_id=client_table_compound_id)
             data = ClientSerializerPOST(clients, many=True).data
             return Response(data)
@@ -364,7 +364,7 @@ class SpecificClient(APIView):
         user = request.user
         if has_permission(user, 'update_client'):
             # Is from the same Contracting
-            if client_compound_id.split("*")[0] != user.contracting.contracting_code:
+            if client_compound_id.split("*")[0] != user.contracting_id:
                 return not_found_response(object_name=_('The client'))
             try:
                 client = Client.objects.get(client_compound_id=client_compound_id)
@@ -390,7 +390,7 @@ class SpecificClient(APIView):
     def delete(self, request, client_compound_id):
         if has_permission(request.user, 'delete_client'):
             # Is from the same Contracting
-            if client_compound_id.split("*")[0] != request.user.contracting.contracting_code:
+            if client_compound_id.split("*")[0] != request.user.contracting_id:
                 return not_found_response(object_name=_('The client'))
             try:
                 client = Client.objects.get(client_compound_id=client_compound_id)

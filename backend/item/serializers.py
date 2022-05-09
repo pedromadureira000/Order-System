@@ -12,25 +12,24 @@ from settings.utils import positive_number
 from user.validators import req_user_is_agent_without_all_estabs
 
 class ItemTablePOSTSerializer(serializers.ModelSerializer):
-    contracting=serializers.HiddenField(default=UserContracting())
+    contracting_id=serializers.HiddenField(default=UserContracting())
     class Meta:
         model = ItemTable
-        fields =  ['item_table_compound_id' ,'item_table_code', 'contracting', 'description', 'note']
+        fields =  ['item_table_compound_id' ,'item_table_code', 'contracting_id', 'description', 'note']
         read_only_fields =  ['item_table_compound_id']
-        validators = [UniqueTogetherValidator(queryset=ItemTable.objects.all(), fields=['item_table_code', 'contracting'], 
+        validators = [UniqueTogetherValidator(queryset=ItemTable.objects.all(), fields=['item_table_code', 'contracting_id'], 
             message=_("The 'item_table_code' field must be unique."))]
 
     def create(self, validated_data):
         # Create item_table_compound_id
-        validated_data['item_table_compound_id'] = validated_data['contracting'].contracting_code + \
+        validated_data['item_table_compound_id'] = validated_data['contracting_id'] + \
                 "*" + validated_data['item_table_code']
         return super().create(validated_data)
 
 class ItemTablePUTSerializer(serializers.ModelSerializer):
-    contracting=serializers.HiddenField(default=UserContracting())
     class Meta:
         model = ItemTable
-        fields =  ['item_table_compound_id' ,'item_table_code', 'contracting', 'description', 'note']
+        fields =  ['item_table_compound_id' ,'item_table_code', 'description', 'note']
         read_only_fields =  ['item_table_code']
 
 class CategoryPOSTSerializer(serializers.ModelSerializer):
@@ -45,7 +44,7 @@ class CategoryPOSTSerializer(serializers.ModelSerializer):
         request_user = self.context['request'].user
         # If the request is for update the instance, some related fields may not be sent since 'parcial=True' is being used
         # item_table belongs to user contracting
-        if value.contracting != request_user.contracting:
+        if value.contracting_id != request_user.contracting_id:
             raise NotFound(detail={"error": [_("Item table not found.")]})
         # Agent without access to all establishments can't access an category from an item_table which he doesn't have access.
         if req_user_is_agent_without_all_estabs(self.context['request'].user) and not \
@@ -54,7 +53,7 @@ class CategoryPOSTSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        validated_data['category_compound_id'] =  self.context['request'].user.contracting.contracting_code + \
+        validated_data['category_compound_id'] =  self.context['request'].user.contracting_id + \
                 "*" + validated_data['item_table'].item_table_code + "*" + validated_data["category_code"]
         item_category = ItemCategory.objects.create(**validated_data)
         item_category.save()
@@ -82,7 +81,7 @@ class ItemPOSTSerializer(serializers.ModelSerializer):
         item_table = attrs.get('item_table')
         category = attrs.get('category')
         # item_table belongs to user contracting
-        if item_table.contracting != request_user.contracting:
+        if item_table.contracting_id != request_user.contracting_id:
             raise NotFound(detail={"error": [_("Item table not found.")]})
         # Category must have the same item_table that the item item_table
         if category.item_table != item_table:
@@ -93,7 +92,7 @@ class ItemPOSTSerializer(serializers.ModelSerializer):
         return super().validate(attrs)
 
     def create(self, validated_data):
-        validated_data['item_compound_id'] = self.context['request'].user.contracting.contracting_code + \
+        validated_data['item_compound_id'] = self.context['request'].user.contracting_id + \
                 "*" + validated_data['item_table'].item_table_code + "*" + validated_data["item_code"]
         return super().create(validated_data)
 
@@ -112,7 +111,7 @@ class ItemPUTSerializer(serializers.ModelSerializer):
         # Verify if agent can assign this category.
         if attrs.get('category'):
             # Category belongs to user contracting
-            if category.item_table.contracting != request_user.contracting:
+            if category.item_table.contracting_id != request_user.contracting_id:
                 raise NotFound(detail={"error": [_("Item category not found.")]})
             # Category must have the same item_table that the item item_table
             if category.item_table != self.instance.item_table:
@@ -183,7 +182,7 @@ class PriceTablePOSTSerializer(serializers.ModelSerializer):
 
         #---------------------------/ Company
         # Company is from the same contracting that request_user
-        if company.contracting != request_user.contracting:
+        if company.contracting_id != request_user.contracting_id:
             raise NotFound(detail={"error": [_("Company not found.")]})
         # User is agent without all estabs and don't have access to this company
         if self.context['req_user_is_agent_without_all_estabs'] and company not in get_agent_companies(request_user):
@@ -195,7 +194,7 @@ class PriceTablePOSTSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         price_items = validated_data.pop('price_items')
-        validated_data['price_table_compound_id'] = self.context['request'].user.contracting.contracting_code + \
+        validated_data['price_table_compound_id'] = self.context['request'].user.contracting_id + \
                 "*" + validated_data['company'].company_code + "*" + validated_data["table_code"]
         price_table = PriceTable.objects.create(**validated_data)
         price_table.save()

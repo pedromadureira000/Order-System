@@ -8,8 +8,8 @@ from rolepermissions.roles import get_user_roles
 
 def get_all_client_users_by_agent(agent):
     if has_permission(agent, 'access_all_establishments'):
-        return User.objects.filter(Q(contracting=agent.contracting), Q(groups__name='client_user'))
-    return User.objects.filter(Q(contracting=agent.contracting), Q(groups__name='client_user'), 
+        return User.objects.filter(Q(contracting_id=agent.contracting_id), Q(groups__name='client_user'))
+    return User.objects.filter(Q(contracting_id=agent.contracting_id), Q(groups__name='client_user'), 
             Q(client__client_table__company__in=Company.objects.filter(establishment__in=agent.establishments.all())))
 
 #------------------------------------/Reverse Foreign key Batch Updates/---------------------------------------------------

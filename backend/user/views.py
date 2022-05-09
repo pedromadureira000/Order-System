@@ -163,7 +163,7 @@ class AdminAgentView(APIView):
     def get(self, request):
         if has_permission(request.user, 'get_admin_agents'):
             user = request.user
-            agents = User.objects.filter(Q(contracting=user.contracting), Q(groups__name='admin_agent'))
+            agents = User.objects.filter(Q(contracting_id=user.contracting_id), Q(groups__name='admin_agent'))
             return Response(AdminAgentPOSTSerializer(agents, many=True).data)
         return unauthorized_response
     @swagger_auto_schema(request_body=AdminAgentPOSTSerializer) 
@@ -187,7 +187,7 @@ class SpecificAdminAgent(APIView):
     @transaction.atomic
     def put(self, request, contracting_code, username):
         if has_permission(request.user, 'update_admin_agent'):
-            if contracting_code != request.user.contracting.contracting_code:
+            if contracting_code != request.user.contracting_id:
                 return not_found_response(object_name=_('The admin agent'))
             user_code = contracting_code + "*" + username
             try: 
@@ -211,7 +211,7 @@ class SpecificAdminAgent(APIView):
     def delete(self, request, contracting_code, username):
         if has_permission(request.user, 'delete_admin_agent'):
             # Contracting Ownership
-            if contracting_code != request.user.contracting.contracting_code:
+            if contracting_code != request.user.contracting_id:
                 return not_found_response(object_name=_('The admin agent'))
             user_code = contracting_code + "*" + username
             try:
@@ -232,7 +232,7 @@ class SpecificAdminAgent(APIView):
 class fetchEstablishmentsToCreateAgent(APIView):
     def get(self, request):
         if has_permission(request.user, 'create_agent'):
-            estabs = Establishment.objects.filter(company__contracting=request.user.contracting,status=1)
+            estabs = Establishment.objects.filter(company__contracting_id=request.user.contracting_id,status=1)
             return Response(EstablishmentPOSTSerializer(estabs, many=True).data)
         return unauthorized_response
 
@@ -240,7 +240,7 @@ class AgentView(APIView):
     def get(self, request):
         if has_permission(request.user, 'get_agents'):
             user = request.user
-            agents = User.objects.filter(Q(contracting=user.contracting), Q(groups__name='agent'))
+            agents = User.objects.filter(Q(contracting_id=user.contracting_id), Q(groups__name='agent'))
             return Response(AgentPOSTSerializer(agents, many=True).data)
         return unauthorized_response
     @swagger_auto_schema(request_body=AgentPOSTSerializer) 
@@ -264,7 +264,7 @@ class SpecificAgent(APIView):
     @transaction.atomic
     def put(self, request, contracting_code, username):
         if has_permission(request.user, 'update_agent'):
-            if contracting_code != request.user.contracting.contracting_code:
+            if contracting_code != request.user.contracting_id:
                 return not_found_response(object_name=_('The agent'))
             user_code = contracting_code + "*" + username
             try: 
@@ -288,7 +288,7 @@ class SpecificAgent(APIView):
     def delete(self, request, contracting_code, username):
         if has_permission(request.user, 'delete_agent'):
             # Contracting Ownership
-            if contracting_code != request.user.contracting.contracting_code:
+            if contracting_code != request.user.contracting_id:
                 return not_found_response(object_name=_('The agent'))
             user_code = contracting_code + "*" + username
             try:
@@ -314,7 +314,7 @@ class fetchClientsToCreateClientUser(APIView):
                 clients = get_clients_by_agent(user).filter(status=1) #TODO TEST
                 data = ClientSerializerPOST(clients, many=True).data
                 return Response(data)
-            clients = Client.objects.filter(client_table__contracting=user.contracting, status=1)
+            clients = Client.objects.filter(client_table__contracting_id=user.contracting_id, status=1)
             data = ClientSerializerPOST(clients, many=True).data
             return Response(data)
         return unauthorized_response
@@ -328,7 +328,7 @@ class ClientUserView(APIView):
             if has_role(user, 'agent'):
                 client_users = get_all_client_users_by_agent(user)
                 return Response(ClientUserPOSTSerializer(client_users, many=True).data)
-            client_users = User.objects.filter(Q(contracting=user.contracting), Q(groups__name='client_user'))
+            client_users = User.objects.filter(Q(contracting_id=user.contracting_id), Q(groups__name='client_user'))
             return Response(ClientUserPOSTSerializer(client_users, many=True).data)
         return unauthorized_response
     @swagger_auto_schema(request_body=ClientUserPOSTSerializer) 
@@ -355,7 +355,7 @@ class SpecificClientUser(APIView):
     @transaction.atomic
     def put(self, request, contracting_code, username):
         if has_permission(request.user, 'update_client_user'):
-            if contracting_code != request.user.contracting.contracting_code:
+            if contracting_code != request.user.contracting_id:
                 return not_found_response(object_name=_('The client user'))
             user_code = contracting_code + "*" + username
             try:
@@ -381,7 +381,7 @@ class SpecificClientUser(APIView):
     @transaction.atomic  
     def delete(self, request, contracting_code, username):
         if has_permission(request.user, 'delete_client_user'):
-            if contracting_code != request.user.contracting.contracting_code:
+            if contracting_code != request.user.contracting_id:
                 return not_found_response(object_name=_('The client user'))
             user_code = contracting_code + "*" + username
             try:
@@ -423,7 +423,7 @@ class UpdateUserPassword(APIView):
     @swagger_auto_schema(request_body=UpdateUserPasswordSerializer) 
     @transaction.atomic
     def put(self, request, contracting_code, username):
-        if contracting_code != request.user.contracting.contracting_code:
+        if contracting_code != request.user.contracting_id:
             return not_found_response(object_name=_('The user'))
         user_code = contracting_code + "*" + username
         try:

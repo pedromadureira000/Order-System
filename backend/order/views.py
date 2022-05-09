@@ -203,7 +203,7 @@ class OrderView(APIView):
                 lastPage = math.ceil(total / items_per_page)
                 return Response({"orders": OrderGetSerializer(orders[start:end], many=True).data, "current_page": page,
                     "lastPage": lastPage, "total": total })
-            orders = Order.objects.filter(company__contracting=request.user.contracting, **kwargs).order_by(sort_by)
+            orders = Order.objects.filter(company__contracting_id=request.user.contracting_id, **kwargs).order_by(sort_by)
             total = orders.count()
             lastPage = math.ceil(total / items_per_page)
             return Response({"orders": OrderGetSerializer(orders[start:end], many=True).data, "current_page": page,
@@ -270,7 +270,7 @@ class SpecificOrderView(APIView):
     #  @transaction.atomic
     #  def delete(self, request, establishment_compound_id, order_number):
         #  if has_permission(request.user, 'delete_order'):
-            #  if establishment_compound_id.split("#")[0] != request.user.contracting.contracting_code:
+            #  if establishment_compound_id.split("#")[0] != request.user.contracting_id:
                 #  return not_found_response(object_name=_('The order'))
             #  try:
                 #  order = Order.objects.get(establishment__establishment_compound_id=establishment_compound_id, order_number=order_number)

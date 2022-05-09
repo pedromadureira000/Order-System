@@ -85,7 +85,7 @@ class OrderPOSTSerializer(serializers.ModelSerializer):
 
     def validate_establishment(self, value):
         # Contracting ownership
-        if value.establishment_compound_id.split("*")[0] != self.context['request'].user.contracting.contracting_code:
+        if value.establishment_compound_id.split("*")[0] != self.context['request'].user.contracting_id:
             raise serializers.ValidationError(_("Establishment not found."))
         return value
 
@@ -372,7 +372,7 @@ class OrderDuplicateSerializer(serializers.ModelSerializer):
         establishment = self.instance.establishment
         company = establishment.company
         # Contracting ownership
-        if establishment.establishment_compound_id.split("*")[0] != request_user.contracting.contracting_code:
+        if establishment.establishment_compound_id.split("*")[0] != request_user.contracting_id:
             raise serializers.ValidationError(_("Establishment not found."))
         #Check if the request_user is active
         if request_user.status != 1:

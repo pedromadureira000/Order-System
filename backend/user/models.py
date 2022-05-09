@@ -21,13 +21,13 @@ class AgentEstablishment(models.Model):
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
-    def _create_user(self, username, contracting, password, **extra_fields):
+    def _create_user(self, username, contracting_id, password, **extra_fields):
         """
-        Create and save a user with the given username, contracting, and password.
+        Create and save a user with the given username, contracting_id, and password.
         """
         if not username:
             raise ValueError('A username must be set')
-        if not contracting:
+        if not contracting_id:
             raise ValueError('A contracting must be set')
         if not password:
             raise ValueError('A password must be set')
@@ -39,21 +39,21 @@ class UserManager(BaseUserManager):
         # manager method can be used in migrations. This is fine because
         # managers are by definition working on the real model.
         username = GlobalUserModel.normalize_username(username)
-        user_code = contracting.contracting_code + "*" + username
-        user = self.model(user_code=user_code,username=username, contracting=contracting, **extra_fields)
+        user_code = contracting_id + "*" + username
+        user = self.model(user_code=user_code,username=username, contracting_id=contracting_id, **extra_fields)
         user.password = make_password(password)
         user.save(using=self._db)
         if user.is_superuser:
             assign_role(user, 'super_user')
         return user
-    def create_user(self, username=None, contracting=None, password=None, **extra_fields):
+    def create_user(self, username=None, contracting_id=None, password=None, **extra_fields):
         extra_fields.setdefault('is_superuser', False)
-        return self._create_user(username, contracting, password, **extra_fields)
-    def create_superuser(self, username, contracting=None, password=None, **extra_fields):
+        return self._create_user(username, contracting_id, password, **extra_fields)
+    def create_superuser(self, username, contracting_id=None, password=None, **extra_fields):
         extra_fields.setdefault('is_superuser', True)
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
-        return self._create_user(username, contracting, password, **extra_fields)
+        return self._create_user(username, contracting_id, password, **extra_fields)
 
 class User(AbstractBaseUser, PermissionsMixin):
     # AgentEstablishment_set

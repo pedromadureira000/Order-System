@@ -13,7 +13,7 @@ class Command(BaseCommand):
             first_name="Admin",
             last_name="adm",
             email="admin@admin.phsw",
-            contracting=contracting,
+            contracting_id=contracting.contracting_code,
             status=1,
             password='asdf'
         )
@@ -40,7 +40,7 @@ class Command(BaseCommand):
             first_name="Cli",
             last_name="ent",
             email="client@user.phsw",
-            contracting=contracting,
+            contracting_id=contracting.contracting_code,
             client=client,
             status=1,
             password='asdf'
@@ -54,7 +54,7 @@ class Command(BaseCommand):
             first_name="Admin",
             last_name="adm",
             email="admin@admin.phsw",
-            contracting=contracting,
+            contracting_id=contracting.contracting_code,
             status=1,
             password='asdf'
         )
@@ -81,7 +81,7 @@ class Command(BaseCommand):
             first_name="Cli",
             last_name="ent",
             email="client@user.phsw",
-            contracting=contracting,
+            contracting_id=contracting.contracting_code,
             client=client,
             status=1,
             password='asdf'

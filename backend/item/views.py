@@ -9,7 +9,7 @@ from rest_framework.parsers import FormParser, MultiPartParser
 from .validators import agent_has_access_to_this_item_table, agent_has_access_to_this_price_table 
 from user.validators import req_user_is_agent_without_all_estabs
 from .facade import get_categories_by_agent, get_categories_to_create_item_by_agent_without_all_estabs, get_companies_to_create_pricetabe_by_agent, get_items_by_agent, get_price_tables_by_agent
-from .serializers import ForTablePriceItemSerializer, ItemPOSTSerializer, ItemPUTSerializer, CategoryPOSTSerializer, CategoryPUTSerializer, ItemTablePOSTSerializer, ItemTablePUTSerializer, PriceItemForAgentsSerializer, PriceTableGetSerializer, PriceTablePOSTSerializer, SpecificPriceTablePUTSerializer, SpecificPriceItemSerializer
+from .serializers import ItemPOSTSerializer, ItemPUTSerializer, CategoryPOSTSerializer, CategoryPUTSerializer, ItemTablePOSTSerializer, ItemTablePUTSerializer, PriceItemForAgentsSerializer, PriceTableGetSerializer, PriceTablePOSTSerializer, SpecificPriceTablePUTSerializer, SpecificPriceItemSerializer
 from .models import ItemTable, Item, ItemCategory, PriceTable, PriceItem
 from rest_framework.views import APIView
 from rolepermissions.checkers import has_permission, has_role
@@ -25,8 +25,8 @@ class ItemTableView(APIView):
     def get(self, request):
         user = request.user
         if has_permission(user, 'get_item_tables'):
-            item_table = ItemTable.objects.filter(contracting=user.contracting)
-            data = ItemTablePOSTSerializer(item_table, many=True).data
+            item_tables = ItemTable.objects.filter(contracting_id=user.contracting_id)
+            data = ItemTablePOSTSerializer(item_tables, many=True).data
             return Response(data)
         return unauthorized_response
     @swagger_auto_schema(request_body=ItemTablePOSTSerializer) 
@@ -51,7 +51,7 @@ class SpecificItemTable(APIView):
     @swagger_auto_schema(request_body=ItemTablePUTSerializer) 
     def put(self, request, item_table_compound_id):
         if has_permission(request.user, 'update_item_table'):
-            if item_table_compound_id.split("*")[0] != request.user.contracting.contracting_code:
+            if item_table_compound_id.split("*")[0] != request.user.contracting_id:
                 return Response({"error":[_( "The item table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 item_table = ItemTable.objects.get(item_table_compound_id=item_table_compound_id)
@@ -71,7 +71,7 @@ class SpecificItemTable(APIView):
     @transaction.atomic
     def delete(self, request, item_table_compound_id):
         if has_permission(request.user, 'delete_item_table'):
-            if item_table_compound_id.split("*")[0] != request.user.contracting.contracting_code:
+            if item_table_compound_id.split("*")[0] != request.user.contracting_id:
                 return Response({"error":[_( "The item table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 item_table = ItemTable.objects.get(item_table_compound_id=item_table_compound_id)
@@ -96,7 +96,7 @@ class fetchItemTablesToCreateItemOrCategoryOrPriceTable(APIView):
             if req_user_is_agent_without_all_estabs(request.user):
                 item_tables = get_agent_item_tables(request.user)
                 return Response(ItemTablePOSTSerializer(item_tables, many=True).data)
-            item_tables = ItemTable.objects.filter(contracting=request.user.contracting)
+            item_tables = ItemTable.objects.filter(contracting_id=request.user.contracting_id)
             serializer = ItemTablePOSTSerializer(item_tables, many=True)
             return Response(serializer.data)
         return unauthorized_response
@@ -107,7 +107,7 @@ class CategoryView(APIView):
             if has_role(request.user, 'agent'):
                 item_categories = get_categories_by_agent(request.user).filter(item_table__item_table_compound_id=item_table_compound_id)
                 return Response(CategoryPOSTSerializer(item_categories, many=True).data)
-            item_categories = ItemCategory.objects.filter(item_table__contracting=request.user.contracting, 
+            item_categories = ItemCategory.objects.filter(item_table__contracting_id=request.user.contracting_id, 
                     item_table__item_table_compound_id=item_table_compound_id)
             serializer = CategoryPOSTSerializer(item_categories, many=True)
             return Response(serializer.data)
@@ -134,7 +134,7 @@ class SpecificCategoryView(APIView):
     def put(self, request, category_compound_id):
         user = request.user
         if has_permission(user, 'update_item_category'):
-            if category_compound_id.split("*")[0] != request.user.contracting.contracting_code:
+            if category_compound_id.split("*")[0] != request.user.contracting_id:
                 return Response({"error":[_( "The item category was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 item_category = ItemCategory.objects.get(category_compound_id=category_compound_id)
@@ -160,7 +160,7 @@ class SpecificCategoryView(APIView):
     @transaction.atomic
     def delete(self, request, category_compound_id):
         if has_permission(request.user, 'delete_item_category'):
-            if category_compound_id.split("*")[0] != request.user.contracting.contracting_code:
+            if category_compound_id.split("*")[0] != request.user.contracting_id:
                 return Response({"error":[_( "The item category was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 item_category = ItemCategory.objects.get(category_compound_id=category_compound_id)
@@ -184,7 +184,7 @@ class SpecificCategoryView(APIView):
 class fetchCategoriesToCreateItem(APIView):
     def get(self, request, item_table_compound_id):
         if has_permission(request.user, 'create_item'):
-            if item_table_compound_id.split("*")[0] != request.user.contracting.contracting_code:
+            if item_table_compound_id.split("*")[0] != request.user.contracting_id:
                 return Response({"error":[_( "The item table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 ItemTable.objects.get(item_table_compound_id=item_table_compound_id)
@@ -237,7 +237,7 @@ class ItemView(APIView):
                 lastPage = math.ceil(total / items_per_page)
                 return Response({"items": ItemPOSTSerializer(items[start:end], many=True).data, "current_page": page,
                     "lastPage": lastPage, "total": total })
-            items = Item.objects.filter(item_table__contracting=request.user.contracting, **kwargs).order_by(sort_by)
+            items = Item.objects.filter(item_table__contracting_id=request.user.contracting_id, **kwargs).order_by(sort_by)
             total = items.count()
             lastPage = math.ceil(total / items_per_page)
             return Response({"items": ItemPOSTSerializer(items[start:end], many=True).data, "current_page": page,
@@ -267,7 +267,7 @@ class SpecificItemView(APIView):
     @swagger_auto_schema(request_body=ItemPUTSerializer) 
     def put(self, request, item_compound_id):
         if has_permission(request.user, 'update_item'):
-            if item_compound_id.split("*")[0] != request.user.contracting.contracting_code:
+            if item_compound_id.split("*")[0] != request.user.contracting_id:
                 return not_found_response(object_name=_('The item'))
             try:
                 item = Item.objects.get(item_compound_id=item_compound_id)
@@ -293,7 +293,7 @@ class SpecificItemView(APIView):
     @transaction.atomic
     def delete(self, request, item_compound_id):
         if has_permission(request.user, 'delete_item'):
-            if item_compound_id.split("*")[0] != request.user.contracting.contracting_code:
+            if item_compound_id.split("*")[0] != request.user.contracting_id:
                 return not_found_response(object_name=_('The item'))
             try:
                 item = Item.objects.get(item_compound_id=item_compound_id)
@@ -319,7 +319,7 @@ class fetchCompaniesToCreatePriceTable(APIView):
             if req_user_is_agent_without_all_estabs(request.user):
                 companies = get_companies_to_create_pricetabe_by_agent(request.user)
                 return Response(CompanyPOSTSerializer(companies, many=True).data)
-            companies = Company.objects.filter(status=1, contracting=request.user.contracting).exclude(item_table=None)
+            companies = Company.objects.filter(status=1, contracting_id=request.user.contracting_id).exclude(item_table=None)
             serializer = CompanyPOSTSerializer(companies, many=True)
             return Response(serializer.data)
         return
@@ -327,7 +327,7 @@ class fetchCompaniesToCreatePriceTable(APIView):
 #  class fetchItemsToCreatePriceTable(APIView):
     #  def get(self, request, item_table_compound_id):
         #  if has_permission(request.user, 'create_price_table'):
-            #  if item_table_compound_id.split("*")[0] != request.user.contracting.contracting_code:
+            #  if item_table_compound_id.split("*")[0] != request.user.contracting_id:
                 #  return Response({"error":[_( "The item table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             #  try:
                 #  item_table = ItemTable.objects.get(item_table_compound_id=item_table_compound_id)
@@ -349,7 +349,7 @@ class PriceTableView(APIView):
             if has_role(request.user, 'agent'):
                 pricetables = get_price_tables_by_agent(request.user)
                 return Response(PriceTableGetSerializer(pricetables, many=True).data)
-            pricetables = PriceTable.objects.filter(company__contracting=request.user.contracting).all()
+            pricetables = PriceTable.objects.filter(company__contracting_id=request.user.contracting_id).all()
             return Response(PriceTableGetSerializer(pricetables, many=True).data)
         return unauthorized_response
     @swagger_auto_schema(request_body=PriceTablePOSTSerializer) 
@@ -374,7 +374,7 @@ class SpecificPriceTableView(APIView):
     @swagger_auto_schema(request_body=SpecificPriceTablePUTSerializer) 
     def put(self, request, price_table_compound_id):
         if has_permission(request.user, 'update_price_table'):
-            if price_table_compound_id.split("*")[0] != request.user.contracting.contracting_code:
+            if price_table_compound_id.split("*")[0] != request.user.contracting_id:
                 return Response({"error":[_( "The price table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 instance = PriceTable.objects.get(price_table_compound_id=price_table_compound_id)
@@ -399,7 +399,7 @@ class SpecificPriceTableView(APIView):
     @transaction.atomic
     def delete(self, request, price_table_compound_id):
         if has_permission(request.user, 'delete_price_table'):
-            if price_table_compound_id.split("*")[0] != request.user.contracting.contracting_code:
+            if price_table_compound_id.split("*")[0] != request.user.contracting_id:
                 return Response({"error":[_( "The price table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             try:
                 instance = PriceTable.objects.get(price_table_compound_id=price_table_compound_id)
@@ -442,9 +442,9 @@ class SpecificPriceItemView(APIView):
     @transaction.atomic
     def put(self, request, price_table_compound_id, item_compound_id):
         if has_permission(request.user, 'create_or_update_price_item'):
-            if price_table_compound_id.split("*")[0] != request.user.contracting.contracting_code:
+            if price_table_compound_id.split("*")[0] != request.user.contracting_id:
                 return not_found_response(object_name=_('The client'))
-            if item_compound_id.split("*")[0] != request.user.contracting.contracting_code:
+            if item_compound_id.split("*")[0] != request.user.contracting_id:
                 return not_found_response(object_name=_('The item'))
             try:
                 price_table = PriceTable.objects.get(price_table_compound_id=price_table_compound_id)
@@ -489,9 +489,9 @@ class SpecificPriceItemView(APIView):
     @transaction.atomic
     def delete(self, request, price_table_compound_id, item_compound_id):
         if has_permission(request.user, 'create_or_update_price_item'):
-            if price_table_compound_id.split("*")[0] != request.user.contracting.contracting_code:
+            if price_table_compound_id.split("*")[0] != request.user.contracting_id:
                 return Response({"error":[_( "The price table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
-            if item_compound_id.split("*")[0] != request.user.contracting.contracting_code:
+            if item_compound_id.split("*")[0] != request.user.contracting_id:
                 return not_found_response(object_name=_('The item'))
             try:
                 instance = PriceItem.objects.get(price_table__price_table_compound_id=price_table_compound_id,

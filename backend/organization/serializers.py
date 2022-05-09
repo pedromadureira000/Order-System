@@ -27,18 +27,18 @@ class CompanyPOSTSerializer(serializers.ModelSerializer):
             queryset=ClientTable.objects.all(), allow_null=True)
     item_table=serializers.SlugRelatedField(slug_field='item_table_compound_id',
             queryset=ItemTable.objects.all(), allow_null=True)
-    contracting=serializers.HiddenField(default=UserContracting())
+    contracting_id=serializers.HiddenField(default=UserContracting())
     class Meta:
         model = Company
-        fields = ['company_compound_id', 'company_code', 'contracting', 'item_table', 'client_table', 'name',
+        fields = ['company_compound_id', 'company_code', 'contracting_id', 'item_table', 'client_table', 'name',
                 'cnpj_root','status', 'note']
-        validators = [UniqueTogetherValidator(queryset=Company.objects.all(), fields=['company_code', 'contracting'], 
+        validators = [UniqueTogetherValidator(queryset=Company.objects.all(), fields=['company_code', 'contracting_id'], 
             message=_("The 'company_code' field must be unique."))]
 
     def validate_client_table(self, value):
         if value:
             # Contracting Ownership
-            if value.contracting != self.context["request"].user.contracting:
+            if value.contracting_id != self.context["request"].user.contracting_id:
                 raise NotFound(detail={"error": [_("Client table not found.")]})
             return value
         return value
@@ -46,13 +46,13 @@ class CompanyPOSTSerializer(serializers.ModelSerializer):
     def validate_item_table(self, value):
         if value:
             # Contracting Ownership
-            if value.contracting != self.context["request"].user.contracting:
+            if value.contracting_id != self.context["request"].user.contracting_id:
                 raise NotFound(detail={"error": [_("Item table not found.")]})
             return value
         return value
 
     def create(self, validated_data):
-        validated_data['company_compound_id'] = validated_data['contracting'].contracting_code + \
+        validated_data['company_compound_id'] = validated_data['contracting_id'] + \
                 "*" + validated_data['company_code']
         return super().create(validated_data)
 
@@ -61,10 +61,9 @@ class CompanyPUTSerializer(serializers.ModelSerializer):
             queryset=ClientTable.objects.all(), allow_null=True)
     item_table=serializers.SlugRelatedField(slug_field='item_table_compound_id',
             queryset=ItemTable.objects.all(), allow_null=True)
-    contracting=serializers.HiddenField(default=UserContracting())
     class Meta:
         model = Company
-        fields = ['company_compound_id', 'company_code', 'contracting', 'item_table', 'client_table', 'name',
+        fields = ['company_compound_id', 'company_code', 'item_table', 'client_table', 'name',
                 'cnpj_root','status', 'note']
         read_only_fields = ['company_code']
 
@@ -78,7 +77,7 @@ class CompanyPUTSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(_("The company must have no orders to be able to change the client table."))
         if value:
             # Contracting Ownership
-            if value.contracting != self.context["request"].user.contracting:
+            if value.contracting_id != self.context["request"].user.contracting_id:
                 raise NotFound(detail={"error": [_("Client table not found.")]})
             return value
 
@@ -91,7 +90,7 @@ class CompanyPUTSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(_("The company must have no price tables to be able to change the item table.")) #TODO translate
         if value:
             # Contracting Ownership
-            if value.contracting != self.context["request"].user.contracting:
+            if value.contracting_id != self.context["request"].user.contracting_id:
                 raise NotFound(detail={"error": [_("Item table not found.")]})
             return value
         return value
@@ -107,7 +106,7 @@ class EstablishmentPOSTSerializer(serializers.ModelSerializer):
 
     def validate_company(self, value):
         if value:
-            if value.contracting != self.context["request"].user.contracting:
+            if value.contracting_id != self.context["request"].user.contracting_id:
                 raise serializers.ValidationError(_("Company not found."))
             if value.status != 1:
                 raise serializers.ValidationError(_("The company must be active."))
@@ -116,7 +115,7 @@ class EstablishmentPOSTSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         # Create establishment_compound_id
-        validated_data['establishment_compound_id'] = validated_data['company'].contracting.contracting_code + "*" + \
+        validated_data['establishment_compound_id'] = validated_data['company'].contracting_id + "*" + \
                 validated_data['company'].company_code + "*" + validated_data['establishment_code']
         return super().create(validated_data)
 
@@ -129,24 +128,23 @@ class EstablishmentPUTSerializer(serializers.ModelSerializer):
         read_only_fields = ['establishment_code', 'company']
 
 class ClientTablePOSTSerializer(serializers.ModelSerializer):
-    contracting=serializers.HiddenField(default=UserContracting())
+    contracting_id=serializers.HiddenField(default=UserContracting())
     class Meta:
         model = ClientTable
-        fields =  ['client_table_compound_id' ,'client_table_code', 'contracting', 'description', 'note']
-        validators = [UniqueTogetherValidator(queryset=ClientTable.objects.all(), fields=['client_table_code', 'contracting'], 
+        fields =  ['client_table_compound_id' ,'client_table_code', 'contracting_id', 'description', 'note']
+        validators = [UniqueTogetherValidator(queryset=ClientTable.objects.all(), fields=['client_table_code', 'contracting_id'], 
             message=_("The 'client_table_code' field must be unique."))]
 
     def create(self, validated_data):
         # Create client_table_compound_id
-        validated_data['client_table_compound_id'] = validated_data['contracting'].contracting_code + \
+        validated_data['client_table_compound_id'] = validated_data['contracting_id'] + \
                 "*" + validated_data['client_table_code']
         return super().create(validated_data)
 
 class ClientTablePUTSerializer(serializers.ModelSerializer):
-    contracting=serializers.HiddenField(default=UserContracting())
     class Meta:
         model = ClientTable
-        fields =  ['client_table_compound_id' ,'client_table_code', 'contracting', 'description', 'note']
+        fields =  ['client_table_compound_id' ,'client_table_code', 'description', 'note']
         read_only_fields = ['client_table_code']
 
 class ClientEstablishmentToClientSerializer(serializers.ModelSerializer):
@@ -158,7 +156,7 @@ class ClientEstablishmentToClientSerializer(serializers.ModelSerializer):
 
     def validate_establishment(self, value):
         # Contracting ownership
-        if value.company.contracting != self.context["request"].user.contracting:
+        if value.company.contracting_id != self.context["request"].user.contracting_id:
             raise serializers.ValidationError(_("Establishment not found."))
         return value
 
@@ -211,7 +209,7 @@ class ClientSerializerPOST(serializers.ModelSerializer):
                         raise serializers.ValidationError(_("You can't add this establishment to this client."))
         # ----------------/ Client Table
         # Client table Contracting ownership
-        if attrs.get('client_table').contracting != request_user.contracting:
+        if attrs.get('client_table').contracting_id != request_user.contracting_id:
             raise serializers.ValidationError(_("Client table not found."))
         # Agent without all estabs has access to this client_table
         if request_user_is_agent_without_all_estabs:
@@ -222,7 +220,7 @@ class ClientSerializerPOST(serializers.ModelSerializer):
     def create(self, validated_data):
         # Create client_compound_id
         client = Client.objects.create(
-            client_compound_id = validated_data['client_table'].contracting.contracting_code + "*" + \
+            client_compound_id = validated_data['client_table'].contracting_id + "*" + \
                     validated_data['client_table'].client_table_code + "*" + validated_data['client_code'],
             client_table=validated_data['client_table'],
             client_code=validated_data['client_code'],

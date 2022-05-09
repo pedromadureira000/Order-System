@@ -28,7 +28,7 @@ class SwaggerProfilePasswordSerializer(serializers.Serializer):
 #------------------------------------------------------/User serializers
 
 class UserSerializer(serializers.ModelSerializer):
-    contracting = serializers.HiddenField(default=UserContracting())
+    contracting_id = serializers.HiddenField(default=UserContracting())
     roles = serializers.SerializerMethodField()
     permissions = serializers.SerializerMethodField() 
     status = serializers.ChoiceField(choices=[x[0] for x in status_choices], required=False)
@@ -36,12 +36,12 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'contracting', 'first_name', 'last_name', 'email', 'status',
+        fields = ['username', 'contracting_id', 'first_name', 'last_name', 'email', 'status',
                 'password', 'note', 'roles', 'permissions', 'contracting_code']
         extra_kwargs = {
             'password': {'write_only': True},
         }
-        validators = [UniqueTogetherValidator(queryset=User.objects.all(), fields=['username', 'contracting'],
+        validators = [UniqueTogetherValidator(queryset=User.objects.all(), fields=['username', 'contracting_id'],
             message=_("The 'username' field must be unique."))]
 
     def validate(self, attrs):
@@ -57,7 +57,7 @@ class UserSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(_("You cannot create more users. Your contracting company already reach the active users limit."))
         # Validate contracting ownership
         if self.context['request'].method == 'PUT': # There is any problem for double validation?
-            if self.instance.contracting.contracting_code != value.contracting_code:
+            if self.instance.contracting_id != value.contracting_code:
                 raise serializers.ValidationError(_("User not found."))
         return value
 
@@ -99,7 +99,7 @@ class UserSerializer(serializers.ModelSerializer):
         return permissions_list 
 
     def get_contracting_code(self, user):
-        return user.contracting.contracting_code
+        return user.contracting_id
 
 class UpdateUserPasswordSerializer(serializers.ModelSerializer):
     class Meta:
@@ -121,7 +121,7 @@ class AgentEstablishmentToUserSerializer(serializers.ModelSerializer):
         fields = ['establishment']
     def validate_establishment(self, value):
     # Contracting Ownership
-        if value.company.contracting != self.context['request'].user.contracting: 
+        if value.company.contracting_id != self.context['request'].user.contracting_id: 
             raise serializers.ValidationError(_("Establishment not found."))
         return value
 
@@ -134,15 +134,15 @@ class OwnProfileSerializer(UserSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'contracting', 'first_name', 'last_name', 'email', 'status', 'client', 'client_name',
+        fields = ['username', 'contracting_id', 'first_name', 'last_name', 'email', 'status', 'client', 'client_name',
                 'roles', 'permissions', 'contracting_code']
-        read_only_fields = ['status' ,'contracting', 'client', 'username']
+        read_only_fields = ['status' , 'client', 'username']
 
     def get_contracting_code(self, user):
-        return user.contracting.contracting_code
+        return user.contracting_id
 
     def get_client_name(self, user):
-        if user.client_id: # TODO every validation like that must use _id
+        if user.client_id:
             return user.client.name
         return None
 
@@ -152,7 +152,7 @@ class ERPUserPOSTSerializer(UserSerializer):
     user_code = serializers.SerializerMethodField()
 
     class Meta(UserSerializer.Meta):
-        fields = ['username', 'contracting', 'first_name', 'last_name', 'email', 'status',
+        fields = ['username', 'contracting', 'contracting_id','first_name', 'last_name', 'email', 'status',
                 'roles', 'permissions', 'contracting_code', 'user_code', 'note', 'password']
 
     #overwrite UserSerializer validation
@@ -164,7 +164,7 @@ class ERPUserPOSTSerializer(UserSerializer):
         contracting = validated_data['contracting']
         password=validated_data['password']
         email = validated_data['email']
-        user = User.objects.create_user(username, contracting, password,\
+        user = User.objects.create_user(username, contracting.contracting_code, password,\
             first_name=validated_data.get('first_name', ''),
             last_name=validated_data.get('last_name', '' ),
             email=email,
@@ -178,7 +178,7 @@ class ERPUserPOSTSerializer(UserSerializer):
         return user.user_code
 
 class ERPUserPUTSerializer(serializers.ModelSerializer):
-    #OBS: I don't utilized the UserSerializer because I shouldn't have contracting field
+    #OBS: I don't utilized the UserSerializer because I shouldn't have contracting_id field
     roles = serializers.SerializerMethodField()
     permissions = serializers.SerializerMethodField() 
     status = serializers.ChoiceField(choices=[x[0] for x in status_choices])
@@ -218,15 +218,15 @@ class ERPUserPUTSerializer(serializers.ModelSerializer):
         return permissions_list 
 
     def get_contracting_code(self, user):
-        return user.contracting.contracting_code
+        return user.contracting_id
 
 class AdminAgentPOSTSerializer(UserSerializer):
     def create(self, validated_data):  
         username = validated_data['username']
-        contracting = validated_data['contracting']
+        contracting_id = validated_data['contracting_id']
         password=validated_data['password']
         email = validated_data['email']
-        user = User.objects.create_user(username, contracting, password,\
+        user = User.objects.create_user(username, contracting_id, password,\
             first_name=validated_data.get('first_name', ''),
             last_name=validated_data.get('last_name', '' ),
             email=email,
@@ -248,7 +248,7 @@ class AgentPOSTSerializer(UserSerializer):
     agent_permissions = serializers.ListField(child=serializers.CharField(), write_only=True)
 
     class Meta(UserSerializer.Meta):
-        fields = ['username', 'contracting', 'first_name', 'last_name', 'email', 'status', 'password',
+        fields = ['username', 'contracting_id', 'first_name', 'last_name', 'email', 'status', 'password',
                 'note', 'roles', 'permissions', 'agent_establishments', 'agent_permissions', 'contracting_code']
         extra_kwargs = {
             'password': {'write_only': True},
@@ -270,10 +270,10 @@ class AgentPOSTSerializer(UserSerializer):
 
     def create(self, validated_data):  
         username = validated_data['username']
-        contracting = validated_data['contracting']
+        contracting_id = validated_data['contracting_id']
         password=validated_data['password']
         email = validated_data['email']
-        user = User.objects.create_user(username, contracting, password,\
+        user = User.objects.create_user(username, contracting_id, password,\
             first_name=validated_data.get('first_name', ''),
             last_name=validated_data.get('last_name', '' ),
             email=email,
@@ -296,7 +296,7 @@ class AgentPUTSerializer(UserSerializer):
     agent_permissions = serializers.ListField(child=serializers.CharField(), write_only=True)
 
     class Meta(UserSerializer.Meta):
-        fields = ['username', 'contracting', 'first_name', 'last_name', 'email', 'status',
+        fields = ['username', 'contracting_id', 'first_name', 'last_name', 'email', 'status',
                 'note', 'roles', 'permissions', 'agent_establishments', 'agent_permissions', 'contracting_code']
         read_only_fields = ['username']
         extra_kwargs = {
@@ -327,13 +327,13 @@ class ClientUserPOSTSerializer(UserSerializer):
     client = serializers.SlugRelatedField(slug_field='client_compound_id', queryset=Client.objects.all())
 
     class Meta(UserSerializer.Meta):
-        fields = ['username',  'contracting', 'client', 'roles', 'permissions', 'first_name',
+        fields = ['username',  'contracting_id', 'client', 'roles', 'permissions', 'first_name',
                 'last_name', 'email', 'status', 'password', 'note', 'contracting_code']
 
     def validate_client(self, value):
         request_user = self.context["request"].user
         # Check if client is from the same contracting as the request user
-        if value.client_table.contracting != request_user.contracting:
+        if value.client_table.contracting_id != request_user.contracting_id:
             raise serializers.ValidationError(_("Client table not found."))
         # Check if request user is agent without all estabs and can assign this client for a client_user
         if self.context['request_user_is_agent_without_all_estabs'] and not agent_has_access_to_this_client(request_user, value):
@@ -345,10 +345,10 @@ class ClientUserPOSTSerializer(UserSerializer):
 
     def create(self, validated_data):  
         username = validated_data['username']
-        contracting = validated_data['contracting']
+        contracting_id = validated_data['contracting_id']
         password=validated_data['password']
         email = validated_data['email']
-        user = User.objects.create_user(username, contracting, password,\
+        user = User.objects.create_user(username, contracting_id, password,\
             first_name=validated_data.get('first_name', ''),
             last_name=validated_data.get('last_name', '' ),
             email=email,
@@ -372,7 +372,7 @@ class ClientUserPUTSerializer(UserSerializer):
         request_user = self.context["request"].user
         if self.context['request'].method == 'POST':
             # Check if client is from the same contracting as the request user
-            if value.client_table.contracting != request_user.contracting:
+            if value.client_table.contracting_id != request_user.contracting_id:
                 raise serializers.ValidationError(_("Client table not found."))
             # Check if request user is agent without all estabs and can assign this client for a client_user
             if self.context['request_user_is_agent_without_all_estabs'] and not agent_has_access_to_this_client(request_user, value):
