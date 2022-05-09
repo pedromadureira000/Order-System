@@ -130,6 +130,7 @@ import {slugFieldValidator, cnpjFieldValidator} from "~/helpers/validators"
 import {mask} from 'vue-the-mask'
 
 export default {
+  name: "Establishment",
   components: {
     "establishment-edit-menu": require("@/components/admin/organization/establishment-edit-menu.vue").default,
   },

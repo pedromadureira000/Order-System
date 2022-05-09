@@ -13,6 +13,7 @@
 <script>
   import {CRUDcontractingPermissions, CRUDcompanyPermissions, CRUDestablishmentPermissions, CRUDclientTablePermissions, CRUDclientPermissions} from '~/helpers/permissions'
   export default {
+    name: "Organization",
     middleware: ["authenticated"],
     data(){ 
       return {

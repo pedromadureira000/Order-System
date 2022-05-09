@@ -161,6 +161,7 @@ let empty_item_table = {
 }
 
 export default {
+  name: "Company",
   components: {
     "company-edit-menu": require("@/components/admin/organization/company-edit-menu.vue").default,
   },

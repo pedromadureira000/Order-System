@@ -27,7 +27,7 @@ class fetchClientEstabsToCreateOrderSerializer(serializers.ModelSerializer):
 class ItemAuxForOrderedItemAuxSerializer(serializers.ModelSerializer):
     class Meta:
         model = Item
-        fields = ['item_compound_id', 'unit', 'description', 'image'] 
+        fields = ['item_compound_id', 'barcode','unit', 'description', 'image'] 
 
 class searchOnePriceItemToMakeOrderSerializer(serializers.ModelSerializer):
     item = ItemAuxForOrderedItemAuxSerializer()

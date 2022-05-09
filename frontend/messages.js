@@ -408,6 +408,7 @@ export const messages = {
     "User": "User",
     "Initial Period": "Initial Period",
     "Final Period": "Final Period",
+    "Print Order": "Print Order",
     // -------------------------------------------------------------------/ Components
     // change user's password
     // -------------------------------/Problem Connecting Error dialog
@@ -434,6 +435,11 @@ export const messages = {
     "There is no companies available.": "There is no companies available.",
     "some_items_were_not_copied": "Some items were not copied.",
     "Order ID": "Order ID",
+    //------------------------------------------------------------------------------
+    "Order": "Order",
+    "Order made by:": "Order made by:",
+    "Duplicate Order": "Duplicate Order",
+    "Order Items": "Order Items"
   },
 
 //====================================================================================
@@ -848,6 +854,7 @@ export const messages = {
     "User": "Usuário",
     "Initial Period": "Período Initial",
     "Final Period": "Período Final",
+    "Print Order": "Imprimir Pedido",
     // -------------------------------------------------------------------/ Components
     // change user's password
     // -------------------------------/Problem Connecting Error dialog
@@ -874,5 +881,10 @@ export const messages = {
     "There is no companies available.": "Não há empresas disponíveis",
     "some_items_were_not_copied": "Alguns items não foram copiados.",
     "Order ID": "ID do Pedido",
+    //------------------------------------------------------------------------------
+    "Order": "Pedido",
+    "Order made by:": "Pedido feito por:",
+    "Duplicate Order": "Duplicar Pedido",
+    "Order Items": "Itens do Pedido"
   },
 }
