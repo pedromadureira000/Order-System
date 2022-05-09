@@ -1,4 +1,4 @@
-from decimal import ROUND_DOWN, Decimal
+from decimal import ROUND_HALF_UP, Decimal
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
@@ -41,11 +41,15 @@ def order_post_save(sender, instance, created=False, **kwargs):
             if old_instance.order_amount != instance.order_amount:
                 old_amount = old_instance.order_amount
                 # This is for reduce decimal places for 2
-                new_amount = instance.order_amount.quantize(Decimal('.01'), rounding=ROUND_DOWN)
+                new_amount = instance.order_amount.quantize(Decimal('.01'), rounding=ROUND_HALF_UP)
                 order_history.history_description += _("\n- Order amount changed from '{old_amount}' to '{new_amount}'.").format(old_amount=old_amount, new_amount=new_amount)
             # Client User update update note
             if old_instance.note != instance.note:
                 order_history.history_description += _("\n- Order note changed.")
+
+            sequence_number_was_changed = getattr(instance, 'sequence_number_was_changed', None)
+            if sequence_number_was_changed:
+                order_history.history_description += _("\n- Items sequence was changed.")
         # If request_user is Agent/ERP
         else:
             order_history.user = request_user

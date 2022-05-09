@@ -12,6 +12,7 @@ from rest_framework.exceptions import PermissionDenied
 from .validators import order_has_changed
 from settings.utils import positive_number
 import copy
+from decimal import ROUND_HALF_UP, Decimal
 
 class fetchClientEstabsToCreateOrderSerializer(serializers.ModelSerializer):
     company=serializers.SlugRelatedField(slug_field='company_compound_id', read_only=True)
@@ -151,7 +152,7 @@ class OrderPOSTSerializer(serializers.ModelSerializer):
         ordered_items_list = []
         for index, ordered_item in enumerate(ordered_items):
             ordered_items_list.append(OrderedItem(item=ordered_item['item'], quantity=ordered_item['quantity'], 
-                unit_price=ordered_item['unit_price'], order=order, sequence_number=index))
+                unit_price=ordered_item['unit_price'], order=order, sequence_number=index + 1))
         order.ordered_items.bulk_create(ordered_items_list)
         return order
 
@@ -273,7 +274,7 @@ class OrderPUTSerializer(serializers.ModelSerializer):
                     ordered_item['unit_price'] = client_establishment.price_table.price_items.get(item=ordered_item['item']).unit_price 
                     #TODO N+1 query
                     order_amount += ordered_item['unit_price'] * ordered_item['quantity'] 
-                attrs['order_amount'] = order_amount
+                attrs['order_amount'] = Decimal(order_amount).quantize(Decimal('.01'), rounding=ROUND_HALF_UP)
         current_ordered_items = OrderedItem.objects.filter(order=self.instance)
         attrs['current_ordered_items'] = current_ordered_items
         if not order_has_changed(self.instance, attrs):
@@ -435,7 +436,7 @@ class OrderDuplicateSerializer(serializers.ModelSerializer):
         ordered_items_list = []
         for index, ordered_item in enumerate(ordered_items):
             ordered_items_list.append(OrderedItem(item=ordered_item.item, quantity=ordered_item.quantity, 
-                unit_price=ordered_item.unit_price, order=order, sequence_number=index))
+                unit_price=ordered_item.unit_price, order=order, sequence_number=index + 1))
         order.ordered_items.bulk_create(ordered_items_list)
         #  if  validated_data['some_items_were_not_copied'] == True:
             #  order.some_items_were_not_copied = True

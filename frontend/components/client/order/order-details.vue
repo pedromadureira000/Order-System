@@ -498,9 +498,11 @@ export default {
   methods: {
     // Fetch Order details
     async fetchOrderHistory(){
-      let order_history = await this.$store.dispatch("order/fetchOrderHistory", this.order.id);
-      if (order_history){
-        this.order_history = order_history
+      if (this.order_history.length === 0){
+        let order_history = await this.$store.dispatch("order/fetchOrderHistory", this.order.id);
+        if (order_history){
+          this.order_history = order_history
+        }
       }
     },
 
