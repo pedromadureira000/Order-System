@@ -318,19 +318,15 @@ class fetchCompaniesAndEstabsToDuplicateOrder(APIView):
                 order = Order.objects.get(id=order_id, company__contracting_id=request.user.contracting_id)
             except Order.DoesNotExist:
                 return not_found_response(object_name=_('The order'))
-            comps_with_estabs = get_comps_and_estabs_to_duplicate_order(request.user, order.company.item_table.item_table_compound_id)
+            comps_with_estabs = get_comps_and_estabs_to_duplicate_order(request.user, order.company.item_table_id)
             return Response(CompaniesAndEstabsToDuplicateOrderSerializer(comps_with_estabs, many=True).data)
         return unauthorized_response
 
 class DuplicateOrder(APIView):
     @transaction.atomic
-    def post(self, request, order_id):
+    def post(self, request):
         if has_permission(request.user, 'create_order'):
-            try:
-                order = Order.objects.get(id=order_id, company__contracting_id=request.user.contracting_id)
-            except Order.DoesNotExist:
-                return not_found_response(object_name=_('The order'))
-            serializer = OrderDuplicateSerializer(order, data={}, context={"request": request})
+            serializer = OrderDuplicateSerializer(data=request.data, context={"request": request})
             if serializer.is_valid():
                 try:
                     order, some_items_were_not_copied = serializer.save()

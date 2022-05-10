@@ -66,7 +66,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     contracting = models.ForeignKey('organization.Contracting', on_delete=models.PROTECT, verbose_name=_('contracting'))
     client = models.ForeignKey('organization.Client', on_delete=models.PROTECT, null=True, blank=True, verbose_name=_("client company"))
     establishments = models.ManyToManyField("organization.Establishment", through='AgentEstablishment', verbose_name=_("agent establishments"))
-    user_code = models.CharField(_('user code'), max_length=50, unique=True, editable=False)
+    user_code = models.CharField(_('user code'), max_length=50, primary_key=True)
     username = models.SlugField(_('username'), max_length=50)
     first_name = models.CharField(_('first name'), max_length=50, blank=True)
     last_name = models.CharField(_('last name'), max_length=50, blank=True)

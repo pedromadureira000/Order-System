@@ -25,5 +25,5 @@ urlpatterns = [
     path('establishments_to_make_order', fetchClientEstabsToCreateOrder.as_view()),
     path('order_history/<order_id>', OrderHistoryView.as_view()),
     path('fetch_comps_and_estabs_to_duplicate_order/<order_id>', fetchCompaniesAndEstabsToDuplicateOrder.as_view()), 
-    path('duplicate_order/<order_id>', DuplicateOrder.as_view()),
+    path('duplicate_order', DuplicateOrder.as_view()),
 ]

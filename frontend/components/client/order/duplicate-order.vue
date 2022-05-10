@@ -15,6 +15,8 @@
                       :label="$t('Company')"
                       :item-text="(x) => x.company_code + ' - ' + x.name"
                       :items="comps_and_estabs"
+                      return-object
+                      @change="establishment = company.establishment_set[0]"
                     ></v-select>
                   </div>
                   <!-- Establishment -->
@@ -24,6 +26,7 @@
                       :label="$t('Establishment')"
                       :item-text="(x) =>  x.establishment_code + ' - ' + x.name"
                       :items="company.establishment_set"
+                      return-object
                     ></v-select>
                   </div>
                 <p>{{$t('areYouSureAboutDuplicateOrderMessage')}}</p>
@@ -94,7 +97,8 @@ export default {
       }
     },
     async duplicateOrder(){
-      let data = await this.$store.dispatch("order/duplicateOrder", this.order.id)
+      let data = await this.$store.dispatch("order/duplicateOrder", {order: this.order.id, 
+        establishment: this.establishment.establishment_compound_id})
       if (data){
         if (data.some_items_were_not_copied === "True"){
           this.$store.dispatch("setAlert", { message: this.$t('some_items_were_not_copied'), alertType: "warning" }, { root: true })

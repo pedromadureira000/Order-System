@@ -984,11 +984,16 @@ export default {
 				})
 	},
 
-	async duplicateOrder(order_id){
-    let url = `/api/order/duplicate_order/${order_id}`
+	async duplicateOrder(payload){
+    let url = "/api/order/duplicate_order"
+    let body_data = {
+      order_id: payload.order,
+      establishment: payload.establishment,
+    }
 		return await axios({
 		method: "post",
 		url: url,
+    data: body_data
 			}).then((request) => {
 					return request.data 
 				})

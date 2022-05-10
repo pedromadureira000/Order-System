@@ -15,7 +15,6 @@ import copy
 from decimal import ROUND_HALF_UP, Decimal
 
 class fetchClientEstabsToCreateOrderSerializer(serializers.ModelSerializer):
-    company=serializers.SlugRelatedField(slug_field='company_compound_id', read_only=True)
     company_name = serializers.SerializerMethodField()
     
     class Meta:
@@ -43,14 +42,12 @@ class EstablishmentForCompanyWithEstab(serializers.ModelSerializer):
         fields = ['establishment_compound_id', 'establishment_code', 'name']
 
 class CompanyWithEstabsSerializer(serializers.ModelSerializer):
-    client_table=serializers.SlugRelatedField(slug_field='client_table_compound_id', read_only=True)
     establishments = EstablishmentForCompanyWithEstab(many=True)
     class Meta:
         model = Company
         fields = ['company_compound_id', 'company_code', 'name', 'client_table', 'establishments']
 
 class ClientsToFillFilterSelectorsToSearchOrdersSerializer(serializers.ModelSerializer):
-    client_table=serializers.SlugRelatedField(slug_field='client_table_compound_id', read_only=True)
     class Meta:
         model = Client
         fields =  ['client_compound_id', 'client_code', 'client_table', 'name']
@@ -64,11 +61,7 @@ class OrderedItemPOSTSerializer(serializers.ModelSerializer):
         read_only_fields = ['unit_price', 'date', 'sequence_number']
 
 class OrderPOSTSerializer(serializers.ModelSerializer):
-    company = serializers.SlugRelatedField(slug_field='company_compound_id', read_only=True)
     establishment = serializers.SlugRelatedField(slug_field='establishment_compound_id', queryset=Establishment.objects.all())
-    client = serializers.SlugRelatedField(slug_field='client_compound_id', read_only=True)
-    client_user = serializers.SlugRelatedField(slug_field='user_code', read_only=True)
-    price_table = serializers.SlugRelatedField(slug_field='price_table_compound_id', read_only=True)
     ordered_items = OrderedItemPOSTSerializer(many=True)
     class Meta:
         model = Order
@@ -167,11 +160,6 @@ class OrderedItemPUTSerializer(serializers.ModelSerializer):
 # PUT will be used by client_user to edit ordered_items and note, and to change status to 'transferred'. This can only be done when the order status is 'typing'. 
 #  agent/admin_agent/erp can update order status and create notes in the order history
 class OrderPUTSerializer(serializers.ModelSerializer):
-    company = serializers.SlugRelatedField(slug_field='company_compound_id', read_only=True)
-    establishment = serializers.SlugRelatedField(slug_field='establishment_compound_id', read_only=True)
-    client = serializers.SlugRelatedField(slug_field='client_compound_id', read_only=True)
-    client_user = serializers.SlugRelatedField(slug_field='user_code', read_only=True)
-    price_table = serializers.SlugRelatedField(slug_field='price_table_compound_id', read_only=True)
     ordered_items = OrderedItemPUTSerializer(many=True)
     #  agent_note = serializers.CharField(max_length=800, required=False, write_only=True)
     class Meta:
@@ -300,11 +288,7 @@ class OrderHistorySerializer(serializers.ModelSerializer):
         fields = ['history_type', 'history_description', 'user', 'agent_note', 'date']
 
 class OrderGetSerializer(serializers.ModelSerializer):
-    company = serializers.SlugRelatedField(slug_field='company_code', read_only=True)
-    establishment = serializers.SlugRelatedField(slug_field='establishment_compound_id', read_only=True)
-    client = serializers.SlugRelatedField(slug_field='client_compound_id', read_only=True)
-    #  client_user = serializers.SlugRelatedField(slug_field='user_code', read_only=True)
-    #  price_table = serializers.SlugRelatedField(slug_field='price_table_compound_id', read_only=True)
+    company = serializers.SlugRelatedField(slug_field='company_code', read_only=True) # TODO Change it for compound_id
     class Meta:
         model = Order
         fields = ['id', 'order_number', 'company', 'establishment', 'client', 'order_amount', 'status', 'order_date', 'invoicing_date', 'invoice_number']
@@ -358,22 +342,33 @@ class OrderDetailsSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 class OrderDuplicateSerializer(serializers.ModelSerializer):
-    company = serializers.SlugRelatedField(slug_field='company_code', read_only=True)
-    establishment = serializers.SlugRelatedField(slug_field='establishment_compound_id', read_only=True)
-    client = serializers.SlugRelatedField(slug_field='client_compound_id', read_only=True)
+    company = serializers.SlugRelatedField(slug_field='company_code', read_only=True) # TODO change it to compound id
+    establishment = serializers.SlugRelatedField(slug_field='establishment_compound_id', queryset=Establishment.objects.all())
+    order_id = serializers.CharField(max_length=20, required=True, write_only=True)
     class Meta:
         model = Order
-        fields = ['id', 'order_number', 'company', 'establishment', 'client', 'order_amount', 'status', 'order_date', 'invoicing_date', 'invoice_number']
-        read_only_fields = fields
+        fields = ['order_id', 'establishment',
+                'id','company', 'order_number', 'client', 'order_amount', 'status', 'order_date', 'invoicing_date', 'invoice_number']
+        read_only_fields = ['id','company', 'order_number', 'client', 'order_amount', 'status', 'order_date', 'invoicing_date', 'invoice_number']
+        extra_kwargs = {
+            'order_id': {'write_only': True},
+        }
 
     def validate(self, attrs):
         request_user = self.context['request'].user
         client = request_user.client
-        establishment = self.instance.establishment
+        establishment = attrs['establishment']
         company = establishment.company
-        # Contracting ownership
+        try:
+            order = Order.objects.get(id=attrs['order_id'], company__contracting_id=request_user.contracting_id)
+        except Order.DoesNotExist:
+            raise serializers.ValidationError(_("The order was not found."))
+        # Contracting ownership from establishment
         if establishment.establishment_compound_id.split("*")[0] != request_user.contracting_id:
             raise serializers.ValidationError(_("Establishment not found."))
+        # Contracting ownership from company
+        if company.company_compound_id.split("*")[0] != request_user.contracting_id:
+            raise serializers.ValidationError(_("Company not found."))
         #Check if the request_user is active
         if request_user.status != 1:
             raise PermissionDenied(detail={"error": [_("Your account is disabled.")]})
@@ -402,7 +397,7 @@ class OrderDuplicateSerializer(serializers.ModelSerializer):
         # Check if item is available for this client by price table
         available_items = client_establishment.price_table.items.filter(status=1)
         order_amount = 0
-        ordered_items = self.instance.ordered_items.all()
+        ordered_items = order.ordered_items.all()
         attrs['ordered_items'] = []
         attrs['some_items_were_not_copied'] = False
         for ordered_item in ordered_items:
@@ -414,16 +409,14 @@ class OrderDuplicateSerializer(serializers.ModelSerializer):
             else:
                 attrs['some_items_were_not_copied'] = True
         attrs['order_amount'] = order_amount
+        attrs['company'] = company
         return super().validate(attrs)
 
-    def update(self, instance, validated_data):
+    def create(self, validated_data):
+        validated_data.pop('order_id') # Not needed anymore
         request_user = self.context['request'].user
-        establishment = instance.establishment
-        company = establishment.company
         some_items_were_not_copied = validated_data.pop('some_items_were_not_copied')
         ordered_items = validated_data.pop('ordered_items')
-        validated_data['establishment'] = establishment
-        validated_data['company'] = company
         validated_data['client'] = request_user.client
         validated_data['client_user'] = request_user
         validated_data['status'] = 1

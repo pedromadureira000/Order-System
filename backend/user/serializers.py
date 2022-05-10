@@ -127,7 +127,6 @@ class AgentEstablishmentToUserSerializer(serializers.ModelSerializer):
 
 class OwnProfileSerializer(UserSerializer):
     #  agent_establishments = AgentEstablishmentToUserSerializer(many=True, read_only=True)
-    client = serializers.SlugRelatedField(slug_field='client_compound_id', read_only=True)
     client_name = serializers.SerializerMethodField()
     contracting_code = serializers.SerializerMethodField()
     status = serializers.ChoiceField(choices=[x[0] for x in status_choices], read_only=True)
@@ -241,7 +240,7 @@ class AdminAgentPUTSerializer(UserSerializer):
         model = User
         fields = ['username', 'first_name', 'last_name', 'email', 'status',
                 'roles', 'permissions', 'contracting_code', 'user_code', 'note']
-        read_only_fields = ['username']
+        read_only_fields = ['username', 'user_code']
 
 class AgentPOSTSerializer(UserSerializer):
     agent_establishments = AgentEstablishmentToUserSerializer(many=True)
@@ -360,7 +359,6 @@ class ClientUserPOSTSerializer(UserSerializer):
         return user
 
 class ClientUserPUTSerializer(UserSerializer):
-    client = serializers.SlugRelatedField(slug_field='client_compound_id', read_only=True)
 
     class Meta:
         model = User

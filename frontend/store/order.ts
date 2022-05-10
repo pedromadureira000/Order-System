@@ -140,9 +140,9 @@ export const actions: ActionTree<OrderState, RootState> = {
     }
   }, 
 
-  async duplicateOrder({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, order_id: string){
+  async duplicateOrder({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
     try {
-      let data = await api.duplicateOrder(order_id)
+      let data = await api.duplicateOrder(payload)
       dispatch("setAlert", {message: this.app.i18n.t('duplicateOrder_success_msg'), alertType: "success"}, { root: true })
       return data
     }

@@ -32,6 +32,7 @@ class CompanyPOSTSerializer(serializers.ModelSerializer):
         model = Company
         fields = ['company_compound_id', 'company_code', 'contracting_id', 'item_table', 'client_table', 'name',
                 'cnpj_root','status', 'note']
+        read_only_fields = ['company_compound_id']
         validators = [UniqueTogetherValidator(queryset=Company.objects.all(), fields=['company_code', 'contracting_id'], 
             message=_("The 'company_code' field must be unique."))]
 
@@ -65,7 +66,7 @@ class CompanyPUTSerializer(serializers.ModelSerializer):
         model = Company
         fields = ['company_compound_id', 'company_code', 'item_table', 'client_table', 'name',
                 'cnpj_root','status', 'note']
-        read_only_fields = ['company_code']
+        read_only_fields = ['company_compound_id', 'company_code']
 
     def validate_client_table(self, value):
         # If there is any clientEstab for this company, do not allow change this field.
@@ -101,6 +102,7 @@ class EstablishmentPOSTSerializer(serializers.ModelSerializer):
     class Meta:
         model = Establishment
         fields = ['establishment_compound_id', 'establishment_code', 'company', 'name', 'cnpj', 'status', 'note']
+        read_only_fields = ['establishment_compound_id']
         validators = [UniqueTogetherValidator(queryset=Establishment.objects.all(), fields=['establishment_code', 'company'],
             message=_("The 'establishment_code' field must be unique by company."))]
 
@@ -120,18 +122,18 @@ class EstablishmentPOSTSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 class EstablishmentPUTSerializer(serializers.ModelSerializer):
-    company=serializers.SlugRelatedField(slug_field='company_compound_id', read_only=True)
     
     class Meta:
         model = Establishment
         fields = ['establishment_compound_id', 'establishment_code', 'company', 'name', 'cnpj', 'status', 'note']
-        read_only_fields = ['establishment_code', 'company']
+        read_only_fields = ['establishment_compound_id','establishment_code', 'company']
 
 class ClientTablePOSTSerializer(serializers.ModelSerializer):
     contracting_id=serializers.HiddenField(default=UserContracting())
     class Meta:
         model = ClientTable
         fields =  ['client_table_compound_id' ,'client_table_code', 'contracting_id', 'description', 'note']
+        read_only_fields = ['client_table_compound_id']
         validators = [UniqueTogetherValidator(queryset=ClientTable.objects.all(), fields=['client_table_code', 'contracting_id'], 
             message=_("The 'client_table_code' field must be unique."))]
 
@@ -145,7 +147,7 @@ class ClientTablePUTSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClientTable
         fields =  ['client_table_compound_id' ,'client_table_code', 'description', 'note']
-        read_only_fields = ['client_table_code']
+        read_only_fields = ['client_table_compound_id', 'client_table_code']
 
 class ClientEstablishmentToClientSerializer(serializers.ModelSerializer):
     establishment = serializers.SlugRelatedField(slug_field='establishment_compound_id', queryset=Establishment.objects.all())
@@ -243,7 +245,7 @@ class ClientSerializerPUT(serializers.ModelSerializer):
         model = Client
         fields =  ['client_compound_id', 'client_table', 'client_code', 'client_establishments',
                 'vendor_code', 'name', 'cnpj', 'status', 'note']
-        read_only_fields =  [ 'client_table', 'client_code']
+        read_only_fields =  [ 'client_compound_id','client_table', 'client_code']
 
     def validate(self, attrs):
         request_user = self.context["request"].user

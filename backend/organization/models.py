@@ -27,7 +27,7 @@ class Company(models.Model):
         verbose_name = _('company')
         verbose_name_plural = _('companies')
         constraints = [UniqueConstraint(fields=['contracting', 'company_code'], name='Company compound primary key')]
-    company_compound_id = models.CharField(_('company compound id'), max_length=7, unique=True, editable=False) 
+    company_compound_id = models.CharField(_('company compound id'), max_length=7, primary_key=True) 
     contracting = models.ForeignKey('Contracting', on_delete=models.PROTECT, verbose_name=_('contracting'))
     company_code = models.SlugField(_('company code'), max_length=3)
     item_table = models.ForeignKey('item.ItemTable', blank=True, null=True, on_delete=models.PROTECT, verbose_name=_('item table'))
@@ -47,7 +47,7 @@ class Establishment(models.Model):
         verbose_name = _('establishment')
         verbose_name_plural = _('establishments')
         constraints = [UniqueConstraint(fields=['company', 'establishment_code'], name='Establishment compound primary key')]
-    establishment_compound_id = models.CharField(_('establishment compound id'), max_length=11, editable=False, unique=True) 
+    establishment_compound_id = models.CharField(_('establishment compound id'), max_length=11, primary_key=True) 
     company = models.ForeignKey('Company', on_delete=models.PROTECT, verbose_name=_('company'))
     establishment_code = models.SlugField(max_length=3, verbose_name=_('establishment code'))
     name = models.CharField(max_length=60, verbose_name=_("name"))
@@ -64,7 +64,7 @@ class ClientTable(models.Model):
         verbose_name = _('client table')
         verbose_name_plural = _('client tables')
         constraints = [UniqueConstraint(fields=['contracting', 'client_table_code'], name='ClientTable compound primary key')]
-    client_table_compound_id = models.CharField(_('client table compound id'), max_length=7, unique=True, editable=False)
+    client_table_compound_id = models.CharField(_('client table compound id'), max_length=7, primary_key=True)
     contracting = models.ForeignKey('Contracting', on_delete=models.PROTECT, verbose_name=_('contracting'))
     client_table_code = models.SlugField(_('client table code'), max_length=3)
     description = models.CharField(max_length=60, verbose_name=_('description'))
@@ -77,7 +77,7 @@ class Client(models.Model):
         verbose_name = 'client'
         verbose_name_plural = 'clients'
         constraints = [UniqueConstraint(fields=['client_table', 'client_code'], name='Client compound primary key')]
-    client_compound_id = models.CharField(_('client compound id'), max_length=16, editable=False, unique=True,) 
+    client_compound_id = models.CharField(_('client compound id'), max_length=16, primary_key=True) 
     client_table = models.ForeignKey('ClientTable',on_delete=models.PROTECT, verbose_name=_('client table'))
     client_code = models.SlugField(max_length=6, verbose_name=_('client code'))
     vendor_code = models.CharField(blank=True, max_length=9, verbose_name=_('vendor code'))
