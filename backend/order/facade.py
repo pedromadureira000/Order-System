@@ -29,11 +29,11 @@ def fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders_by_client_
 def get_comps_and_estabs_to_duplicate_order(cli_user, item_table_compound_id):
     cliestabs = ClientEstablishment.objects.filter(~Q(price_table=None),client_id=cli_user.client_id)
     establishments = Establishment.objects.filter(clientestablishment__in=cliestabs, status=1)
-    return Company.objects.filter(status=1, establishment__in=establishments, item_table__item_table_compound_id=item_table_compound_id).prefetch_related(Prefetch('establishment_set', queryset=establishments, to_attr='establishments'))
+    return Company.objects.filter(status=1, establishment__in=establishments, item_table__item_table_compound_id=item_table_compound_id).prefetch_related(Prefetch('establishment_set', queryset=establishments))
 
 def update_ordered_items(order, ordered_items, current_ordered_items):
     # Create set of OrderedItems as tuples
-    ordered_items_set = {(ordered_item['item'].item_compound_id, ordered_item['quantity'], ordered_item['unit_price'], 
+    ordered_items_set = {(ordered_item['item'], ordered_item['quantity'], ordered_item['unit_price'], 
         ordered_item['sequence_number']) for ordered_item in ordered_items}
     current_ordered_items_set = set(current_ordered_items.values_list('item__item_compound_id', 'quantity', 'unit_price', 'sequence_number'))
     intersection = ordered_items_set.intersection(current_ordered_items_set)
@@ -42,10 +42,10 @@ def update_ordered_items(order, ordered_items, current_ordered_items):
     to_delete_item_list = [ordered_item[0] for ordered_item in to_delete]
     current_ordered_items.filter(item__item_compound_id__in=to_delete_item_list).delete()
     # List the OrderedItems to be created from the serialized 'ordered_items'. 
-    ordered_items_to_create = list(filter(lambda ordered_item: (ordered_item["item"].item_compound_id, 
+    ordered_items_to_create = list(filter(lambda ordered_item: (ordered_item["item"], 
         ordered_item['quantity'], ordered_item['unit_price'], ordered_item['sequence_number']) in to_create, ordered_items))
     if ordered_items_to_create:
         # Create a list with the real OrderedItem instances to be saved with bulk_create.
-        ordered_items_to_create = [OrderedItem(item=obj['item'], quantity=obj['quantity'], unit_price=obj['unit_price'],
+        ordered_items_to_create = [OrderedItem(item_id=obj['item'], quantity=obj['quantity'], unit_price=obj['unit_price'],
             order=order, sequence_number=obj['sequence_number']) for obj in  ordered_items_to_create]
         order.ordered_items.bulk_create(ordered_items_to_create)

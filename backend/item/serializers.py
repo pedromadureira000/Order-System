@@ -118,6 +118,13 @@ class ItemPUTSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(_("You cannot choose this category because it is from another item table."))
         return super().validate(attrs)
 
+class ItemGETSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Item
+        fields = ['item_compound_id', 'item_table', 'item_code', 'category', 'description', 'unit', 'barcode',
+                'status', 'image', 'technical_description'] 
+        read_only_fields =  fields
+
 class ForTablePriceItemSerializer(serializers.ModelSerializer):
     item = serializers.SlugRelatedField(slug_field='item_compound_id', queryset=Item.objects.all())
     unit_price = serializers.DecimalField(max_digits=11, decimal_places=2,required=True, validators=[positive_number])
@@ -134,31 +141,29 @@ class ForTablePriceItemSerializer(serializers.ModelSerializer):
             raise NotFound(detail={"error": [_("Item with id '{item_id}' was not found.").format(item_id=item_id)]})
         return value
 
+class CompanyAUXSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Company
+        fields = ['item_table', 'name', 'company_compound_id']
+        read_only_fields = fields
+
 class PriceTableGetSerializer(serializers.ModelSerializer):
+    company = CompanyAUXSerializer()
+
+    class Meta:
+        model = PriceTable
+        fields = ['price_table_compound_id', 'company', 'table_code', 'description', 'note']
+        read_only_fields = fields
+
+class PriceTablePOSTSerializer(serializers.ModelSerializer):
+    price_items = ForTablePriceItemSerializer(many=True)
+    company = serializers.SlugRelatedField(slug_field='company_compound_id', queryset=Company.objects.all())
     company_name = serializers.SerializerMethodField()
     item_table = serializers.SerializerMethodField()
 
     class Meta:
         model = PriceTable
-        fields = ['price_table_compound_id', 'item_table', 'company', 'company_name', 'table_code', 'description', 'note']
-        read_only_fields = fields
-
-    def get_company_name(self, obj):
-        return obj.company.name #TODO bad query
-
-    def get_item_table(self, obj):
-        if obj.company.item_table != None:
-            return obj.company.item_table_id
-        return None
-
-class PriceTablePOSTSerializer(serializers.ModelSerializer):
-    price_items = ForTablePriceItemSerializer(many=True)
-    company = serializers.SlugRelatedField(slug_field='company_compound_id', queryset=Company.objects.all())
-    item_table = serializers.SerializerMethodField()
-
-    class Meta:
-        model = PriceTable
-        fields = ['price_table_compound_id', 'company', 'price_items', 'table_code', 'description', 'note', 'item_table']
+        fields = ['price_table_compound_id', 'company_name', 'company', 'price_items', 'table_code', 'description', 'note', 'item_table']
         read_only_fields = ['price_table_compound_id']
         validators = [UniqueTogetherValidator(queryset=PriceTable.objects.all(), fields=['company', 'table_code'], 
             message=_("The 'table_code' field must be unique by 'company'."))]
@@ -204,6 +209,9 @@ class PriceTablePOSTSerializer(serializers.ModelSerializer):
 
     def get_item_table(self, obj):
         return obj.company.item_table_id
+
+    def get_company_name(self, obj):
+        return obj.company.name
 
 class SpecificPriceTablePUTSerializer(serializers.ModelSerializer):
     price_items = ForTablePriceItemSerializer(many=True)

@@ -3,14 +3,14 @@ from django.db.models.query import Prefetch
 from rest_framework import status
 from rest_framework.response import Response
 from item.models import ItemCategory, ItemTable, PriceItem, PriceTable
-from item.serializers import CategoryPOSTSerializer
+from item.serializers import CategoryPUTSerializer
 from organization.facade import get_clients_by_agent
 from organization.models import Client, Company, Establishment
 from organization.serializers import CompaniesAndEstabsToDuplicateOrderSerializer
 from user.validators import req_user_is_agent_without_all_estabs
 from .facade import fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders, fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders_by_agent, fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders_by_client_user, get_comps_and_estabs_to_duplicate_order, get_orders_by_agent
 from .serializers import ClientsToFillFilterSelectorsToSearchOrdersSerializer, CompanyWithEstabsSerializer, OrderDetailsSerializer, OrderDuplicateSerializer, OrderGetSerializer, OrderHistorySerializer, OrderPOSTSerializer,OrderPUTSerializer, fetchClientEstabsToCreateOrderSerializer, searchOnePriceItemToMakeOrderSerializer
-from .models import Order, OrderHistory
+from .models import Order, OrderHistory, OrderedItem
 from rest_framework.views import APIView
 from rolepermissions.checkers import has_permission, has_role
 from drf_yasg.utils import swagger_auto_schema
@@ -23,7 +23,7 @@ import datetime
 class fetchClientEstabsToCreateOrder(APIView):
     def get(self, request):
         if has_permission(request.user, 'create_order'):
-            establishments = Establishment.objects.filter(clientestablishment__in=request.user.client.client_establishments.filter(establishment__status=1).exclude(price_table=None))
+            establishments = Establishment.objects.filter(clientestablishment__in=request.user.client.client_establishments.filter(establishment__status=1).exclude(price_table=None)).select_related('company')
             serializer = fetchClientEstabsToCreateOrderSerializer(establishments, many=True)
             return Response(serializer.data)
         return unauthorized_response
@@ -32,12 +32,12 @@ class searchOnePriceItemToMakeOrder(APIView):
     def get(self, request, establishment_compound_id, item_code):
         if has_permission(request.user, 'create_order'):
             try:
-                price_table = PriceTable.objects.get(clientestablishment__client=request.user.client, 
+                price_table = PriceTable.objects.get(clientestablishment__client_id=request.user.client_id, 
                         clientestablishment__establishment__establishment_compound_id=establishment_compound_id)
             except PriceTable.DoesNotExist:
                 return not_found_response(object_name=_('The item'))
             try:
-                price_item = PriceItem.objects.get(price_table=price_table, item__item_code=item_code, item__status=1)
+                price_item = PriceItem.objects.select_related('item').get(price_table=price_table, item__item_code=item_code, item__status=1)
             except PriceItem.DoesNotExist:
                 return not_found_response(object_name=_('The item'))
             return Response(searchOnePriceItemToMakeOrderSerializer(price_item).data)
@@ -56,7 +56,6 @@ item_description_query_string = openapi.Parameter('item_description', openapi.IN
         type=openapi.TYPE_STRING)
 
 class SearchPriceItemsToMakeOrder(APIView):
-
     @swagger_auto_schema(manual_parameters=[item_description_query_string, category_query_string, page_query_string, items_per_page_query_string, sort_by_query_string, sort_desc_query_string]) 
     def get(self, request, establishment_compound_id):
         if has_permission(request.user, 'create_order'):
@@ -82,11 +81,11 @@ class SearchPriceItemsToMakeOrder(APIView):
             #  if request.GET.get("item_code"): kwargs.update({"item_code": request.GET.get("item_code")})
             if request.GET.get("item_description"): kwargs.update({"item__description__icontains": request.GET.get("item_description")})
             try:
-                price_table = PriceTable.objects.get(clientestablishment__client=request.user.client, 
+                price_table = PriceTable.objects.get(clientestablishment__client_id=request.user.client_id, 
                         clientestablishment__establishment__establishment_compound_id=establishment_compound_id)
             except PriceTable.DoesNotExist:
                 return Response({"error":[_( "The price table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
-            price_items = PriceItem.objects.filter(price_table=price_table, item__status=1, **kwargs).order_by(sort_by)
+            price_items = PriceItem.objects.filter(price_table=price_table, item__status=1, **kwargs).select_related('item').order_by(sort_by)
             total = price_items.count()
             lastPage = math.ceil(total / items_per_page)
             return Response({"price_items": searchOnePriceItemToMakeOrderSerializer(price_items[start:end], many=True).data, 
@@ -97,17 +96,18 @@ class fetchCategoriesToMakeOrderAndGetPriceTableInfo(APIView):
     def get(self, request, establishment_compound_id):    
         if has_permission(request.user, 'create_order'):
             try:
+                client_id_splited = request.user.client_id.split('*') 
+                client_table_from_req_user = client_id_splited[0] + '*' + client_id_splited[1]
                 comp= Company.objects.get(establishment__establishment_compound_id=establishment_compound_id, 
-                        client_table=request.user.client.client_table)
-                item_table = ItemTable.objects.get(company=comp)
+                        client_table_id=client_table_from_req_user)
             except Company.DoesNotExist:
                 return Response({"error":[_( "You do not have access to this establishment.")]}, 
                         status=status.HTTP_404_NOT_FOUND) #TODO translate
-            except ItemTable.DoesNotExist:
+            if not comp.item_table_id:
                 return Response({"error":[_( "The company from this establishment does not have a item table.")]}, 
                         status=status.HTTP_404_NOT_FOUND) #TODO translate 
-            categories = ItemCategory.objects.filter(item_table=item_table)
-            serializer = CategoryPOSTSerializer(categories, many=True)
+            categories = ItemCategory.objects.filter(item_table_id=comp.item_table_id)
+            serializer = CategoryPUTSerializer(categories, many=True)
             # Get price table description and code
             try: 
                 price_table = PriceTable.objects.get(clientestablishment__establishment__establishment_compound_id=establishment_compound_id, 
@@ -192,7 +192,7 @@ class OrderView(APIView):
                 kwargs.update({"status__in": [1,2,3] })
             if has_role(request.user, 'client_user'):
                 if kwargs.get("client"): kwargs.pop("client")
-                orders = Order.objects.filter(client=request.user.client, **kwargs ).order_by(sort_by)
+                orders = Order.objects.filter(client_id=request.user.client_id, **kwargs ).order_by(sort_by)
                 total = orders.count()
                 lastPage = math.ceil(total / items_per_page)
                 return Response({"orders": OrderGetSerializer(orders[start:end], many=True).data, "current_page": page,
@@ -217,7 +217,7 @@ class OrderView(APIView):
             if serializer.is_valid():
                 try:
                     serializer.save()
-                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                    return Response('ok', status=status.HTTP_201_CREATED)
                 except Exception as error:
                     transaction.rollback()
                     print(error)
@@ -229,7 +229,10 @@ class SpecificOrderView(APIView):
     def get(self, request, id):
         if has_permission(request.user, 'get_orders'):
             try:
-                order = Order.objects.get(id=id, company__contracting_id=request.user.contracting_id)
+                ordered_items = OrderedItem.objects.filter(order_id=id).select_related('item')
+                order = Order.objects.select_related('establishment', 'company', 'client', 'client_user', 
+                        'price_table').prefetch_related(Prefetch('ordered_items', queryset=ordered_items
+                            )).get(id=id, company__contracting_id=request.user.contracting_id)
             except Order.DoesNotExist:
                 return not_found_response(object_name=_('The order'))
             # Client user can't access order from another client
@@ -247,7 +250,7 @@ class SpecificOrderView(APIView):
     def put(self, request, id):
         if has_permission(request.user, 'update_order_status') or has_role(request.user, 'client_user'):
             try:
-                order = Order.objects.get(id=id, company__contracting_id=request.user.contracting_id)
+                order = Order.objects.select_related('company__contracting').get(id=id, company__contracting_id=request.user.contracting_id)
             except Order.DoesNotExist:
                 return not_found_response(object_name=_('The order'))
             if has_role(request.user, 'client_user'):
@@ -260,7 +263,7 @@ class SpecificOrderView(APIView):
             if serializer.is_valid():
                 try:
                     serializer.save()
-                    return Response(serializer.data)
+                    return Response('Order updated.')
                 except Exception as error:
                     transaction.rollback()
                     print(error)
@@ -305,7 +308,7 @@ class OrderHistoryView(APIView):
                 if not request.user.establishments.filter(id=order.establishment_id).first():
                     return not_found_response(object_name=_('The order'))
             try:
-                order_history = OrderHistory.objects.filter(order_id=order_id)
+                order_history = OrderHistory.objects.filter(order_id=order_id).select_related('user')
             except OrderHistory.DoesNotExist:
                 return not_found_response(object_name=_('The order history'))
             return Response(OrderHistorySerializer(order_history, many=True).data)
@@ -315,7 +318,7 @@ class fetchCompaniesAndEstabsToDuplicateOrder(APIView):
     def get(self, request, order_id):    
         if has_permission(request.user, 'create_order'):
             try:
-                order = Order.objects.get(id=order_id, company__contracting_id=request.user.contracting_id)
+                order = Order.objects.select_related('company').get(id=order_id, company__contracting_id=request.user.contracting_id)
             except Order.DoesNotExist:
                 return not_found_response(object_name=_('The order'))
             comps_with_estabs = get_comps_and_estabs_to_duplicate_order(request.user, order.company.item_table_id)

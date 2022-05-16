@@ -20,7 +20,7 @@ def order_post_save(sender, instance, created=False, **kwargs):
     request_user = getattr(instance, '_request_user', None)
     # Order Inclusion
     if created:
-        order_history = OrderHistory(order=instance, user=instance.client_user, history_type="I")
+        order_history = OrderHistory(order=instance, user_id=instance.client_user_id, history_type="I")
         if instance.status == 1:
             order_history.history_description = "- " + _("Order created with 'Typing' status.")
         if instance.status == 2:
@@ -35,8 +35,8 @@ def order_post_save(sender, instance, created=False, **kwargs):
             new_status = instance.get_status_verbose_name(instance.status)
             order_history.history_description = _("- Order status changed from '{old_status}' to '{new_status}'.").format(old_status=old_status, new_status=new_status)
         # If request_user is ClientUser
-        if instance.client_user == request_user:
-            order_history.user = instance.client_user
+        if instance.client_user_id == request_user.user_code:
+            order_history.user_id = instance.client_user_id
             # Client User update OrderedItems
             if old_instance.order_amount != instance.order_amount:
                 old_amount = old_instance.order_amount
@@ -52,7 +52,7 @@ def order_post_save(sender, instance, created=False, **kwargs):
                 order_history.history_description += _("\n- Items sequence was changed.")
         # If request_user is Agent/ERP
         else:
-            order_history.user = request_user
+            order_history.user_id = request_user.user_code
             # Agent create note
             if old_instance.agent_note != instance.agent_note:
                 order_history.history_description += _("\n - Agent note added.")

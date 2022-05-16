@@ -6,7 +6,7 @@ let establishment_fields = ['company' ,'establishment_code']
 let client_table_fields = ['client_table_code']
 let client_fields = ['client_code', 'client_table', 'vendor_code', 'establishment', 'price_table']
 // User
-let common_user_fields = ['username', 'first_name','last_name', 'email', 'password']
+let common_user_fields = ['username', 'first_name','last_name', 'email', 'password', 'contracting_id']
 let erp_user_fields  = ['contracting']
 let client_user_fields = ['client']
 // Item

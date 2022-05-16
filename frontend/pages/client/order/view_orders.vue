@@ -149,7 +149,7 @@
                 <p>{{getLocaleDate(item.order_date)}}</p> 
               </template>
               <template v-slot:item.company="{ item }">
-                <p>{{typeof item.company === 'string' ? item.company : item.company.company_code}}</p> 
+                <p>{{typeof item.company === 'string' ? item.company.split('*')[1] : item.company.company_code}}</p> 
               </template>
               <template v-slot:item.establishment="{ item }">
                 <p>{{typeof item.establishment === 'string' ? item.establishment.split('*')[2] : item.establishment.establishment_code}}</p>

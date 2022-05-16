@@ -121,9 +121,9 @@ export const actions: ActionTree<OrderState, RootState> = {
 
   async updateOrder({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
     try {
-      let data = await api.updateOrder(payload)
+      await api.updateOrder(payload)
       dispatch("setAlert", {message: this.app.i18n.t('updateOrder_success_msg'), alertType: "success"}, { root: true })
-      return data
+      return 'ok'
     }
     catch(error){
       ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t('updateOrder_error_msg'))

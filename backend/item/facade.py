@@ -1,7 +1,8 @@
+from django.db.models.query import Prefetch
 from rolepermissions.checkers import has_permission
 from item.models import ItemCategory, Item, PriceItem, PriceTable, ItemTable
 from organization.models import Company
-#  from organization.facade import get_agent_companies  # /!\ This import is causing a circular dependency error
+#  from organization.facade import get_agent_companies  # ! This import is causing a circular dependency error
 from organization import facade
 
 def get_categories_by_agent(agent):
@@ -16,8 +17,8 @@ def get_items_by_agent(agent):
 
 def get_price_tables_by_agent(agent): 
     if has_permission(agent, 'access_all_establishments'):
-        return PriceTable.objects.filter(company__contracting_id=agent.contracting_id)
-    return PriceTable.objects.filter(company__in=Company.objects.filter(establishment__in=agent.establishments.all()))
+        return PriceTable.objects.filter(company__contracting_id=agent.contracting_id).select_related('company')
+    return PriceTable.objects.filter(company__in=Company.objects.filter(establishment__in=agent.establishments.all())).select_related('company')
 
 def get_agent_item_tables(agent):
     return ItemTable.objects.filter(company__in=facade.get_agent_companies(agent))

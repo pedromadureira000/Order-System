@@ -98,7 +98,7 @@ export default {
           this.order.client_table = order_details.client_table
           this.order.price_table = order_details.price_table
           console.log(">>>>>>> order_details.ordered_items: ", order_details.ordered_items)
-          this.order.ordered_items = order_details.ordered_items
+          this.order.ordered_items = order_details.ordered_items.sort((a,b)=> a.sequence_number - b.sequence_number)
           this.order.note = order_details.note
           this.order.agent_note = order_details.agent_note
         }

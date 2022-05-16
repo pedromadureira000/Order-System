@@ -1,3 +1,4 @@
+from django.db.models.query import Prefetch
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from rolepermissions.checkers import has_role
@@ -53,15 +54,16 @@ class ClientsToFillFilterSelectorsToSearchOrdersSerializer(serializers.ModelSeri
         fields =  ['client_compound_id', 'client_code', 'client_table', 'name']
 
 class OrderedItemPOSTSerializer(serializers.ModelSerializer):
-    item = serializers.SlugRelatedField(slug_field='item_compound_id', queryset=Item.objects.all())
+    #  item = serializers.SlugRelatedField(slug_field='item_compound_id', queryset=Item.objects.all())
+    item = serializers.CharField(max_length=23, required=True)
     quantity = serializers.DecimalField(max_digits=11, decimal_places=2,required=True, validators=[positive_number])
     class Meta:
         model = OrderedItem
-        fields = ['item', 'quantity', 'unit_price', 'sequence_number', 'date']
-        read_only_fields = ['unit_price', 'date', 'sequence_number']
+        fields = ['item', 'quantity']
 
 class OrderPOSTSerializer(serializers.ModelSerializer):
-    establishment = serializers.SlugRelatedField(slug_field='establishment_compound_id', queryset=Establishment.objects.all())
+    #  establishment = serializers.SlugRelatedField(slug_field='establishment_compound_id', queryset=Establishment.objects.all())
+    establishment = serializers.CharField(max_length=11, required=True)
     ordered_items = OrderedItemPOSTSerializer(many=True)
     class Meta:
         model = Order
@@ -77,29 +79,31 @@ class OrderPOSTSerializer(serializers.ModelSerializer):
         return value
 
     def validate_establishment(self, value):
-        # Contracting ownership
-        if value.establishment_compound_id.split("*")[0] != self.context['request'].user.contracting_id:
-            raise serializers.ValidationError(_("Establishment not found."))
         return value
 
     def validate(self, attrs):
         request_user = self.context['request'].user
-        client = request_user.client
-        establishment = attrs['establishment']
-        company = establishment.company
+        try: 
+            establishment = Establishment.objects.select_related('company', 'company__contracting').get(establishment_compound_id=attrs['establishment'], company__contracting_id=request_user.contracting_id)
+            company = establishment.company
+            contracting = company.contracting
+        except Establishment.DoesNotExist:
+            raise serializers.ValidationError(_("Establishment not found."))
         #Check if the request_user is active
         if request_user.status != 1:
             raise PermissionDenied(detail={"error": [_("Your account is disabled.")]})
         #Check if the contracting is active
-        if request_user.contracting.status != 1:
+        if contracting.status != 1:
             raise PermissionDenied(detail={"error": [_("Your contracting is disabled.")]})
         # Check if client have access to this establishment 
         try:
-            client_establishment = ClientEstablishment.objects.get(client=client, establishment=establishment)
+            client_establishment = ClientEstablishment.objects.select_related('client').get(client_id=request_user.client_id, 
+                    establishment=establishment)
+            client = client_establishment.client
         except ClientEstablishment.DoesNotExist:
             raise PermissionDenied(detail={"error": [_("Establishment not found.")]})
         # Check if ClientEstablishment has a price_table
-        if not client_establishment.price_table:
+        if not client_establishment.price_table_id:
             raise PermissionDenied(detail={"error": [_("You cannot buy from this establishment.")]})
         #Check if the client is active
         if client.status != 1:
@@ -110,47 +114,51 @@ class OrderPOSTSerializer(serializers.ModelSerializer):
         #Check if the establishment is active
         if establishment.status != 1:
             raise PermissionDenied(detail={"error": [_("The establishment is disabled.")]})
-        attrs['price_table'] = client_establishment.price_table
-        # Check if item is available for this client by price table
-        available_items = client_establishment.price_table.items.filter(status=1)
-        check_for_duplicate_values = []
-        order_amount = 0
-        if not attrs['ordered_items']:
+        attrs['price_table_id'] = client_establishment.price_table_id
+        # Get ordered_items
+        ordered_items = attrs['ordered_items']
+        if not ordered_items:
             raise serializers.ValidationError(_("You must add at least one item to the order."))
-        for ordered_item in attrs['ordered_items']:
+        # Deny duplicate values
+        items_id_list = [x['item'] for x in ordered_items]
+        items_id_set = set(items_id_list)
+        if len(items_id_list) != len(items_id_set):
+            raise serializers.ValidationError(_("There are duplicate items."))
+            #  raise serializers.ValidationError(_("Item not found."))
+        # Get all price_items
+        available_price_items = PriceItem.objects.filter(price_table_id=client_establishment.price_table_id, item__status=1)
+        available_items = [x.item_id for x in available_price_items]
+        order_amount = 0
+        for ordered_item in ordered_items:
             if ordered_item['item'] not in available_items:
-                raise serializers.ValidationError(_("You cannot add the item whose code is '{item}' to the order.").format(item=ordered_item['item'].item_code))
-            # Deny duplicate values
-            if ordered_item in check_for_duplicate_values:
-                raise serializers.ValidationError(_("There are duplicate items."))
-            check_for_duplicate_values.append(ordered_item)
-            # Add unit_price to ordered_item
-            ordered_item['unit_price'] = client_establishment.price_table.price_items.get(item=ordered_item['item']).unit_price #TODO N+1 query
+                raise serializers.ValidationError(_("You cannot add the item whose code is '{item}' to the order.").format(item=ordered_item['item'].split('*')[2]))
+            ordered_item['unit_price'] = next(p.unit_price for p in available_price_items if p.item_id == ordered_item['item'])
             order_amount += ordered_item['unit_price'] * ordered_item['quantity'] 
         attrs['order_amount'] = order_amount
+        attrs['establishment'] = establishment
+        attrs['company'] = company
+        attrs['client'] = client
+        attrs['client_user'] = request_user
+        attrs['ordered_items'] = ordered_items
         return super().validate(attrs)
 
     def create(self, validated_data):
-        request_user = self.context['request'].user
+        client = validated_data['client']
         ordered_items = validated_data.pop('ordered_items')
-        validated_data['company'] = validated_data['establishment'].company
-        validated_data['client'] = request_user.client
-        validated_data['client_user'] = request_user
-        last_order = request_user.client.order_set.order_by("order_date").last()
+        last_order = client.order_set.order_by("order_date").last()
         validated_data['order_number'] = last_order.order_number + 1 if last_order else 1
-        validated_data['id'] = request_user.client.client_table.client_table_code + '.' + \
-            self.context['request'].user.client.client_code + '.' + str(validated_data['order_number'])
+        validated_data['id'] = client.client_table_id.split("*")[1] + '.' + client.client_code + '.' + str(validated_data['order_number'])
         order = Order.objects.create(**validated_data)
         # Create OrderedItems
         ordered_items_list = []
         for index, ordered_item in enumerate(ordered_items):
-            ordered_items_list.append(OrderedItem(item=ordered_item['item'], quantity=ordered_item['quantity'], 
+            ordered_items_list.append(OrderedItem(item_id=ordered_item['item'], quantity=ordered_item['quantity'], 
                 unit_price=ordered_item['unit_price'], order=order, sequence_number=index + 1))
         order.ordered_items.bulk_create(ordered_items_list)
         return order
 
 class OrderedItemPUTSerializer(serializers.ModelSerializer):
-    item = serializers.SlugRelatedField(slug_field='item_compound_id', queryset=Item.objects.all())
+    item = serializers.CharField(max_length=23, required=True)
     quantity = serializers.DecimalField(max_digits=11, decimal_places=2,required=True, validators=[positive_number])
     class Meta:
         model = OrderedItem
@@ -213,17 +221,17 @@ class OrderPUTSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         request_user = self.context['request'].user
-        client = self.instance.client
-        establishment = self.instance.establishment
         status = attrs.get("status")
         invoice_number = attrs.get("invoice_number")
         invoicing_date = attrs.get("invoicing_date")
         ordered_items = attrs.get('ordered_items')
+        company = self.instance.company
+        contracting = company.contracting
         #Check if the request_user is active
         if request_user.status != 1:
             raise PermissionDenied(detail={"error": [_("Your account is disabled.")]})
         #Check if the contracting is active
-        if request_user.contracting.status != 1:
+        if contracting.status != 1:
             raise PermissionDenied(detail={"error": [_("Your contracting is disabled.")]})
         # Deny setting wrong invoice_number
         if (invoice_number and status not in [4, 5] and self.instance.status not in [4, 5]):
@@ -239,7 +247,8 @@ class OrderPUTSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(_("You need send invoicing date when order status has changed from 'Registered 'to 'Invoiced'."))
         if has_role(request_user, 'client_user'):
             try:
-                client_establishment = ClientEstablishment.objects.get(client=client, establishment=establishment)
+                client_establishment = ClientEstablishment.objects.get(client_id=self.instance.client_id,
+                        establishment_id=self.instance.establishment_id)
             except ClientEstablishment.DoesNotExist:
                 raise PermissionDenied(detail={"error": [_("Establishment not found.")]})
             check_for_duplicate_values = []
@@ -250,17 +259,17 @@ class OrderPUTSerializer(serializers.ModelSerializer):
             if ordered_items == []:
                 raise serializers.ValidationError(_("You must add at least one item to the order."))
             if ordered_items:
-                available_items = client_establishment.price_table.items.filter(status=1)
+                available_price_items = PriceItem.objects.filter(price_table_id=client_establishment.price_table_id, item__status=1)
+                available_items = [x.item_id for x in available_price_items]
                 for ordered_item in ordered_items:
                     if ordered_item['item'] not in available_items:
-                        raise serializers.ValidationError(_("You cannot add the item whose code is '{item}' to the order.").format(item=ordered_item['item'].item_code))
+                        raise serializers.ValidationError(_("You cannot add the item whose code is '{item}' to the order.").format(item=ordered_item['item'].split('*')[2]))
                     # Deny duplicate values
                     if ordered_item in check_for_duplicate_values:
                         raise serializers.ValidationError(_("There are duplicate items."))
                     check_for_duplicate_values.append(ordered_item)
                     # Add unit_price to ordered_item
-                    ordered_item['unit_price'] = client_establishment.price_table.price_items.get(item=ordered_item['item']).unit_price 
-                    #TODO N+1 query
+                    ordered_item['unit_price'] = next(p.unit_price for p in available_price_items if p.item_id == ordered_item['item'])
                     order_amount += ordered_item['unit_price'] * ordered_item['quantity'] 
                 attrs['order_amount'] = Decimal(order_amount).quantize(Decimal('.01'), rounding=ROUND_HALF_UP)
         current_ordered_items = OrderedItem.objects.filter(order=self.instance)
@@ -288,7 +297,6 @@ class OrderHistorySerializer(serializers.ModelSerializer):
         fields = ['history_type', 'history_description', 'user', 'agent_note', 'date']
 
 class OrderGetSerializer(serializers.ModelSerializer):
-    company = serializers.SlugRelatedField(slug_field='company_code', read_only=True) # TODO Change it for compound_id
     class Meta:
         model = Order
         fields = ['id', 'order_number', 'company', 'establishment', 'client', 'order_amount', 'status', 'order_date', 'invoicing_date', 'invoice_number']
@@ -342,8 +350,8 @@ class OrderDetailsSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 class OrderDuplicateSerializer(serializers.ModelSerializer):
-    company = serializers.SlugRelatedField(slug_field='company_code', read_only=True) # TODO change it to compound id
-    establishment = serializers.SlugRelatedField(slug_field='establishment_compound_id', queryset=Establishment.objects.all())
+    #  company = serializers.SlugRelatedField(slug_field='company_code', read_only=True) # TODO change it to compound id
+    establishment = serializers.CharField(max_length=11, required=True)
     order_id = serializers.CharField(max_length=20, required=True, write_only=True)
     class Meta:
         model = Order
@@ -356,11 +364,16 @@ class OrderDuplicateSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         request_user = self.context['request'].user
-        client = request_user.client
-        establishment = attrs['establishment']
-        company = establishment.company
         try:
-            order = Order.objects.get(id=attrs['order_id'], company__contracting_id=request_user.contracting_id)
+            establishment = Establishment.objects.select_related('company', 'company__contracting').get(establishment_compound_id=attrs['establishment'], company__contracting_id=request_user.contracting_id)
+            company = establishment.company
+        except Establishment.DoesNotExist:
+            raise serializers.ValidationError(_("Establishment not found."))
+        try:
+            order = Order.objects.select_related('client').prefetch_related(Prefetch('ordered_items', 
+                to_attr='ordered_items_set')).get(id=attrs['order_id'], client_id=request_user.client_id)
+            ordered_items = order.ordered_items_set
+            client = order.client 
         except Order.DoesNotExist:
             raise serializers.ValidationError(_("The order was not found."))
         # Contracting ownership from establishment
@@ -373,7 +386,7 @@ class OrderDuplicateSerializer(serializers.ModelSerializer):
         if request_user.status != 1:
             raise PermissionDenied(detail={"error": [_("Your account is disabled.")]})
         #Check if the contracting is active
-        if request_user.contracting.status != 1:
+        if company.contracting.status != 1:
             raise PermissionDenied(detail={"error": [_("Your contracting is disabled.")]})
         #Check if the client is active
         if client.status != 1:
@@ -390,45 +403,45 @@ class OrderDuplicateSerializer(serializers.ModelSerializer):
         except ClientEstablishment.DoesNotExist:
             raise PermissionDenied(detail={"error": [_("Establishment not found.")]})
         # Check if ClientEstablishment has a price_table
-        if not client_establishment.price_table:
+        if not client_establishment.price_table_id:
             raise PermissionDenied(detail={"error": [_("You cannot buy from this establishment.")]})
-        attrs['price_table'] = client_establishment.price_table
+        attrs['price_table_id'] = client_establishment.price_table_id
 
         # Check if item is available for this client by price table
-        available_items = client_establishment.price_table.items.filter(status=1)
+        available_price_items = PriceItem.objects.filter(price_table_id=client_establishment.price_table_id, item__status=1)
+        available_items = [x.item_id for x in available_price_items]
         order_amount = 0
-        ordered_items = order.ordered_items.all()
         attrs['ordered_items'] = []
         attrs['some_items_were_not_copied'] = False
         for ordered_item in ordered_items:
-            if ordered_item.item in available_items:
+            if ordered_item.item_id in available_items:
                 attrs['ordered_items'].append(ordered_item) 
                 # Add unit_price to ordered_item
-                ordered_item.unit_price = client_establishment.price_table.price_items.get(item=ordered_item.item).unit_price #TODO N+1 query
+                ordered_item.unit_price = next(p.unit_price for p in available_price_items if p.item_id == ordered_item.item_id)
                 order_amount += ordered_item.unit_price * ordered_item.quantity 
             else:
                 attrs['some_items_were_not_copied'] = True
         attrs['order_amount'] = order_amount
+        attrs['establishment'] = establishment
         attrs['company'] = company
+        attrs['client'] = client
+        attrs['client_user'] = request_user
         return super().validate(attrs)
 
     def create(self, validated_data):
         validated_data.pop('order_id') # Not needed anymore
-        request_user = self.context['request'].user
         some_items_were_not_copied = validated_data.pop('some_items_were_not_copied')
         ordered_items = validated_data.pop('ordered_items')
-        validated_data['client'] = request_user.client
-        validated_data['client_user'] = request_user
+        client = validated_data['client']
         validated_data['status'] = 1
-        last_order = request_user.client.order_set.order_by("order_date").last()
+        last_order = client.order_set.order_by("order_date").last()
         validated_data['order_number'] = last_order.order_number + 1 if last_order else 1
-        validated_data['id'] = request_user.client.client_table.client_table_code + '.' + \
-            request_user.client.client_code + '.' + str(validated_data['order_number'])
+        validated_data['id'] = client.client_table_id.split("*")[1] + '.' + client.client_code + '.' + str(validated_data['order_number'])
         order = Order.objects.create(**validated_data)
         # Create OrderedItems
         ordered_items_list = []
         for index, ordered_item in enumerate(ordered_items):
-            ordered_items_list.append(OrderedItem(item=ordered_item.item, quantity=ordered_item.quantity, 
+            ordered_items_list.append(OrderedItem(item_id=ordered_item.item_id, quantity=ordered_item.quantity, 
                 unit_price=ordered_item.unit_price, order=order, sequence_number=index + 1))
         order.ordered_items.bulk_create(ordered_items_list)
         #  if  validated_data['some_items_were_not_copied'] == True:

@@ -494,11 +494,9 @@ export default {
         if (this.note && this.currentUserIsClientUser){payload['note'] = this.note}
         if (this.agent_note && !this.currentUserIsClientUser){payload['agent_note'] = this.agent_note}
         let response = await this.$store.dispatch("order/updateOrder", payload)
-        if (response) {
-          this.order.order_amount = response.order_amount
-          this.order.status = response.status
-          this.order.note = response.note
-          this.order.agent_note = response.agent_note
+        if (response == 'ok') {
+          this.order.order_amount = this.getOrderTotal()
+          this.order.status = this.status
           this.$emit('close-edit-dialog')
         }
         this.loading = false;

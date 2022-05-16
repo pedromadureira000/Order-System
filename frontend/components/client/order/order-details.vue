@@ -316,7 +316,7 @@
                   </thead>
                   <tbody>
                     <tr
-                      v-for="ordered_item in order.ordered_items" 
+                      v-for="ordered_item in first_page_items " 
                       :key="ordered_item.item.item_compound_id"
                     >
                       <td>{{ordered_item.sequence_number}}</td>
@@ -345,7 +345,7 @@
                   </tbody>
                 </template>
               </v-simple-table>
-              <div id="note_with_order_total" v-if="ord_items.length <= 17">
+              <div id="note_with_order_total" v-if="order.ordered_items.length <= 17">
                 <div class="ml-3 pt-3" style="text-align:right;">
                   <p style="margin-right: 15px"><b>Total: </b><span>{{getRealMask(getOrderTotal())}}</span></p>
                 </div>
@@ -357,10 +357,10 @@
           </div>
         </div>
 
-        <!-- Order To Print Other page -->
+        <!-- Print Other pages -->
         <div id="order_to_print_new_page" style="width: 1116px; height: 1578px; border-color: black; background-color: white;">
           <div style="padding: 50px 50px">
-            <!-- Ordered items Print -->
+            <!-- Ordered items -->
             <div style="height:1196px;">
               <v-simple-table>
                 <template v-slot:default>
@@ -394,7 +394,7 @@
                   </thead>
                   <tbody>
                     <tr
-                      v-for="ordered_item in order.ordered_items" 
+                      v-for="ordered_item in new_page_items" 
                       :key="ordered_item.item.item_compound_id"
                     >
                       <td>{{ordered_item.sequence_number}}</td>
@@ -454,7 +454,7 @@ export default {
   props: ['order', 'show_view_details_dialog'],
   data() {
     return {
-      ord_items: [{pk: 1}],
+      /** ord_items: [{pk: 1}], */
       first_page_items: [],
       new_page_items: [],
       note: null,
@@ -559,7 +559,8 @@ export default {
 
     printOrder(){
       let filename = this.$t('Order') + 'Nº ' + String(this.order.order_number) + ' - ' + this.order.client.name + ".pdf"
-      let ordered_items = this.ord_items
+      let ordered_items = this.order.ordered_items
+      /** let ordered_items = this.ord_items */
       let new_page_items = this.new_page_items
       let nextTick = this.$nextTick
 
@@ -618,24 +619,31 @@ export default {
   },
   watch: {
     order: {
-       handler(obj){
-         if (obj.ordered_items){
-           this.order_details_fetched = true
-         }
-         else{
-           this.order_details_fetched = false
-         }
-       },
-       deep: true
+      handler(obj){
+        if (obj.ordered_items){
+          // Fix ordered_items's sequence_number
+          let aux_numb = 0
+          this.order.ordered_items.forEach(el=> {
+            aux_numb = aux_numb + 1
+            el.sequence_number = aux_numb
+          })
+          this.order_details_fetched = true
+          this.first_page_items = this.order.ordered_items.slice(0, 21) // // This is for order printing
+        }
+        else{
+          this.order_details_fetched = false
+        }
+      },
+      deep: true
     }
   },
-  mounted(){
+  /** mounted(){ */
     /** for (let n = 2; n <= 17; n++){ */  // <- this is for test purposes
       /** this.ord_items.push({pk: n}) */
     /** } */
     /** console.log(">>>>>>> this.ord_items", this.ord_items) */
    
-    this.first_page_items = this.ord_items.slice(0, 21) // // This is for order printing
-  }
+    /** this.first_page_items = this.ord_items.slice(0, 21) // // This is for order printing */
+  /** } */
 }
 </script>

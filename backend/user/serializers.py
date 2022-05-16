@@ -1,5 +1,6 @@
 from typing import OrderedDict
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.validators import UniqueTogetherValidator
 from .facade import update_agent_establishments, update_agent_permissions
 from .models import User
@@ -47,17 +48,17 @@ class UserSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if self.context['request'].method == 'PUT':
             # I need to call it manually in the update view, because HiddenField don't work with partial=True
-            self.validate_contracting(self.context["request"].user.contracting)
+            self.validate_contracting_id(self.context["request"].user.contracting_id)
         return attrs
 
-    def validate_contracting(self, value):
+    def validate_contracting_id(self, value):
         if self.context['request'].method == 'POST':
             # validate the limit of users by contracting
-            if not contracting_can_create_user(value):
-                raise serializers.ValidationError(_("You cannot create more users. Your contracting company already reach the active users limit."))
+            if not contracting_can_create_user(self.context["request"].user.contracting):
+                raise PermissionDenied(_("You cannot create more users. Your contracting company already reach the active users limit.")) 
         # Validate contracting ownership
-        if self.context['request'].method == 'PUT': # There is any problem for double validation?
-            if self.instance.contracting_id != value.contracting_code:
+        if self.context['request'].method == 'PUT':
+            if self.instance.contracting_id != value:
                 raise serializers.ValidationError(_("User not found."))
         return value
 
@@ -155,7 +156,7 @@ class ERPUserPOSTSerializer(UserSerializer):
                 'roles', 'permissions', 'contracting_code', 'user_code', 'note', 'password']
 
     #overwrite UserSerializer validation
-    def validate_contracting(self, value):
+    def validate_contracting_id(self, value):
         return value
 
     def create(self, validated_data):  

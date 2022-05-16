@@ -382,7 +382,7 @@ export default {
     this.description = this.price_table.description
     this.note = this.price_table.note
     // Default value for company_from_price_table
-    this.company_from_price_table = this.companies.find(el=>el.company_compound_id === this.price_table.company)
+    this.company_from_price_table = this.companies.find(el=>el.company_compound_id === this.price_table.company.company_compound_id)
   },
 
   /** watch: { */

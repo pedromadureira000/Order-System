@@ -76,7 +76,7 @@
           class="elevation-1 mt-3"
         >
           <template v-slot:item.company="{ item }">
-            <p>{{item.company.split('*')[1] + ' - ' + item.company_name}}</p>
+            <p>{{item.company.company_compound_id.split('*')[1] + ' - ' + item.company.name}}</p>
           </template>
           <template v-slot:item.description="{ item }">
             <p style="width: 240px;">{{item.description}}</p>
@@ -167,7 +167,7 @@ export default {
           note: this.note,
         });
         if (data) {
-          this.price_tables.push({...data, company_name: this.company.name});
+          this.price_tables.push({...data, company: {name: data['company_name'], company_compound_id: data['company']}});
           // Clear fields
           this.table_code = ""
           this.description = ""

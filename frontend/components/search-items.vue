@@ -263,7 +263,7 @@ export default {
       this.filter__company = this.companies[0]
     }
     else if (this.itsForPriceItems){
-      this.filter__company = this.companies.find(el=>el.company_compound_id === this.price_table.company)
+      this.filter__company = this.companies.find(el=>el.company_compound_id === this.price_table.company.company_compound_id)
     }
     // The function below will not run another api call. It's just for set the default filter values
     this.fetchCategoriesToSearchItems() 

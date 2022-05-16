@@ -26,8 +26,8 @@ def get_establishments_to_create_client(request_user, client_table_compound_id, 
 
 def get_price_tables_to_create_client(request_user, company_compound_id, req_user_is_agent_without_all_estabs):
     if req_user_is_agent_without_all_estabs:
-        return get_price_tables_by_agent(request_user).filter(company__company_compound_id=company_compound_id)
-    return PriceTable.objects.filter(company__company_compound_id=company_compound_id)
+        return get_price_tables_by_agent(request_user).filter(company__company_compound_id=company_compound_id).select_related('company')
+    return PriceTable.objects.filter(company__company_compound_id=company_compound_id).select_related('company')
 
 #  def get_items_by_category():
     #  itens_actives = Item.objects.filter(active=True)

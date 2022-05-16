@@ -9,7 +9,7 @@ from rest_framework.parsers import FormParser, MultiPartParser
 from .validators import agent_has_access_to_this_item_table, agent_has_access_to_this_price_table 
 from user.validators import req_user_is_agent_without_all_estabs
 from .facade import get_categories_by_agent, get_categories_to_create_item_by_agent_without_all_estabs, get_companies_to_create_pricetabe_by_agent, get_items_by_agent, get_price_tables_by_agent
-from .serializers import ItemPOSTSerializer, ItemPUTSerializer, CategoryPOSTSerializer, CategoryPUTSerializer, ItemTablePOSTSerializer, ItemTablePUTSerializer, PriceItemForAgentsSerializer, PriceTableGetSerializer, PriceTablePOSTSerializer, SpecificPriceTablePUTSerializer, SpecificPriceItemSerializer
+from .serializers import ItemGETSerializer, ItemPOSTSerializer, ItemPUTSerializer, CategoryPOSTSerializer, CategoryPUTSerializer, ItemTablePOSTSerializer, ItemTablePUTSerializer, PriceItemForAgentsSerializer, PriceTableGetSerializer, PriceTablePOSTSerializer, SpecificPriceTablePUTSerializer, SpecificPriceItemSerializer
 from .models import ItemTable, Item, ItemCategory, PriceTable, PriceItem
 from rest_framework.views import APIView
 from rolepermissions.checkers import has_permission, has_role
@@ -106,10 +106,10 @@ class CategoryView(APIView):
         if has_permission(request.user, 'get_item_category'):
             if has_role(request.user, 'agent'):
                 item_categories = get_categories_by_agent(request.user).filter(item_table__item_table_compound_id=item_table_compound_id)
-                return Response(CategoryPOSTSerializer(item_categories, many=True).data)
+                return Response(CategoryPUTSerializer(item_categories, many=True).data)
             item_categories = ItemCategory.objects.filter(item_table__contracting_id=request.user.contracting_id, 
                     item_table__item_table_compound_id=item_table_compound_id)
-            serializer = CategoryPOSTSerializer(item_categories, many=True)
+            serializer = CategoryPUTSerializer(item_categories, many=True)
             return Response(serializer.data)
         return unauthorized_response
     @transaction.atomic
@@ -192,9 +192,9 @@ class fetchCategoriesToCreateItem(APIView):
                 return Response({"error":[_( "The item table was not found.")]}, status=status.HTTP_404_NOT_FOUND)
             if req_user_is_agent_without_all_estabs(request.user):
                 categories = get_categories_to_create_item_by_agent_without_all_estabs(request.user, item_table_compound_id)
-                return Response(CategoryPOSTSerializer(categories, many=True).data)
+                return Response(CategoryPUTSerializer(categories, many=True).data)
             categories = ItemCategory.objects.filter(item_table__item_table_compound_id=item_table_compound_id)
-            return Response(CategoryPOSTSerializer(categories, many=True).data)
+            return Response(CategoryPUTSerializer(categories, many=True).data)
         return unauthorized_response
 
 page_query_string = openapi.Parameter('page', openapi.IN_QUERY, description="page number", type=openapi.TYPE_INTEGER)
@@ -235,12 +235,12 @@ class ItemView(APIView):
                 items = get_items_by_agent(request.user).filter(**kwargs).order_by(sort_by)
                 total = items.count()
                 lastPage = math.ceil(total / items_per_page)
-                return Response({"items": ItemPOSTSerializer(items[start:end], many=True).data, "current_page": page,
+                return Response({"items": ItemGETSerializer(items[start:end], many=True).data, "current_page": page,
                     "lastPage": lastPage, "total": total })
             items = Item.objects.filter(item_table__contracting_id=request.user.contracting_id, **kwargs).order_by(sort_by)
             total = items.count()
             lastPage = math.ceil(total / items_per_page)
-            return Response({"items": ItemPOSTSerializer(items[start:end], many=True).data, "current_page": page,
+            return Response({"items": ItemGETSerializer(items[start:end], many=True).data, "current_page": page,
                 "lastPage": lastPage, "total": total})
         return unauthorized_response
     @transaction.atomic
@@ -349,7 +349,7 @@ class PriceTableView(APIView):
             if has_role(request.user, 'agent'):
                 pricetables = get_price_tables_by_agent(request.user)
                 return Response(PriceTableGetSerializer(pricetables, many=True).data)
-            pricetables = PriceTable.objects.filter(company__contracting_id=request.user.contracting_id).all()
+            pricetables = PriceTable.objects.filter(company__contracting_id=request.user.contracting_id).select_related('company')
             return Response(PriceTableGetSerializer(pricetables, many=True).data)
         return unauthorized_response
     @swagger_auto_schema(request_body=PriceTablePOSTSerializer) 
