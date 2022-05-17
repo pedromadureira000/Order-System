@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from rolepermissions.checkers import has_permission, has_role
+from settings.utils import has_permission, has_role
 from organization.facade import get_agent_client_tables
 from .roles import Agent
 from django.utils.translation import gettext_lazy as _

@@ -6,7 +6,7 @@ from item.serializers import PriceTableGetSerializer
 from organization.facade import get_agent_companies, get_clients_by_agent, get_establishments_to_create_client, get_price_tables_to_create_client
 from organization.serializers import  ClientSerializerPOST, ClientSerializerPUT, ClientTablePOSTSerializer, ClientTablePUTSerializer, CompaniesToCreateClientSerializer, CompanyPOSTSerializer, CompanyPUTSerializer, ContractingPOSTSerializer, ContractingPUTSerializer, EstablishmentPOSTSerializer, EstablishmentPUTSerializer
 from organization.models import Client, ClientTable, Company, Contracting, Establishment
-from rolepermissions.checkers import has_permission, has_role
+from settings.utils import has_permission, has_role
 from django.db import transaction
 from drf_yasg.utils import swagger_auto_schema
 from organization.validators import agent_has_access_to_this_client

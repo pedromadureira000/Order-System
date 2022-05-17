@@ -1,5 +1,4 @@
-from django.db.models.query import Prefetch
-from rolepermissions.checkers import has_permission
+from settings.utils import has_permission
 from item.models import ItemCategory, Item, PriceItem, PriceTable, ItemTable
 from organization.models import Company
 #  from organization.facade import get_agent_companies  # ! This import is causing a circular dependency error

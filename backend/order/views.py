@@ -12,7 +12,7 @@ from .facade import fetch_comps_with_estabs_to_fill_filter_selectors_to_search_o
 from .serializers import ClientsToFillFilterSelectorsToSearchOrdersSerializer, CompanyWithEstabsSerializer, OrderDetailsSerializer, OrderDuplicateSerializer, OrderGetSerializer, OrderHistorySerializer, OrderPOSTSerializer,OrderPUTSerializer, fetchClientEstabsToCreateOrderSerializer, searchOnePriceItemToMakeOrderSerializer
 from .models import Order, OrderHistory, OrderedItem
 from rest_framework.views import APIView
-from rolepermissions.checkers import has_permission, has_role
+from settings.utils import has_permission, has_role
 from drf_yasg.utils import swagger_auto_schema
 from settings.response_templates import not_found_response, serializer_invalid_response, unauthorized_response, unknown_exception_response
 from django.utils.translation import gettext_lazy as _

@@ -1,9 +1,7 @@
 from django.db.models.query import Prefetch
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
-from rolepermissions.checkers import has_role
+from settings.utils import has_role
 from organization.models import Client, ClientEstablishment, Company, Establishment
-from organization.validators import UserClientId
 from user.models import User
 from .facade import update_ordered_items
 from .models import Order, OrderedItem, OrderHistory

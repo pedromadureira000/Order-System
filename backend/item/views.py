@@ -12,7 +12,7 @@ from .facade import get_categories_by_agent, get_categories_to_create_item_by_ag
 from .serializers import ItemGETSerializer, ItemPOSTSerializer, ItemPUTSerializer, CategoryPOSTSerializer, CategoryPUTSerializer, ItemTablePOSTSerializer, ItemTablePUTSerializer, PriceItemForAgentsSerializer, PriceTableGetSerializer, PriceTablePOSTSerializer, SpecificPriceTablePUTSerializer, SpecificPriceItemSerializer
 from .models import ItemTable, Item, ItemCategory, PriceTable, PriceItem
 from rest_framework.views import APIView
-from rolepermissions.checkers import has_permission, has_role
+from settings.utils import has_permission, has_role
 from drf_yasg.utils import swagger_auto_schema
 from settings.response_templates import error_response, not_found_response, protected_error_response, serializer_invalid_response,  unauthorized_response, unknown_exception_response
 from django.utils.translation import gettext_lazy as _

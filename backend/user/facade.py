@@ -1,6 +1,6 @@
 from django.contrib.auth.models import Permission
 from django.db.models.query_utils import Q
-from rolepermissions.checkers import has_permission
+from settings.utils import has_permission
 from rolepermissions.permissions import available_perm_status
 from .models import AgentEstablishment, User
 from organization.models import Company

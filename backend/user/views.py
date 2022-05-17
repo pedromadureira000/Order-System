@@ -13,7 +13,7 @@ from organization.serializers import ClientSerializerPOST, ContractingPOSTSerial
 from .facade import get_all_client_users_by_agent, get_update_permission
 from .serializers import AdminAgentPOSTSerializer, AdminAgentPUTSerializer, AgentPOSTSerializer, AgentPUTSerializer, ClientUserPOSTSerializer, ClientUserPUTSerializer, ERPUserPOSTSerializer, ERPUserPUTSerializer, OwnProfileSerializer, SwaggerLoginSerializer, SwaggerProfilePasswordSerializer, UpdateUserPasswordSerializer
 from .models import User
-from rolepermissions.checkers import has_permission, has_role
+from settings.utils import has_permission, has_role
 from django.db import transaction
 from drf_yasg.utils import swagger_auto_schema
 from .validators import agent_has_access_to_this_client_user, req_user_is_agent_without_all_estabs
