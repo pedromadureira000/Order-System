@@ -1,7 +1,6 @@
 from django.contrib.auth.models import Permission
 from django.db.models.query_utils import Q
 from settings.utils import has_permission
-from rolepermissions.permissions import available_perm_status
 from .models import AgentEstablishment, User
 from organization.models import Company
 from rolepermissions.roles import get_user_roles
@@ -17,7 +16,7 @@ def get_all_client_users_by_agent(agent):
 def update_agent_permissions(agent, agent_permissions):
     agent_permissions = set(agent_permissions)
     #  all_agent_permissions = set(Agent.available_permissions.keys())
-    current_agent_permissions = {k for k, v in available_perm_status(agent).items() if v == True} 
+    current_agent_permissions =  {perm.codename for perm in agent.user_permissions.all()}
     permissions_to_delete = current_agent_permissions.difference(agent_permissions)
     permissions_to_create = agent_permissions.difference(current_agent_permissions)
     agent.user_permissions.remove(*agent.user_permissions.filter(codename__in=permissions_to_delete))

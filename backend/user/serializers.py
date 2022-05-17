@@ -5,15 +5,15 @@ from rest_framework.validators import UniqueTogetherValidator
 from .facade import update_agent_establishments, update_agent_permissions
 from .models import User
 from rolepermissions.roles import get_user_roles
-from rolepermissions.permissions import available_perm_status
 from .validators import agent_permissions_exist_and_does_not_have_duplicates 
 from organization.validators import UserContracting, contracting_can_create_user, agent_has_access_to_this_client
 from .models import AgentEstablishment
 from organization.models import Client, Contracting, Establishment
 from rolepermissions.roles import assign_role
-from rolepermissions.permissions import available_perm_status
 from .models import status_choices
 from django.utils.translation import gettext_lazy as _
+from rest_framework.authtoken.models import Token
+
 
 #-------------------------------------------------/Auth Serializers
 
@@ -67,13 +67,7 @@ class UserSerializer(serializers.ModelSerializer):
         if validated_data.get('password'): validated_data.pop('password')
         # Don't log out the user in UpdateOwnProfile view
         if self.context.get("view") != "update own profile":
-            # Which is the best option?
-            #  if LoggedInUser.objects.get(user=instance).exists()
-                #  instance.logged_in_user.session_key = None
-            try:
-                instance.logged_in_user.delete()
-            except User.logged_in_user.RelatedObjectDoesNotExist:
-                pass
+            validated_data['current_session_key'] = '' #TODO test if it's working
         return super().update(instance, validated_data)
 
     def get_roles(self, user):
@@ -92,11 +86,8 @@ class UserSerializer(serializers.ModelSerializer):
         if isinstance(user, OrderedDict):
             permissions_list = []
             return permissions_list 
-        permissions = available_perm_status(user)
-        permissions_list = []
-        for key, value in permissions.items():
-            if value == True:
-                permissions_list.append(key) 
+        permissions = user.user_permissions.all()
+        permissions_list = [perm.codename for perm in permissions]
         return permissions_list 
 
     def get_contracting_code(self, user):
@@ -172,6 +163,7 @@ class ERPUserPOSTSerializer(UserSerializer):
             status=1
             )
         assign_role(user, 'erp_user')
+        Token.objects.create(user=user)
         return user
 
     def get_user_code(self, user):
@@ -210,11 +202,8 @@ class ERPUserPUTSerializer(serializers.ModelSerializer):
         if isinstance(user, OrderedDict):
             permissions_list = []
             return permissions_list 
-        permissions = available_perm_status(user)
-        permissions_list = []
-        for key, value in permissions.items():
-            if value == True:
-                permissions_list.append(key) 
+        permissions = user.user_permissions.all()
+        permissions_list = [perm.codename for perm in permissions]
         return permissions_list 
 
     def get_contracting_code(self, user):

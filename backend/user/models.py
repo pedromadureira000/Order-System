@@ -74,6 +74,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     status = models.IntegerField(choices=status_choices, default=1)
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
     note = models.CharField(blank=True, verbose_name=_('note'), max_length=800)
+    current_session_key = models.CharField(max_length=32, null=True, blank=True, verbose_name=_('sesssion key'))
     objects = UserManager()
     EMAIL_FIELD = 'email'
     USERNAME_FIELD = 'user_code'
@@ -96,9 +97,3 @@ class User(AbstractBaseUser, PermissionsMixin):
         """Send an email to this user."""
         send_mail(subject, message, from_email, [self.email], **kwargs)
 
-class LoggedInUser(models.Model):
-    user = models.OneToOneField(User, related_name='logged_in_user', on_delete=models.CASCADE, verbose_name=_('user'))
-    # Session keys are 32 characters long
-    session_key = models.CharField(max_length=32, null=True, blank=True, verbose_name=_('sesssion key'))
-    def __str__(self):
-        return self.user.first_name
