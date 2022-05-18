@@ -25,6 +25,7 @@ export default {
 
   methods: {
     verifyConnection() {
+      console.log(">>>>>>> Inside verifyConnection function")
       this.loading = true
       while (this.$store.state.connectionError == true) {
         setTimeout(() => {
