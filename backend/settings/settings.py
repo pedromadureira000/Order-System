@@ -52,21 +52,24 @@ INSTALLED_APPS = [
     'organization',
     'item',
     'order',
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
-    'anymail',
-    #  'axes',
+    #  'anymail',
+    'axes',
     'rest_framework',
     'rest_framework.authtoken',
     'rolepermissions',
     'django_cpf_cnpj',
     'drf_yasg'
 ]
+
+if DEBUG:
+    #  INSTALLED_APPS.append('django.contrib.staticfiles')
+    INSTALLED_APPS.append('django.contrib.admin')
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -78,7 +81,7 @@ MIDDLEWARE = [
     'user.middleware.OneSessionPerUserMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    #  'axes.middleware.AxesMiddleware',
+    'axes.middleware.AxesMiddleware',
 ]
 
 ROOT_URLCONF = 'settings.urls'
@@ -102,7 +105,7 @@ TEMPLATES = [
 
 AUTHENTICATION_BACKENDS = [
     # AxesBackend should be the first backend in the AUTHENTICATION_BACKENDS list.
-    #  'axes.backends.AxesBackend',
+    'axes.backends.AxesBackend',
 
     # Django ModelBackend is the default authentication backend.
     'django.contrib.auth.backends.ModelBackend',
@@ -115,7 +118,15 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
-    ]
+    ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '60/min',
+        'user': '10/second'
+    }
 }
 
 
@@ -123,23 +134,23 @@ WSGI_APPLICATION = 'settings.wsgi.application'
 
 
 # SMTP
-if DEBUG:
-    CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', 'http://localhost:8000/'] 
-    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-    DEFAULT_FROM_EMAIL = "webmaster@localhost"
-    EMAIL_HOST = "localhost"
-    EMAIL_PORT = "1025"
-    EMAIL_HOST_USER = ""
-    EMAIL_HOST_PASSWORD = ""
-    EMAIL_USE_TLS = False
+#  if DEBUG:
+    #  CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', 'http://localhost:8000/'] 
+    #  EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    #  DEFAULT_FROM_EMAIL = "webmaster@localhost"
+    #  EMAIL_HOST = "localhost"
+    #  EMAIL_PORT = "1025"
+    #  EMAIL_HOST_USER = ""
+    #  EMAIL_HOST_PASSWORD = ""
+    #  EMAIL_USE_TLS = False
 
-else: 
-    EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
-    DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
-    SERVER_EMAIL = config('SERVER_EMAIL')
-    ANYMAIL = {'MAILGUN_API_KEY': config('MAILGUN_API_KEY'),
-               'MAILGUN_SENDER_DOMAIN': config('MAILGUN_SENDER_DOMAIN'),
-               }
+#  else: 
+    #  EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
+    #  DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
+    #  SERVER_EMAIL = config('SERVER_EMAIL')
+    #  ANYMAIL = {'MAILGUN_API_KEY': config('MAILGUN_API_KEY'),
+               #  'MAILGUN_SENDER_DOMAIN': config('MAILGUN_SENDER_DOMAIN'),
+               #  }
 
 # Debug tool bar
 if DEBUG:
@@ -263,8 +274,8 @@ if AWS_ACCESS_KEY_ID:
 
 # axex
 AXES_FAILURE_LIMIT = 5
-AXES_COOLOFF_TIME = datetime.timedelta(seconds=5)
-AXES_ONLY_USER_FAILURES = True
+AXES_COOLOFF_TIME = datetime.timedelta(seconds=60)
+AXES_ONLY_USER_FAILURES = True #block username instead of ip
 
 # Session age: 60s * 60m * 24h * 7d
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 7

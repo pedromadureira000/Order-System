@@ -1,4 +1,3 @@
-#  from django.db import close_old_connections
 from django.db.models.deletion import ProtectedError
 from django.contrib.auth import authenticate, login, logout
 from django.utils.decorators import method_decorator
@@ -69,7 +68,6 @@ class OwnProfileView(APIView):
     def get(self, request):
         try:
             data = OwnProfileSerializer(request.user).data
-            #  close_old_connections()
             return Response(data)
         except Exception as error:
             print(error)
