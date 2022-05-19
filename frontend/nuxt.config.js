@@ -34,9 +34,6 @@ export default {
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
-		// {src: '@/plugins/axios', ssr: false},
-		// '@/plugins/axios',
-    // '~/plugins/axios.js
 		'@/plugins/vuetify',
 		'~/plugins/myFunctions',
   ],
@@ -56,7 +53,6 @@ export default {
   modules: [
     '@nuxtjs/i18n',
     '@nuxtjs/proxy',
-    // TODO Is it working?
   ],
 
   i18n: {
@@ -164,10 +160,8 @@ export default {
   },
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
-	axios: {
-		// credentials: true,
-    // timeout: 1000, TODO this is not working
-	},
+	// axios: {
+	// },
 
   // Vuetify module configuration: https://go.nuxtjs.dev/config-vuetify
   vuetify: {

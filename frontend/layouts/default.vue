@@ -36,8 +36,7 @@
         <nuxt-link :to="switchLocalePath('en')">English</nuxt-link>
         <nuxt-link :to="switchLocalePath('pt-BR')">Português</nuxt-link>
         <nuxt-link :to="localePath('admin-organization-company')">TEST</nuxt-link>
-        <v-btn label="testF" @click="testF"/>
-        <v-btn label="testFF" @click="testFF"/>
+        <!-- <v-btn label="testFF" @click="testFF"/> -->
       </v-card>
       <!-- Test Button -->
 
@@ -104,9 +103,6 @@
         class="alert_message" 
         dismissible
       >
-        <!-- <v-btn  -->
-          <!-- @click="$store.dispatch('removeAlert')" -->
-        <!-- >Close</v-btn> -->
         {{$store.state.alert.alertMessage}}
       </v-alert>
     </div>
@@ -126,7 +122,6 @@ let organizationPermissions = CRUDcontractingPermissions.concat(CRUDcompanyPermi
 let itemsMenuPermissions = CRUDitemTablePerms.concat(CRUDitemPerms, CRUDitemCategoryPerms, CRUDpriceTablePerms)
 let orderPermissions = client_user
 
-/** import {handleError} from '~/helpers/functions' //TODO REmove it  */
 /** import axios from '~/plugins/axios' */
 
 export default {
@@ -154,6 +149,7 @@ export default {
       ],
     }
   },
+
   methods: {
     /** TODO Remember who it works */
     open_login_dialog(evt) {
@@ -164,41 +160,10 @@ export default {
 			this.$store.dispatch('user/logout')
     },
 
-    wtf(event){
-      console.log(">>>>>>>JESUS!!!!!!: ", event)
-      /** event.preventDefault() */
-      /** event.stopPropagation() */
-      /** event.stopImmediatePropagation() */
-    },
-    async testFF(){
-      this.$store.dispatch("setAlert", {message: "erro rah rr erro rah rr erro rah rr erro rah rrerro rah rr erro rah rrerro rah rr erro rah rrerro rah rr erro rah rr erro rah rr erro rah rr erro rah rr erro rah rr erro rah rr erro rah rr erro rah rr erro rah rrerro rah rr erro rah rrerro rah rr erro rah rrerro rah rr erro rah rr erro rah rr erro rah rr erro rah rr erro rah rr", alertType: "error"}, { root: true })
-    },
-    async testF(){
-      /** this.$store.dispatch("setAlert", {message: "User deleted", alertType: "success"}, { root: true }) */
+    /** async testFF(){ */
       /** this.$store.dispatch("setAlert", {message: "erro rah rr erro rah rr erro rah rr erro rah rrerro rah rr erro rah rrerro rah rr erro rah rrerro rah rr erro rah rr erro rah rr erro rah rr erro rah rr erro rah rr erro rah rr erro rah rr erro rah rr erro rah rrerro rah rr erro rah rrerro rah rr erro rah rrerro rah rr erro rah rr erro rah rr erro rah rr erro rah rr erro rah rr", alertType: "error"}, { root: true }) */
-      this.$store.dispatch("setAlert", {message: "erro rah rr erro rah rr erro rah rr erro rah rrerro rah rr erro rah rrerro rah rr error", alertType: "error"}, { root: true })
+    /** }, */
 
-      /** this.$store.dispatch("switchConnectionError") */
-
-        /** return await axios({  */
-        /** method: "post", */
-        /** data: { */
-          /** "client_table": "123*11", */
-          /** "client_code": "689", */
-          /** "vendor_code": "string", */
-          /** "name": "string", */
-          /** "cnpj": "40.229.893/0001-66", */
-          /** "status": 1, */
-          /** "note": "string" */
-        /** }, */
-        /** url: `/api/organization/client`, */
-          /** }).then((response) => { */
-              /** console.log(">>>>>>> It worked", response) */
-          /** }).catch(error => { */
-            /** console.log(">>>>>>> ***********************", error.message) */
-            /** handleError(error, this.$store.commit, this.$store.dispatch, this.$i18n, 'Error on the test' ) */
-          /** }) */
-    },
   },
 
   computed: {
@@ -230,12 +195,7 @@ export default {
       let user = this.$store.state.user.currentUser;
       return !user.roles.includes("client_user")
     },
-
   },
-  /** mounted() { */
-    /** console.log('>>>>>>>>>>>>>>>>>>', this.localeRoute('/about')) */
-    /** console.log('>>>>>>>>>>>>>>>>>>', this.getRouteBaseName('')) */
-  /** } */
 
 };
 </script>

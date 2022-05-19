@@ -1,9 +1,3 @@
-// export default ({ app }) => {
-	// app.$axios.defaults.xsrfHeaderName = "X-CSRFToken";
-	// app.$axios.defaults.xsrfCookieName = "csrftoken";
-// }
-
-
 import axios from 'axios'
 
 // axios.defaults.headers.common.tabid = (Math.random() * 1e8).toFixed(0)

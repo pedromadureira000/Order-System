@@ -1,8 +1,0 @@
-- Requirements dev
-
-yay -S mailhog-bin
-mailhog (run mailhog)
-
-- Swagger
-
-After login is necessary to reload page to load csrftoken
