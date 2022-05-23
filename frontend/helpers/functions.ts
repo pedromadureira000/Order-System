@@ -135,12 +135,12 @@ export const ErrorHandler = (error: any, commit: Commit, dispatch: Dispatch, i18
     }
     // Default Error
     else {
-      console.log(">>>>>>> No 'first_key'")
+      // console.log(">>>>>>> No 'first_key'")
       dispatch("setAlert", {message: default_error_msg, alertType: "error"}, { root: true })
     }
   } 
   else { // Case where error.response does not exist and it's not a Internet Connection or Time-out error
-    console.log(">>>>>>> Something very wrong happened here. 'error.response' is empty.") //TODO communicate the ADM.
+    // console.log(">>>>>>> Something very wrong happened here. 'error.response' is empty.") //TODO communicate the ADM.
     dispatch("setAlert", {message: default_error_msg, alertType: "error"}, { root: true })
   }
 }

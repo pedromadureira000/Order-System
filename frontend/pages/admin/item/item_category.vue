@@ -159,14 +159,14 @@ export default {
 
   methods: {
     async fetchCategories(){
-      console.log(">>>>>>> inside fetchCategories()")
+      /** console.log(">>>>>>> inside fetchCategories()") */
       let category_group = this.category_group.find(el=>el.group_id===this.company_to_fetch_categories.item_table)
       if (category_group){
-        console.log(">>>>>>> inside fetchCategories(): category_group found")
+        /** console.log(">>>>>>> inside fetchCategories(): category_group found") */
         this.categories = category_group.categories
       }
       else{
-        console.log(">>>>>>> inside fetchCategories(): category_group was not found")
+        /** console.log(">>>>>>> inside fetchCategories(): category_group was not found") */
         let categories = await this.$store.dispatch("item/fetchCategories", this.company_to_fetch_categories.item_table);
         if (categories){
           this.categories.push(...categories)
@@ -257,8 +257,8 @@ export default {
 
   watch: {
     company_to_fetch_categories(newValue, oldValue){
-      console.log(">>>>>>> newValue: ", newValue)
-      console.log(">>>>>>> OldValue:", oldValue)
+      /** console.log(">>>>>>> newValue: ", newValue) */
+      /** console.log(">>>>>>> OldValue:", oldValue) */
       if (newValue.item_table !== (oldValue === null ? null : oldValue.item_table)) {
         this.fetchCategories()
       }

@@ -25,11 +25,11 @@ export default {
 
   methods: {
     verifyConnection() {
-      console.log(">>>>>>> Inside verifyConnection function")
+      /** console.log(">>>>>>> Inside verifyConnection function") */
       this.loading = true
       while (this.$store.state.connectionError == true) {
         setTimeout(() => {
-          console.log(">>>>>>> Inside net loop")
+          /** console.log(">>>>>>> Inside net loop") */
           if (this.window.navigator.onLine) {
             this.$store.dispatch('switchConnectionError')
             this.loading = false

@@ -41,7 +41,7 @@ class ItemTableView(APIView):
                         return Response(serializer.data)
                     except Exception as error:
                         transaction.rollback()
-                        print(error)
+                        #  print(error)
                         return unknown_exception_response(action=_('create item table'))
                 return serializer_invalid_response(serializer.errors)
             return unauthorized_response
@@ -64,7 +64,7 @@ class SpecificItemTable(APIView):
                     return Response(serializer.data)
                 except Exception as error:
                     transaction.rollback()
-                    print(error)
+                    #  print(error)
                     return unknown_exception_response(action=_('update item table'))
             return serializer_invalid_response(serializer.errors)
         return unauthorized_response
@@ -85,7 +85,7 @@ class SpecificItemTable(APIView):
                         status=status.HTTP_400_BAD_REQUEST) 
             except Exception as error:
                 transaction.rollback()
-                print(error)
+                #  print(error)
                 return unknown_exception_response(action=_('delete item table'))
         return unauthorized_response
 
@@ -123,7 +123,7 @@ class CategoryView(APIView):
                     return Response(serializer.data)
                 except Exception as error:
                     transaction.rollback()
-                    print(error)
+                    #  print(error)
                     return unknown_exception_response(action=_('create item category'))
             return serializer_invalid_response(serializer.errors)
         return unauthorized_response
@@ -153,7 +153,7 @@ class SpecificCategoryView(APIView):
                     return Response(serializer.data)
                 except Exception as error:
                     transaction.rollback()
-                    print(error)
+                    #  print(error)
                     return unknown_exception_response(action=_('update item category'))
             return serializer_invalid_response(serializer.errors)
         return unauthorized_response
@@ -177,7 +177,7 @@ class SpecificCategoryView(APIView):
                         status=status.HTTP_400_BAD_REQUEST) 
             except Exception as error:
                 transaction.rollback()
-                print(error)
+                #  print(error)
                 return unknown_exception_response(action=_('delete item category'))
         return unauthorized_response
 
@@ -255,7 +255,7 @@ class ItemView(APIView):
                     return Response(serializer.data, status=status.HTTP_201_CREATED)
                 except Exception as error:
                     transaction.rollback()
-                    print(error)
+                    #  print(error)
                     return unknown_exception_response(action=_('create item'))
             return serializer_invalid_response(serializer.errors)
         return unauthorized_response
@@ -286,7 +286,7 @@ class SpecificItemView(APIView):
                     return Response(data=serializer.data)
                 except Exception as error:
                     transaction.rollback()
-                    print(error)
+                    #  print(error)
                     return unknown_exception_response(action=_('update item'))
             return serializer_invalid_response(serializer.errors)
         return unauthorized_response
@@ -309,7 +309,7 @@ class SpecificItemView(APIView):
                 return protected_error_response(object_name=_('item'))
             except Exception as error:
                 transaction.rollback()
-                print(error)
+                #  print(error)
                 return unknown_exception_response(action=_('delete item'))
         return unauthorized_response
 
@@ -364,7 +364,7 @@ class PriceTableView(APIView):
                     return Response(serializer.data, status=status.HTTP_201_CREATED)
                 except Exception as error:
                     transaction.rollback()
-                    print(error)
+                    #  print(error)
                     return unknown_exception_response(action=_('create price table'))
             return serializer_invalid_response(serializer.errors)
         return unauthorized_response
@@ -392,7 +392,7 @@ class SpecificPriceTableView(APIView):
                     return Response(serializer.data)
                 except Exception as error:
                     transaction.rollback()
-                    print(error)
+                    #  print(error)
                     return unknown_exception_response(action=_('update price table'))
             return serializer_invalid_response(serializer.errors)
         return unauthorized_response
@@ -415,7 +415,7 @@ class SpecificPriceTableView(APIView):
                 return Response({"error":[_("You cannot delete this price table because it has records linked to it.")]}, 
                         status=status.HTTP_400_BAD_REQUEST) 
             except Exception as error:
-                print(error)
+                #  print(error)
                 return unknown_exception_response(action=_('delete price table'))
         return unauthorized_response
 
@@ -466,7 +466,7 @@ class SpecificPriceItemView(APIView):
                 instance, created = PriceItem.objects.get_or_create(item=item, price_table=price_table)
             except Exception as error:
                 transaction.rollback()
-                print(error)
+                #  print(error)
                 return unknown_exception_response(action=_('get or create price item'))
             serializer = SpecificPriceItemSerializer(instance, data=request.data, context={"request": request})
             # If no change was made on update request, just return the instance
@@ -482,7 +482,7 @@ class SpecificPriceItemView(APIView):
                     return Response(_('Price item updated successfully.'))
                 except Exception as error:
                     transaction.rollback()
-                    print(error)
+                    #  print(error)
                     return unknown_exception_response(action=_('create or update price item'))
             return serializer_invalid_response(serializer.errors)
         return unauthorized_response
@@ -504,6 +504,6 @@ class SpecificPriceItemView(APIView):
             except ProtectedError:
                 return protected_error_response(object_name=_('price item'))
             except Exception as error:
-                print(error)
+                #  print(error)
                 return unknown_exception_response(action=_('delete price item'))
         return unauthorized_response

@@ -293,7 +293,7 @@ export default {
             }
             this.price_items = price_items
             this.price_items_already_fetched = true
-            console.log(">>>>>>> this.price_items: ", this.price_items)
+            /** console.log(">>>>>>> this.price_items: ", this.price_items) */
           }
         }
       },

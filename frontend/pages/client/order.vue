@@ -19,8 +19,8 @@
       return {
         value: 'User',
         allMenuItems: [
-          {"permissions": ['create_order'], "title": "Create Order", "icon":"mdi-account", "to": "/client/order/create_order"},
-          {"permissions": viewOrders, "title": "View Orders", "icon":"mdi-office-building", "to": "/client/order/view_orders"},
+          {"permissions": ['create_order'], "title": "Create Order", "icon":"mdi-cart-variant", "to": "/client/order/create_order"},
+          {"permissions": viewOrders, "title": "View Orders", "icon":"mdi-clipboard-list-outline", "to": "/client/order/view_orders"},
         ],
       }
     },

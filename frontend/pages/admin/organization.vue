@@ -22,9 +22,11 @@
         allMenuItems: [
           {permissions: CRUDcontractingPermissions, title: "Contracting", icon: "mdi-office-building", to: "admin-organization-contracting"},
           {permissions: CRUDcompanyPermissions, title: "Company", icon: "mdi-office-building", to: "admin-organization-company"},
-          {permissions: CRUDestablishmentPermissions, title: "Establishment", icon: "mdi-office-building", to: "admin-organization-establishment"},
-          {permissions: CRUDclientTablePermissions, title: "Client_Table", icon: "mdi-office-building", to: "admin-organization-client_table"},
-          {permissions: CRUDclientPermissions, title: "Client", icon: "mdi-office-building", to: "admin-organization-client"},
+          {permissions: CRUDestablishmentPermissions, title: "Establishment", icon: "mdi-office-building-outline", 
+            to: "admin-organization-establishment"},
+          {permissions: CRUDclientTablePermissions, title: "Client_Table", icon: "mdi-clipboard-list-outline",
+            to: "admin-organization-client_table"},
+          {permissions: CRUDclientPermissions, title: "Client", icon: "mdi-domain", to: "admin-organization-client"},
         ],
       }
     },

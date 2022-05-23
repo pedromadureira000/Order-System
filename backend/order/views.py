@@ -220,7 +220,7 @@ class OrderView(APIView):
                     return Response('ok', status=status.HTTP_201_CREATED)
                 except Exception as error:
                     transaction.rollback()
-                    print(error)
+                    #  print(error)
                     return unknown_exception_response(action=_('create order'))
             return serializer_invalid_response(serializer.errors)
         return unauthorized_response 
@@ -266,7 +266,7 @@ class SpecificOrderView(APIView):
                     return Response('Order updated.')
                 except Exception as error:
                     transaction.rollback()
-                    print(error)
+                    #  print(error)
                     return unknown_exception_response(action=_('update order by client user'))
             return serializer_invalid_response(serializer.errors)
         return unauthorized_response
@@ -337,7 +337,7 @@ class DuplicateOrder(APIView):
                     return Response(response, status=status.HTTP_201_CREATED)
                 except Exception as error:
                     transaction.rollback()
-                    print(error)
+                    #  print(error)
                     return unknown_exception_response(action=_('create order'))
             return serializer_invalid_response(serializer.errors)
         return unauthorized_response

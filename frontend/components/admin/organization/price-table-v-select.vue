@@ -33,11 +33,11 @@ export default {
     async fetchPriceTables(){
       let price_table_already_fetched = this.price_table_groups.find(el=>el.group_id === this.establishment.company)
       if (price_table_already_fetched){
-        console.log(">>>>>>> I GOT IT $$$$$$$$$$$$$$$$$", price_table_already_fetched)
+        /** console.log(">>>>>>> I GOT IT $$$$$$$$$$$$$$$$$", price_table_already_fetched) */
         // price_table_already_fetched comes with 'default_null_value'
         this.price_tables = price_table_already_fetched.price_tables
       }else{
-        console.log(">>>>>>> I fetch IT $$$$$$$$$$$$$$$$$")
+        /** console.log(">>>>>>> I fetch IT $$$$$$$$$$$$$$$$$") */
         this.loading = true
         let price_tables = await this.$store.dispatch("organization/fetchPriceTablesToCreateClient", this.establishment.company);
         this.loading = false

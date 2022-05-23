@@ -441,11 +441,13 @@ export const messages = {
     "Duplicate Order": "Duplicate Order",
     "Order Items": "Order Items",
     //---- about
+    "Types of user": "Types of user",
     "About the system": "About the system",
     "about_the_system__paragraph": "This system is aimed at companies in the industrial sector that work with production on demand. The system allows integration with ERP for order processing.",
     "System administration": "System administration",
-    "system_administration__paragraph": "System administration functions are performed by two types of users: ",
+    "system_administration__paragraph_obs": "System administration roles are performed by user agent and admin agent.",
     "system_administration__paragraph_1": "You can create other administrator and agent-type users. In addition, it has all user agent permissions.",
+    "client_user__paragraph_1":"The client user is the user associated with a client company, who can make orders and consult their own orders.",
     "system_administration__paragraph_2": "You can create, edit and delete the following records: client, client user, item, item category and price table. You can also view orders and update their status. Agent permissions can be set at creation time or can be edited later.",
     "About the representation of system elements by code and name.": "Note on the representation of records in the system",
     "representation_of_records_by_code": "The identification of records such as company, establishment, client, category of items and others, is done by concatenating the identification code of the record with a hyphen followed by the name or description of the record. Example: (001 - Company name), (0102 - Category name).",
@@ -457,7 +459,6 @@ export const messages = {
     "how_to_exclude_a_client__paragraph": "To delete a client, it must not be linked to orders or users.",
     //agent
     "how_to_create_an_agent__paragraph": "When adding an agent, there is a permissions selector that defines which permissions this agent will have, in addition there is also an option to define the agent's access establishments.",
-    "how_to_exclude_a_agent__paragraph": "To delete an agent, it must not be linked to orders.",
     //item
     "how_to_create_an_item__paragraph": "In the inclusion of the item it is necessary to select the company. The system allows more than one company to use the same table of items, so an item included in a company will be automatically recognized by other companies that use the same table.",
     "how_to_create_an_item__paragraph_2": "The item must be linked to a category.",
@@ -474,10 +475,11 @@ export const messages = {
     "how_to_make_an_order__paragraph": "After selecting the establishment from which to buy, the user can add the items (by typing the item code and clicking on the ", //adicionar
     "how_to_make_an_order__paragraph_2": " or searching the items by using the search option). After adding all the items, the user can save the order by clicking on one of the options:",// salvar
     "how_to_make_an_order__paragraph_3": "It will save the order with 'Type' status, allowing the user to change the order later.",
-    "how_to_make_an_order__paragraph_4":"It will save the order with status 'Transferred', then the order will be processed and can no longer be changed by the client.", 
+    "how_to_make_an_order__paragraph_4":"It will save the order with status 'Transferred', then the order will be processed by the ERP and can no longer be changed by the client.", 
     "Get orders": "Get orders",
     "how_to_get_orders__paragraph": "To search for orders the user must access the page ", // ver pedidos
     "how_to_get_orders__paragraph_2": ", define the search filters and click the button ", // buscar
+    "how_to_get_orders__paragraph_3": "When searching for orders, the user can see the order details, where all the items are shown, the order history and there is an option to print the order.",
   },
 
 //====================================================================================
@@ -925,11 +927,13 @@ export const messages = {
     "Duplicate Order": "Duplicar Pedido",
     "Order Items": "Itens do Pedido",
     //---- about
+    "Types of user": "Tipos de usuário",
     "About the system": "Sobre o sistema",
     "about_the_system__paragraph": "Esse sistema é voltado para empresas do setor industrial que trabalham com produção por demanda. O sistema permite integração com ERP para o processamento de pedidos.",
     "System administration": "Administração do sistema",
-    "system_administration__paragraph": "As funções de administração do sistema são desempenhadas por dois tipos de usuário: ",
+    "system_administration__paragraph_obs": "As funções de administração do sistema são desempenhadas pelo usuário agente e agente administrador.",
     "system_administration__paragraph_1": "Pode criar outros usuários do tipo agente administrador e agente. Além disso ele tem todas as permissões do usuário agente.",
+    "client_user__paragraph_1":"O usuário cliente é o usuário associado a uma empresa cliente, que pode fazer pedidos e consultar os próprios pedidos.",
     "system_administration__paragraph_2": "Pode criar, editar e excluir os seguintes cadastros: cliente, usuário do cliente, item, categoria de item e tabela de preços. Pode também ver pedidos e atualizar seus status. As permissões do agente podem ser definidas na hora da sua criação ou podem ser editadas posteriormente.",
     "About the representation of system elements by code and name.": "Observação sobre a representação dos registros no sistema",
     "representation_of_records_by_code": "A identificação de cadastros como empresa, estabelecimento, cliente, categoria de itens e outros, é feita através da concatenação do código de identificação do registro com um hífen seguido do nome ou descrição do registro. Exemplo: (001 - Nome da empresa), (0102 - Nome da categoria).",
@@ -941,7 +945,6 @@ export const messages = {
     "how_to_exclude_a_client__paragraph": "Para excluir um cliente, este não deve estar vinculado a pedidos ou usuários.",
     //agent
     "how_to_create_an_agent__paragraph": "Ao incluir um agente, há um seletor de permissões que define quais permissões esse agente terá, além disso também existe uma opção para definir os estabelecimentos de acesso do agente.",
-    "how_to_exclude_a_agent__paragraph": "Para excluir um agente, este não deve estar vinculado a pedidos.",
     //item
     "how_to_create_an_item__paragraph": "Na inclusão do item é preciso selecionar a empresa. O sistema permite que mais de uma empresa use a mesma tabela de itens, logo um item incluído em uma empresa será automaticamente reconhecido pelas demais empresas que usam a mesma tabela.",
     "how_to_create_an_item__paragraph_2": "O item deve ser vinculado a uma categoria.",
@@ -958,9 +961,11 @@ export const messages = {
     "how_to_make_an_order__paragraph": "Após selecionar o estabelecimento da qual deseja comprar, o usuário pode adicionar os itens (digitando o código do item e clicando no botão ", //adicionar
     "how_to_make_an_order__paragraph_2": " ou pesquisando os itens ao pela opção de pesquisa). Após adicionar todos os itens o usuário poderá salvar o pedido clicando em uma das opções:",// salvar
     "how_to_make_an_order__paragraph_3": "Vai salvar o pedido com status 'Digitação', permitindo que o usuário altere posteriormente o pedido.",
-    "how_to_make_an_order__paragraph_4":"Vai salvar o pedido com status 'Transferido', então o pedido será processado e não poderá mais ser alterado pelo cliente. , então o pedido será processado e não poderá mais ser alterado pelo cliente.", 
+    "how_to_make_an_order__paragraph_4":"Vai salvar o pedido com status 'Transferido', então o pedido será processado pelo ERP e não poderá mais ser alterado pelo cliente.", 
     "Get orders": "Buscar pedidos",
     "how_to_get_orders__paragraph": "Para buscar pedidos o usuário deve acessar a pagina ", // ver pedidos
     "how_to_get_orders__paragraph_2": ", definir os filtros de busca e clicar no botão ", // buscar
+    "how_to_get_orders__paragraph_3": "Ao buscar os pedidos o usuário pode ver os detalhes do pedido, onde é mostrado todos os itens, o histórico e há uma opção para impressão do pedido.",
+
   },
 }

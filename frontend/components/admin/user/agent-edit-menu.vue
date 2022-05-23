@@ -378,7 +378,7 @@ export default {
         this.agent_establishments.push(estab.AUX_agent_estab)
       }
     }
-    console.log(">>>>>>> this.agent_establishments: ", this.agent_establishments)
+    /** console.log(">>>>>>> this.agent_establishments: ", this.agent_establishments) */
     this.first_name = this.agent.first_name
     this.last_name = this.agent.last_name
     this.email = this.agent.email

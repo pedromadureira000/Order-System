@@ -33,7 +33,7 @@ class ContractingView(APIView):
                         return Response(serializer.data)
                     except Exception as error:
                         transaction.rollback()
-                        print(error)
+                        #  print(error)
                         return unknown_exception_response(action=_("create contracting"))
                 return serializer_invalid_response(serializer.errors)
             return unauthorized_response
@@ -54,7 +54,7 @@ class SpecificContracting(APIView):
                     return Response(serializer.data)
                 except Exception as error:
                     transaction.rollback()
-                    print(error)
+                    #  print(error)
                     return unknown_exception_response(action=_('update contracting'))
             return serializer_invalid_response(serializer.errors)
         return unauthorized_response
@@ -73,7 +73,7 @@ class SpecificContracting(APIView):
                         status=status.HTTP_400_BAD_REQUEST) 
             except Exception as error:
                 transaction.rollback()
-                print(error)
+                #  print(error)
                 return unknown_exception_response(action=_('delete contracting'))
         return unauthorized_response
 
@@ -97,7 +97,7 @@ class CompanyView(APIView):
                     return Response(serializer.data)
                 except Exception as error:
                     transaction.rollback()
-                    print(error)
+                    #  print(error)
                 return unknown_exception_response(action=_('create company'))
             return serializer_invalid_response(serializer.errors)
         return unauthorized_response
@@ -121,7 +121,7 @@ class SpecificCompany(APIView):
                     return Response(serializer.data)
                 except Exception as error:
                     transaction.rollback()
-                    print(error)
+                    #  print(error)
                     return unknown_exception_response(action=_('update company'))
             return serializer_invalid_response(serializer.errors)
         return unauthorized_response
@@ -142,7 +142,7 @@ class SpecificCompany(APIView):
                         status=status.HTTP_400_BAD_REQUEST) 
             except Exception as error:
                 transaction.rollback()
-                print(error)
+                #  print(error)
                 return unknown_exception_response(action=_('delete company'))
         return unauthorized_response
 
@@ -173,7 +173,7 @@ class EstablishmentView(APIView):
                     return Response(serializer.data)
                 except Exception as error:
                     transaction.rollback()
-                    print(error)
+                    #  print(error)
                     return unknown_exception_response(action=_('create establishment'))
             return serializer_invalid_response(serializer.errors)
         return unauthorized_response
@@ -196,7 +196,7 @@ class SpecificEstablishment(APIView):
                     return Response(serializer.data)
                 except Exception as error:
                     transaction.rollback()
-                    print(error)
+                    #  print(error)
                     return unknown_exception_response(action=_('update establishment'))
             return serializer_invalid_response(serializer.errors)
         return unauthorized_response
@@ -216,7 +216,7 @@ class SpecificEstablishment(APIView):
                 return protected_error_response(object_name=_('establishment'))
             except Exception as error:
                 transaction.rollback()
-                print(error)
+                #  print(error)
                 return unknown_exception_response(action=_('delete establishment'))
         return unauthorized_response
 
@@ -240,7 +240,7 @@ class ClientTableView(APIView):
                         return Response(serializer.data)
                     except Exception as error:
                         transaction.rollback()
-                        print(error)
+                        #  print(error)
                         return unknown_exception_response(action=_('create client table'))
                 return serializer_invalid_response(serializer.errors)
             return unauthorized_response
@@ -263,7 +263,7 @@ class SpecificClientTable(APIView):
                     return Response(serializer.data)
                 except Exception as error:
                     transaction.rollback()
-                    print(error)
+                    #  print(error)
                     return unknown_exception_response(action=_('update client table'))
             return serializer_invalid_response(serializer.errors)
         return unauthorized_response
@@ -284,7 +284,7 @@ class SpecificClientTable(APIView):
                         status=status.HTTP_400_BAD_REQUEST) 
             except Exception as error:
                 transaction.rollback()
-                print(error)
+                #  print(error)
                 return unknown_exception_response(action=_('delete client table'))
         return unauthorized_response
     
@@ -352,7 +352,7 @@ class ClientView(APIView):
                         return Response(serializer.data)
                     except Exception as error:
                         transaction.rollback()
-                        print(error)
+                        #  print(error)
                         return unknown_exception_response(action=_('create client'))
                 return serializer_invalid_response(serializer.errors)
             return unauthorized_response
@@ -382,7 +382,7 @@ class SpecificClient(APIView):
                     return Response(serializer.data)
                 except Exception as error:
                     transaction.rollback()
-                    print(error)
+                    #  print(error)
                     return unknown_exception_response(action=_('update client'))
             return serializer_invalid_response(serializer.errors)
         return unauthorized_response
@@ -406,6 +406,6 @@ class SpecificClient(APIView):
                 return protected_error_response(object_name=_('client'))
             except Exception as error:
                 transaction.rollback()
-                print(error)
+                #  print(error)
                 return unknown_exception_response(action=_('delete client'))
         return unauthorized_response

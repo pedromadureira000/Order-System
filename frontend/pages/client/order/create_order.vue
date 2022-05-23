@@ -412,6 +412,7 @@ export default {
         if (response === 'ok'){
           this.ordered_items = []
           this.default_quantity = 1
+          this.note = ""
         }
       this.loading = false;
       }

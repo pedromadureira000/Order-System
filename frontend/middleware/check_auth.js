@@ -1,9 +1,9 @@
 import api from '~api'
 
 export default async (ctx) => {
-	if (process.env.API_MOCK){
-		console.log(">>>>>>> 'API_MOCK'")
-	}
+	// if (process.env.API_MOCK){
+		// console.log(">>>>>>> 'API_MOCK'")
+	// }
 		// A middleware can be asynchronous. To do this return a  Promise or use async/await.
 	if (process.server && ctx.req.headers.cookie){
 		let csrftoken = ctx.req.headers.cookie
@@ -29,7 +29,7 @@ export default async (ctx) => {
 		catch (error) { 
       // if ( error.message == 'timeout of 15000ms exceeded') { //TODO fix
       // }
-      console.log('>>>> error middleware "check_auth": ', error)
+      // console.log('>>>> error middleware "check_auth": ', error)
 		}
 	}
 }

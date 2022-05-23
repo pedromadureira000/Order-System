@@ -60,7 +60,7 @@ class Logout(APIView):
             logout(request)
             return Response(_('Logged out'))
         except Exception as error:
-            print(error)
+            #  print(error)
             unknown_exception_response(action=_('log out'))
 
 #-------------------------------------------/ Users Views / -------------------------------------
@@ -70,7 +70,7 @@ class OwnProfileView(APIView):
             data = OwnProfileSerializer(request.user).data
             return Response(data)
         except Exception as error:
-            print(error)
+            #  print(error)
             return unknown_exception_response(action=_('get request user profile'))
     @swagger_auto_schema(request_body=OwnProfileSerializer) 
     @transaction.atomic
@@ -82,7 +82,7 @@ class OwnProfileView(APIView):
                 serializer.save()
                 return Response(serializer.data)
             except Exception as error:
-                print(error)
+                #  print(error)
                 return unknown_exception_response(action=_('update request user profile'))
         return serializer_invalid_response(serializer.errors)
 
@@ -111,7 +111,7 @@ class ERPUserView(APIView):
                     return Response(serializer.data)
                 except Exception as error:
                     transaction.rollback()
-                    print(error)
+                    #  print(error)
                     return unknown_exception_response(action=_('create erp user'))
             return serializer_invalid_response(serializer.errors)
         return unauthorized_response
@@ -134,7 +134,7 @@ class SpecificERPUser(APIView):
                     return Response(serializer.data)
                 except Exception as error:
                     transaction.rollback()
-                    print(error)
+                    #  print(error)
                     #  raise error
                     return unknown_exception_response(action=_('update erp user'))
             return serializer_invalid_response(serializer.errors)
@@ -154,7 +154,7 @@ class SpecificERPUser(APIView):
                 return protected_error_response(object_name=_('erp user'))
             except Exception as error:
                 transaction.rollback()
-                print(error)
+                #  print(error)
                 return unknown_exception_response(action=_('delete erp user'))
         return unauthorized_response
 
@@ -176,7 +176,7 @@ class AdminAgentView(APIView):
                     return Response(serializer.data)
                 except Exception as error:
                     transaction.rollback()
-                    print(error)
+                    #  print(error)
                     return unknown_exception_response(action=_('create admin agent'))
             return serializer_invalid_response(serializer.errors)
         return unauthorized_response
@@ -201,7 +201,7 @@ class SpecificAdminAgent(APIView):
                     return Response(serializer.data)
                 except Exception as error:
                     transaction.rollback()
-                    print(error)
+                    #  print(error)
                     #  raise error
                     return unknown_exception_response(action=_('update admin agent'))
             return serializer_invalid_response(serializer.errors)
@@ -224,7 +224,7 @@ class SpecificAdminAgent(APIView):
                 return protected_error_response(object_name=_('admin agent'))
             except Exception as error:
                 transaction.rollback()
-                print(error)
+                #  print(error)
                 return unknown_exception_response(action=_('delete admin agent'))
         return unauthorized_response
 
@@ -253,7 +253,7 @@ class AgentView(APIView):
                     return Response(serializer.data)
                 except Exception as error:
                     transaction.rollback()
-                    print(error)
+                    #  print(error)
                     return unknown_exception_response(action=_('create agent'))
             return serializer_invalid_response(serializer.errors)
         return unauthorized_response
@@ -278,7 +278,7 @@ class SpecificAgent(APIView):
                     return Response(serializer.data)
                 except Exception as error:
                     transaction.rollback()
-                    print(error)
+                    #  print(error)
                     #  raise error
                     return unknown_exception_response(action=_('update agent'))
             return serializer_invalid_response(serializer.errors)
@@ -301,7 +301,7 @@ class SpecificAgent(APIView):
                 return protected_error_response(object_name=_('agent'))
             except Exception as error:
                 transaction.rollback()
-                print(error)
+                #  print(error)
                 return unknown_exception_response(action=_('delete agent'))
         return unauthorized_response
 
@@ -344,7 +344,7 @@ class ClientUserView(APIView):
                         return Response(serializer.data)
                     except Exception as error:
                         transaction.rollback()
-                        print(error)
+                        #  print(error)
                         return unknown_exception_response(action=_('create client user'))
                 return serializer_invalid_response(serializer.errors)
         return unauthorized_response
@@ -372,7 +372,7 @@ class SpecificClientUser(APIView):
                     return Response(serializer.data)
                 except Exception as error:
                     transaction.rollback()
-                    print(error)
+                    #  print(error)
                     #  raise error
                     return unknown_exception_response(action=_('update client user'))
             return serializer_invalid_response(serializer.errors)
@@ -398,7 +398,7 @@ class SpecificClientUser(APIView):
                 return protected_error_response(object_name=_('client user'))
             except Exception as error:
                 transaction.rollback()
-                print(error)
+                #  print(error)
                 return unknown_exception_response(action=_('delete client user'))
         return unauthorized_response
 
@@ -432,7 +432,7 @@ class UpdateUserPassword(APIView):
         try:
             permission = get_update_permission(user)
         except Exception as error:
-            print(error)  #TODO send log. (user probably don't have role)
+            #  print(error)  #TODO send log. (user probably don't have role)
             return unknown_exception_response(action=_("update user's password"))
 
         if has_permission(request.user, permission):
@@ -443,7 +443,7 @@ class UpdateUserPassword(APIView):
                     return Response(_('Password updated'))
                 except Exception as error:
                     transaction.rollback()
-                    print(error)
+                    #  print(error)
                     #  raise error
                     return unknown_exception_response(action=_("update user's password"))
         return unauthorized_response

@@ -72,7 +72,7 @@ export const actions: ActionTree<RootState, RootState> = {
     }, timeout);
   },
   removeAlert({ commit}: { commit: Commit}){
-    console.log(">>>>>>> removeAlert Action!!!!!!!!")
+    // console.log(">>>>>>> removeAlert Action!!!!!!!!")
     commit('removeAlert')
   },
   switchConnectionError({ commit}: { commit: Commit}){
