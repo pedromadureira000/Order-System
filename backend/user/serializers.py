@@ -67,7 +67,7 @@ class UserSerializer(serializers.ModelSerializer):
         if validated_data.get('password'): validated_data.pop('password')
         # Don't log out the user in UpdateOwnProfile view
         if self.context.get("view") != "update own profile":
-            validated_data['current_session_key'] = '' #TODO test if it's working
+            validated_data['current_session_key'] = ''
         return super().update(instance, validated_data)
 
     def get_roles(self, user):
@@ -301,7 +301,7 @@ class AgentPUTSerializer(UserSerializer):
         return value
 
     def validate_agent_permissions(self, value):
-        agent_permissions_exist_and_does_not_have_duplicates(value) # TODO test it (seems weird)
+        agent_permissions_exist_and_does_not_have_duplicates(value)
         return value
 
     def update(self, instance, validated_data):

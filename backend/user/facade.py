@@ -38,7 +38,7 @@ def update_agent_establishments(agent, agent_establishments):
     agent.agent_establishments.bulk_create(agent_establishments_to_create)
 
 def get_update_permission(user):
-    # TODO seems bugado
+    # A user is supposed to have only one role
     role = get_user_roles(user)
     permission = 'update_' + role[0].get_name()
     return permission

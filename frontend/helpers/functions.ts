@@ -67,7 +67,7 @@ export const ErrorHandler = (error: any, commit: Commit, dispatch: Dispatch, i18
     dispatch("setAlert", {message: i18n.t("Request_Time_out"), alertType: "error"}, { root: true })
   } 
   // ----------/ Internet Connection Error
-  else if (error.message === 'Network Error' || !window.navigator.onLine){ // TODO: I'm not sure about it.
+  else if (error.message === 'Network Error' || !window.navigator.onLine){
     dispatch("setAlert", {message: i18n.t("Connection_error"), alertType: "error"}, { root: true })
     dispatch("switchConnectionError")
   // ---------/ Other Error
@@ -79,12 +79,8 @@ export const ErrorHandler = (error: any, commit: Commit, dispatch: Dispatch, i18
     if (response.data ===  "Session already open." || response.data === "A Sessão já esta aberta."){
       commit("toggleSessionError")
     }
-    //  This will occur when a user attempt to access an API with an old session after he has been logged out.
-    else if (response.data ===  "Invalid session. Try to login again." || response.data === "Sessão invalida. Tente logar novamente."){
-      // commit("toggleInvalidSessionError") TODO
-    }
     // 500 Server Error
-    else if (response.status ===  500){
+    else if (response.status === 500){
         dispatch("setAlert", {message: i18n.t("Server_error"), alertType: "error"}, { root: true })
     }
     else if (first_key){
@@ -101,7 +97,7 @@ export const ErrorHandler = (error: any, commit: Commit, dispatch: Dispatch, i18
       // DRF Normal Field Errors
       else if (field_list.includes(first_key)){
         let errorMessage = response.data[first_key][0]
-        // Translation Gambiarra: TODO Fix it
+        // Translation Workaround (Gambiarra)!
         if (errorMessage.includes('is not valid cnpj')){
           errorMessage = errorMessage.replace('is not valid cnpj', 'não é um CNPJ valido')
         } 
@@ -140,7 +136,7 @@ export const ErrorHandler = (error: any, commit: Commit, dispatch: Dispatch, i18
     }
   } 
   else { // Case where error.response does not exist and it's not a Internet Connection or Time-out error
-    // console.log(">>>>>>> Something very wrong happened here. 'error.response' is empty.") //TODO communicate the ADM.
+    // console.log(">>>>>>> Something very wrong happened here. 'error.response' is empty.")
     dispatch("setAlert", {message: default_error_msg, alertType: "error"}, { root: true })
   }
 }

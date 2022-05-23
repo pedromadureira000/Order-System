@@ -44,7 +44,6 @@ export default {
 	},
 
 	updateCurrentUserProfile(payload){ 
-    //TODO some fields should be optional
 		if (typeof payload.first_name === 'string' && typeof payload.last_name === 'string' 
       && typeof payload.email === 'string' && payload.cpf === 'string'){
 			let updated_user = {...user, ...payload}
@@ -83,7 +82,6 @@ export default {
 	},
 
 	createUser(payload){
-    //TODO some fields should be optional (use types!)
 		if (typeof payload.first_name === 'string' && typeof payload.last_name === 'string' &&
         typeof payload.username === 'string' && typeof payload.company_code === 'number' &&
         typeof payload.email === 'string' && typeof payload.password === 'string' && payload.cpf === 'string')

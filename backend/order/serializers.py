@@ -204,7 +204,7 @@ class OrderPUTSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(_("You cannot choose this option as status."))
         # Canceled order can't change status
         if self.instance.status == 0 and value != self.instance.status:
-            raise serializers.ValidationError(_("You cannot choose this option as status.")) #TODO made a better message
+            raise serializers.ValidationError(_("You cannot choose this option as status."))
         return value
 
     def validate_invoice_number(self, value):
@@ -233,10 +233,10 @@ class OrderPUTSerializer(serializers.ModelSerializer):
             raise PermissionDenied(detail={"error": [_("Your contracting is disabled.")]})
         # Deny setting wrong invoice_number
         if (invoice_number and status not in [4, 5] and self.instance.status not in [4, 5]):
-            raise serializers.ValidationError(_("You can only add invoice number when order status is 'Invoiced' of 'Delivered'."))
+            raise serializers.ValidationError(_("You can only add invoice number when order status is 'Invoiced' or 'Delivered'."))
         # Deny setting wrong invoicing_date
         if (invoicing_date and status not in [4, 5] and self.instance.status not in [4, 5]):
-            raise serializers.ValidationError(_("You can only add invoicing date when order status is 'Invoiced' of 'Delivered'."))
+            raise serializers.ValidationError(_("You can only add invoicing date when order status is 'Invoiced' or 'Delivered'."))
         # Force setting invoice_number when status changes from 'Registered' to 'Invoiced'.
         if status == 4 and self.instance.status == 3 and not invoice_number:
             raise serializers.ValidationError(_("You need send invoice number when order status has changed from 'Registered' to 'Invoiced'."))
@@ -348,7 +348,6 @@ class OrderDetailsSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 class OrderDuplicateSerializer(serializers.ModelSerializer):
-    #  company = serializers.SlugRelatedField(slug_field='company_code', read_only=True) # TODO change it to compound id
     establishment = serializers.CharField(max_length=11, required=True)
     order_id = serializers.CharField(max_length=20, required=True, write_only=True)
     class Meta:

@@ -310,7 +310,7 @@ class fetchClientsToCreateClientUser(APIView):
         user = request.user
         if has_permission(user, 'create_client_user'):
             if req_user_is_agent_without_all_estabs(user):
-                clients = get_clients_by_agent(user).filter(status=1) #TODO TEST
+                clients = get_clients_by_agent(user)
                 data = ClientSerializerPOST(clients, many=True).data
                 return Response(data)
             clients = Client.objects.filter(client_table__contracting_id=user.contracting_id, status=1)
@@ -432,7 +432,6 @@ class UpdateUserPassword(APIView):
         try:
             permission = get_update_permission(user)
         except Exception as error:
-            #  print(error)  #TODO send log. (user probably don't have role)
             return unknown_exception_response(action=_("update user's password"))
 
         if has_permission(request.user, permission):

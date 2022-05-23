@@ -27,7 +27,7 @@ export default async (ctx) => {
 			ctx.store.commit('user/SET_USER', data )
 		}
 		catch (error) { 
-      // if ( error.message == 'timeout of 15000ms exceeded') { //TODO fix
+      // if ( error.message == 'timeout of 15000ms exceeded') { 
       // }
       // console.log('>>>> error middleware "check_auth": ', error)
 		}

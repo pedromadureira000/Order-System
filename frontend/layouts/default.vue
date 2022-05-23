@@ -151,7 +151,6 @@ export default {
   },
 
   methods: {
-    /** TODO Remember who it works */
     open_login_dialog(evt) {
       this.$refs.login_dialog.open()
       evt.stopPropagation()

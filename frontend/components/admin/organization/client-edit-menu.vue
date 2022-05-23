@@ -285,7 +285,7 @@ export default {
               price_table: null}
           }
         }
-        this.establishments = establishments //TODO what I have done?
+        this.establishments = establishments
       }
     },
 

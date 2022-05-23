@@ -88,7 +88,7 @@ class CompanyPUTSerializer(serializers.ModelSerializer):
         # If there is any price_table for this company, do not allow change this field.
         if self.instance.item_table != value:
             if self.instance.pricetable_set.first():
-                raise serializers.ValidationError(_("The company must have no price tables to be able to change the item table.")) #TODO translate
+                raise serializers.ValidationError(_("The company must have no price tables to be able to change the item table."))
         if value:
             # Contracting Ownership
             if value.contracting_id != self.context["request"].user.contracting_id:

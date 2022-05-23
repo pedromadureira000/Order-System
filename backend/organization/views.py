@@ -292,7 +292,7 @@ class GetPriceTablesToCreateClient(APIView):
     def get(self, request, company_compound_id):
         if has_permission(request.user, 'create_client'):
             if company_compound_id.split("*")[0] != request.user.contracting_id:
-                return error_response(detail="You cannot access this 'company'", status=status.HTTP_403_FORBIDDEN) #TODO translate
+                return error_response(detail=_("You cannot access this 'company'"), status=status.HTTP_403_FORBIDDEN)
             request_user_is_agent_without_all_estabs = req_user_is_agent_without_all_estabs(request.user)
             price_tables = get_price_tables_to_create_client(request.user, company_compound_id, request_user_is_agent_without_all_estabs)
             return Response(PriceTableGetSerializer(price_tables, many=True).data)
@@ -301,7 +301,7 @@ class GetEstablishmentsToCreateClient(APIView):
     def get(self, request, client_table_compound_id):
         if has_permission(request.user, 'create_client'):
             if client_table_compound_id.split("*")[0] != request.user.contracting_id:
-                return error_response(detail="You cannot access this 'client_table'", status=status.HTTP_403_FORBIDDEN) #TODO translate
+                return error_response(detail=_("You cannot access this 'client_table'"), status=status.HTTP_403_FORBIDDEN)
             request_user_is_agent_without_all_estabs = req_user_is_agent_without_all_estabs(request.user)
             establishments = get_establishments_to_create_client(request.user, client_table_compound_id,request_user_is_agent_without_all_estabs)
             return Response(EstablishmentPOSTSerializer(establishments, many=True).data)

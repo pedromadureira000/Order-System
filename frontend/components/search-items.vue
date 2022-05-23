@@ -250,7 +250,6 @@ export default {
   watch: {
     options: {
       handler () {
-        /** console.log(">>>>>>> $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$") */
         this.fetchItems()
       },
       deep: true,
@@ -258,7 +257,6 @@ export default {
   },
 
   mounted() {
-    /** console.log('>>>>>>>>>>>>>>>>>> CDN url: ', this.cdn_url) */
     if (this.itsForAdminItemPage){
       this.filter__company = this.companies[0]
     }

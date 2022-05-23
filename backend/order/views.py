@@ -103,10 +103,10 @@ class fetchCategoriesToMakeOrderAndGetPriceTableInfo(APIView):
                         client_table_id=client_table_from_req_user)
             except Company.DoesNotExist:
                 return Response({"error":[_( "You do not have access to this establishment.")]}, 
-                        status=status.HTTP_404_NOT_FOUND) #TODO translate
+                        status=status.HTTP_404_NOT_FOUND)
             if not comp.item_table_id:
                 return Response({"error":[_( "The company from this establishment does not have a item table.")]}, 
-                        status=status.HTTP_404_NOT_FOUND) #TODO translate 
+                        status=status.HTTP_404_NOT_FOUND)
             categories = ItemCategory.objects.filter(item_table_id=comp.item_table_id).order_by('category_code')
             serializer = CategoryPUTSerializer(categories, many=True)
             # Get price table description and code

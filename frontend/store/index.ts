@@ -18,7 +18,8 @@ export const state = (): RootState => ({
     alertID: 0
   },
   connectionError: false,
-  CDNBaseUrl: process.env.DEV ? 'http://localhost:8000' : 'https://amazoncdn.com' //TODO CDN
+  // @ts-ignore
+  CDNBaseUrl: process.env.DEV ? 'http://localhost:8000' : process.env.CDN_URL
 });
 
 import { MutationTree } from "vuex";

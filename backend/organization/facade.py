@@ -1,6 +1,6 @@
 from item.facade import get_price_tables_by_agent
 from item.models import PriceTable
-from organization.models import Client, ClientEstablishment, ClientTable, Company, Establishment
+from organization.models import Client, ClientTable, Company, Establishment
 from user.models import User
 
 def company_has_active_users(company):
@@ -16,7 +16,7 @@ def get_agent_client_tables(agent):
 
 def get_clients_by_agent(user):
     client_tables = get_agent_client_tables(user)
-    return Client.objects.filter(client_table__in=client_tables)
+    return Client.objects.filter(client_table__in=client_tables, status=1)
 
 #---/ Client
 def get_establishments_to_create_client(request_user, client_table_compound_id, req_user_is_agent_without_all_estabs):
@@ -28,12 +28,6 @@ def get_price_tables_to_create_client(request_user, company_compound_id, req_use
     if req_user_is_agent_without_all_estabs:
         return get_price_tables_by_agent(request_user).filter(company__company_compound_id=company_compound_id).select_related('company')
     return PriceTable.objects.filter(company__company_compound_id=company_compound_id).select_related('company')
-
-#  def get_items_by_category():
-    #  itens_actives = Item.objects.filter(active=True)
-    #  return ItemCategory.objects.prefetch_related(
-        #  Prefetch('item_set', queryset=itens_actives, to_attr='items')).all()
-
 
 
 #------------------------------------/Reverse Foreign key Batch Updates/---------------------------------------------------
