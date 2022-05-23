@@ -4,7 +4,7 @@ import {messages} from './messages'
 const _isdev = process.env.DEV
 const _apimock = process.env.API_MOCK 
 const _apijs = _apimock ? 'apimock' : 'api'
-// import pt from 'vuetify/es5/locale/pt'
+import pt from 'vuetify/es5/locale/pt'
 
 export default {
 
@@ -69,8 +69,8 @@ export default {
     // If a custom path is missing for one of the locales, the defaultLocale custom path is used, if set.
     pages: {
       about: {
-        en: '/about-us',
-        'pt-BR': '/sobre-nos',
+        en: '/about_the_system',
+        'pt-BR': '/sobre_o_sistema',
       },
       myaccount: {
         en: '/my-account',
@@ -181,10 +181,10 @@ export default {
         }
       }
     },
-    // lang: {
-      // locales: { pt },
-      // current: 'pt'
-    // },
+    lang: {
+      locales: { pt },
+      current: 'pt'
+    },
   },
 
 	// Build Configuration: https://go.nuxtjs.dev/config-build

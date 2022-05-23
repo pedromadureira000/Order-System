@@ -439,7 +439,45 @@ export const messages = {
     "Order": "Order",
     "Order made by:": "Order made by:",
     "Duplicate Order": "Duplicate Order",
-    "Order Items": "Order Items"
+    "Order Items": "Order Items",
+    //---- about
+    "About the system": "About the system",
+    "about_the_system__paragraph": "This system is aimed at companies in the industrial sector that work with production on demand. The system allows integration with ERP for order processing.",
+    "System administration": "System administration",
+    "system_administration__paragraph": "System administration functions are performed by two types of users: ",
+    "system_administration__paragraph_1": "You can create other administrator and agent-type users. In addition, it has all user agent permissions.",
+    "system_administration__paragraph_2": "You can create, edit and delete the following records: client, client user, item, item category and price table. You can also view orders and update their status. Agent permissions can be set at creation time or can be edited later.",
+    "About the representation of system elements by code and name.": "Note on the representation of records in the system",
+    "representation_of_records_by_code": "The identification of records such as company, establishment, client, category of items and others, is done by concatenating the identification code of the record with a hyphen followed by the name or description of the record. Example: (001 - Company name), (0102 - Category name).",
+    //client
+    "how_to_create_a_client__paragraph": "The system allows more than one company to use the same client table, so a client included in a company will be automatically recognized by other companies that use the same table.", 
+    "how_to_create_a_client__paragraph_1": "When adding a client, it is possible to choose which establishments the client can buy from in the option", 
+    "how_to_create_a_client__paragraph_2":", and for each selected establishment you can define the price table that will determine the client's items and price. The field",
+    "how_to_create_a_client__paragraph_3":" can be changed later.",
+    "how_to_exclude_a_client__paragraph": "To delete a client, it must not be linked to orders or users.",
+    //agent
+    "how_to_create_an_agent__paragraph": "When adding an agent, there is a permissions selector that defines which permissions this agent will have, in addition there is also an option to define the agent's access establishments.",
+    "how_to_exclude_a_agent__paragraph": "To delete an agent, it must not be linked to orders.",
+    //item
+    "how_to_create_an_item__paragraph": "In the inclusion of the item it is necessary to select the company. The system allows more than one company to use the same table of items, so an item included in a company will be automatically recognized by other companies that use the same table.",
+    "how_to_create_an_item__paragraph_2": "The item must be linked to a category.",
+    "how_to_exclude_an_item__paragraph": "To delete an item it must not be linked to price tables or orders.",
+    //order
+    "Sales orders": "Sales orders (agent)",
+    "how_to_update_orders__paragraph": "In this option it is possible to change the status of the order between the options (Registered, Invoiced, Delivered), and it is possible to cancel the order. The canceled order can no longer have its status changed.",
+    "how_to_update_orders__paragraph_OBS":"It is not possible to delete the order.",
+    //client pages
+    "Client pages": "Client pages",
+    "Update order": "Update order",
+    "how_to_update_orders_by_client_user__paragraph": "In the order edit option it is possible to change the items and the order note. After these changes it is possible to transfer, save in typing or cancel the order. Only the typing order can be updated.",
+    "Make order": "Make order",
+    "how_to_make_an_order__paragraph": "After selecting the establishment from which to buy, the user can add the items (by typing the item code and clicking on the ", //adicionar
+    "how_to_make_an_order__paragraph_2": " or searching the items by using the search option). After adding all the items, the user can save the order by clicking on one of the options:",// salvar
+    "how_to_make_an_order__paragraph_3": "It will save the order with 'Type' status, allowing the user to change the order later.",
+    "how_to_make_an_order__paragraph_4":"It will save the order with status 'Transferred', then the order will be processed and can no longer be changed by the client.", 
+    "Get orders": "Get orders",
+    "how_to_get_orders__paragraph": "To search for orders the user must access the page ", // ver pedidos
+    "how_to_get_orders__paragraph_2": ", define the search filters and click the button ", // buscar
   },
 
 //====================================================================================
@@ -535,14 +573,14 @@ export const messages = {
     fetchCompanies_error_msg: "Algo deu errado ao tentar buscar empresas.",
     updateCompany_error_msg: "Algo deu errado ao tentar atualizar a empresa.",
     deleteCompany_error_msg: "Algo deu errado ao tentar excluir a empresa.",
-    fetchPriceTablesToCreateClient_error_msg: "Algo deu errado ao tentar buscar tabelas de preço na pagina de criação de cliente.",
-    fetchEstablishmentsToCreateClient_error_msg: "Algo deu errado ao tentar buscar estabelecimentos na pagina de criação de cliente.",
+    fetchPriceTablesToCreateClient_error_msg: "Algo deu errado ao tentar buscar tabelas de preço na página de criação de cliente.",
+    fetchEstablishmentsToCreateClient_error_msg: "Algo deu errado ao tentar buscar estabelecimentos na página de criação de cliente.",
     fetchCompaniesToCreateClient_error_msg: "Algo deu errado ao tentar buscar empresas para criar cliente.",
     createClient_error_msg: "Algo deu errado ao tentar criar cliente",
     fetchClients_error_msg: "Algo deu errado ao tentar buscar clientes",
     updateClient_error_msg: "Algo deu errado ao tentar atualizar o cliente.",
     deleteClient_error_msg: "Algo deu errado ao tentar excluir o cliente.",
-    fetchCompaniesToCreateEstablishment_error_msg: "Algo deu errado ao tentar buscar empresas na pagina de criação de estabelecimento.",
+    fetchCompaniesToCreateEstablishment_error_msg: "Algo deu errado ao tentar buscar empresas na página de criação de estabelecimento.",
     createEstablishment_error_msg: "Algo deu errado ao tentar criar um estabelecimento.",
     fetchEstablishments_error_msg: "Algo deu errado ao tentar buscar estabelecimentos.",
     updateEstablishment_error_msg: "Algo deu errado ao tentar atualizar o estabelecimento.",
@@ -656,7 +694,7 @@ export const messages = {
     Last_Name: 'Sobrenome',
     Update_Account_Information: 'Atualizar Perfil',
     Change_Password: 'Alterar Senha',
-    After_change_your_password_you_will_be_logged_out: 'Após mudar sua senha voce será deslogado.',
+    After_change_your_password_you_will_be_logged_out: 'Após mudar sua senha você será deslogado.',
     Current_password: 'Senha atual',
     Password_Confirm: 'Confirmar Senha',
     You_have_not_changed_any_fields: 'Você não alterou nenhum campo.',
@@ -729,7 +767,7 @@ export const messages = {
     "Select company": "Selecione a empresa",
     // ---------------------------------------------------------------------------------------/admin/user
     ERP_User: 'Usuário ERP',
-    Admin_Agent: 'Agente Admin',
+    Admin_Agent: 'Agente Administrador',
     Agent: 'Agente',
     Client_User: 'Usuário Cliente',
     // -------------------------------/admin/user/ERP_User
@@ -885,6 +923,44 @@ export const messages = {
     "Order": "Pedido",
     "Order made by:": "Pedido feito por:",
     "Duplicate Order": "Duplicar Pedido",
-    "Order Items": "Itens do Pedido"
+    "Order Items": "Itens do Pedido",
+    //---- about
+    "About the system": "Sobre o sistema",
+    "about_the_system__paragraph": "Esse sistema é voltado para empresas do setor industrial que trabalham com produção por demanda. O sistema permite integração com ERP para o processamento de pedidos.",
+    "System administration": "Administração do sistema",
+    "system_administration__paragraph": "As funções de administração do sistema são desempenhadas por dois tipos de usuário: ",
+    "system_administration__paragraph_1": "Pode criar outros usuários do tipo agente administrador e agente. Além disso ele tem todas as permissões do usuário agente.",
+    "system_administration__paragraph_2": "Pode criar, editar e excluir os seguintes cadastros: cliente, usuário do cliente, item, categoria de item e tabela de preços. Pode também ver pedidos e atualizar seus status. As permissões do agente podem ser definidas na hora da sua criação ou podem ser editadas posteriormente.",
+    "About the representation of system elements by code and name.": "Observação sobre a representação dos registros no sistema",
+    "representation_of_records_by_code": "A identificação de cadastros como empresa, estabelecimento, cliente, categoria de itens e outros, é feita através da concatenação do código de identificação do registro com um hífen seguido do nome ou descrição do registro. Exemplo: (001 - Nome da empresa), (0102 - Nome da categoria).",
+    //client
+    "how_to_create_a_client__paragraph": "O sistema permite que mais de uma empresa use a mesma tabela de clientes, logo um cliente incluído em uma empresa será automaticamente reconhecido pelas demais empresas que usam a mesma tabela.", 
+    "how_to_create_a_client__paragraph_1": "Ao incluir um cliente, é possível escolher de quais estabelecimentos o cliente poderá comprar na opção", 
+    "how_to_create_a_client__paragraph_2":", e para cada estabelecimento selecionado pode-se definir a tabela de preço que irá determinar os itens e preço do cliente. O campo",
+    "how_to_create_a_client__paragraph_3":" pode ser alterado posteriormente.",
+    "how_to_exclude_a_client__paragraph": "Para excluir um cliente, este não deve estar vinculado a pedidos ou usuários.",
+    //agent
+    "how_to_create_an_agent__paragraph": "Ao incluir um agente, há um seletor de permissões que define quais permissões esse agente terá, além disso também existe uma opção para definir os estabelecimentos de acesso do agente.",
+    "how_to_exclude_a_agent__paragraph": "Para excluir um agente, este não deve estar vinculado a pedidos.",
+    //item
+    "how_to_create_an_item__paragraph": "Na inclusão do item é preciso selecionar a empresa. O sistema permite que mais de uma empresa use a mesma tabela de itens, logo um item incluído em uma empresa será automaticamente reconhecido pelas demais empresas que usam a mesma tabela.",
+    "how_to_create_an_item__paragraph_2": "O item deve ser vinculado a uma categoria.",
+    "how_to_exclude_an_item__paragraph": "Para excluir um item ele não deve estar vinculado a tabelas de preços ou pedidos.",
+    //order
+    "Sales orders": "Pedidos de venda (agente)",
+    "how_to_update_orders__paragraph": "Nesta opção é possível alterar o status do pedido entre as opções (Registrado, Faturado, Entregue), e é possível cancelar o pedido. O pedido cancelado não pode mais ter o status alterado.",
+    "how_to_update_orders__paragraph_OBS":"Não é possível excluir o pedido.",
+    //client pages
+    "Client pages": "Paginas do cliente",
+    "Update order": "Atualizar pedido",
+    "how_to_update_orders_by_client_user__paragraph": "Na opção de edição do pedido é possível alterar os itens e a observação do pedido. Após essas alterações é possível transferir, salvar em digitação ou cancelar o pedido. Apenas o pedido em digitação pode ser atualizado.",
+    "Make order": "Fazer pedido",
+    "how_to_make_an_order__paragraph": "Após selecionar o estabelecimento da qual deseja comprar, o usuário pode adicionar os itens (digitando o código do item e clicando no botão ", //adicionar
+    "how_to_make_an_order__paragraph_2": " ou pesquisando os itens ao pela opção de pesquisa). Após adicionar todos os itens o usuário poderá salvar o pedido clicando em uma das opções:",// salvar
+    "how_to_make_an_order__paragraph_3": "Vai salvar o pedido com status 'Digitação', permitindo que o usuário altere posteriormente o pedido.",
+    "how_to_make_an_order__paragraph_4":"Vai salvar o pedido com status 'Transferido', então o pedido será processado e não poderá mais ser alterado pelo cliente. , então o pedido será processado e não poderá mais ser alterado pelo cliente.", 
+    "Get orders": "Buscar pedidos",
+    "how_to_get_orders__paragraph": "Para buscar pedidos o usuário deve acessar a pagina ", // ver pedidos
+    "how_to_get_orders__paragraph_2": ", definir os filtros de busca e clicar no botão ", // buscar
   },
 }

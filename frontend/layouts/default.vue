@@ -139,7 +139,7 @@ export default {
       drawer: null,
       defaultMenuItems: [
         { title: "Home", icon: "mdi-home", to: "index" },
-        { title: "About", icon: "mdi-help-box", to: "about" },
+        { title: "About the system", icon: "mdi-help-box", to: "about" },
       ],
       allMenuItems: [
         {permissions: organizationPermissions, title: "Organizations", icon: "mdi-clipboard-check-multiple", to: "admin-organization"},
@@ -173,7 +173,7 @@ export default {
     currentUserIsClientUser(){
       return this.$store.state.user.currentUser.roles.includes('client_user')
     },
-    /** Calculates which Menus the CurrentUser has access and return it concatenated with defaultMenuItems (between Home and About page). */
+    /** Calculates which Menus the CurrentUser has access and return it concatenated with defaultMenuItems (between Home and About_the_system page). */
 		currentMenuItems() {
 			let user = this.$store.state.user.currentUser;
 			if (user) {
