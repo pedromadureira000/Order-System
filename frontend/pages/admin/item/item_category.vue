@@ -191,6 +191,11 @@ export default {
           if (data.item_table === this.company_to_fetch_categories.item_table){
             this.categories.push(data);
           } 
+          // Clearing fields
+          this.$v.$reset()
+          this.category_code = ""
+          this.description = ""
+          this.note = ""
         }
         this.loading = false;
       }

@@ -77,8 +77,9 @@ class SearchPriceItemsToMakeOrder(APIView):
             items_per_page = int(items_per_page) if items_per_page in ["5", "10", "15"] else 10
             start = (page - 1) * items_per_page
             end = page * items_per_page
-            if request.GET.get("category"): kwargs.update({"item__category__category_compound_id": request.GET.get("category")})
-            #  if request.GET.get("item_code"): kwargs.update({"item_code": request.GET.get("item_code")})
+            if request.GET.get("category"): 
+                category_code = request.GET.get("category").split('*')[2]
+                kwargs.update({"item__category__category_code__startswith": category_code})
             if request.GET.get("item_description"): kwargs.update({"item__description__icontains": request.GET.get("item_description")})
             try:
                 price_table = PriceTable.objects.get(clientestablishment__client_id=request.user.client_id, 
@@ -106,7 +107,7 @@ class fetchCategoriesToMakeOrderAndGetPriceTableInfo(APIView):
             if not comp.item_table_id:
                 return Response({"error":[_( "The company from this establishment does not have a item table.")]}, 
                         status=status.HTTP_404_NOT_FOUND) #TODO translate 
-            categories = ItemCategory.objects.filter(item_table_id=comp.item_table_id)
+            categories = ItemCategory.objects.filter(item_table_id=comp.item_table_id).order_by('category_code')
             serializer = CategoryPUTSerializer(categories, many=True)
             # Get price table description and code
             try: 

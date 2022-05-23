@@ -193,7 +193,7 @@ class fetchCategoriesToCreateItem(APIView):
             if req_user_is_agent_without_all_estabs(request.user):
                 categories = get_categories_to_create_item_by_agent_without_all_estabs(request.user, item_table_compound_id)
                 return Response(CategoryPUTSerializer(categories, many=True).data)
-            categories = ItemCategory.objects.filter(item_table__item_table_compound_id=item_table_compound_id)
+            categories = ItemCategory.objects.filter(item_table__item_table_compound_id=item_table_compound_id).order_by('category_code')
             return Response(CategoryPUTSerializer(categories, many=True).data)
         return unauthorized_response
 
@@ -228,7 +228,10 @@ class ItemView(APIView):
             start = (page - 1) * items_per_page
             end = page * items_per_page
             if request.GET.get("item_table"): kwargs.update({"item_table__item_table_compound_id": request.GET.get("item_table")})
-            if request.GET.get("category"): kwargs.update({"category__category_compound_id": request.GET.get("category")})
+            #  if request.GET.get("category"): kwargs.update({"category__category_compound_id": request.GET.get("category")})
+            if request.GET.get("category"): 
+                category_code = request.GET.get("category").split('*')[2]
+                kwargs.update({"category__category_code__startswith": category_code})
             if request.GET.get("item_code"): kwargs.update({"item_code": request.GET.get("item_code")})
             if request.GET.get("description"): kwargs.update({"description__icontains": request.GET.get("description")})
             if has_role(request.user, 'agent'):

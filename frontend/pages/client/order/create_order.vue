@@ -52,7 +52,7 @@
                 >{{$t('Add')}}</v-btn>
               </v-col>
               <v-col cols="1" style="display: flex; align-items: center;">
-                <v-icon @click="show_search_dialog = true; search_dialog_was_already_open = true" large>
+                <v-icon @click="searchIconFunction" large>
                   mdi-magnify
                 </v-icon >
               </v-col>
@@ -267,7 +267,7 @@
                     :items="establishments"
                     :item-text="(x) => x.establishment_compound_id.split('*')[2] + ' - ' + x.name + ' (' + $t('Company') + ': '  + x.company + ' - ' + x.company_name + ')'"
                     :item-value="(x) => x"
-                    @change="show_select_establishment_dialog = false; fetchCategoriesToMakeOrderAndGetPriceTableInfo()"
+                    @change="show_select_establishment_dialog = false"
                   ></v-select>
                 </v-col>
               </v-row>
@@ -378,7 +378,6 @@ export default {
       /** console.log(">>>>>>> this.establishments: ", this.establishments) */
       if (this.establishments.length === 1){
         this.establishment = this.establishments[0]
-        this.fetchCategoriesToMakeOrderAndGetPriceTableInfo()
       }
       else if (this.establishments.length > 1){
         this.show_select_establishment_dialog = true
@@ -466,8 +465,9 @@ export default {
     },
 
     async fetchCategoriesToMakeOrderAndGetPriceTableInfo(){
-      let {categories, price_table} = await this.$store.dispatch("order/fetchCategoriesToMakeOrderAndGetPriceTableInfo",
+      let data = await this.$store.dispatch("order/fetchCategoriesToMakeOrderAndGetPriceTableInfo",
         this.establishment.establishment_compound_id);
+      let {categories, price_table} = data
       if (categories){
         this.categories.push(...categories) 
       }
@@ -528,6 +528,15 @@ export default {
     itemIsAlreadyInTheOrder(item_compound_id){
       return this.ordered_items.some(el=>el.item.item_compound_id === item_compound_id)
     },
+
+    searchIconFunction(){
+      this.show_search_dialog = true
+      this.search_dialog_was_already_open = true
+      // This will happen if the client user click the search icon for the first tame and the user has only one establishment
+      if (this.categories.length == 1){
+        this.fetchCategoriesToMakeOrderAndGetPriceTableInfo()
+      }
+    }
   },
 
   validations: {

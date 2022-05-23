@@ -181,7 +181,7 @@
                               >{{$t('Add')}}</v-btn>
                             </v-col>
                             <v-col cols="1" style="display: flex; align-items: center;">
-                              <v-icon @click="show_search_dialog = true; search_dialog_was_already_open = true" large>
+                              <v-icon @click="searchIconFunction" large>
                                 mdi-magnify
                               </v-icon >
                             </v-col>
@@ -308,7 +308,7 @@
               v-model="filter__category"
               :label="$t('Category')"
               :items="categories"
-              :item-text="(x) => x.category_compound_id ? x.category_compound_id + ' - ' + x.description : $t(x.description)"
+              :item-text="(x) => x.category_compound_id ? x.category_compound_id.split('*')[2] + ' - ' + x.description : $t(x.description)"
               return-object
             ></v-select>
             <v-text-field
@@ -598,7 +598,15 @@ export default {
       return this.ordered_items.reduce((previous, current)=>{
         return (typeof previous == 'number' ? previous : (previous.unit_price * previous.quantity)) + (current.unit_price * current.quantity)
       }, 0)
+    },
+    searchIconFunction(){
+      this.show_search_dialog = true
+      this.search_dialog_was_already_open = true
+      if (this.categories.length == 1){
+        this.fetchCategoriesToMakeOrderAndGetPriceTableInfo()
+      }
     }
+
   },
 
   validations: {
@@ -739,7 +747,7 @@ export default {
             this.status = this.order.status
             if (this.currentUserIsClientUserAndCanEditTheOrder) { 
               this.edit_ordered_items_headers.push({ text: this.$t('Remove item'), value: 'remove_item', sortable: false})
-              this.fetchCategoriesToMakeOrderAndGetPriceTableInfo()
+              /** this.fetchCategoriesToMakeOrderAndGetPriceTableInfo() */
             }
           }
         }
