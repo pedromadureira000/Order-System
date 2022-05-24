@@ -4,6 +4,7 @@ import {messages} from './messages'
 const _isdev = process.env.DEV
 const _apimock = process.env.API_MOCK 
 const _apijs = _apimock ? 'apimock' : 'api'
+const _LANG = process.env.LANG_OPTION 
 import pt from 'vuetify/es5/locale/pt'
 
 export default {
@@ -59,12 +60,12 @@ export default {
     locales: ['en', 'pt-BR'],
     strategy: 'prefix_except_default',
     // defaultLocale: 'pt-BR',
-    defaultLocale: 'en',
-    detectBrowserLanguage: {
-      useCookie: true,
-      cookieKey: 'lang',
-      redirectOn: 'root',  // recommended
-    },
+    defaultLocale: _LANG == 'pt' ? 'pt-BR' : 'en',
+    // detectBrowserLanguage: {
+      // useCookie: true,
+      // cookieKey: 'lang',
+      // redirectOn: 'root',  // recommended
+    // },
     parsePages: false,   // Disable babel parsing. To use custom pages
     // If a custom path is missing for one of the locales, the defaultLocale custom path is used, if set.
     pages: {
@@ -181,10 +182,10 @@ export default {
         }
       }
     },
-    lang: {
+    lang: _LANG == 'pt' ? {
       locales: { pt },
       current: 'pt'
-    },
+    } : {},
   },
 
 	// Build Configuration: https://go.nuxtjs.dev/config-build
@@ -209,9 +210,9 @@ export default {
 		'vuetify'
 	],
 
-	env: {
+	// env: {
 		// test: process.env.test || 'test'
-	},
+	// },
 	
   // router: {
     // middleware: ['fwdcookies', 'auth']

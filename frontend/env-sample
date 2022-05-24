@@ -1,3 +1,5 @@
 DEV=true
 # API_MOCK=true
 BASE_URL_DEV="http://localhost:3000"
+CDN_URL="http://localhost:3000"
+LANG_OPTION="pt"  #comment this line to select 'en'

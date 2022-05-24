@@ -40,16 +40,16 @@ export const mutations: MutationTree<RootState> = {
       alertID: state.alert.alertID
     };
   },
-  // removeOneFromAlertqueue(state){
-    // state.alert.alertqueue = state.alert.alertqueue - 1
-  // }
   switchConnectionError(state){
     state.connectionError = !state.connectionError
   }
 
 };
 
-import { ActionTree, Commit } from "vuex";
+ // @ts-ignore: This module is dynamically added in nuxt.config.js
+// import api from "~api"
+// import {ErrorHandler} from "~/helpers/functions";
+import { ActionTree, Commit, Dispatch } from "vuex";
 export const actions: ActionTree<RootState, RootState> = {
   setAlert({ commit, state }: { commit: Commit, state: RootState }, 
            payload: {alertMessage: string, alertType: string, timeout?: number}) {
@@ -78,5 +78,13 @@ export const actions: ActionTree<RootState, RootState> = {
   },
   switchConnectionError({ commit}: { commit: Commit}){
     commit('switchConnectionError')
-  }
+  },
+  // async testFF({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
+    // try {
+      // await api.testFF()
+    // }
+    // catch(error){
+      // ErrorHandler(error, commit, dispatch, this.app.i18n, 'testFF final error')
+    // }
+  // }
 };

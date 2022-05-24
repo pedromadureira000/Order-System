@@ -42,6 +42,8 @@ ROLEPERMISSIONS_MODULE = 'user.roles'
 
 ROLEPERMISSIONS_SUPERUSER_SUPERPOWERS = False
 
+LANG_OPTION = config('LANG_OPTION')
+
 if DEBUG:
     CSRF_TRUSTED_ORIGINS = ['http://localhost:3000'] 
 
@@ -75,7 +77,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.locale.LocaleMiddleware',
+    #  'django.middleware.locale.LocaleMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'user.middleware.OneSessionPerUserMiddleware',
@@ -212,7 +214,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # If the locale middleware isn’t in use, it decides which translation is served to all users.
 # If the locale middleware is active, it provides a fallback language in case the user’s preferred language can’t be determined or is not supported by the website. It also provides the fallback translation when a translation for a given literal doesn’t exist for the user’s preferred language.
-LANGUAGE_CODE = 'pt-BR'
+
+LANGUAGE_CODE = 'pt-BR' if LANG_OPTION == 'pt' else 'en-us'
 
 TIME_ZONE = 'America/Sao_Paulo'
 
@@ -222,7 +225,7 @@ USE_L10N = True
 
 USE_TZ = True
 
-LANGUAGE_COOKIE_NAME = 'lang'
+#  LANGUAGE_COOKIE_NAME = 'lang'
 
 LOCALE_PATHS = (
     os.path.join(BASE_DIR, "locale"),

@@ -32,12 +32,12 @@
       </v-list>
 
       <!-- Test Button -->
-      <v-card class="pa-3" color="blue-grey darken-4" tile>
-        <nuxt-link :to="switchLocalePath('en')">English</nuxt-link>
-        <nuxt-link :to="switchLocalePath('pt-BR')">Português</nuxt-link>
-        <nuxt-link :to="localePath('admin-organization-company')">TEST</nuxt-link>
+      <!-- <v-card class="pa-3" color="blue-grey darken-4" tile> -->
+        <!-- <nuxt-link :to="switchLocalePath('en')">English</nuxt-link> -->
+        <!-- <nuxt-link :to="switchLocalePath('pt-BR')">Português</nuxt-link> -->
+        <!-- <nuxt-link :to="localePath('admin-organization-company')">TEST</nuxt-link> -->
         <!-- <v-btn label="testFF" @click="testFF"/> -->
-      </v-card>
+      <!-- </v-card> -->
       <!-- Test Button -->
 
     </v-navigation-drawer>
@@ -160,6 +160,9 @@ export default {
     },
 
     /** async testFF(){ */
+      /** console.log(">>>>>>> process.env.XX: ", process.env.DEV) */
+      /** this.$store.dispatch("testFF") */
+      
       /** this.$store.dispatch("setAlert", {message: "erro rah rr erro rah rr erro rah rr erro rah rrerro rah rr erro rah rrerro rah rr erro rah rrerro rah rr erro rah rr erro rah rr erro rah rr erro rah rr erro rah rr erro rah rr erro rah rr erro rah rr erro rah rrerro rah rr erro rah rrerro rah rr erro rah rrerro rah rr erro rah rr erro rah rr erro rah rr erro rah rr erro rah rr", alertType: "error"}, { root: true }) */
     /** }, */
 
