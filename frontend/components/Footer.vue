@@ -2,14 +2,16 @@
   <v-footer color="blue-grey darken-4" class="white--text">
 		<div class="col">
 			<address>
-					62 99337-8753
+          {{$config.phone_number}}
 					<br/>
-					<a href="mailto:contato@phsolucoesweb.com.br" class="white--text">contato@phsolucoesweb.com.br</a>
+          <a :href="'mailto:' + $config.email" class="white--text">{{$config.email}}</a>
 			</address>
 		</div>
 		<v-spacer />
-		<span>PH - Soluções Web&nbsp;</span>
-		<span>- {{date.getFullYear()}}</span><br/>
+      <div v-if="$config.company_name">
+        <span>{{$config.company_name}}</span>
+        <span>- {{date.getFullYear()}}</span><br/>
+      </div>
   </v-footer>
 </template>
 
@@ -17,7 +19,7 @@
 export default {
 	data() {
 		return {
-			date: new Date
+			date: new Date,
 		}
 	},
 }

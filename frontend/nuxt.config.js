@@ -210,9 +210,11 @@ export default {
 		'vuetify'
 	],
 
-	// env: {
-		// test: process.env.test || 'test'
-	// },
+  publicRuntimeConfig: {
+    email: process.env.EMAIL,
+    phone_number: process.env.PHONE_NUMBER,
+    company_name: process.env.COMPANY_NAME
+  },
 	
   // router: {
     // middleware: ['fwdcookies', 'auth']

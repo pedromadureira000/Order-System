@@ -68,6 +68,8 @@ export const ErrorHandler = (error: any, commit: Commit, dispatch: Dispatch, i18
   } 
   // ----------/ Internet Connection Error
   else if (error.message === 'Network Error' || !window.navigator.onLine){
+    console.log(">>>>>>> error.message: ", error.message)
+    console.log(">>>>>>> window.navigator.onLine: ", window.navigator.onLine)
     dispatch("setAlert", {message: i18n.t("Connection_error"), alertType: "error"}, { root: true })
     dispatch("switchConnectionError")
   // ---------/ Other Error

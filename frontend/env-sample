@@ -1,5 +1,8 @@
 DEV=true
-# API_MOCK=true
-BASE_URL_DEV="http://localhost:3000"
+API_MOCK=true
+BASE_URL="http://localhost:3000"
 CDN_URL="http://localhost:3000"
 LANG_OPTION="pt"  #comment this line to select 'en'
+EMAIL="contato@phsolucoesweb.com.br"
+PHONE_NUMBER="(62)9999-9999"
+COMPANY_NAME="PH - Soluções Web"
