@@ -156,7 +156,7 @@ export default {
         { text: 'Username', value: 'username' },
         { text: this.$t('Complete name'), value: 'complete_name' },
         { text: 'Email', value: 'email' },
-        { text: this.$t('Contracting'), value: 'contracting' },
+        { text: this.$t('Contracting'), value: 'contracting_code' },
         { text: 'Status', value: 'status'},
         { text: this.$t('Note'), value: 'note' },
         { text: this.$t('Actions'), value: 'actions' },

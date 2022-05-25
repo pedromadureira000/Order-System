@@ -178,6 +178,11 @@ export default {
         });
         if (data) {
           this.item_tables.push(data);
+          // Clearing fields
+          this.$v.$reset()
+          this.description = ""
+          this.item_table_code = ""
+          this.note = ""
         }
         this.loading = false;
       }

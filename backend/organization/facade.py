@@ -1,6 +1,6 @@
 from item.facade import get_price_tables_by_agent
 from item.models import PriceTable
-from organization.models import Client, ClientTable, Company, Establishment
+from organization.models import Client, ClientEstablishment, ClientTable, Company, Establishment
 from user.models import User
 
 def company_has_active_users(company):

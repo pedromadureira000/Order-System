@@ -145,6 +145,8 @@ class ERPUserPOSTSerializer(UserSerializer):
     class Meta(UserSerializer.Meta):
         fields = ['username', 'contracting', 'contracting_id','first_name', 'last_name', 'email', 'status',
                 'roles', 'permissions', 'contracting_code', 'user_code', 'note', 'password']
+        validators = [UniqueTogetherValidator(queryset=User.objects.all(), fields=['username', 'contracting'],
+            message=_("The 'username' field must be unique."))]
 
     #overwrite UserSerializer validation
     def validate_contracting_id(self, value):

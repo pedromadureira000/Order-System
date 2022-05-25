@@ -270,7 +270,8 @@ export default {
     this.status = String(this.erp_user.status)
     this.note = this.erp_user.note
     // Default value for contracting_from_erpuser
-    let contracting = this.contracting_companies.find(el=>el.contracting_code === this.erp_user.contracting)
+    let contracting = this.contracting_companies.find(el=>el.contracting_code === this.erp_user.contracting_code)
+    console.log(">>>>>>> ", contracting)
     this.contracting_from_erpuser = contracting
   }
 }

@@ -422,7 +422,7 @@ class UpdateUserPassword(APIView):
     @swagger_auto_schema(request_body=UpdateUserPasswordSerializer) 
     @transaction.atomic
     def put(self, request, contracting_code, username):
-        if contracting_code != request.user.contracting_id:
+        if contracting_code != request.user.contracting_id and not has_role(request.user,'super_user'):
             return not_found_response(object_name=_('The user'))
         user_code = contracting_code + "*" + username
         try:
