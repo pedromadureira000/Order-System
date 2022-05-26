@@ -13,6 +13,7 @@ from settings.utils import status_choices
 
 class AgentEstablishment(models.Model):
     class Meta:
+        default_permissions = []
         verbose_name = _('agent establishment')
         verbose_name_plural = _('agent establishments')
         constraints = [UniqueConstraint(fields=['agent', 'establishment'], name='AgentEstablishment compound primary key')]
@@ -60,6 +61,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     # OrderHistory_set
     # Order_set
     class Meta:
+        default_permissions = []
         verbose_name = _('user')
         verbose_name_plural = _('users')
         constraints = [UniqueConstraint(fields=['username', 'contracting'], name='Username compound primary key')]

@@ -10,6 +10,7 @@ class Contracting(models.Model):
     # Company_set
     # User_set
     class Meta:
+        default_permissions = []
         verbose_name = _('contracting')
         verbose_name_plural = _('contractings')
     contracting_code = models.SlugField(_("contracting code"), max_length=3, primary_key=True)
@@ -24,6 +25,7 @@ class Company(models.Model):
     # Establishment_set
     # PriceTable_set
     class Meta:
+        default_permissions = []
         verbose_name = _('company')
         verbose_name_plural = _('companies')
         constraints = [UniqueConstraint(fields=['contracting', 'company_code'], name='Company compound primary key')]
@@ -44,6 +46,7 @@ class Establishment(models.Model):
     # AgentEstablishment_set
     # Order_set
     class Meta:
+        default_permissions = []
         verbose_name = _('establishment')
         verbose_name_plural = _('establishments')
         constraints = [UniqueConstraint(fields=['company', 'establishment_code'], name='Establishment compound primary key')]
@@ -61,6 +64,7 @@ class ClientTable(models.Model):
     #  Company_set
     #  Client_set
     class Meta:
+        default_permissions = []
         verbose_name = _('client table')
         verbose_name_plural = _('client tables')
         constraints = [UniqueConstraint(fields=['contracting', 'client_table_code'], name='ClientTable compound primary key')]
@@ -74,6 +78,7 @@ class Client(models.Model):
     # User_set
     # ClientEstablishment_set
     class Meta:
+        default_permissions = []
         verbose_name = 'client'
         verbose_name_plural = 'clients'
         constraints = [UniqueConstraint(fields=['client_table', 'client_code'], name='Client compound primary key')]
@@ -91,6 +96,7 @@ class Client(models.Model):
 
 class ClientEstablishment(models.Model):
     class Meta:
+        default_permissions = []
         verbose_name = _('client establishment')
         verbose_name_plural = _('client establishments')
         constraints = [UniqueConstraint(fields=['client', 'establishment'], name='ClientEstablishment compound primary key')]

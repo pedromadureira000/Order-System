@@ -70,17 +70,20 @@ export const ErrorHandler = (error: any, commit: Commit, dispatch: Dispatch, i18
   else if (error.message === 'Network Error' || !window.navigator.onLine){
     console.log(">>>>>>> error.message: ", error.message)
     console.log(">>>>>>> window.navigator.onLine: ", window.navigator.onLine)
-    dispatch("setAlert", {message: i18n.t("Connection_error"), alertType: "error"}, { root: true })
-    dispatch("switchConnectionError")
+    // XXX : "To dispatch actions or commit mutations in the global namespace, pass { root: true } as the 3rd argument to dispatch and commit."
+    // This is why I'm sending null as the second argument, even though the action does not receive any argument
+    dispatch("switchConnectionError", null,{ root: true }) 
+    // dispatch("setAlert", {message: i18n.t("Connection_error"), alertType: "error"}, { root: true })
   // ---------/ Other Error
   } 
   else if (error.response && error.response.data){
     let response = error.response
-    let  first_key = Object.keys(error.response.data)[0]
+    let first_key = Object.keys(error.response.data)[0]
     // 2 Sessions At the same time.
-    if (response.data ===  "Session already open." || response.data === "A Sessão já esta aberta."){
-      commit("toggleSessionError")
-    }
+    if ((first_key ==  "detail" && response.data[first_key] == "A session was opened in another browser. Reload the page to access here.") || 
+        (first_key ==  "detail" && response.data[first_key] == "Uma sessão foi aberta em outro navegador. Recarregue a pagina para acessar aqui."))      {
+        commit("toggleSessionError")
+      }
     // 500 Server Error
     else if (response.status === 500){
         dispatch("setAlert", {message: i18n.t("Server_error"), alertType: "error"}, { root: true })
@@ -99,7 +102,7 @@ export const ErrorHandler = (error: any, commit: Commit, dispatch: Dispatch, i18
       // DRF Normal Field Errors
       else if (field_list.includes(first_key)){
         let errorMessage = response.data[first_key][0]
-        // Translation Workaround (Gambiarra)!
+        // Translation Workaround (XXX Gambiarra)
         if (errorMessage.includes('is not valid cnpj')){
           errorMessage = errorMessage.replace('is not valid cnpj', 'não é um CNPJ valido')
         } 

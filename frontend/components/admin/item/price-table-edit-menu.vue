@@ -164,18 +164,13 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
     <!-- Delete Confirmation Dialog -->
-    <v-dialog :retain-focus="false" v-model="show_delete_confirmation_dialog" max-width="30%">
-      <v-card>
-        <v-card-title>{{$t('Are_you_sure_you_want_to_delete')}}</v-card-title>
-        <v-card-text>
-          <v-card-actions class="d-flex justify-space-around" style="width:100%;">
-            <v-btn class="black--text darken-1" text @click="show_delete_confirmation_dialog = false">{{$t('Cancel')}}</v-btn>
-            <v-btn class="red--text darken-1" text @click="deletePriceTable()">{{$t('Delete')}}</v-btn>
-          </v-card-actions>
-        </v-card-text>
-      </v-card>
-    </v-dialog>
+    <delete-confirmation-dialog 
+      @delete-item="deletePriceTable()" 
+      @cancel="show_delete_confirmation_dialog = false" 
+      :show_delete_confirmation_dialog="show_delete_confirmation_dialog"
+    />
   </div>
 </template>
 
@@ -195,6 +190,7 @@ export default {
   mixins: [validationMixin],
   components: {
     "dots-menu": require("@/components/dots-menu.vue").default,
+    "delete-confirmation-dialog": require("@/components/delete-confirmation-dialog.vue").default,
   },
   directives: {money: VMoney},
   props: ['price_table',  'companies','item_group'],

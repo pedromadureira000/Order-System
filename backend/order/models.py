@@ -15,6 +15,7 @@ class Order(models.Model):
     # OrderedItem_set
     # OrderHistory_set
     class Meta:
+        default_permissions = []
         verbose_name = _('order')
         verbose_name_plural = _('orders')
         constraints = [UniqueConstraint(fields=['client', 'order_number',], name='order compound primary key')]
@@ -41,6 +42,7 @@ class Order(models.Model):
 
 class OrderedItem(models.Model):
     class Meta:
+        default_permissions = []
         verbose_name = _('ordered Item')
         verbose_name_plural = _('ordered Items')
         constraints = [UniqueConstraint(fields=['order', 'item'], name='OrderedItem unique_together')]
@@ -53,6 +55,7 @@ class OrderedItem(models.Model):
 
 class OrderHistory(models.Model):
     class Meta:
+        default_permissions = []
         verbose_name = _('order history')
         verbose_name_plural = _('order history')
 

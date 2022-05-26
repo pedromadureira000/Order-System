@@ -86,17 +86,11 @@
     </v-dialog>
 
     <!-- Delete Confirmation Dialog -->
-    <v-dialog :retain-focus="false" v-model="show_delete_confirmation_dialog" max-width="30%">
-      <v-card>
-        <v-card-title>{{$t('Are_you_sure_you_want_to_delete')}}</v-card-title>
-        <v-card-text class="d-flex justify-center">
-          <v-card-actions class="d-flex justify-space-around" style="width:100%;">
-            <v-btn class="black--text darken-1" text @click="show_delete_confirmation_dialog = false">{{$t('Cancel')}}</v-btn>
-            <v-btn class="red--text darken-1" text @click="deleteERPuser()">{{$t('Delete')}}</v-btn>
-          </v-card-actions>
-        </v-card-text>
-      </v-card>
-    </v-dialog>
+    <delete-confirmation-dialog 
+      @delete-item="deleteERPuser" 
+      @cancel="show_delete_confirmation_dialog = false" 
+      :show_delete_confirmation_dialog="show_delete_confirmation_dialog"
+    />
 
      <!-- Change Password Dialog -->
     <change-users-password 
@@ -120,6 +114,7 @@ export default {
   components: {
     "dots-menu": require("@/components/dots-menu.vue").default,
     "change-users-password": require("@/components/admin/user/change-users-password.vue").default,
+    "delete-confirmation-dialog": require("@/components/delete-confirmation-dialog.vue").default,
   },
   props: ['erp_user', 'contracting_companies'],
   data() {
@@ -271,7 +266,6 @@ export default {
     this.note = this.erp_user.note
     // Default value for contracting_from_erpuser
     let contracting = this.contracting_companies.find(el=>el.contracting_code === this.erp_user.contracting_code)
-    console.log(">>>>>>> ", contracting)
     this.contracting_from_erpuser = contracting
   }
 }

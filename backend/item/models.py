@@ -9,6 +9,7 @@ class ItemTable(models.Model):
     # ItemCategory_set
     # Item_set
     class Meta:
+        default_permissions = []
         verbose_name = _('item table')
         verbose_name_plural = _('item tables')
         constraints = [UniqueConstraint(fields=['contracting', 'item_table_code'], name='ItemTable compound primary key')]
@@ -23,6 +24,7 @@ class ItemTable(models.Model):
 class ItemCategory(models.Model):
     #Item_set
     class Meta:
+        default_permissions = []
         verbose_name = _('item category')
         verbose_name_plural = _('item categories')
         constraints = [UniqueConstraint(fields=['item_table', 'category_code'], name='ItemCategory compound primary key')]
@@ -38,6 +40,7 @@ class Item(models.Model):
     # OrderedItem_set
     # PriceItem_set
     class Meta:
+        default_permissions = []
         verbose_name = _('item')
         verbose_name_plural = _('items')
         constraints = [UniqueConstraint(fields=['item_table', 'item_code'], name='Item compound primary key')]
@@ -59,6 +62,7 @@ class PriceTable(models.Model):
     #PriceItem_set
     # ClientEstablishment_set
     class Meta:
+        default_permissions = []
         verbose_name = _('price table')
         verbose_name_plural = _('price tables')
         constraints = [UniqueConstraint(fields=['company', 'table_code'], name='PriceTable compound primary key')]
@@ -73,6 +77,7 @@ class PriceTable(models.Model):
 
 class PriceItem(models.Model):
     class Meta:
+        default_permissions = []
         verbose_name = _('price item')
         verbose_name_plural = _('price items')
         constraints = [UniqueConstraint(fields=['price_table', 'item'], name='PriceItem compound primary key')]

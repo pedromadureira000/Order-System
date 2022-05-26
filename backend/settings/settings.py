@@ -276,9 +276,10 @@ if AWS_ACCESS_KEY_ID:
     ADMIN_MEDIA_PREFIX = STATIC_URL + 'admin/'
 
 # axex
-AXES_FAILURE_LIMIT = 5
+AXES_FAILURE_LIMIT = 7
 AXES_COOLOFF_TIME = datetime.timedelta(seconds=60)
 AXES_ONLY_USER_FAILURES = True #block username instead of ip
+AXES_RESET_ON_SUCCESS = True
 
 # Session age: 60s * 60m * 24h * 7d
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 7

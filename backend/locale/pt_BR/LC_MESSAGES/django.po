@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-23 14:56-0300\n"
+"POT-Creation-Date: 2022-05-26 09:37-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -772,8 +772,8 @@ msgid "The 'company_code' field must be unique."
 msgstr "O campo 'company_code' deve ser único"
 
 #: organization/serializers.py:43 organization/serializers.py:82
-#: organization/serializers.py:215 user/serializers.py:326
-#: user/serializers.py:364
+#: organization/serializers.py:215 user/serializers.py:328
+#: user/serializers.py:366
 msgid "Client table not found."
 msgstr "Tabela de cliente não encontrada."
 
@@ -940,6 +940,14 @@ msgstr ""
 msgid "delete client table"
 msgstr "tabela de clientes"
 
+#: organization/views.py:295
+msgid "You cannot access this 'company'"
+msgstr "Você não pode acessar essa empresa."
+
+#: organization/views.py:304
+msgid "You cannot access this 'client_table'"
+msgstr "Não pode acessar essa tabela de cliente."
+
 #: organization/views.py:356
 msgid "create client"
 msgstr "criar cliente"
@@ -1049,7 +1057,7 @@ msgstr "data de entrada"
 msgid "sesssion key"
 msgstr "chave da sessão"
 
-#: user/serializers.py:46
+#: user/serializers.py:46 user/serializers.py:149
 msgid "The 'username' field must be unique."
 msgstr "O campo 'username' deve ser único."
 
@@ -1065,21 +1073,27 @@ msgstr ""
 msgid "User not found."
 msgstr "Usuário não encontrado."
 
-#: user/serializers.py:251 user/serializers.py:299
+#: user/serializers.py:253 user/serializers.py:301
 msgid "There are duplicate values for agent_establishments."
 msgstr "Existem valores duplicados para 'agent_establishments'"
 
-#: user/serializers.py:329 user/serializers.py:367
+#: user/serializers.py:331 user/serializers.py:369
 msgid "You have no permission to assign this client to this client user."
 msgstr ""
 "Você não possui permissão para atribuir esse cliente a esse usuário cliente."
 
-#: user/serializers.py:332 user/serializers.py:370
+#: user/serializers.py:334 user/serializers.py:372
 msgid ""
 "You cannot create a client user for this client, because it already exists."
 msgstr ""
 "Você não pode criar um usuário cliente para esse cliente, pois já existe um "
 "usuário."
+
+#: user/signals.py:24
+msgid ""
+"Locked out due to too many login failures. Please try again in a minute."
+msgstr ""
+"Bloqueado devido a muitas falhas de login. Por favor, tente novamente em um minuto."
 
 #: user/validators.py:26
 msgid "There are duplicate values for agent_permissions"
@@ -1219,7 +1233,7 @@ msgstr "Senha não enviada"
 msgid "Current Password field not sent"
 msgstr "A senha atual não foi enviada"
 
-#: user/views.py:418 user/views.py:443
+#: user/views.py:418 user/views.py:442
 msgid "Password updated"
 msgstr "Senha atualizada"
 
@@ -1231,7 +1245,7 @@ msgstr "senhas não coincidem"
 msgid "The user"
 msgstr "O usuário"
 
-#: user/views.py:436 user/views.py:448
+#: user/views.py:435 user/views.py:447
 msgid "update user's password"
 msgstr "atualizar a senha do usuário"
 

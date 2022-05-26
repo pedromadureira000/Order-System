@@ -74,6 +74,7 @@
                       :label="$t('Select all')"
                       style="margin-right: 27px;"
                       @change="selectAllPermissions"
+                      v-model="select_all_permissions"
                     ></v-checkbox>
                     <v-divider class="mt-2 mb-4"></v-divider>
                     <v-row
@@ -103,6 +104,7 @@
                         :label="$t('Select all')"
                         style="margin-right: 27px;"
                         @change="selectAllEstablishments"
+                        v-model="select_all_establishments"
                       ></v-checkbox>
                       <v-divider class="mt-2 mb-4"></v-divider>
                       <v-container
@@ -113,7 +115,7 @@
                         <v-row align="center" class="ml-1 mt-0">
                           <v-col>
                             <v-checkbox
-                              :label="establishment.establishment_code + ' - ' + establishment.name + ' (' + $t('Company') + ': ' + establishment.company + ')'"
+                              :label="establishment.establishment_code + ' - ' + establishment.name + ' (' + $t('Company') + ': ' + establishment.company.split('*')[1] + ')'"
                               v-model="agent_establishments"
                               :value='establishment.AUX_agent_estab'
                               hide-details
@@ -205,7 +207,10 @@ export default {
       establishments: [],
       agent_establishments: [],
       loading: false,
+      select_all_permissions: false,
       permissions: [],
+      select_all_establishments: false,
+      all_agent_estabs: [],
       agentPermissions: [
           "access_all_establishments",
           "create_client",
@@ -260,6 +265,7 @@ export default {
         estab.AUX_agent_estab = {establishment: estab.establishment_compound_id}
         this.establishments.push(estab)
       }
+      this.all_agent_estabs = this.establishments.map(el=>el.AUX_agent_estab)
     }
   },
 
@@ -347,21 +353,24 @@ export default {
     },
 
     selectAllPermissions(){
-      if (this.permissions.length === this.agentPermissions.length){
-        this.permissions = []
-      }
-      else {
+      if (this.select_all_permissions === true){
         this.permissions = this.agentPermissions
+      }
+      else{
+        if (this.permissions.length === this.agentPermissions.length){
+          this.permissions = []
+        }
       }
     },
 
     selectAllEstablishments(){
-      let all_agent_estabs = this.establishments.map(el=>el.AUX_agent_estab)
-      if (this.agent_establishments.length === all_agent_estabs.length){
-        this.agent_establishments = []
+      if (this.select_all_establishments === true){
+        this.agent_establishments = this.all_agent_estabs
       }
       else{
-        this.agent_establishments = all_agent_estabs
+        if (this.agent_establishments.length === this.all_agent_estabs.length){
+          this.agent_establishments = []
+        }
       }
     }
   },

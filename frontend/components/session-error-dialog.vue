@@ -1,14 +1,12 @@
 <template>
-  <v-dialog :retain-focus="false" :value="session_error" max-width="500px" persistent>
+  <v-dialog :retain-focus="false" :value="session_error" max-width="30%" persistent>
     <v-card>
       <v-card-text>
-        <v-container fluid>
-          <h4>{{$t('SessionErrorText')}}</h4>
-        </v-container>
+        <h4 class="pt-3">{{$t('SessionErrorText')}}</h4>
+        <div class="d-flex justify-center mt-2">
+          <v-btn class="blue--text darken-1" text @click="useHere()" :loading="loading" :disabled="loading">{{$t('Use_Here')}}</v-btn>
+        </div>
       </v-card-text>
-      <v-card-actions class="d-flex justify-center">
-        <v-btn class="blue--text darken-1" text @click="useHere()" :loading="loading" :disabled="loading">{{$t('Use_Here')}}</v-btn>
-      </v-card-actions>
     </v-card>
   </v-dialog>
 </template>

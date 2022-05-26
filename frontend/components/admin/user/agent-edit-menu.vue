@@ -97,7 +97,7 @@
                         <v-row align="center" class="ml-1 mt-0">
                           <v-col>
                             <v-checkbox
-                              :label="establishment.establishment_code + ' - ' + establishment.name + ' (' + $t('Company') + ': ' + establishment.company + ')'"
+                              :label="establishment.establishment_code + ' - ' + establishment.name + ' (' + $t('Company') + ': ' + establishment.company.split('*')[1]+ ')'"
                               v-model="agent_establishments"
                               :value='establishment.AUX_agent_estab'
                               hide-details
@@ -135,17 +135,11 @@
       </v-card>
     </v-dialog>
     <!-- Delete Confirmation Dialog -->
-    <v-dialog :retain-focus="false" v-model="show_delete_confirmation_dialog" max-width="30%">
-      <v-card>
-        <v-card-title>{{$t('Are_you_sure_you_want_to_delete')}}</v-card-title>
-        <v-card-text class="d-flex justify-center">
-          <v-card-actions class="d-flex justify-space-around" style="width:100%;">
-            <v-btn class="black--text darken-1" text @click="show_delete_confirmation_dialog = false">{{$t('Cancel')}}</v-btn>
-            <v-btn class="red--text darken-1" text @click="deleteAgent()">{{$t('Delete')}}</v-btn>
-          </v-card-actions>
-        </v-card-text>
-      </v-card>
-    </v-dialog>
+    <delete-confirmation-dialog 
+      @delete-item="deleteAgent" 
+      @cancel="show_delete_confirmation_dialog = false" 
+      :show_delete_confirmation_dialog="show_delete_confirmation_dialog"
+    />
 
     <!-- Change Password Dialog -->
     <change-users-password 
@@ -168,12 +162,14 @@ export default {
   components: {
     "dots-menu": require("@/components/dots-menu.vue").default,
     "change-users-password": require("@/components/admin/user/change-users-password.vue").default,
+    "delete-confirmation-dialog": require("@/components/delete-confirmation-dialog.vue").default,
   },
   props: ['agent', 'establishments'],
   data() {
     return {
       select_all_permissions: false,
       select_all_establishments: false,
+      all_agent_estabs: [],
       show_edit_dialog: false,
       show_delete_confirmation_dialog: false,
       first_name: null,
@@ -350,21 +346,24 @@ export default {
     },
 
     selectAllPermissions(){
-      if (this.permissions.length === this.agentPermissions.length){
-        this.permissions = []
-      }
-      else {
+      if (this.select_all_permissions === true){
         this.permissions = this.agentPermissions
+      }
+      else{
+        if (this.permissions.length === this.agentPermissions.length){
+          this.permissions = []
+        }
       }
     },
 
     selectAllEstablishments(){
-      let all_agent_estabs = this.establishments.map(el=>el.AUX_agent_estab)
-      if (this.agent_establishments.length === all_agent_estabs.length){
-        this.agent_establishments = []
+      if (this.select_all_establishments === true){
+        this.agent_establishments = this.all_agent_estabs
       }
       else{
-        this.agent_establishments = all_agent_estabs
+        if (this.agent_establishments.length === this.all_agent_estabs.length){
+          this.agent_establishments = []
+        }
       }
     }
   },
@@ -378,7 +377,6 @@ export default {
         this.agent_establishments.push(estab.AUX_agent_estab)
       }
     }
-    /** console.log(">>>>>>> this.agent_establishments: ", this.agent_establishments) */
     this.first_name = this.agent.first_name
     this.last_name = this.agent.last_name
     this.email = this.agent.email
@@ -389,8 +387,8 @@ export default {
     this.select_all_permissions = this.permissions.length === this.agentPermissions.length ? true : false
 
     // Default value for select_all_establishments
-    let all_agent_estabs = this.establishments.map(el=>el.AUX_agent_estab)
-    this.select_all_establishments = this.agent_establishments.length === all_agent_estabs.length ? true : false
+    this.all_agent_estabs = this.establishments.map(el=>el.AUX_agent_estab)
+    this.select_all_establishments = this.agent_establishments.length === this.all_agent_estabs.length ? true : false
   }
 }
 </script>

@@ -260,8 +260,8 @@ export default {
       }
     },
     deleteERPuser(userToDelete) {
-      this.erp_users = this.erp_users.filter((user) => user.username != 
-        userToDelete.username);
+      this.erp_users = this.erp_users.filter((user) => user.user_code != 
+        userToDelete.user_code);
     },
   },
 

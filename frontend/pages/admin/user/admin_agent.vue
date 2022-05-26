@@ -232,6 +232,10 @@ export default {
         this.loading = false;
       }
     },
+    deleteAdminAgent(agentToDelete) {
+      this.admin_agents = this.admin_agents.filter((user) => user.username != agentToDelete.username);
+    },
+
   },
 
   computed: {

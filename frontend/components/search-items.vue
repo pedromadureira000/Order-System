@@ -250,21 +250,31 @@ export default {
   watch: {
     options: {
       handler () {
-        this.fetchItems()
+        // XXX This is to fix the error that happens when there are no companies that have item_tables yet.
+        if (!this.companies.length === 0){
+          this.fetchItems()
+        }
       },
       deep: true,
     },
   },
 
   mounted() {
-    if (this.itsForAdminItemPage){
-      this.filter__company = this.companies[0]
+    // Same as the above XXX
+    if (this.companies.length === 0){
+      this.$store.dispatch("setAlert", {message: this.$t("There is no companies available."), 
+        alertType: "warning", timeout: 10000}, { root: true })
     }
-    else if (this.itsForPriceItems){
-      this.filter__company = this.companies.find(el=>el.company_compound_id === this.price_table.company.company_compound_id)
+    else{
+      if (this.itsForAdminItemPage){
+        this.filter__company = this.companies[0]
+      }
+      else if (this.itsForPriceItems){
+        this.filter__company = this.companies.find(el=>el.company_compound_id === this.price_table.company.company_compound_id)
+      }
+      // The function below will not run another api call. It's just for set the default filter values
+      this.fetchCategoriesToSearchItems() 
     }
-    // The function below will not run another api call. It's just for set the default filter values
-    this.fetchCategoriesToSearchItems() 
   }
 }
 </script>

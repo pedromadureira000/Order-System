@@ -98,7 +98,7 @@
                             <!-- 'value' is a variable because 'value' is passed by reference. If a literal -->
                             <!-- was used, it will not be possible to update cli_estab.price_table -->
                             <v-checkbox
-                              :label="establishment.establishment_code + ' - ' + establishment.name + ' (' + $t('Company') + ': ' + establishment.company + ')'"
+                              :label="establishment.establishment_code + ' - ' + establishment.name + ' (' + $t('Company') + ': ' + establishment.company.split('*')[1] + ')'"
                               v-model="client_establishments"
                               :value='establishment.AUX_cli_estab'
                               hide-details

@@ -41,17 +41,12 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog :retain-focus="false" v-model="show_delete_confirmation_dialog" max-width="30%">
-      <v-card>
-        <v-card-title>{{$t('Are_you_sure_you_want_to_delete')}}</v-card-title>
-        <v-card-text>
-          <v-card-actions class="d-flex justify-space-around" style="width:100%;">
-            <v-btn class="black--text darken-1" text @click="show_delete_confirmation_dialog = false">{{$t('Cancel')}}</v-btn>
-            <v-btn class="red--text darken-1" text @click="deleteItemTable()">{{$t('Delete')}}</v-btn>
-          </v-card-actions>
-        </v-card-text>
-      </v-card>
-    </v-dialog>
+    <!-- Delete Confirmation Dialog -->
+    <delete-confirmation-dialog 
+      @delete-item="deleteItemTable" 
+      @cancel="show_delete_confirmation_dialog = false" 
+      :show_delete_confirmation_dialog="show_delete_confirmation_dialog"
+    />
   </div>
 </template>
 
@@ -65,6 +60,7 @@ import { validationMixin } from "vuelidate";
 export default {
   components: {
     "dots-menu": require("@/components/dots-menu.vue").default,
+    "delete-confirmation-dialog": require("@/components/delete-confirmation-dialog.vue").default,
   },
   props: ['item_table'],
   mixins: [validationMixin],
