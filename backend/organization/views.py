@@ -13,8 +13,11 @@ from organization.validators import agent_has_access_to_this_client
 from user.validators import req_user_is_agent_without_all_estabs
 from django.utils.translation import gettext_lazy as _
 from settings.response_templates import error_response, not_found_response, serializer_invalid_response, protected_error_response, unknown_exception_response, unauthorized_response
+from rest_framework.decorators import action
 
 class ContractingView(APIView):
+    @swagger_auto_schema(method='get', responses={200: ContractingPOSTSerializer(many=True)})
+    @action(detail=False, methods=['get'])
     def get(self, request):
         if has_permission(request.user, 'get_contracting'):
             contractings = Contracting.objects.all()
@@ -78,6 +81,8 @@ class SpecificContracting(APIView):
         return unauthorized_response
 
 class CompanyView(APIView):
+    @swagger_auto_schema(method='get', responses={200: CompanyPOSTSerializer(many=True)}) 
+    @action(detail=False, methods=['get'])
     def get(self, request):
         user = request.user
         if has_permission(user, 'get_companies'):
@@ -148,12 +153,16 @@ class SpecificCompany(APIView):
 
 # Only companies from the same contracting company of the user, and which is active.
 class GetCompaniesToCreateEstablishment(APIView):
+    @swagger_auto_schema(method='get', responses={200: CompanyPOSTSerializer(many=True)}) 
+    @action(detail=False, methods=['get'])
     def get(self, request):
         if has_permission(request.user, 'create_establishment'):
             companies = Company.objects.filter(contracting_id=request.user.contracting_id, status=1)
             return Response(CompanyPOSTSerializer(companies, many=True).data)
 
 class EstablishmentView(APIView):
+    @swagger_auto_schema(method='get', responses={200: EstablishmentPOSTSerializer(many=True)}) 
+    @action(detail=False, methods=['get'])
     def get(self, request):
         user = request.user
         if has_permission(request.user, 'get_establishments'):
@@ -221,6 +230,8 @@ class SpecificEstablishment(APIView):
         return unauthorized_response
 
 class ClientTableView(APIView):
+    @swagger_auto_schema(method='get', responses={200: ClientTablePOSTSerializer(many=True)}) 
+    @action(detail=False, methods=['get'])
     def get(self, request):
         user = request.user
         if has_permission(user, 'get_client_tables'):
@@ -289,6 +300,8 @@ class SpecificClientTable(APIView):
         return unauthorized_response
     
 class GetPriceTablesToCreateClient(APIView):
+    @swagger_auto_schema(method='get', responses={200: PriceTableGetSerializer(many=True)})
+    @action(detail=False, methods=['get'])
     def get(self, request, company_compound_id):
         if has_permission(request.user, 'create_client'):
             if company_compound_id.split("*")[0] != request.user.contracting_id:
@@ -298,6 +311,8 @@ class GetPriceTablesToCreateClient(APIView):
             return Response(PriceTableGetSerializer(price_tables, many=True).data)
 
 class GetEstablishmentsToCreateClient(APIView):
+    @swagger_auto_schema(method='get', responses={200: EstablishmentPOSTSerializer(many=True)}) 
+    @action(detail=False, methods=['get'])
     def get(self, request, client_table_compound_id):
         if has_permission(request.user, 'create_client'):
             if client_table_compound_id.split("*")[0] != request.user.contracting_id:
@@ -315,6 +330,8 @@ class GetEstablishmentsToCreateClient(APIView):
             #  client_tables = ClientTable.objects.filter(contracting_id=request.user.contracting_id)
             #  return Response(ClientTablePOSTSerializer(client_tables, many=True).data)
 class GetCompaniesToCreateClient(APIView):
+    @swagger_auto_schema(method='get', responses={200: CompaniesToCreateClientSerializer(many=True)}) 
+    @action(detail=False, methods=['get'])
     def get(self, request):
         if has_permission(request.user, 'create_client'):
             if req_user_is_agent_without_all_estabs(request.user):
@@ -324,6 +341,8 @@ class GetCompaniesToCreateClient(APIView):
             return Response(CompaniesToCreateClientSerializer(companies, many=True).data)
 
 class GetClientsView(APIView):
+    @swagger_auto_schema(method='get', responses={200: ClientSerializerPOST(many=True)}) 
+    @action(detail=False, methods=['get'])
     def get(self, request, client_table_compound_id):
         user = request.user
         if has_permission(user, 'get_clients'):

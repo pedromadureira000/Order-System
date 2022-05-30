@@ -76,7 +76,7 @@
                           </tr>
                           <tr>
                             <td><b>{{$t('Invoice Date')}}</b></td>
-                            <td>{{getLocaleDate(order.invoice_date)}}</td>
+                            <td>{{getLocaleDate(order.invoicing_date)}}</td>
                           </tr>
                           <tr>
                             <td><b>{{$t('Order Amount')}}</b></td>
@@ -267,7 +267,7 @@
                         </tr>
                         <tr>
                           <td><b>{{$t('Invoice Date')}}</b></td>
-                          <td>{{getLocaleDate(order.invoice_date)}}</td>
+                          <td>{{getLocaleDate(order.invoicing_date)}}</td>
                         </tr>
                         <tr>
                           <td><b>{{$t('Order Amount')}}</b></td>

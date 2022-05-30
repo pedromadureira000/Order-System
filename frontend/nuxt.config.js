@@ -57,9 +57,9 @@ export default {
   ],
 
   i18n: {
-    locales: ['en', 'pt-BR'],
+    locale: _LANG == 'pt' ? 'pt-BR' : 'en',
+    locales: [_LANG == 'pt' ? 'pt-BR' : 'en'],
     strategy: 'prefix_except_default',
-    // defaultLocale: 'pt-BR',
     defaultLocale: _LANG == 'pt' ? 'pt-BR' : 'en',
     // detectBrowserLanguage: {
       // useCookie: true,

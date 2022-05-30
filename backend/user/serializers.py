@@ -2,6 +2,8 @@ from typing import OrderedDict
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.validators import UniqueTogetherValidator
+from item.serializers import CategoryPUTSerializer
+from order.serializers import OrderGetSerializer, searchOnePriceItemToMakeOrderSerializer
 from .facade import update_agent_establishments, update_agent_permissions
 from .models import User
 from rolepermissions.roles import get_user_roles
@@ -25,6 +27,23 @@ class SwaggerLoginSerializer(serializers.Serializer):
 class SwaggerProfilePasswordSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
     current_password = serializers.CharField(write_only=True)
+
+class SwaggerDuplicateOrderResponse(serializers.Serializer):
+    response_data = OrderGetSerializer()
+    some_items_were_not_copied = serializers.BooleanField()
+
+class PriceItemsResponse(serializers.Serializer):
+    price_items = searchOnePriceItemToMakeOrderSerializer(many=True)
+    current_page = serializers.IntegerField()
+    lastPage = serializers.IntegerField()
+    total = serializers.IntegerField()
+
+class CategoriesToMakeOrderResponse(serializers.Serializer):
+    class PriceTableAUX(serializers.Serializer):
+        description = serializers.CharField()
+        table_code = serializers.CharField()
+    categories = CategoryPUTSerializer(many=True)
+    price_table = PriceTableAUX()
 
 #------------------------------------------------------/User serializers
 

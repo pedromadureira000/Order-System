@@ -283,7 +283,7 @@
       <!-- Show 'You have no establishments to buy' message -->
       <v-dialog :value="show_you_have_no_establishments_to_buy_message" :retain-focus="false" max-width="500px" persistent>
         <v-card>
-          <v-card-title>{{'You have no establishments'}}</v-card-title>
+          <v-card-title>{{$t('You have no establishments')}}</v-card-title>
           <v-card-text>
             <v-container fluid>
               <p>{{$t('It seems that you have no establishments which you can buy at this moment.')}}</p>

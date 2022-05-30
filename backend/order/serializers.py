@@ -166,7 +166,7 @@ class OrderedItemPUTSerializer(serializers.ModelSerializer):
 # PUT will be used by client_user to edit ordered_items and note, and to change status to 'transferred'. This can only be done when the order status is 'typing'. 
 #  agent/admin_agent/erp can update order status and create notes in the order history
 class OrderPUTSerializer(serializers.ModelSerializer):
-    ordered_items = OrderedItemPUTSerializer(many=True)
+    ordered_items = OrderedItemPUTSerializer(many=True, required=False)
     #  agent_note = serializers.CharField(max_length=800, required=False, write_only=True)
     class Meta:
         model = Order
@@ -254,22 +254,21 @@ class OrderPUTSerializer(serializers.ModelSerializer):
             if self.instance.status != 1:
                 raise serializers.ValidationError(_("You cannot update this order."))
             # client user cannot remove all items from the order.
-            if ordered_items == []:
+            if not ordered_items or ordered_items == []:
                 raise serializers.ValidationError(_("You must add at least one item to the order."))
-            if ordered_items:
-                available_price_items = PriceItem.objects.filter(price_table_id=client_establishment.price_table_id, item__status=1)
-                available_items = [x.item_id for x in available_price_items]
-                for ordered_item in ordered_items:
-                    if ordered_item['item'] not in available_items:
-                        raise serializers.ValidationError(_("You cannot add the item whose code is '{item}' to the order.").format(item=ordered_item['item'].split('*')[2]))
-                    # Deny duplicate values
-                    if ordered_item in check_for_duplicate_values:
-                        raise serializers.ValidationError(_("There are duplicate items."))
-                    check_for_duplicate_values.append(ordered_item)
-                    # Add unit_price to ordered_item
-                    ordered_item['unit_price'] = next(p.unit_price for p in available_price_items if p.item_id == ordered_item['item'])
-                    order_amount += ordered_item['unit_price'] * ordered_item['quantity'] 
-                attrs['order_amount'] = Decimal(order_amount).quantize(Decimal('.01'), rounding=ROUND_HALF_UP)
+            available_price_items = PriceItem.objects.filter(price_table_id=client_establishment.price_table_id, item__status=1)
+            available_items = [x.item_id for x in available_price_items]
+            for ordered_item in ordered_items:
+                if ordered_item['item'] not in available_items:
+                    raise serializers.ValidationError(_("You cannot add the item whose code is '{item}' to the order.").format(item=ordered_item['item'].split('*')[2]))
+                # Deny duplicate values
+                if ordered_item in check_for_duplicate_values:
+                    raise serializers.ValidationError(_("There are duplicate items."))
+                check_for_duplicate_values.append(ordered_item)
+                # Add unit_price to ordered_item
+                ordered_item['unit_price'] = next(p.unit_price for p in available_price_items if p.item_id == ordered_item['item'])
+                order_amount += ordered_item['unit_price'] * ordered_item['quantity'] 
+            attrs['order_amount'] = Decimal(order_amount).quantize(Decimal('.01'), rounding=ROUND_HALF_UP)
         current_ordered_items = OrderedItem.objects.filter(order=self.instance)
         attrs['current_ordered_items'] = current_ordered_items
         if not order_has_changed(self.instance, attrs):

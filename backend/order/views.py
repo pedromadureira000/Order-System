@@ -2,11 +2,12 @@ from django.db import transaction
 from django.db.models.query import Prefetch
 from rest_framework import status
 from rest_framework.response import Response
-from item.models import ItemCategory, ItemTable, PriceItem, PriceTable
+from item.models import ItemCategory, PriceItem, PriceTable
 from item.serializers import CategoryPUTSerializer
 from organization.facade import get_clients_by_agent
 from organization.models import Client, Company, Establishment
 from organization.serializers import CompaniesAndEstabsToDuplicateOrderSerializer
+from user.serializers import CategoriesToMakeOrderResponse, PriceItemsResponse, SwaggerDuplicateOrderResponse
 from user.validators import req_user_is_agent_without_all_estabs
 from .facade import fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders, fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders_by_agent, fetch_comps_with_estabs_to_fill_filter_selectors_to_search_orders_by_client_user, get_comps_and_estabs_to_duplicate_order, get_orders_by_agent
 from .serializers import ClientsToFillFilterSelectorsToSearchOrdersSerializer, CompanyWithEstabsSerializer, OrderDetailsSerializer, OrderDuplicateSerializer, OrderGetSerializer, OrderHistorySerializer, OrderPOSTSerializer,OrderPUTSerializer, fetchClientEstabsToCreateOrderSerializer, searchOnePriceItemToMakeOrderSerializer
@@ -14,13 +15,17 @@ from .models import Order, OrderHistory, OrderedItem
 from rest_framework.views import APIView
 from settings.utils import has_permission, has_role
 from drf_yasg.utils import swagger_auto_schema
-from settings.response_templates import not_found_response, serializer_invalid_response, unauthorized_response, unknown_exception_response
+from settings.response_templates import error_response, not_found_response, serializer_invalid_response, unauthorized_response, unknown_exception_response
 from django.utils.translation import gettext_lazy as _
 from drf_yasg import openapi
+from rest_framework.decorators import action
+from django.core.exceptions import ValidationError
+
 import math
-import datetime
 
 class fetchClientEstabsToCreateOrder(APIView):
+    @swagger_auto_schema(method='get', responses={200: fetchClientEstabsToCreateOrderSerializer(many=True)}) 
+    @action(detail=False, methods=['get'])
     def get(self, request):
         if has_permission(request.user, 'create_order'):
             establishments = Establishment.objects.filter(clientestablishment__in=request.user.client.client_establishments.filter(establishment__status=1).exclude(price_table=None)).select_related('company')
@@ -29,6 +34,8 @@ class fetchClientEstabsToCreateOrder(APIView):
         return unauthorized_response
 
 class searchOnePriceItemToMakeOrder(APIView):
+    @swagger_auto_schema(method='get', responses={200: searchOnePriceItemToMakeOrderSerializer}) 
+    @action(detail=False, methods=['get'])
     def get(self, request, establishment_compound_id, item_code):
         if has_permission(request.user, 'create_order'):
             try:
@@ -44,19 +51,21 @@ class searchOnePriceItemToMakeOrder(APIView):
         return unauthorized_response
 
 
-page_query_string = openapi.Parameter('page', openapi.IN_QUERY, description="page number", type=openapi.TYPE_INTEGER)
-items_per_page_query_string = openapi.Parameter('items_per_page', openapi.IN_QUERY, description="items per page", 
-        type=openapi.TYPE_INTEGER)
-sort_by_query_string = openapi.Parameter('sort_by', openapi.IN_QUERY, description="sort by", type=openapi.TYPE_STRING)
-sort_desc_query_string = openapi.Parameter('sort_desc', openapi.IN_QUERY, description="sort desc", type=openapi.TYPE_STRING)
-#  item_code_query_string = openapi.Parameter('item_code', openapi.IN_QUERY, description="item_code", 
-        #  type=openapi.TYPE_STRING)
-category_query_string = openapi.Parameter('category', openapi.IN_QUERY, description="category_compound_id field", type=openapi.TYPE_STRING)
-item_description_query_string = openapi.Parameter('item_description', openapi.IN_QUERY, description="item description field", 
-        type=openapi.TYPE_STRING)
-
 class SearchPriceItemsToMakeOrder(APIView):
-    @swagger_auto_schema(manual_parameters=[item_description_query_string, category_query_string, page_query_string, items_per_page_query_string, sort_by_query_string, sort_desc_query_string]) 
+    page_query_string = openapi.Parameter('page', openapi.IN_QUERY, description="page number", type=openapi.TYPE_INTEGER)
+    items_per_page_query_string = openapi.Parameter('items_per_page', openapi.IN_QUERY, description="items per page", 
+            type=openapi.TYPE_INTEGER)
+    sort_by_query_string = openapi.Parameter('sort_by', openapi.IN_QUERY, description="sort by", type=openapi.TYPE_STRING)
+    sort_desc_query_string = openapi.Parameter('sort_desc', openapi.IN_QUERY, description="sort desc", type=openapi.TYPE_STRING)
+    #  item_code_query_string = openapi.Parameter('item_code', openapi.IN_QUERY, description="item_code", 
+            #  type=openapi.TYPE_STRING)
+    category_query_string = openapi.Parameter('category', openapi.IN_QUERY, description="category_compound_id field", type=openapi.TYPE_STRING)
+    item_description_query_string = openapi.Parameter('item_description', openapi.IN_QUERY, description="item description field", 
+            type=openapi.TYPE_STRING)
+
+    @swagger_auto_schema(method='get', responses={200: PriceItemsResponse}, manual_parameters=[item_description_query_string, 
+        category_query_string, page_query_string, items_per_page_query_string, sort_by_query_string, sort_desc_query_string]) 
+    @action(detail=False, methods=['get'])
     def get(self, request, establishment_compound_id):
         if has_permission(request.user, 'create_order'):
             kwargs = {}
@@ -94,6 +103,8 @@ class SearchPriceItemsToMakeOrder(APIView):
         return unauthorized_response
 
 class fetchCategoriesToMakeOrderAndGetPriceTableInfo(APIView):
+    @swagger_auto_schema(method='get', responses={200: CategoriesToMakeOrderResponse}) 
+    @action(detail=False, methods=['get'])
     def get(self, request, establishment_compound_id):    
         if has_permission(request.user, 'create_order'):
             try:
@@ -119,6 +130,8 @@ class fetchCategoriesToMakeOrderAndGetPriceTableInfo(APIView):
         return unauthorized_response
  
 class fetchDataToFillFilterSelectorsToSearchOrders(APIView):
+    @swagger_auto_schema(method='get', responses={200: CompanyWithEstabsSerializer(many=True)}) 
+    @action(detail=False, methods=['get'])
     def get(self, request):    
         if has_permission(request.user, 'get_orders'):
             if has_role(request.user, 'client_user'):
@@ -135,6 +148,8 @@ class fetchDataToFillFilterSelectorsToSearchOrders(APIView):
         return unauthorized_response
 
 class fetchClientsToFillFilterSelectorToSearchOrders(APIView):
+    @swagger_auto_schema(method='get', responses={200: ClientsToFillFilterSelectorsToSearchOrdersSerializer(many=True)})
+    @action(detail=False, methods=['get'])
     def get(self, request):    
         if has_permission(request.user, 'get_orders') and not has_role(request.user, 'client_user'):
             if req_user_is_agent_without_all_estabs(request.user):
@@ -146,25 +161,55 @@ class fetchClientsToFillFilterSelectorToSearchOrders(APIView):
             return Response(client_serializer.data)
         return unauthorized_response
 
-page_query_string = openapi.Parameter('page', openapi.IN_QUERY, description="page number", type=openapi.TYPE_INTEGER)
-items_per_page_query_string = openapi.Parameter('items_per_page', openapi.IN_QUERY, description="items per page", 
-        type=openapi.TYPE_INTEGER)
-sort_by_query_string = openapi.Parameter('sort_by', openapi.IN_QUERY, description="sort by", type=openapi.TYPE_STRING)
-sort_desc_query_string = openapi.Parameter('sort_desc', openapi.IN_QUERY, description="sort desc", type=openapi.TYPE_STRING)
-company_query_string = openapi.Parameter('company', openapi.IN_QUERY, description="company_compound_id", type=openapi.TYPE_STRING)
-establishment_query_string = openapi.Parameter('establishment', openapi.IN_QUERY, description="establishment_compound_id", 
-        type=openapi.TYPE_STRING)
-client_query_string = openapi.Parameter('client', openapi.IN_QUERY, description="client_compound_id", type=openapi.TYPE_STRING)
-invoice_number_query_string = openapi.Parameter('invoice_number', openapi.IN_QUERY, description="Order invoice_number field.", 
-        type=openapi.TYPE_STRING)
-order_number_query_string = openapi.Parameter('order_number', openapi.IN_QUERY, description="Order order_number field.", type=openapi.TYPE_STRING)
-initial_period_query_string = openapi.Parameter('initial_period', openapi.IN_QUERY, description="Initial period in ?? format.",
-        type=openapi.TYPE_STRING)
-final_period_query_string = openapi.Parameter('final_period', openapi.IN_QUERY, description="Final period in ?? format.", type=openapi.TYPE_STRING)
-status_query_string = openapi.Parameter('status', openapi.IN_QUERY, description="pending = Typing, Transferred or Registered; 0 = Canceled; 1 = Typing; 2 = Transferred; 3 = Registered; 4 = Invoiced; 5 = Delivered", type=openapi.TYPE_STRING)
 class OrderView(APIView):
-    @swagger_auto_schema(manual_parameters=[company_query_string, establishment_query_string, client_query_string, 
-        invoice_number_query_string, order_number_query_string, status_query_string]) 
+    page_query_string = openapi.Parameter('page', openapi.IN_QUERY, description="page number", type=openapi.TYPE_INTEGER)
+    items_per_page_query_string = openapi.Parameter('items_per_page', openapi.IN_QUERY, description="items per page", 
+            type=openapi.TYPE_INTEGER)
+    sort_by_query_string = openapi.Parameter('sort_by', openapi.IN_QUERY, description="sort by", type=openapi.TYPE_STRING)
+    sort_desc_query_string = openapi.Parameter('sort_desc', openapi.IN_QUERY, description="sort desc", type=openapi.TYPE_STRING)
+    company_query_string = openapi.Parameter('company', openapi.IN_QUERY, description="company_compound_id", type=openapi.TYPE_STRING)
+    establishment_query_string = openapi.Parameter('establishment', openapi.IN_QUERY, description="establishment_compound_id", 
+            type=openapi.TYPE_STRING)
+    client_query_string = openapi.Parameter('client', openapi.IN_QUERY, description="client_compound_id", type=openapi.TYPE_STRING)
+    invoice_number_query_string = openapi.Parameter('invoice_number', openapi.IN_QUERY, description="Order invoice_number field.", 
+            type=openapi.TYPE_STRING)
+    order_number_query_string = openapi.Parameter('order_number', openapi.IN_QUERY, description="Order order_number field.", 
+            type=openapi.TYPE_STRING)
+    initial_period_query_string = openapi.Parameter('initial_period', openapi.IN_QUERY, description="Initial period in ?? format.",
+            type=openapi.TYPE_STRING)
+    final_period_query_string = openapi.Parameter('final_period', openapi.IN_QUERY, description="Final period in ?? format.", 
+            type=openapi.TYPE_STRING)
+    status_query_string = openapi.Parameter('status', openapi.IN_QUERY, description="pending = Typing, Transferred or Registered; 0 = Canceled; 1 = Typing; 2 = Transferred; 3 = Registered; 4 = Invoiced; 5 = Delivered", type=openapi.TYPE_STRING)
+
+    response_schema_dict = {
+        "200": openapi.Response(
+            description="custom 200 description",
+            examples={
+                "application/json": {
+                    "orders": [
+                        {
+                            "id": "11.123.1",
+                            "order_number": 1,
+                            "company": "123*123",
+                            "establishment": "123*123*123",
+                            "client": "123*11*123",
+                            "order_amount": "768.84",
+                            "status": 1,
+                            "order_date": "2022-05-27T00:45:32.448395-03:00",
+                            "invoicing_date": None,
+                            "invoice_number": ""
+                        }
+                    ],
+                    "current_page": 1,
+                    "lastPage": 1,
+                    "total": 1
+                }
+            }
+        ),
+    }
+
+    @swagger_auto_schema(method='get', responses=response_schema_dict, manual_parameters=[company_query_string, establishment_query_string, client_query_string, invoice_number_query_string, order_number_query_string, status_query_string]) 
+    @action(detail=False, methods=['get'])
     def get(self, request):
         if has_permission(request.user, 'get_orders'):
             kwargs = {}
@@ -193,18 +238,33 @@ class OrderView(APIView):
                 kwargs.update({"status__in": [1,2,3] })
             if has_role(request.user, 'client_user'):
                 if kwargs.get("client"): kwargs.pop("client")
-                orders = Order.objects.filter(client_id=request.user.client_id, **kwargs ).order_by(sort_by)
+                try:
+                    orders = Order.objects.filter(client_id=request.user.client_id, **kwargs ).order_by(sort_by)
+                except ValidationError as error:
+                    if 'YYYY-MM-DD' in error.__str__():
+                        return error_response(detail=_("An invalid date was sent to the filter."), status=status.HTTP_400_BAD_REQUEST )
+                    return error_response(detail=_("Invalid parameters were sent to the filter."), status=status.HTTP_400_BAD_REQUEST )
                 total = orders.count()
                 lastPage = math.ceil(total / items_per_page)
                 return Response({"orders": OrderGetSerializer(orders[start:end], many=True).data, "current_page": page,
                     "lastPage": lastPage, "total": total })
             if req_user_is_agent_without_all_estabs(request.user):
-                orders = get_orders_by_agent(request.user).filter(**kwargs).order_by(sort_by)
+                try:
+                    orders = get_orders_by_agent(request.user).filter(**kwargs).order_by(sort_by)
+                except ValidationError as error:
+                    if 'YYYY-MM-DD' in error.__str__():
+                        return error_response(detail=_("An invalid date was sent to the filter."), status=status.HTTP_400_BAD_REQUEST )
+                    return error_response(detail=_("Invalid parameters were sent to the filter."), status=status.HTTP_400_BAD_REQUEST )
                 total = orders.count()
                 lastPage = math.ceil(total / items_per_page)
                 return Response({"orders": OrderGetSerializer(orders[start:end], many=True).data, "current_page": page,
                     "lastPage": lastPage, "total": total })
-            orders = Order.objects.filter(company__contracting_id=request.user.contracting_id, **kwargs).order_by(sort_by)
+            try:
+                orders = Order.objects.filter(company__contracting_id=request.user.contracting_id, **kwargs).order_by(sort_by)
+            except ValidationError as error: # XXX this is solving the invalid date error.
+                if 'YYYY-MM-DD' in error.__str__():
+                    return error_response(detail=_("An invalid date was sent to the filter."), status=status.HTTP_400_BAD_REQUEST )
+                return error_response(detail=_("Invalid parameters were sent to the filter."), status=status.HTTP_400_BAD_REQUEST )
             total = orders.count()
             lastPage = math.ceil(total / items_per_page)
             return Response({"orders": OrderGetSerializer(orders[start:end], many=True).data, "current_page": page,
@@ -227,6 +287,8 @@ class OrderView(APIView):
         return unauthorized_response 
 
 class SpecificOrderView(APIView):
+    @swagger_auto_schema(method='get', responses={200: OrderDetailsSerializer}) 
+    @action(detail=False, methods=['get'])
     def get(self, request, id):
         if has_permission(request.user, 'get_orders'):
             try:
@@ -246,8 +308,32 @@ class SpecificOrderView(APIView):
                     return not_found_response(object_name=_('The order'))
             return Response(OrderDetailsSerializer(order).data)
         return unauthorized_response
+
+    request_schema_dict = openapi.Schema(
+        title=_("Update order"),
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'ordered_items': openapi.Schema(type=openapi.TYPE_ARRAY, description=_('Ordered items list'), 
+                items=openapi.Schema(type=openapi.TYPE_OBJECT, description=_('Ordered item'),
+                    properties={
+                        'item': openapi.Schema(type=openapi.TYPE_STRING, description=_('Item id'), example="123*123*0001"),
+                        'quantity': openapi.Schema(type=openapi.TYPE_NUMBER, description=_('Ordered quantity'), example=12.33),
+                        'sequence_number': openapi.Schema(type=openapi.TYPE_INTEGER, description=_('Sequence of item inclusion in the order.'), 
+                            example=1),
+                        }
+                )
+            ),
+            'status': openapi.Schema(type=openapi.TYPE_STRING, description=_('Order status'), example=1, enum=[0,1,2,3,4,5]),
+            'invoicing_date': openapi.Schema(type=openapi.TYPE_STRING, description=_('Invoice date'), example="2022-05-27T12:48:07.256Z", 
+                format="YYYY-MM-DD HH:MM[:ss[.uuuuuu]][TZ]"),
+            'invoice_number': openapi.Schema(type=openapi.TYPE_STRING, description=_('Invoice number'), example="123456789"),
+            'note': openapi.Schema(type=openapi.TYPE_STRING, description=_('Client user note'), example=_("Client user note")),
+            'agent_note': openapi.Schema(type=openapi.TYPE_STRING, description=_('Agent note'), example=_("Agent note")),
+        }
+    )
+
     @transaction.atomic
-    @swagger_auto_schema(request_body=OrderPUTSerializer) 
+    @swagger_auto_schema(request_body=request_schema_dict, responses={200: 'Order updated.'}) 
     def put(self, request, id):
         if has_permission(request.user, 'update_order_status') or has_role(request.user, 'client_user'):
             try:
@@ -264,7 +350,7 @@ class SpecificOrderView(APIView):
             if serializer.is_valid():
                 try:
                     serializer.save()
-                    return Response('Order updated.')
+                    return Response(_('Order updated.'))
                 except Exception as error:
                     transaction.rollback()
                     #  print(error)
@@ -296,6 +382,8 @@ class SpecificOrderView(APIView):
 
 class OrderHistoryView(APIView):
     @transaction.atomic
+    @swagger_auto_schema(method='get', responses={200: OrderHistorySerializer(many=True)}) 
+    @action(detail=False, methods=['get'])
     def get(self, request, order_id):
         if has_permission(request.user, 'get_orders'):
             try:
@@ -316,6 +404,8 @@ class OrderHistoryView(APIView):
         return unauthorized_response
 
 class fetchCompaniesAndEstabsToDuplicateOrder(APIView):
+    @swagger_auto_schema(method='get', responses={200: CompaniesAndEstabsToDuplicateOrderSerializer(many=True)})
+    @action(detail=False, methods=['get'])
     def get(self, request, order_id):    
         if has_permission(request.user, 'create_order'):
             try:
@@ -328,6 +418,7 @@ class fetchCompaniesAndEstabsToDuplicateOrder(APIView):
 
 class DuplicateOrder(APIView):
     @transaction.atomic
+    @swagger_auto_schema(request_body=OrderDuplicateSerializer, responses={200: SwaggerDuplicateOrderResponse}) 
     def post(self, request):
         if has_permission(request.user, 'create_order'):
             serializer = OrderDuplicateSerializer(data=request.data, context={"request": request})
@@ -342,4 +433,3 @@ class DuplicateOrder(APIView):
                     return unknown_exception_response(action=_('create order'))
             return serializer_invalid_response(serializer.errors)
         return unauthorized_response
-

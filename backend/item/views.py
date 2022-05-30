@@ -19,9 +19,13 @@ from django.utils.translation import gettext_lazy as _
 from decimal import Decimal
 from organization.serializers import CompanyPOSTSerializer
 from drf_yasg import openapi
+from rest_framework.decorators import action
 import math
 
 class ItemTableView(APIView):
+    #  @swagger_auto_schema(method='get', responses={200: ItemTablePOSTSerializer}, operation_description='GET /item/item_table/') 
+    @swagger_auto_schema(method='get', responses={200: ItemTablePOSTSerializer(many=True)}) 
+    @action(detail=False, methods=['get'])
     def get(self, request):
         user = request.user
         if has_permission(user, 'get_item_tables'):
@@ -90,6 +94,8 @@ class SpecificItemTable(APIView):
         return unauthorized_response
 
 class fetchItemTablesToCreateItemOrCategoryOrPriceTable(APIView):
+    @swagger_auto_schema(method='get', responses={200: ItemTablePOSTSerializer(many=True)}) 
+    @action(detail=False, methods=['get'])
     def get(self, request):
         if has_permission(request.user, 'create_item') or has_permission(request.user,  'create_item_category') or \
                 has_permission(request.user, 'create_price_table'):
@@ -101,17 +107,8 @@ class fetchItemTablesToCreateItemOrCategoryOrPriceTable(APIView):
             return Response(serializer.data)
         return unauthorized_response
 
+
 class CategoryView(APIView):
-    def get(self, request, item_table_compound_id):
-        if has_permission(request.user, 'get_item_category'):
-            if has_role(request.user, 'agent'):
-                item_categories = get_categories_by_agent(request.user).filter(item_table__item_table_compound_id=item_table_compound_id)
-                return Response(CategoryPUTSerializer(item_categories, many=True).data)
-            item_categories = ItemCategory.objects.filter(item_table__contracting_id=request.user.contracting_id, 
-                    item_table__item_table_compound_id=item_table_compound_id)
-            serializer = CategoryPUTSerializer(item_categories, many=True)
-            return Response(serializer.data)
-        return unauthorized_response
     @transaction.atomic
     @swagger_auto_schema(request_body=CategoryPOSTSerializer) 
     def post(self, request):
@@ -129,6 +126,18 @@ class CategoryView(APIView):
         return unauthorized_response
 
 class SpecificCategoryView(APIView):
+    @swagger_auto_schema(method='get', responses={200: CategoryPUTSerializer(many=True)})
+    @action(detail=False, methods=['get'])
+    def get(self, request, item_table_compound_id):
+        if has_permission(request.user, 'get_item_category'):
+            if has_role(request.user, 'agent'):
+                item_categories = get_categories_by_agent(request.user).filter(item_table__item_table_compound_id=item_table_compound_id)
+                return Response(CategoryPUTSerializer(item_categories, many=True).data)
+            item_categories = ItemCategory.objects.filter(item_table__contracting_id=request.user.contracting_id, 
+                    item_table__item_table_compound_id=item_table_compound_id)
+            serializer = CategoryPUTSerializer(item_categories, many=True)
+            return Response(serializer.data)
+        return unauthorized_response
     @transaction.atomic
     @swagger_auto_schema(request_body=CategoryPUTSerializer) 
     def put(self, request, category_compound_id):
@@ -182,6 +191,8 @@ class SpecificCategoryView(APIView):
         return unauthorized_response
 
 class fetchCategoriesToCreateItem(APIView):
+    @swagger_auto_schema(method='get', responses={200: CategoryPUTSerializer(many=True)})
+    @action(detail=False, methods=['get'])
     def get(self, request, item_table_compound_id):
         if has_permission(request.user, 'create_item'):
             if item_table_compound_id.split("*")[0] != request.user.contracting_id:
@@ -212,8 +223,8 @@ description_query_string = openapi.Parameter('description', openapi.IN_QUERY, de
 class ItemView(APIView):
     parser_classes = [MultiPartParser, FormParser]
 
-    @swagger_auto_schema(manual_parameters=[page_query_string, items_per_page_query_string, sort_by_query_string, sort_desc_query_string, 
-        item_table_query_string, category_query_string, item_code_query_string, description_query_string]) 
+    @swagger_auto_schema(method='get', responses={200: ItemGETSerializer}, manual_parameters=[page_query_string, items_per_page_query_string, sort_by_query_string, sort_desc_query_string, item_table_query_string, category_query_string, item_code_query_string, description_query_string]) 
+    @action(detail=False, methods=['get'])
     def get(self, request):
         if has_permission(request.user, 'get_items'):
             kwargs = {}
@@ -317,6 +328,8 @@ class SpecificItemView(APIView):
         return unauthorized_response
 
 class fetchCompaniesToCreatePriceTable(APIView):
+    @swagger_auto_schema(method='get', responses={200: CompanyPOSTSerializer(many=True)})
+    @action(detail=False, methods=['get'])
     def get(self, request):
         if has_permission(request.user, 'create_price_table'):
             if req_user_is_agent_without_all_estabs(request.user):
@@ -347,6 +360,8 @@ class fetchCompaniesToCreatePriceTable(APIView):
         #  return unauthorized_response
 
 class PriceTableView(APIView):
+    @swagger_auto_schema(method='get', responses={200: PriceTablePOSTSerializer(many=True)})
+    @action(detail=False, methods=['get'])
     def get(self, request):
         if has_permission(request.user, 'get_price_tables'):
             if has_role(request.user, 'agent'):
@@ -423,6 +438,8 @@ class SpecificPriceTableView(APIView):
         return unauthorized_response
 
 class PriceItemForAgentsView(APIView):
+    @swagger_auto_schema(method='get', responses={200: PriceItemForAgentsSerializer(many=True)}) 
+    @action(detail=False, methods=['get'])
     def get(self, request, price_table_compound_id):
         if has_permission(request.user, 'get_price_tables'):
             try:
@@ -441,7 +458,19 @@ class PriceItemForAgentsView(APIView):
         return unauthorized_response
 
 class SpecificPriceItemView(APIView):
-    @swagger_auto_schema(request_body=SpecificPriceItemSerializer) 
+
+    request_schema_dict = openapi.Schema(
+        title=_("Update order"),
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'unit_price': openapi.Schema(type=openapi.TYPE_NUMBER, description=_('Unit price'), example=12.33),
+        }
+    )
+
+    #  item_compound_id = openapi.Parameter('item_compound_id', in_=openapi.IN_QUERY, description='Item identifier', 
+            #  type=openapi.TYPE_STRING, required=False, example="asdfasdf")
+
+    @swagger_auto_schema(request_body=request_schema_dict, responses={200: 'Price item updated successfully.'}) 
     @transaction.atomic
     def put(self, request, price_table_compound_id, item_compound_id):
         if has_permission(request.user, 'create_or_update_price_item'):

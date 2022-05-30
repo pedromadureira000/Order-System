@@ -21,6 +21,7 @@ from organization.validators import agent_has_access_to_this_client
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from settings.response_templates import error_response, not_found_response, serializer_invalid_response, protected_error_response, unknown_exception_response, unauthorized_response
+from rest_framework.decorators import action
 
 
 #------------------------/ Auth Views
@@ -30,16 +31,18 @@ class GetCSRFToken(APIView):
     permission_classes = (permissions.AllowAny,)
     def get(self, request):
         return Response(_("The CSRF cookie was sent"))
+
 # If the user has status != 1, it will be considered disabled and the user can't log in.
 class Login(APIView):
     permission_classes = (permissions.AllowAny,)
-    @swagger_auto_schema(request_body=SwaggerLoginSerializer) 
+    @swagger_auto_schema(request_body=SwaggerLoginSerializer, method='get', responses={200: OwnProfileSerializer}) 
+    @action(detail=False, methods=['get'])
     def post(self, request):
         if request.user.is_authenticated:
             return Response(_("User is already authenticated"))
         serializer = SwaggerLoginSerializer(data=request.data)
         if serializer.is_valid():
-            user_code = serializer.validated_data["contracting_code"] + "*" + serializer.validated_data["username" ]
+            user_code = serializer.validated_data["contracting_code"] + "*" + serializer.validated_data["username"]
             user = authenticate(username=user_code, password=serializer.validated_data["password"], request=request)
             if user is not None:
                 if user.status != 1:
@@ -65,6 +68,8 @@ class Logout(APIView):
 
 #-------------------------------------------/ Users Views / -------------------------------------
 class OwnProfileView(APIView):
+    @swagger_auto_schema(method='get', responses={200: OwnProfileSerializer}) 
+    @action(detail=False, methods=['get'])
     def get(self, request):
         try:
             data = OwnProfileSerializer(request.user).data
@@ -88,6 +93,8 @@ class OwnProfileView(APIView):
 
 
 class fetchContractingCompaniesToCreateERPuser(APIView):
+    @swagger_auto_schema(method='get', responses={200: ContractingPOSTSerializer(many=True)}) 
+    @action(detail=False, methods=['get'])
     def get(self, request):
         if has_permission(request.user, 'create_erp_user'):
             erp_users = Contracting.objects.filter(status=1)
@@ -95,6 +102,8 @@ class fetchContractingCompaniesToCreateERPuser(APIView):
         return unauthorized_response
 
 class ERPUserView(APIView):
+    @swagger_auto_schema(method='get', responses={200: ERPUserPOSTSerializer(many=True)}) 
+    @action(detail=False, methods=['get'])
     def get(self, request):
         if has_permission(request.user, 'get_erp_user'):
             erp_users = User.objects.filter(Q(groups__name='erp_user'))
@@ -159,6 +168,8 @@ class SpecificERPUser(APIView):
         return unauthorized_response
 
 class AdminAgentView(APIView):
+    @swagger_auto_schema(method='get', responses={200: AdminAgentPOSTSerializer(many=True)}) 
+    @action(detail=False, methods=['get'])
     def get(self, request):
         if has_permission(request.user, 'get_admin_agents'):
             user = request.user
@@ -229,6 +240,8 @@ class SpecificAdminAgent(APIView):
         return unauthorized_response
 
 class fetchEstablishmentsToCreateAgent(APIView):
+    @swagger_auto_schema(method='get', responses={200: EstablishmentPOSTSerializer(many=True)}) 
+    @action(detail=False, methods=['get'])
     def get(self, request):
         if has_permission(request.user, 'create_agent'):
             estabs = Establishment.objects.filter(company__contracting_id=request.user.contracting_id,status=1)
@@ -236,6 +249,8 @@ class fetchEstablishmentsToCreateAgent(APIView):
         return unauthorized_response
 
 class AgentView(APIView):
+    @swagger_auto_schema(method='get', responses={200: AgentPOSTSerializer(many=True)}) 
+    @action(detail=False, methods=['get'])
     def get(self, request):
         if has_permission(request.user, 'get_agents'):
             user = request.user
@@ -306,6 +321,8 @@ class SpecificAgent(APIView):
         return unauthorized_response
 
 class fetchClientsToCreateClientUser(APIView):
+    @swagger_auto_schema(method='get', responses={200: ClientSerializerPOST(many=True)}) 
+    @action(detail=False, methods=['get'])
     def get(self, request):
         user = request.user
         if has_permission(user, 'create_client_user'):
@@ -320,6 +337,8 @@ class fetchClientsToCreateClientUser(APIView):
 
 
 class ClientUserView(APIView):
+    @swagger_auto_schema(method='get', responses={200: ClientUserPOSTSerializer(many=True)}) 
+    @action(detail=False, methods=['get'])
     def get(self, request):
         if has_permission(request.user, 'get_client_users'):
             user = request.user

@@ -378,6 +378,7 @@ export const messages = {
     "Come back to Homepage": "Come back to Homepage",
     "Select an establishment": "Select an establishment",
     "All": "All",
+    "You have no establishments": "You have no establishments",
     // --------------------------------------------------/client/order/view_orders
     "Order Number": "Order Nº",
     "Order Date": "Order Date",
@@ -864,6 +865,7 @@ export const messages = {
     "Come back to Homepage": "Voltar para a página inicial",
     "Select an establishment": "Selecione um estabelecimento",
     "All": "Todos",
+    "You have no establishments": "Você não possui estabelecimentos",
     // --------------------------------------------------/client/order/view_orders
     "Order Number": "Nº do Pedido",
     "Order Date": "Data do Pedido",
@@ -901,7 +903,7 @@ export const messages = {
     ProblemConnectingTitle: "Problema de conexão",
     Check_your_internet_connection: "Verifique sua conexão de internet e tente novamente.",
     // -------------------------------/Session Error dialog
-    SessionErrorText: 'A aplicação já está aberta em outra janela. Clique em "Usar aqui" para usar a aplicação nessa janela.',
+    SessionErrorText: 'A aplicação foi aberta em outra janela. Clique no botão abaixo para usar a aplicação nessa janela.',
     Use_Here: 'Usar aqui',
     // -------------------------------/Login dialog
     Username: 'Username',
@@ -966,6 +968,5 @@ export const messages = {
     "how_to_get_orders__paragraph": "Para buscar pedidos o usuário deve acessar a pagina ", // ver pedidos
     "how_to_get_orders__paragraph_2": ", definir os filtros de busca e clicar no botão ", // buscar
     "how_to_get_orders__paragraph_3": "Ao buscar os pedidos o usuário pode ver os detalhes do pedido, onde é mostrado todos os itens, o histórico e há uma opção para impressão do pedido.",
-
   },
 }

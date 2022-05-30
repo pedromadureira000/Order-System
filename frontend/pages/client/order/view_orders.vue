@@ -160,8 +160,8 @@
               <template v-slot:item.invoice_number="{ item }">
                 <p>{{item.invoice_number}}</p>
               </template>
-              <template v-slot:item.invoice_date="{ item }">
-                <p>{{item.invoice_date}}</p>
+              <template v-slot:item.invoicing_date="{ item }">
+                <p>{{getLocaleDate(item.invoicing_date)}}</p>
               </template>
               <template v-slot:item.order_amount="{ item }">
                 <p style="float: right;">{{getRealMask(Number(item.order_amount))}}</p>
@@ -233,7 +233,7 @@ export default {
         { text: this.$t('Establishment'), value: 'establishment', sortable: false},
         { text: 'Status', value: 'status', sortable: true },
         { text: this.$t('Invoice Number'), value: 'invoice_number', sortable: false},
-        { text: this.$t('Invoice Date'), value: 'invoice_date', sortable: false},
+        { text: this.$t('Invoice Date'), value: 'invoicing_date', sortable: false},
         { text: this.$t('Order Amount'), value: 'order_amount', sortable: true},
         { text: this.$t('Actions'), value: 'actions', sortable: false},
       ],
@@ -284,8 +284,9 @@ export default {
         if (query_strings !== "") {
           query_strings = query_strings.slice(0, -1) // remove the last '&' character
         }
-        let {orders, current_page, lastPage, total} = await this.$store.dispatch("order/searchOrders", query_strings);
-        if (orders){
+        let data = await this.$store.dispatch("order/searchOrders", query_strings);
+        if (data){
+          let {orders, current_page, lastPage, total} = data
           this.orders = orders
           this.totalItems = total
         }

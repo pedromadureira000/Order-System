@@ -111,7 +111,7 @@
                     <v-text-field
                       disabled
                       :label="$t('Invoice Date')"
-                      :value="getLocaleDate(order.invoice_date)"
+                      :value="getLocaleDate(order.invoicing_date)"
                       class="mb-3"
                     />
                     <!-- Order Status -->

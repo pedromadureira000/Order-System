@@ -280,6 +280,7 @@ AXES_FAILURE_LIMIT = 7
 AXES_COOLOFF_TIME = datetime.timedelta(seconds=60)
 AXES_ONLY_USER_FAILURES = True #block username instead of ip
 AXES_RESET_ON_SUCCESS = True
+AXES_RESET_COOL_OFF_ON_FAILURE_DURING_LOCKOUT = False
 
 # Session age: 60s * 60m * 24h * 7d
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 7
