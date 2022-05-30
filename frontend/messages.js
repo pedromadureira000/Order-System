@@ -174,7 +174,6 @@ export const messages = {
     Table_code: "Table code",
     // Error messages
     Request_Time_out: "The request timed out.",
-    Connection_error: "Connection error",
     Something_went_wrong: "Something went wrong.",
     Server_error: "Server error.",
     // -------------------------------------------------------------------/ Layouts
@@ -660,7 +659,6 @@ export const messages = {
     Table_code: "Código da tabela",
     // Error messages(from store actions(default_error_msg parameter) and handleError function)
     Request_Time_out: "A requisição excedeu o tempo limite.",
-    Connection_error: "Erro de conexão",
     Something_went_wrong: "Algo deu errado.",
     Server_error: "Error no servidor.",
 

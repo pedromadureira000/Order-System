@@ -24,16 +24,16 @@ export default {
   },
 
   methods: {
-    verifyConnection() {
+    async verifyConnection() {
       this.loading = true
-      setTimeout(() => {
-        if (window.navigator.onLine) {
-          this.loading = false
-          this.$store.dispatch('switchConnectionError')
-        }
+      await new Promise(resolve => setTimeout(resolve, 2500))
+      let data = await this.$store.dispatch('testConnection')
+      if (data == 'ok') {
+        this.loading = false
+        this.$store.dispatch('switchConnectionError', false)
+      }
         else {this.verifyConnection()}
-      }, 2500);
-    },
+      }
   },
 
   computed: {

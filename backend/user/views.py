@@ -23,7 +23,6 @@ from django.utils.translation import gettext_lazy as _
 from settings.response_templates import error_response, not_found_response, serializer_invalid_response, protected_error_response, unknown_exception_response, unauthorized_response
 from rest_framework.decorators import action
 
-
 #------------------------/ Auth Views
 
 @method_decorator(ensure_csrf_cookie, name='dispatch')

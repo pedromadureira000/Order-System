@@ -40,14 +40,14 @@ export const mutations: MutationTree<RootState> = {
       alertID: state.alert.alertID
     };
   },
-  switchConnectionError(state){
-    state.connectionError = !state.connectionError
+  switchConnectionError(state, value: boolean){
+    state.connectionError = value
   }
 
 };
 
  // @ts-ignore: This module is dynamically added in nuxt.config.js
-// import api from "~api"
+import api from "~api"
 // import {ErrorHandler} from "~/helpers/functions";
 import { ActionTree, Commit, Dispatch } from "vuex";
 export const actions: ActionTree<RootState, RootState> = {
@@ -75,9 +75,19 @@ export const actions: ActionTree<RootState, RootState> = {
   removeAlert({ commit}: { commit: Commit}){
     commit('removeAlert')
   },
-  switchConnectionError({ commit}: { commit: Commit}){
-    commit('switchConnectionError')
+  switchConnectionError({ commit}: { commit: Commit}, value: boolean){
+    commit('switchConnectionError', value)
   },
+
+	async testConnection() {
+		try {
+			await api.getCsrf() 
+      return 'ok'
+		} catch (error) {
+      // console.log(">>>>>>> ", error)
+		}
+	},
+
   // async testFF({commit, dispatch}: {commit: Commit, dispatch: Dispatch}){
     // try {
       // await api.testFF()

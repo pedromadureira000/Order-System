@@ -67,14 +67,9 @@ export const ErrorHandler = (error: any, commit: Commit, dispatch: Dispatch, i18
     dispatch("setAlert", {message: i18n.t("Request_Time_out"), alertType: "error"}, { root: true })
   } 
   // ----------/ Internet Connection Error
-  else if (error.message === 'Network Error' || !window.navigator.onLine){
-    console.log(">>>>>>> error.message: ", error.message)
-    console.log(">>>>>>> window.navigator.onLine: ", window.navigator.onLine)
-    // XXX : "To dispatch actions or commit mutations in the global namespace, pass { root: true } as the 3rd argument to dispatch and commit."
-    // This is why I'm sending null as the second argument, even though the action does not receive any argument
-    dispatch("switchConnectionError", null,{ root: true }) 
-    // dispatch("setAlert", {message: i18n.t("Connection_error"), alertType: "error"}, { root: true })
-  // ---------/ Other Error
+  else if (error.message === 'Network Error'){
+    //  "To dispatch actions or commit mutations in the global namespace, pass { root: true } as the 3rd argument to dispatch and commit."
+    dispatch("switchConnectionError", true,{ root: true }) 
   } 
   else if (error.response && error.response.data){
     let response = error.response
