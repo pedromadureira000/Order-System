@@ -751,7 +751,7 @@ export default {
 	async fetchCategories(item_table_compound_id){
 		return await axios({ 
 		method: "get",
-		url: `/api/item/category/${item_table_compound_id}`,
+		url: `/api/item/get_categories/${item_table_compound_id}`,
 			}).then((request) => {
 					return request.data 
 				})

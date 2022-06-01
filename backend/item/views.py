@@ -107,6 +107,19 @@ class fetchItemTablesToCreateItemOrCategoryOrPriceTable(APIView):
             return Response(serializer.data)
         return unauthorized_response
 
+class GetCategoriesView(APIView):
+    @swagger_auto_schema(method='get', responses={200: CategoryPUTSerializer(many=True)})
+    @action(detail=False, methods=['get'])
+    def get(self, request, item_table_compound_id):
+        if has_permission(request.user, 'get_item_category'):
+            if has_role(request.user, 'agent'):
+                item_categories = get_categories_by_agent(request.user).filter(item_table__item_table_compound_id=item_table_compound_id)
+                return Response(CategoryPUTSerializer(item_categories, many=True).data)
+            item_categories = ItemCategory.objects.filter(item_table__contracting_id=request.user.contracting_id, 
+                    item_table__item_table_compound_id=item_table_compound_id)
+            serializer = CategoryPUTSerializer(item_categories, many=True)
+            return Response(serializer.data)
+        return unauthorized_response
 
 class CategoryView(APIView):
     @transaction.atomic
@@ -126,18 +139,6 @@ class CategoryView(APIView):
         return unauthorized_response
 
 class SpecificCategoryView(APIView):
-    @swagger_auto_schema(method='get', responses={200: CategoryPUTSerializer(many=True)})
-    @action(detail=False, methods=['get'])
-    def get(self, request, item_table_compound_id):
-        if has_permission(request.user, 'get_item_category'):
-            if has_role(request.user, 'agent'):
-                item_categories = get_categories_by_agent(request.user).filter(item_table__item_table_compound_id=item_table_compound_id)
-                return Response(CategoryPUTSerializer(item_categories, many=True).data)
-            item_categories = ItemCategory.objects.filter(item_table__contracting_id=request.user.contracting_id, 
-                    item_table__item_table_compound_id=item_table_compound_id)
-            serializer = CategoryPUTSerializer(item_categories, many=True)
-            return Response(serializer.data)
-        return unauthorized_response
     @transaction.atomic
     @swagger_auto_schema(request_body=CategoryPUTSerializer) 
     def put(self, request, category_compound_id):

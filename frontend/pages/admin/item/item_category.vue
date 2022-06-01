@@ -51,7 +51,6 @@
                 v-model.trim="note"
                 :error-messages="noteErrors"
                 @blur="$v.note.$touch()"
-                required
                 class="mb-3"
               />
               <!-- Submit -->
@@ -130,7 +129,7 @@ export default {
       companies: [],
       category_code: null,
       description: null,
-      note: null,
+      note: "",
       company_to_fetch_categories: null,
       categories: [],
       category_group: [],

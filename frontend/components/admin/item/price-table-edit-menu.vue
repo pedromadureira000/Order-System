@@ -23,6 +23,13 @@
                   ></v-select>
                 </v-col>
               </v-row>
+              <!-- Price Table Code -->
+              <v-text-field
+                disabled
+                :label="$t('Price Table Code')"
+                :value="table_code"
+                class="mb-3"
+              />
               <!-- Description -->
               <v-text-field
                 :label="$t('Description')"
@@ -200,6 +207,7 @@ export default {
       show_delete_confirmation_dialog: false,
       price_items: [],
       price_items_already_fetched: false,
+      table_code: '',
       description: null,
       note: null,
       loading: false,
@@ -375,6 +383,7 @@ export default {
   },
 
   mounted() {
+    this.table_code = this.price_table.table_code
     this.description = this.price_table.description
     this.note = this.price_table.note
     // Default value for company_from_price_table

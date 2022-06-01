@@ -40,6 +40,7 @@
                     :items="categories"
                     :item-text="(x) => x.category_compound_id === null ? $t('All') : x.category_code + ' - ' + x.description"
                     :item-value="(x) => x.category_compound_id"
+                    :error-messages="categoryErrors"
                   ></v-select>
                 </v-col>
               </v-row>
@@ -146,6 +147,10 @@
 </template>
 
 <script>
+// XXX I tried to use the 'not' builtin-validator from Vuelidate but it doesn't worked
+const notSame = (compareTo) => {
+	return (val, vm) => val != vm[compareTo]
+}
 import {
   required,
   maxLength,
@@ -197,7 +202,8 @@ export default {
       this.$v.itemInfoGroup.$touch();
       if (this.$v.itemInfoGroup.$invalid) {
         this.$store.dispatch("setAlert", { message: this.$t('Please_fill_the_form_correctly'), alertType: "error" }, { root: true })
-      } else {
+      } 
+      else {
         this.loading = true;
         const formData = new FormData()
         formData.append('item_table', this.company.item_table)
@@ -217,7 +223,6 @@ export default {
           this.$v.$reset()
           // this avoid "This field is required" errors by vuelidate
           this.company = this.companies[0]
-          this.category = this.categories[0].category_compound_id 
           this.item_code = ""
           this.description = ""
           this.unit = ""
@@ -235,18 +240,12 @@ export default {
       let category_already_exists = this.category_group.find(el=>el.item_table == this.company.item_table)
       if (category_already_exists){
         this.categories = category_already_exists.categories
-        if (this.categories.length > 0){
-          this.category = this.categories[0].category_compound_id 
-        }
       }
       else{
         let categories = await this.$store.dispatch("item/fetchCategoriesToCreateItem", this.company.item_table); 
         if (categories){
           this.category_group.push({item_table: this.company.item_table, categories: categories} )
           this.categories = categories
-          if (this.categories.length > 0){
-            this.category = this.categories[0].category_compound_id 
-          }
         }
       }
     },
@@ -272,10 +271,12 @@ export default {
       let user = this.$store.state.user.currentUser;
       return user.permissions.includes("get_items")
     },
-
   },
 
   validations: {
+    category: {
+      isDifferent: notSame(null)
+    },
     description: { 
       required, 
       minLength: minLength(3),
@@ -297,6 +298,7 @@ export default {
       maxLength: maxLength(800)
     },
     itemInfoGroup: [
+      "category",
       "item_code",
       "description",
       "unit",
@@ -341,6 +343,13 @@ export default {
       !this.$v.technical_description.maxLength && errors.push(this.$formatStr(this.$t("This_field_must_have_up_to_X_characters"), 800));
       return errors;
     },
+    categoryErrors() {
+      const errors = [];
+      if (!this.$v.category.$dirty) return errors;
+      !this.$v.category.isDifferent && errors.push(this.$t("You must select a category"))
+      return errors;
+    },
+    
   },
 
 };

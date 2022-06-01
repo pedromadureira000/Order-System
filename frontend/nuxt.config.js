@@ -11,10 +11,11 @@ export default {
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    titleTemplate: '%s - frontend',
-    title: 'frontend',
+    // titleTemplate: '%s - frontend',
+    titleTemplate: _LANG === 'pt' ? 'Sistema de pedidos' : 'Order system',
+    title: _LANG === 'pt' ? 'Sistema de pedidos' : 'Order system',
     htmlAttrs: {
-      lang: 'en'
+      lang: _LANG == 'pt' ? 'pt-BR' : 'en'
     },
     meta: [
       { charset: 'utf-8' },

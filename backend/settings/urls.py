@@ -36,8 +36,8 @@ if settings.DEBUG:
        openapi.Info(
           title="API Documentation",
           default_version='v1',
-          description="API from django-vue Scaffold",
-          terms_of_service="https://www.google.com/policies/terms/",
+          description="Order-System API definition",
+          #  terms_of_service="https://www.google.com/policies/terms/",
           contact=openapi.Contact(email="contato@phsolucoesweb.com.br"),
           license=openapi.License(name="No License"),
        ),

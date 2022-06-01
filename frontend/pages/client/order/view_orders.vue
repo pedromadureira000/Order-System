@@ -155,13 +155,15 @@
                 <p>{{typeof item.establishment === 'string' ? item.establishment.split('*')[2] : item.establishment.establishment_code}}</p>
               </template>
               <template v-slot:item.status="{ item }">
-                <p>{{$t(status_options.filter(el=>el.value===String(item.status))[0].description)}}</p>
+                <div :style="{color: getColor(item.status)}">
+                  <b><p>{{$t(status_options.filter(el=>el.value===String(item.status))[0].description)}}</p></b>
+                </div>
               </template>
               <template v-slot:item.invoice_number="{ item }">
                 <p>{{item.invoice_number}}</p>
               </template>
               <template v-slot:item.invoicing_date="{ item }">
-                <p>{{getLocaleDate(item.invoicing_date)}}</p>
+                <p>{{item.invoicing_date ? getLocaleDate(item.invoicing_date) : ''}}</p>
               </template>
               <template v-slot:item.order_amount="{ item }">
                 <p style="float: right;">{{getRealMask(Number(item.order_amount))}}</p>
@@ -309,6 +311,15 @@ export default {
 
     getLocaleDate(value){
       return new Date(value).toLocaleDateString('pt-BR')
+    },
+
+    getColor(status){
+      if (status === 0){return 'gray'}
+      if (status === 1){return 'red'}
+      if (status === 2){return 'green'}
+      if (status === 3){return 'brown'}
+      if (status === 4){return 'darkblue'}
+      if (status === 5){return 'black'}
     },
 
     fixPeriod(value){

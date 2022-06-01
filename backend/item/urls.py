@@ -1,6 +1,7 @@
 from django.urls import path
 from item.views import (
     # Item
+    GetCategoriesView,
     ItemTableView,
     ItemView,
     PriceItemForAgentsView,
@@ -24,8 +25,9 @@ urlpatterns = [
     path('item_table', ItemTableView.as_view()),
     path('item_table/<item_table_compound_id>', SpecificItemTable.as_view()),
     path('item_tables_to_create_item_category_or_pricetable', fetchItemTablesToCreateItemOrCategoryOrPriceTable.as_view()),
+    path('get_categories/<item_table_compound_id>', GetCategoriesView.as_view()),
     path('category', CategoryView.as_view()),
-    path('category/<item_table_compound_id>', SpecificCategoryView.as_view()),
+    path('category/<category_compound_id>', SpecificCategoryView.as_view()),
     path('categories_to_create_item/<item_table_compound_id>', fetchCategoriesToCreateItem.as_view()),
     path('item', ItemView.as_view()),
     path('item/<item_compound_id>', SpecificItemView.as_view()),

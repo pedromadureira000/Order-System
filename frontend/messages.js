@@ -357,6 +357,7 @@ export const messages = {
     "Available Items": "Available Items",
     "DecimalErrorMessage": "This field must be a decimal number.",
     "DecimalErrorMessage2Places": "Ensure that there are no more than 2 decimal places",
+    "You must select a category":"You must select a category",
     "Edit Items": "Edit Items",
     // -----------------------------------------------------------------------------------/client/order
     "Create Order": "Create Order",
@@ -841,6 +842,7 @@ export const messages = {
     "Available Items": "Itens Disponíveis",
     "DecimalErrorMessage": "Esse campo deve ser um número decimal.",
     "DecimalErrorMessage2Places": "Certifique-se de que não haja mais de 2 casas decimais",
+    "You must select a category": "Você deve selecionar uma categoria",
     "Edit Items": "Editar Itens",
 
     // -----------------------------------------------------------------------------------/client/order
