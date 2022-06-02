@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from item.models import ItemCategory, PriceItem, PriceTable
 from item.serializers import CategoryPUTSerializer
-from organization.facade import get_clients_by_agent
+from organization.facade import get_clients_by_agent, get_clients_with_client_users_by_agent
 from organization.models import Client, Company, Establishment
 from organization.serializers import CompaniesAndEstabsToDuplicateOrderSerializer
 from user.serializers import CategoriesToMakeOrderResponse, PriceItemsResponse, SwaggerDuplicateOrderResponse
@@ -153,10 +153,10 @@ class fetchClientsToFillFilterSelectorToSearchOrders(APIView):
     def get(self, request):    
         if has_permission(request.user, 'get_orders') and not has_role(request.user, 'client_user'):
             if req_user_is_agent_without_all_estabs(request.user):
-                clients = get_clients_by_agent(request.user)
+                clients = get_clients_with_client_users_by_agent(request.user)
                 client_serializer = ClientsToFillFilterSelectorsToSearchOrdersSerializer(clients, many=True)
                 return Response(client_serializer.data)
-            clients = Client.objects.filter(client_table__contracting_id=request.user.contracting_id)
+            clients = Client.objects.filter(client_table__contracting_id=request.user.contracting_id).prefetch_related('client_users')
             client_serializer = ClientsToFillFilterSelectorsToSearchOrdersSerializer(clients, many=True)
             return Response(client_serializer.data)
         return unauthorized_response
@@ -171,6 +171,7 @@ class OrderView(APIView):
     establishment_query_string = openapi.Parameter('establishment', openapi.IN_QUERY, description="establishment_compound_id", 
             type=openapi.TYPE_STRING)
     client_query_string = openapi.Parameter('client', openapi.IN_QUERY, description="client_compound_id", type=openapi.TYPE_STRING)
+    client_user_query_string = openapi.Parameter('client_user', openapi.IN_QUERY, description="user_code", type=openapi.TYPE_STRING)
     invoice_number_query_string = openapi.Parameter('invoice_number', openapi.IN_QUERY, description="Order invoice_number field.", 
             type=openapi.TYPE_STRING)
     order_number_query_string = openapi.Parameter('order_number', openapi.IN_QUERY, description="Order order_number field.", 
@@ -227,6 +228,7 @@ class OrderView(APIView):
             if request.GET.get("company"): kwargs.update({"company__company_compound_id": request.GET.get("company")})
             if request.GET.get("establishment"): kwargs.update({"establishment__establishment_compound_id": request.GET.get("establishment")})
             if request.GET.get("client"): kwargs.update({"client__client_compound_id": request.GET.get("client")})
+            if request.GET.get("client_user"): kwargs.update({"client_user__user_code": request.GET.get("client_user")})
             if request.GET.get("invoice_number"): kwargs.update({"invoice_number": request.GET.get("invoice_number")})
             if request.GET.get("order_number"): kwargs.update({"order_number": request.GET.get("order_number")})
             if request.GET.get("initial_period"): kwargs.update({"order_date__gte": request.GET.get("initial_period")})
@@ -238,8 +240,9 @@ class OrderView(APIView):
                 kwargs.update({"status__in": [1,2,3] })
             if has_role(request.user, 'client_user'):
                 if kwargs.get("client"): kwargs.pop("client")
+                if kwargs.get("client_user"): kwargs.pop("client_user")
                 try:
-                    orders = Order.objects.filter(client_id=request.user.client_id, **kwargs ).order_by(sort_by)
+                    orders = Order.objects.filter(client_id=request.user.client_id, client_user=request.user, **kwargs ).order_by(sort_by)
                 except ValidationError as error:
                     if 'YYYY-MM-DD' in error.__str__():
                         return error_response(detail=_("An invalid date was sent to the filter."), status=status.HTTP_400_BAD_REQUEST )
@@ -300,7 +303,7 @@ class SpecificOrderView(APIView):
                 return not_found_response(object_name=_('The order'))
             # Client user can't access order from another client
             if has_role(request.user, 'client_user'):
-                if order.client_id != request.user.client_id:
+                if order.client_id != request.user.client_id or order.client_user_id != request.user.user_code:
                     return not_found_response(object_name=_('The order'))
             # Agent without all estabs can't access order from some clients
             if req_user_is_agent_without_all_estabs(request.user):
@@ -341,7 +344,7 @@ class SpecificOrderView(APIView):
             except Order.DoesNotExist:
                 return not_found_response(object_name=_('The order'))
             if has_role(request.user, 'client_user'):
-                if order.client_id != request.user.client_id:
+                if order.client_id != request.user.client_id or order.client_user_id != request.user.user_code:
                     return not_found_response(object_name=_('The order'))
             if req_user_is_agent_without_all_estabs(request.user):
                 if not request.user.establishments.filter(id=order.establishment_id).first():
@@ -391,7 +394,7 @@ class OrderHistoryView(APIView):
             except Order.DoesNotExist:
                 return not_found_response(object_name=_('The order'))
             if has_role(request.user, 'client_user'):
-                if order.client_id != request.user.client_id:
+                if order.client_id != request.user.client_id or order.client_user_id != request.user.user_code:
                     return not_found_response(object_name=_('The order'))
             if req_user_is_agent_without_all_estabs(request.user):
                 if not request.user.establishments.filter(id=order.establishment_id).first():

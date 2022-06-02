@@ -18,6 +18,10 @@ def get_clients_by_agent(user):
     client_tables = get_agent_client_tables(user)
     return Client.objects.filter(client_table__in=client_tables, status=1)
 
+def get_clients_with_client_users_by_agent(user):
+    client_tables = get_agent_client_tables(user)
+    return Client.objects.filter(client_table__in=client_tables, status=1).prefetch_related('client_users')
+
 #---/ Client
 def get_establishments_to_create_client(request_user, client_table_compound_id, req_user_is_agent_without_all_estabs):
     if req_user_is_agent_without_all_estabs:

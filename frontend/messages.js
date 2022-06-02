@@ -286,6 +286,7 @@ export const messages = {
     Admin_Agent: 'Admin Agent',
     Agent: 'Agent',
     Client_User: 'Client User',
+    Client_user: 'Client user',
     // -------------------------------/admin/user/ERP_User
     "Create ERP User": "Create ERP User",
     "Edit ERP User": "Edit ERP User",
@@ -772,6 +773,7 @@ export const messages = {
     Admin_Agent: 'Agente Administrador',
     Agent: 'Agente',
     Client_User: 'Usuário Cliente',
+    Client_user: 'Usuário cliente',
     // -------------------------------/admin/user/ERP_User
     "Create ERP User": "Criar usuário ERP",
     "Edit ERP User": "Editar usuário ERP",

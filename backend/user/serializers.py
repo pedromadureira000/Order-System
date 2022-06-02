@@ -348,9 +348,6 @@ class ClientUserPOSTSerializer(UserSerializer):
         # Check if request user is agent without all estabs and can assign this client for a client_user
         if self.context['request_user_is_agent_without_all_estabs'] and not agent_has_access_to_this_client(request_user, value):
             raise serializers.ValidationError(_("You have no permission to assign this client to this client user.")) 
-        # Check if there is already an client user for this client
-        if value.user_set.exists():
-            raise serializers.ValidationError(_("You cannot create a client user for this client, because it already exists.")) 
         return value
 
     def create(self, validated_data):  

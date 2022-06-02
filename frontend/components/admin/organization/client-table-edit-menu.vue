@@ -4,7 +4,11 @@
 
     <v-dialog :retain-focus="false" v-model="show_edit_dialog" max-width="50%">
       <v-card>
-        <v-card-title>{{$t('Edit')}}</v-card-title>
+        <!-- Close Butto -->
+        <div style="text-align: right;"> 
+          <v-icon @click="show_edit_dialog = false" large class="pt-2 mr-2">mdi-window-close</v-icon >
+        </div>
+        <v-card-title style="padding-top: 0px;">{{$t('Edit')}}</v-card-title>
         <v-card-text>
           <v-container fluid>
             <!-- Description -->

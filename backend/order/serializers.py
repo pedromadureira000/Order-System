@@ -46,10 +46,16 @@ class CompanyWithEstabsSerializer(serializers.ModelSerializer):
         model = Company
         fields = ['company_compound_id', 'company_code', 'name', 'client_table', 'establishments']
 
+class ClientUserAuxSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['user_code', 'username', 'first_name', 'last_name']
+
 class ClientsToFillFilterSelectorsToSearchOrdersSerializer(serializers.ModelSerializer):
+    client_users = ClientUserAuxSerializer(many=True)
     class Meta:
         model = Client
-        fields =  ['client_compound_id', 'client_code', 'client_table', 'name']
+        fields =  ['client_compound_id', 'client_code', 'client_users', 'client_table', 'name']
 
 class OrderedItemPOSTSerializer(serializers.ModelSerializer):
     #  item = serializers.SlugRelatedField(slug_field='item_compound_id', queryset=Item.objects.all())
@@ -315,12 +321,6 @@ class ClientAuxSerializer(serializers.ModelSerializer):
         model = Client
         fields =  ['client_compound_id', 'client_code', 'name', 'cnpj']
 
-class ClientUserAuxSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        #  fields = ['username']
-        fields = ['username', 'first_name', 'last_name']
-
 class PriceTableAuxSerializer(serializers.ModelSerializer):
     class Meta:
         model = PriceTable
@@ -367,7 +367,7 @@ class OrderDuplicateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(_("Establishment not found."))
         try:
             order = Order.objects.select_related('client').prefetch_related(Prefetch('ordered_items', 
-                to_attr='ordered_items_set')).get(id=attrs['order_id'], client_id=request_user.client_id)
+                to_attr='ordered_items_set')).get(id=attrs['order_id'], client_user_id=request_user.user_code)
             ordered_items = order.ordered_items_set
             client = order.client 
         except Order.DoesNotExist:

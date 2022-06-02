@@ -34,8 +34,8 @@ class GetCSRFToken(APIView):
 # If the user has status != 1, it will be considered disabled and the user can't log in.
 class Login(APIView):
     permission_classes = (permissions.AllowAny,)
-    @swagger_auto_schema(request_body=SwaggerLoginSerializer, method='get', responses={200: OwnProfileSerializer}) 
-    @action(detail=False, methods=['get'])
+    @swagger_auto_schema(request_body=SwaggerLoginSerializer, method='post', responses={200: OwnProfileSerializer}) 
+    @action(detail=False, methods=['post'])
     def post(self, request):
         if request.user.is_authenticated:
             return Response(_("User is already authenticated"))

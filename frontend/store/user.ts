@@ -55,9 +55,14 @@ export const actions: ActionTree<UserState, RootState> = {
 		payload["csrftoken"] = state.csrftoken
 		try {
 			let data = await api.login(payload)
-			commit("SET_USER", data);
-			commit("setCsrf");
-			dispatch("setAlert", {message: this.app.i18n.t('login_success_msg'), alertType: "success"}, { root: true })
+      if (data === "O usuário já está autenticado" || data === "User is already authenticated"){
+        await dispatch("checkAuthenticated");
+      }
+      else{
+        commit("SET_USER", data);
+        commit("setCsrf");
+        dispatch("setAlert", {message: this.app.i18n.t('login_success_msg'), alertType: "success"}, { root: true })
+      }
 		} catch(error){
         ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("login_error_msg"))
 		}

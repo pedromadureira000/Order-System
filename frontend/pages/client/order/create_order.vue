@@ -170,6 +170,10 @@
       <!-- Search Items Dialog -->
       <v-dialog v-model="show_search_dialog" :retain-focus="false" max-width="75%">
         <v-card>
+          <!-- Close Butto -->
+          <div style="text-align: right;"> 
+            <v-icon @click="show_search_dialog = false" large class="pt-2 mr-2">mdi-window-close</v-icon >
+          </div>
           <v-card-title style="font-size: 1.3rem; font-weight: 400; line-height: 1rem">{{$t('Search Items')}}</v-card-title>
           <v-card-text class="mt-2">
             <v-container fluid>

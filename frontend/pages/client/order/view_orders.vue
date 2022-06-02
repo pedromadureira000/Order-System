@@ -45,6 +45,20 @@
                   :items="computed_clients"
                   :item-text="(x) => x.client_compound_id ? x.client_code + ' - ' + x.name : $t('All')"
                   return-object
+                  @change="clientChanged"
+                ></v-select>
+              </v-col>
+              <!-- Client User -->
+              <v-col
+                class="mr-3"
+                v-if="!currentUserIsClientUser"
+              >
+                <v-select
+                  v-model="client_user"
+                  :label="$t('Client_user')"
+                  :items="computed_client_users"
+                  :item-text="(x) => x.user_code ? x.username + ' - ' + x.first_name + ' ' + x.last_name : $t('All')"
+                  return-object
                 ></v-select>
               </v-col>
             </v-row>
@@ -155,15 +169,13 @@
                 <p>{{typeof item.establishment === 'string' ? item.establishment.split('*')[2] : item.establishment.establishment_code}}</p>
               </template>
               <template v-slot:item.status="{ item }">
-                <div :style="{color: getColor(item.status)}">
-                  <b><p>{{$t(status_options.filter(el=>el.value===String(item.status))[0].description)}}</p></b>
-                </div>
+                <p>{{$t(status_options.filter(el=>el.value===String(item.status))[0].description)}}</p>
               </template>
               <template v-slot:item.invoice_number="{ item }">
                 <p>{{item.invoice_number}}</p>
               </template>
               <template v-slot:item.invoicing_date="{ item }">
-                <p>{{item.invoicing_date ? getLocaleDate(item.invoicing_date) : ''}}</p>
+                <p>{{getLocaleDate(item.invoicing_date)}}</p>
               </template>
               <template v-slot:item.order_amount="{ item }">
                 <p style="float: right;">{{getRealMask(Number(item.order_amount))}}</p>
@@ -192,6 +204,7 @@ import {mask} from 'vue-the-mask'
 let all_companies = {company_compound_id: null, establishments: [], client_table: null}
 let all_establishments = {establishment_compound_id: null}
 let all_clients = {client_compound_id: null, client_table: 'null'}
+let all_client_users = {user_code: null, username: 'null'}
 let all_status = {description: 'All', value: null}
 let pending_status = {description: 'Pending', value: 'pending'}
 
@@ -210,6 +223,7 @@ export default {
       company: all_companies,
       establishment: all_establishments,
       client: all_clients,
+      client_user: all_client_users,
       invoice_number: '',
       order_number: '',
       initial_period: '',
@@ -252,7 +266,7 @@ export default {
     if (data){
       this.companies = [all_companies, ...data]
     }
-    // Fetch Clients
+    // Fetch Clients with client_users
     if (!this.currentUserIsClientUser){
       let clients = await this.$store.dispatch("order/fetchClientsToFillFilterSelectorToSearchOrders")
       if (clients) {
@@ -278,6 +292,7 @@ export default {
         query_strings += this.company.company_compound_id ? `company=${this.company.company_compound_id}&` : ''
         query_strings += this.establishment.establishment_compound_id ? `establishment=${this.establishment.establishment_compound_id}&` : ''
         query_strings += this.client.client_compound_id ? `client=${this.client.client_compound_id}&` : ''
+        query_strings += this.client_user.user_code ? `client_user=${this.client_user.user_code}&` : ''
         query_strings += this.invoice_number ? `invoice_number=${this.invoice_number}&` : ''
         query_strings += this.order_number ? `order_number=${this.order_number}&` : ''
         query_strings += this.initial_period ? `initial_period=${this.fixPeriod(this.initial_period)}&` : ''
@@ -305,21 +320,19 @@ export default {
       }
     },
 
+    async clientChanged(){
+      console.log(">>>>>>> ", this.client.client_compound_id)
+      // Reset client_user field
+      this.client_user = all_client_users
+    },
+
+
     getRealMask(value){
       return value.toLocaleString('pt-br',{style: 'currency', currency: 'BRL'})
     },
 
     getLocaleDate(value){
       return new Date(value).toLocaleDateString('pt-BR')
-    },
-
-    getColor(status){
-      if (status === 0){return 'gray'}
-      if (status === 1){return 'red'}
-      if (status === 2){return 'green'}
-      if (status === 3){return 'brown'}
-      if (status === 4){return 'darkblue'}
-      if (status === 5){return 'black'}
     },
 
     fixPeriod(value){
@@ -366,6 +379,11 @@ export default {
       // otherwise return all clients
       return this.company.company_compound_id ? [all_clients, 
         ...this.clients.filter(el=>el.client_table===this.company.client_table)] : [all_clients, ...this.clients]  
+    },
+    computed_client_users(){
+      // If the client is not all_clients, then return only the client users from this client
+      // otherwise set all_client_users option
+      return this.client.client_compound_id ? [all_client_users, ...this.client.client_users] : [all_client_users]  
     },
     // Vuelidate
     invoiceNumberErrors() {

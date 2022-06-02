@@ -2,10 +2,13 @@
   <div v-if="order_details_fetched">
     <!-- ========= View Details Dialog ============ -->
     <v-dialog :retain-focus="false" :value="show_view_details_dialog" max-width="90%" persistent>
-      <!-- <v-btn @click="testt">Test ----------------------------------</v-btn> -->
       <v-card class="pa-3">
-        <v-row class="mb-1">
-          <v-col style="display: flex; justify-content: center;">
+        <!-- Close Butto -->
+        <div style="text-align: right;"> 
+          <v-icon @click="$emit('close-details-dialog')" large class="pt-2 mr-2">mdi-window-close</v-icon >
+        </div>
+        <v-row class="mb-1" style="padding-top: 0px;">
+          <v-col style="display: flex; justify-content: center; padding-top: 0px;">
             <h3 class="ml-3 pt-3">{{$t('Order Details')}}</h3>
           </v-col>
         </v-row>
@@ -557,6 +560,15 @@ export default {
       },0)
     },
 
+    printOrder2(){
+      var doc = new jsPDF();
+      var name = "Doe, John"
+      doc.setFontSize(12);
+      doc.text(20,20,'Name: '+ name);
+      doc.autoPrint();
+      //This is a key for printing
+      doc.output('dataurlnewwindow');
+    },
     printOrder(){
       let filename = this.$t('Order') + 'Nº ' + String(this.order.order_number) + ' - ' + this.order.client.name + ".pdf"
       let ordered_items = this.order.ordered_items
@@ -606,7 +618,11 @@ export default {
             })
           }
         }
-        doc.save(filename)
+        doc.setProperties({ title: filename })
+        doc.autoPrint();
+        //This is a key for printing
+        doc.output('dataurlnewwindow');
+        /** doc.save(filename) */
       });
     },
 

@@ -3,7 +3,11 @@
     <!-- ========= Edit Order Dialog ============ -->
     <v-dialog :retain-focus="false" v-model="show_edit_dialog" max-width="90%" persistent>
       <v-card>
-        <v-card-title style="display: flex; justify-content: center;" class="mb-2">{{$t('Edit Order')}}</v-card-title>
+        <!-- Close Butto -->
+        <div style="text-align: right;"> 
+          <v-icon @click="$emit('close-edit-dialog')" large class="pt-2 mr-2">mdi-window-close</v-icon >
+        </div>
+        <v-card-title style="display: flex; justify-content: center; padding-top: 0px" class="mb-2">{{$t('Edit Order')}}</v-card-title>
         <form @submit.prevent="updateOrder" class="ml-3">
           <div style="display: flex; justify-content: center;">
             <div style="width: 80%">
