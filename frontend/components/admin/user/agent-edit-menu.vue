@@ -12,6 +12,12 @@
         <v-card-title style="padding-top: 0px;">{{$t('Edit')}}</v-card-title>
         <v-card-text>
           <v-container fluid>
+              <!-- Username -->
+                <v-text-field
+                  disabled
+                  label="Username"
+                  :value="username"
+                />
               <!-- First Name -->
               <v-text-field
                 :label="$t('First_name')"
@@ -176,6 +182,7 @@ export default {
       all_agent_estabs: [],
       show_edit_dialog: false,
       show_delete_confirmation_dialog: false,
+      username: null,
       first_name: null,
       last_name: null,
       email: null,
@@ -381,6 +388,7 @@ export default {
         this.agent_establishments.push(estab.AUX_agent_estab)
       }
     }
+    this.username = this.agent.username,
     this.first_name = this.agent.first_name
     this.last_name = this.agent.last_name
     this.email = this.agent.email

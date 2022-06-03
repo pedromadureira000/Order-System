@@ -27,7 +27,7 @@
                           </tr>
                           <tr>
                             <td><b>{{$t('Client')}}</b></td>
-                            <td>{{order.client.client_code}} - {{order.client.name}} ({{order.establishment.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5")}})</td>
+                            <td>{{order.client.client_code}} - {{order.client.name}} ({{order.client.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5")}})</td>
                           </tr>
                           <tr>
                             <td><b>{{$t('Order Number')}}</b></td>
@@ -222,7 +222,7 @@
                         </tr>
                         <tr>
                           <td><b>{{$t('Client')}}</b></td>
-                          <td>{{order.client.client_code}} - {{order.client.name}} ({{order.establishment.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5")}})</td>
+                          <td>{{order.client.client_code}} - {{order.client.name}} ({{order.client.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5")}})</td>
                         </tr>
                         <tr>
                           <td><b>{{$t('Order Number')}}</b></td>

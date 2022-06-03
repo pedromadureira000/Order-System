@@ -346,7 +346,7 @@ class GetClientsView(APIView):
     def get(self, request, client_table_compound_id):
         user = request.user
         if has_permission(user, 'get_clients'):
-            if has_role(user, 'agent'):
+            if req_user_is_agent_without_all_estabs(request.user):
                 clients = get_clients_by_agent(user).filter(client_table__client_table_compound_id=client_table_compound_id)
                 data = ClientSerializerPOST(clients, many=True).data
                 return Response(data)

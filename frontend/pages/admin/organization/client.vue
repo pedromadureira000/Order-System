@@ -378,6 +378,7 @@ export default {
     },
 
     async fetchEstablishmentsToCreateClient(){
+      this.client_establishments = [] // After changing the company field, this field must be empty
       let establishment_group = this.establishment_groups.find(el=>el.group_id===this.company.client_table)
       if (establishment_group){
         this.establishments = establishment_group.establishments

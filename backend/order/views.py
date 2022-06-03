@@ -307,7 +307,7 @@ class SpecificOrderView(APIView):
                     return not_found_response(object_name=_('The order'))
             # Agent without all estabs can't access order from some clients
             if req_user_is_agent_without_all_estabs(request.user):
-                if not request.user.establishments.filter(id=order.establishment_id).first():
+                if not request.user.establishments.filter(establishment_compound_id=order.establishment_id).first():
                     return not_found_response(object_name=_('The order'))
             return Response(OrderDetailsSerializer(order).data)
         return unauthorized_response
@@ -347,7 +347,7 @@ class SpecificOrderView(APIView):
                 if order.client_id != request.user.client_id or order.client_user_id != request.user.user_code:
                     return not_found_response(object_name=_('The order'))
             if req_user_is_agent_without_all_estabs(request.user):
-                if not request.user.establishments.filter(id=order.establishment_id).first():
+                if not request.user.establishments.filter(establishment_compound_id=order.establishment_id).first():
                     return not_found_response(object_name=_('The order'))
             serializer = OrderPUTSerializer(order, data=request.data, context={"request": request})
             if serializer.is_valid():
@@ -397,7 +397,7 @@ class OrderHistoryView(APIView):
                 if order.client_id != request.user.client_id or order.client_user_id != request.user.user_code:
                     return not_found_response(object_name=_('The order'))
             if req_user_is_agent_without_all_estabs(request.user):
-                if not request.user.establishments.filter(id=order.establishment_id).first():
+                if not request.user.establishments.filter(establishment_compound_id=order.establishment_id).first():
                     return not_found_response(object_name=_('The order'))
             try:
                 order_history = OrderHistory.objects.filter(order_id=order_id).select_related('user')

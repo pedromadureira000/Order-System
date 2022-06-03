@@ -271,7 +271,7 @@
                     :items="establishments"
                     :item-text="(x) => x.establishment_compound_id.split('*')[2] + ' - ' + x.name + ' (' + $t('Company') + ': '  + x.company + ' - ' + x.company_name + ')'"
                     :item-value="(x) => x"
-                    @change="show_select_establishment_dialog = false"
+                    @change="show_select_establishment_dialog = false; fetchCategoriesToMakeOrderAndGetPriceTableInfo()"
                   ></v-select>
                 </v-col>
               </v-row>
@@ -382,6 +382,7 @@ export default {
       /** console.log(">>>>>>> this.establishments: ", this.establishments) */
       if (this.establishments.length === 1){
         this.establishment = this.establishments[0]
+        await this.fetchCategoriesToMakeOrderAndGetPriceTableInfo()
       }
       else if (this.establishments.length > 1){
         this.show_select_establishment_dialog = true
@@ -536,10 +537,6 @@ export default {
     searchIconFunction(){
       this.show_search_dialog = true
       this.search_dialog_was_already_open = true
-      // This will happen if the client user click the search icon for the first tame and the user has only one establishment
-      if (this.categories.length == 1){
-        this.fetchCategoriesToMakeOrderAndGetPriceTableInfo()
-      }
     }
   },
 

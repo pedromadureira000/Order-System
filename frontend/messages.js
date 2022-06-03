@@ -428,7 +428,7 @@ export const messages = {
     Cancel: 'Cancel',
     Delete: 'Delete',
     Save: 'Save',
-    Are_you_sure_you_want_to_delete: 'Are you sure you want to delete this item?',
+    Are_you_sure_you_want_to_delete: 'Confirm the deletion of this record?',
     //-------------------------------/admin/organization/price-table-v-select
     Empty: 'Empty',
     //----------------------/dialog duplicate order
@@ -916,7 +916,7 @@ export const messages = {
     Cancel: 'Cancelar',
     Delete: 'Excluir',
     Save: 'Salvar',
-    Are_you_sure_you_want_to_delete: 'Tem certeza que quer excluir esse item?',
+    Are_you_sure_you_want_to_delete: 'Confirma a exclusão desse registro?',
     //-------------------------------/admin/organization/price-table-v-select
     Empty: 'Vazio',
     //----------------------/dialog duplicate order

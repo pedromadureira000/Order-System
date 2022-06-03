@@ -332,7 +332,12 @@ export default {
     },
 
     getLocaleDate(value){
-      return new Date(value).toLocaleDateString('pt-BR')
+      if (value){
+        return new Date(value).toLocaleDateString('pt-BR')
+      }
+      else {
+        return ""
+      }
     },
 
     fixPeriod(value){

@@ -27,6 +27,12 @@
                   ></v-select>
                 </v-col>
               </v-row>
+              <!-- Username -->
+                <v-text-field
+                  disabled
+                  label="Username"
+                  :value="username"
+                />
               <!-- First Name -->
               <v-text-field
                 :label="$t('First_name')"
@@ -127,6 +133,7 @@ export default {
       show_edit_dialog: false,
       show_delete_confirmation_dialog: false,
       show_change_password_dialog: false,
+      username: null,
       first_name: null,
       last_name: null,
       email: null,
@@ -263,6 +270,7 @@ export default {
   },
 
   mounted() {
+    this.username = this.erp_user.username,
     this.first_name = this.erp_user.first_name
     this.last_name = this.erp_user.last_name
     this.email = this.erp_user.email
