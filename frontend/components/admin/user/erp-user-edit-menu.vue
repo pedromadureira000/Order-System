@@ -102,6 +102,32 @@
       :show_delete_confirmation_dialog="show_delete_confirmation_dialog"
     />
 
+    <!-- Update/create ERP User's Token -->
+    <v-dialog :retain-focus="false" :value="show_update_token_dialog" max-width="50%" persistent>
+      <v-card>
+        <v-card-title>{{$t('Are_you_sure_you_want_to_update_or_create_a_token_to_this_ERP_user1')}}<br>{{$t('Are_you_sure_you_want_to_update_or_create_a_token_to_this_ERP_user2')}}</v-card-title>
+        <v-card-text>
+          <v-card-actions class="d-flex justify-space-around" style="width:100%;">
+            <v-btn class="black--text darken-1" text @click="show_update_token_dialog = false">{{$t('Cancel')}}</v-btn>
+            <v-btn class="red--text darken-1" text @click="updateToken">{{$t('Update')}}</v-btn>
+          </v-card-actions>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
+    <!-- Delete ERP User's Token -->
+    <v-dialog :retain-focus="false" :value="show_delete_token_dialog" max-width="50%" persistent>
+      <v-card>
+        <v-card-title>{{$t('Are_you_sure_you_want_to_delete_the_ERP_users_token')}}</v-card-title>
+        <v-card-text>
+          <v-card-actions class="d-flex justify-space-around" style="width:100%;">
+            <v-btn class="black--text darken-1" text @click="show_delete_token_dialog = false">{{$t('Cancel')}}</v-btn>
+            <v-btn class="red--text darken-1" text @click="deleteToken">{{$t('Delete')}}</v-btn>
+          </v-card-actions>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
      <!-- Change Password Dialog -->
     <change-users-password 
       :user="erp_user" 
@@ -133,6 +159,8 @@ export default {
       show_edit_dialog: false,
       show_delete_confirmation_dialog: false,
       show_change_password_dialog: false,
+      show_update_token_dialog: false,
+      show_delete_token_dialog: false,
       username: null,
       first_name: null,
       last_name: null,
@@ -160,6 +188,20 @@ export default {
           icon: 'mdi-lock',
           async click(){
             this.show_change_password_dialog = true
+          }
+        },
+        { 
+          title: this.$t('Create or update token'),
+          icon: 'mdi-key',
+          async click(){
+            this.show_update_token_dialog = true
+          }
+        },
+        { 
+          title: this.$t('Delete token'),
+          icon: 'mdi-key-remove',
+          async click(){
+            this.show_delete_token_dialog = true
           }
         },
       ]
@@ -266,6 +308,18 @@ export default {
       if (data === "ok"){
         this.$emit('erp-user-deleted')
       }
+    },
+
+    async updateToken(){
+      await this.$store.dispatch('user/updateOrCreateERPUsersToken', {contracting_code: this.erp_user.contracting_code, 
+        username: this.erp_user.username})
+      this.show_update_token_dialog = false
+    },
+
+    async deleteToken(){
+        await this.$store.dispatch('user/deleteERPUsersToken', {contracting_code: this.erp_user.contracting_code, 
+          username: this.erp_user.username})
+      this.show_delete_token_dialog = false
     },
   },
 

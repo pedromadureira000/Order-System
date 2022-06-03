@@ -170,7 +170,7 @@
               </template>
               <template v-slot:item.status="{ item }">
                 <div :style="{color: getColor(item.status)}">
-                  <p><b>{{$t(status_options.filter(el=>el.value===String(item.status))[0].description)}}</b></p>
+                  <p>{{$t(status_options.filter(el=>el.value===String(item.status))[0].description)}}</p>
                 </div>
               </template>
               <template v-slot:item.invoice_number="{ item }">

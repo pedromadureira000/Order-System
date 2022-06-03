@@ -170,6 +170,27 @@ export const actions: ActionTree<UserState, RootState> = {
 		}
 	},
 
+	async updateOrCreateERPUsersToken({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
+		try {
+			let data = await api.updateOrCreateERPUsersToken(payload)
+			dispatch("setAlert", {message: (this.app.i18n.t('updateOrCreateERPUsersToken_success_msg') + ` Token: ${data['token']}`), 
+               alertType: "success", timeout: 15000}, { root: true })
+      return 'ok'
+		}
+		catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("updateOrCreateERPUsersToken_error_msg"))
+		}
+	},
+
+	async deleteERPUsersToken({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){
+		try {
+			await api.deleteERPUsersToken(payload)
+			dispatch("setAlert", {message: this.app.i18n.t('deleteERPUsersToken_success_msg'), alertType: "success"}, { root: true })
+		}
+		catch(error){
+      ErrorHandler(error, commit, dispatch, this.app.i18n, this.app.i18n.t("deleteERPUsersToken_error_msg"))
+		}
+	},
  //------------Admin Agent
 
 	async createAdminAgent({commit, dispatch}: {commit: Commit, dispatch: Dispatch}, payload: any){

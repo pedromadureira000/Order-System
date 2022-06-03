@@ -1,4 +1,5 @@
 from typing import OrderedDict
+from django.contrib.auth import authenticate
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.validators import UniqueTogetherValidator
@@ -44,6 +45,42 @@ class CategoriesToMakeOrderResponse(serializers.Serializer):
         table_code = serializers.CharField()
     categories = CategoryPUTSerializer(many=True)
     price_table = PriceTableAUX()
+
+class AuthTokenSerializer(serializers.Serializer):
+    user_code = serializers.CharField(
+        label=_("User code"),
+        write_only=True
+    )
+    password = serializers.CharField(
+        label=_("Password"),
+        style={'input_type': 'password'},
+        trim_whitespace=False,
+        write_only=True
+    )
+    token = serializers.CharField(
+        label=_("Token"),
+        read_only=True
+    )
+
+    def validate(self, attrs):
+        user_code = attrs.get('user_code')
+        password = attrs.get('password')
+
+        if user_code and password:
+            user = authenticate(request=self.context.get('request'), username=user_code, password=password)
+
+            # The authenticate call simply returns None for is_active=False
+            # users. (Assuming the default ModelBackend authentication
+            # backend.)
+            if not user:
+                msg = _('Unable to log in with provided credentials.')
+                raise serializers.ValidationError(msg, code='authorization')
+        else:
+            msg = _('Must include "user_code" and "password".')
+            raise serializers.ValidationError(msg, code='authorization')
+
+        attrs['user'] = user
+        return attrs
 
 #------------------------------------------------------/User serializers
 

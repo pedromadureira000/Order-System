@@ -2,8 +2,8 @@ from django.db.models.deletion import ProtectedError
 from django.contrib.auth import authenticate, login, logout
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
+from drf_yasg import openapi
 from rest_framework import status, permissions
-#  from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from organization.facade import get_clients_by_agent
@@ -11,7 +11,7 @@ from organization.facade import get_clients_by_agent
 from organization.models import Client, Contracting, Establishment
 from organization.serializers import ClientSerializerPOST, ContractingPOSTSerializer, EstablishmentPOSTSerializer
 from .facade import get_all_client_users_by_agent, get_update_permission
-from .serializers import AdminAgentPOSTSerializer, AdminAgentPUTSerializer, AgentPOSTSerializer, AgentPUTSerializer, ClientUserPOSTSerializer, ClientUserPUTSerializer, ERPUserPOSTSerializer, ERPUserPUTSerializer, OwnProfileSerializer, SwaggerLoginSerializer, SwaggerProfilePasswordSerializer, UpdateUserPasswordSerializer
+from .serializers import AdminAgentPOSTSerializer, AdminAgentPUTSerializer, AgentPOSTSerializer, AgentPUTSerializer, AuthTokenSerializer, ClientUserPOSTSerializer, ClientUserPUTSerializer, ERPUserPOSTSerializer, ERPUserPUTSerializer, OwnProfileSerializer, SwaggerLoginSerializer, SwaggerProfilePasswordSerializer, UpdateUserPasswordSerializer
 from .models import User
 from settings.utils import has_permission, has_role
 from django.db import transaction
@@ -22,8 +22,65 @@ from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from settings.response_templates import error_response, not_found_response, serializer_invalid_response, protected_error_response, unknown_exception_response, unauthorized_response
 from rest_framework.decorators import action
+# ObtainAuthToken imports
+from rest_framework import parsers, renderers
+from rest_framework.authtoken.models import Token
+#  from rest_framework.compat import coreapi, coreschema
+#  from rest_framework.schemas import ManualSchema
+#  from rest_framework.schemas import coreapi as coreapi_schema
 
 #------------------------/ Auth Views
+
+class ObtainAuthToken(APIView):
+    throttle_classes = ()
+    permission_classes = ()
+    parser_classes = (parsers.FormParser, parsers.MultiPartParser, parsers.JSONParser,)
+    renderer_classes = (renderers.JSONRenderer,)
+    serializer_class = AuthTokenSerializer
+
+    request_schema_dict = openapi.Schema(
+        title="ObtainAuthToken request body",
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'user_code': openapi.Schema(type=openapi.TYPE_STRING, 
+                description=_("The concatenation of the user's contracting_code and username, joined by an asterisk."), example="123*erp_user"),
+            'password': openapi.Schema(type=openapi.TYPE_STRING, description=_("User's password"), example="SafePassword123"),
+        }
+    )
+
+    response_schema_dict = openapi.Schema(
+        title="ObtainAuthToken response",
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'token': openapi.Schema(type=openapi.TYPE_STRING, 
+                description=_("The authentication token, which is used in the authentication header."),
+                example="c0ecd5242e6ea8a61392e6449624227b47ce5ef6")
+        }
+    )
+
+    def get_serializer_context(self):
+        return {
+            'request': self.request,
+            'format': self.format_kwarg,
+            'view': self
+        }
+
+    def get_serializer(self, *args, **kwargs):
+        kwargs['context'] = self.get_serializer_context()
+        return self.serializer_class(*args, **kwargs)
+
+    @swagger_auto_schema(method='post', responses={200: response_schema_dict}, request_body=request_schema_dict) 
+    @action(detail=False, methods=['post'])
+    def post(self, request, *args, **kwargs):
+        serializer = AuthTokenSerializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        #  token, created = Token.objects.get_or_create(user=user)
+        try:
+            token = user.auth_token.key
+            return Response({'token': token})
+        except Token.DoesNotExist:
+            return error_response(detail=_("This ERP user does not have a token."), status=status.HTTP_401_UNAUTHORIZED)
 
 @method_decorator(ensure_csrf_cookie, name='dispatch')
 class GetCSRFToken(APIView):
@@ -463,4 +520,58 @@ class UpdateUserPassword(APIView):
                     #  print(error)
                     #  raise error
                     return unknown_exception_response(action=_("update user's password"))
+        return unauthorized_response
+
+class ERPUsersToken(APIView):
+    response_schema_dict = openapi.Schema(
+        title="ERPUsersToken response for PUT method.",
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'token': openapi.Schema(type=openapi.TYPE_STRING, 
+                description=_("The authentication token, which is used in the authentication header."), 
+                example="c0ecd5242e6ea8a61392e6449624227b47ce5ef6")
+        }
+    )
+
+    @transaction.atomic
+    # Update or create ERP user's token
+    @swagger_auto_schema(method='put', responses={200: response_schema_dict}) 
+    @action(detail=False, methods=['put'])
+    def put(self, request, contracting_code, username):
+        if has_permission(request.user, 'update_erp_user'):
+            user_code = contracting_code + "*" + username
+            try: 
+                user = User.objects.get(user_code=user_code, groups__name='erp_user')
+            except User.DoesNotExist:
+                return not_found_response(object_name='The erp user')
+            try:
+                user.auth_token.delete()
+                token, created = Token.objects.get_or_create(user=user)
+                return Response({'token': token.key})
+            except Token.DoesNotExist:
+                token, created = Token.objects.get_or_create(user=user)
+                return Response({'token': token.key})
+            except Exception as error:
+                transaction.rollback()
+                print(error)
+                #  raise error
+                return unknown_exception_response(action=_("update erp user's token"))
+        return unauthorized_response
+    @transaction.atomic  
+    def delete(self, request, contracting_code, username):
+        if has_permission(request.user, 'update_erp_user'):
+            user_code = contracting_code + "*" + username
+            try:
+                user = User.objects.get(user_code=user_code, groups__name='erp_user')
+            except User.DoesNotExist:
+                return not_found_response(object_name=_('The erp user'))
+            try:
+                user.auth_token.delete()
+                return Response(_("ERP user's token deleted successfully."))
+            except Token.DoesNotExist:
+                return error_response(detail=_("This ERP user does not have a token."), status=status.HTTP_401_UNAUTHORIZED)
+            except Exception as error:
+                transaction.rollback()
+                print(error)
+                return unknown_exception_response(action=_("delete erp user's token"))
         return unauthorized_response

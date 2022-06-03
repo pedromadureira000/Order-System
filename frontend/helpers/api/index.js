@@ -444,6 +444,24 @@ export default {
 				})
 	},
 
+	async updateOrCreateERPUsersToken(payload){
+		return await axios({ 
+		method: "put",
+		url: `/api/user/erp_users_token/${payload.contracting_code}/${payload.username}`,
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
+	async deleteERPUsersToken(payload){
+		return await axios({ 
+		method: "delete",
+		url: `/api/user/erp_users_token/${payload.contracting_code}/${payload.username}`,
+			}).then((request) => {
+					return request.data 
+				})
+	},
+
   // -----/Admin Agent
 
 	async createAdminAgent(payload){

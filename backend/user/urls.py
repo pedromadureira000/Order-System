@@ -1,7 +1,6 @@
 from django.urls import path
-#  from rest_framework.authtoken.views import obtain_auth_token
 from .views import (
-    AdminAgentView, AgentView, ClientUserView, ERPUserView, OwnProfileView, SpecificAdminAgent, SpecificAgent, SpecificClientUser, SpecificERPUser, UpdateOwnPassword, UpdateUserPassword, Login, Logout, GetCSRFToken, fetchClientsToCreateClientUser, fetchContractingCompaniesToCreateERPuser, fetchEstablishmentsToCreateAgent
+    AdminAgentView, AgentView, ClientUserView, ERPUserView, ERPUsersToken, ObtainAuthToken, OwnProfileView, SpecificAdminAgent, SpecificAgent, SpecificClientUser, SpecificERPUser, UpdateOwnPassword, UpdateUserPassword, Login, Logout, GetCSRFToken, fetchClientsToCreateClientUser, fetchContractingCompaniesToCreateERPuser, fetchEstablishmentsToCreateAgent
 )
 
 urlpatterns = [
@@ -31,5 +30,6 @@ urlpatterns = [
 
     path('update_own_password', UpdateOwnPassword.as_view()),
     path('update_user_password/<contracting_code>/<username>', UpdateUserPassword.as_view()),
-    #  path('gettoken', obtain_auth_token, name='gettoken'),
+    path('erp_users_token/<contracting_code>/<username>', ERPUsersToken.as_view()),
+    path('gettoken', ObtainAuthToken.as_view(), name='gettoken'),
 ]
