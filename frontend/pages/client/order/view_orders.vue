@@ -169,7 +169,9 @@
                 <p>{{typeof item.establishment === 'string' ? item.establishment.split('*')[2] : item.establishment.establishment_code}}</p>
               </template>
               <template v-slot:item.status="{ item }">
-                <p>{{$t(status_options.filter(el=>el.value===String(item.status))[0].description)}}</p>
+                <div :style="{color: getColor(item.status)}">
+                  <p><b>{{$t(status_options.filter(el=>el.value===String(item.status))[0].description)}}</b></p>
+                </div>
               </template>
               <template v-slot:item.invoice_number="{ item }">
                 <p>{{item.invoice_number}}</p>
@@ -338,6 +340,15 @@ export default {
       else {
         return ""
       }
+    },
+
+    getColor(status){
+      if (status === 0){return 'gray'}
+      if (status === 1){return 'red'}
+      if (status === 2){return 'green'}
+      if (status === 3){return 'brown'}
+      if (status === 4){return 'darkblue'}
+      if (status === 5){return 'black'}
     },
 
     fixPeriod(value){
