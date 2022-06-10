@@ -323,7 +323,7 @@ export default {
     },
 
     async clientChanged(){
-      console.log(">>>>>>> ", this.client.client_compound_id)
+      /** console.log(">>>>>>> ", this.client.client_compound_id) */
       // Reset client_user field
       this.client_user = all_client_users
     },
@@ -346,7 +346,7 @@ export default {
       if (status === 0){return 'gray'}
       if (status === 1){return 'red'}
       if (status === 2){return 'green'}
-      if (status === 3){return 'brown'}
+      if (status === 3){return 'purple'}
       if (status === 4){return 'darkblue'}
       if (status === 5){return 'black'}
     },
