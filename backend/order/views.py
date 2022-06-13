@@ -233,10 +233,15 @@ class OrderView(APIView):
             if request.GET.get("order_number"): kwargs.update({"order_number": request.GET.get("order_number")})
             if request.GET.get("initial_period"): kwargs.update({"order_date__gte": request.GET.get("initial_period")})
             if request.GET.get("final_period"): 
-                date_format = '%Y-%m-%d'
-                date = datetime.strptime(request.GET.get("final_period"), date_format)
-                fixed_date = date.replace(hour=23, minute=59, second=59, microsecond=999999)
-                kwargs.update({"order_date__lte": fixed_date})
+                try:
+                    date_format = '%Y-%m-%d'
+                    date = datetime.strptime(request.GET.get("final_period"), date_format)
+                    fixed_date = date.replace(hour=23, minute=59, second=59, microsecond=999999)
+                    kwargs.update({"order_date__lte": fixed_date})
+                except ValueError as error:
+                    if '%Y-%m-%d' in error.__str__():
+                        return error_response(detail=_("An invalid date was sent to the filter."), status=status.HTTP_400_BAD_REQUEST )
+                    return error_response(detail=_("Invalid parameters were sent to the filter."), status=status.HTTP_400_BAD_REQUEST )
             if request.GET.get("status"): kwargs.update({"status": request.GET.get("status")})
             #  print('>>>>>>>kwargs: ', kwargs)
             if kwargs.get("status") and kwargs["status"] == "pending":

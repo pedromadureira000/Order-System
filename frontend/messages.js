@@ -915,7 +915,7 @@ export const messages = {
     "History description": "Descrição do histórico",
     "Date": "Data",
     "User": "Usuário",
-    "Initial Date": "Data Initial",
+    "Initial Date": "Data Inicial",
     "Final Date": "Data Final",
     "Print Order": "Imprimir Pedido",
     // -------------------------------------------------------------------/ Components
