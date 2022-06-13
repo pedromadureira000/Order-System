@@ -417,8 +417,8 @@ export const messages = {
     "History description": "History description",
     "Date": "Date",
     "User": "User",
-    "Initial Period": "Initial Period",
-    "Final Period": "Final Period",
+    "Initial Date": "Initial Date",
+    "Final Date": "Final Date",
     "Print Order": "Print Order",
     // -------------------------------------------------------------------/ Components
     // change user's password
@@ -915,8 +915,8 @@ export const messages = {
     "History description": "Descrição do histórico",
     "Date": "Data",
     "User": "Usuário",
-    "Initial Period": "Período Initial",
-    "Final Period": "Período Final",
+    "Initial Date": "Data Initial",
+    "Final Date": "Data Final",
     "Print Order": "Imprimir Pedido",
     // -------------------------------------------------------------------/ Components
     // change user's password

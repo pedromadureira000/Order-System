@@ -88,7 +88,7 @@
               <!-- Status -->
               <v-col
                 class="d-flex"
-                cols="3"
+                cols="2"
               >
                 <v-select
                   v-model="status"
@@ -99,11 +99,11 @@
                 ></v-select>
               </v-col>
               <!-- Period -->
-              <v-col cols="3">
+              <v-col cols="4">
                 <v-row>
                   <v-col class="ml-3">
                     <v-text-field
-                      :label="$t('Initial Period')"
+                      :label="$t('Initial Date')"
                       v-model.trim="initial_period"
                       class="mr-2"
                       outlined
@@ -116,7 +116,7 @@
                   </v-col>
                   <v-col>
                     <v-text-field
-                      :label="$t('Final Period')"
+                      :label="$t('Final Date')"
                       v-model.trim="final_period"
                       class="mr-2"
                       outlined

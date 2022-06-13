@@ -20,8 +20,8 @@ from django.utils.translation import gettext_lazy as _
 from drf_yasg import openapi
 from rest_framework.decorators import action
 from django.core.exceptions import ValidationError
-
 import math
+from datetime import datetime
 
 class fetchClientEstabsToCreateOrder(APIView):
     @swagger_auto_schema(method='get', responses={200: fetchClientEstabsToCreateOrderSerializer(many=True)}) 
@@ -232,7 +232,11 @@ class OrderView(APIView):
             if request.GET.get("invoice_number"): kwargs.update({"invoice_number": request.GET.get("invoice_number")})
             if request.GET.get("order_number"): kwargs.update({"order_number": request.GET.get("order_number")})
             if request.GET.get("initial_period"): kwargs.update({"order_date__gte": request.GET.get("initial_period")})
-            if request.GET.get("final_period"): kwargs.update({"order_date__lte": request.GET.get("final_period")})
+            if request.GET.get("final_period"): 
+                date_format = '%Y-%m-%d'
+                date = datetime.strptime(request.GET.get("final_period"), date_format)
+                fixed_date = date.replace(hour=23, minute=59, second=59, microsecond=999999)
+                kwargs.update({"order_date__lte": fixed_date})
             if request.GET.get("status"): kwargs.update({"status": request.GET.get("status")})
             #  print('>>>>>>>kwargs: ', kwargs)
             if kwargs.get("status") and kwargs["status"] == "pending":
